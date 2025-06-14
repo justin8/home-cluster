@@ -332,3 +332,4 @@ dist
 .pnp.*
 
 *.iso
+.build-vm-settings
