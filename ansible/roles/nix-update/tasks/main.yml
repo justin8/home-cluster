@@ -1,0 +1,35 @@
+---
+# Tasks for nix-update role
+
+- name: Ensure /etc/nixos directory exists
+  file:
+    path: /etc/nixos
+    state: directory
+    mode: "0755"
+  become: yes
+
+- name: Copy configuration.nix
+  copy:
+    src: configuration.nix
+    dest: /etc/nixos/configuration.nix
+    mode: "0644"
+  become: yes
+  register: config_copy
+
+- name: Check if hardware-configuration.nix exists
+  stat:
+    path: /etc/nixos/hardware-configuration.nix
+  register: hardware_config
+  become: yes
+
+- name: Generate hardware configuration if it doesn't exist
+  command: nixos-generate-config --root /
+  args:
+    creates: /etc/nixos/hardware-configuration.nix
+  become: yes
+  when: not hardware_config.stat.exists and config_copy.changed
+
+- name: Rebuild NixOS configuration
+  command: nixos-rebuild switch
+  become: yes
+  when: config_copy.changed or not hardware_config.stat.exists

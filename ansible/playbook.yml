@@ -1,6 +1,7 @@
 - hosts: all
   become: no
-  roles: []
+  roles:
+    - nix-update
 
 - hosts: dns*
   become: no
