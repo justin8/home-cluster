@@ -1,0 +1,9 @@
+dnsmasq_config:
+  interface: "eth0"
+  dns_servers:
+    - "9.9.9.9"
+    - "1.1.1.1"
+
+hosts_list:
+#  - { ip: "192.168.1.10", name: "host1.local" }
+#  - { ip: "192.168.1.11", name: "host2.local" }

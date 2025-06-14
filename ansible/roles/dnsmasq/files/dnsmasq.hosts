@@ -1,0 +1,7 @@
+# This file is managed by Ansible. Do not edit manually.
+192.168.4.10 home-assistant-au.dray.id.au mqtt.dray.id.au
+192.168.4.15 rhea.dray.id.au
+192.168.4.20 hestia.dray.id.au auth.dray.id.au traefik.dray.id.au grafana.dray.id.au immich.dray.id.au kavita.dray.id.au livesync.dray.id.au prometheus.dray.id.au prowlarr.dray.id.au radarr.dray.id.au sabnzbd.dray.id.au sonarr.dray.id.au syncthing.dray.id.au teslamate-grafana.dray.id.au teslamate.dray.id.au transmission.dray.id.au
+192.168.4.25 leto.dray.id.au
+192.168.4.1 router.dray.id.au tartarus.dray.id.au
+192.168.4.1 dns.dray.id.au

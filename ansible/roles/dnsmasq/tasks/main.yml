@@ -1,0 +1,22 @@
+- name: Ensure dnsmasq is installed
+  package:
+    name: dnsmasq
+    state: present
+
+- name: Configure dnsmasq
+  template:
+    src: dnsmasq.conf.j2
+    dest: /etc/dnsmasq.conf
+  notify: Restart dnsmasq
+
+- name: Manage /etc/dnsmasq.hosts file
+  copy:
+    src: dnsmasq.hosts
+    dest: /etc/dnsmasq.hosts
+  notify: Restart dnsmasq
+
+- name: Ensure dnsmasq service is enabled
+  service:
+    name: dnsmasq
+    enabled: yes
+

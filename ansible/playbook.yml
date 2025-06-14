@@ -1,0 +1,4 @@
+- hosts: all
+  become: no
+  roles:
+    - dnsmasq
