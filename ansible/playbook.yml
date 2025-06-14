@@ -1,4 +1,8 @@
 - hosts: all
   become: no
+  roles: []
+
+- hosts: dns*
+  become: no
   roles:
     - dnsmasq
