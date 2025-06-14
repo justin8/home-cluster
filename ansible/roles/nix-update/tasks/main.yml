@@ -16,6 +16,14 @@
   become: yes
   register: config_copy
 
+- name: Copy ansible.nix
+  copy:
+    src: ansible.nix
+    dest: /etc/nixos/ansible.nix
+    mode: "0644"
+  become: yes
+  register: ansible_copy
+
 - name: Check if hardware-configuration.nix exists
   stat:
     path: /etc/nixos/hardware-configuration.nix
@@ -32,4 +40,4 @@
 - name: Rebuild NixOS configuration
   command: nixos-rebuild switch
   become: yes
-  when: config_copy.changed or not hardware_config.stat.exists
+  when: config_copy.changed or ansible_copy.changed or not hardware_config.stat.exists
