@@ -59,7 +59,17 @@
 
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;
+  services.openssh.settings.PermitRootLogin = lib.mkOverride 999 "yes";
 
+  # Delete this eventually, this is just for testing
+  services.getty.autologinUser = lib.mkOverride 999 "root";
+  users.users.root = {
+    password = "nixos";
+    openssh.authorizedKeys.keys = [
+      "ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBF88ymIneFCORv9MOMjHDWD5dswKXM/nbRNtuUP3uS0Icu0ROvWKjP6JWow2PCERWx6YVQV7adzzqUhI1K18W8Q= justin@hades"
+    ];
+  };
+  
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];
   # networking.firewall.allowedUDPPorts = [ ... ];
