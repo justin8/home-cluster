@@ -17,6 +17,7 @@ zerombr
 # Partition clearing information
 clearpart --all --initlabel --drives=sda
 # Disk partitioning information
+part biosboot --fstype="biosboot" --size=1 --ondisk=sda
 part /boot --fstype="xfs" --size=1024 --ondisk=sda
 part / --fstype="xfs" --grow --ondisk=sda
 
