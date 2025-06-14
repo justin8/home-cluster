@@ -31,7 +31,7 @@
     wantedBy = [ "timers.target" ];
     
     timerConfig = {
-      OnBootSec = "0";
+      OnBootSec = "30";
       OnUnitActiveSec = "10min";
       Unit = "ansible-pull.service";
     };
