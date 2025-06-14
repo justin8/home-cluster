@@ -15,7 +15,7 @@
     after = [ "network-online.target" ];
     wants = [ "network-online.target" ];
     wantedBy = [ "multi-user.target" ];
-    path = [ pkgs.ansible pkgs.git pkgs.nixos-install-tools ];
+    path = [ pkgs.ansible pkgs.git pkgs.nixos-install-tools pkgs.nixos-rebuild ];
     
     serviceConfig = {
       Type = "oneshot";
