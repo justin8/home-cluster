@@ -99,14 +99,16 @@ def prepare_build_files(temp_dir, hostname):
     return image_nix_path
 
 
-def build_vm_image_file(image_nix_path, hostname, expected_build_time, verbose=False):
+def build_vm_image_file(
+    image_nix_path, hostname, expected_build_time, verbose=False, disk_size=32768
+):
     """Build the VM image and show progress or verbose output."""
     cmd = [
         "nixos-generate",
         "-f",
         "qcow",
         "--disk-size",
-        "32768",
+        str(disk_size),
         "-I",
         "nixpkgs=channel:nixos-25.05",
         "-c",
@@ -318,12 +320,29 @@ def deploy_to_proxmox(image_path, vm_id, vm_host, verbose=False):
         return False
 
 
+def parse_disk_size(size_str):
+    """Parse disk size string with optional M/G suffix and return size in MB as int."""
+    size_str = str(size_str).strip().upper()
+    if size_str.endswith("G"):
+        return int(float(size_str[:-1]) * 1024)
+    elif size_str.endswith("M"):
+        return int(float(size_str[:-1]))
+    else:
+        return int(float(size_str))
+
+
 @click.command()
 @click.option("--vm-id", help="VM ID for Proxmox")
 @click.option("--vm-host", help="VM host in ssh user@host format")
 @click.option("-v", "--verbose", is_flag=True, help="Enable verbose logging")
+@click.option(
+    "--disk-size",
+    default="32G",
+    show_default=True,
+    help="Disk size for the VM image (e.g. 32768, 32G, 4096M)",
+)
 @click.argument("hostname", required=True)
-def main(vm_id, vm_host, verbose, hostname):
+def main(vm_id, vm_host, verbose, disk_size, hostname):
     """Build a NixOS VM image and optionally deploy it to Proxmox."""
 
     # Validate options
@@ -346,8 +365,13 @@ def main(vm_id, vm_host, verbose, hostname):
                 click.echo(f"[VERBOSE] image-build.nix path: {image_nix_path}")
 
             # Build the image
+            disk_size_mb = parse_disk_size(disk_size)
             image_path, build_time = build_vm_image_file(
-                image_nix_path, hostname, expected_build_time, verbose=verbose
+                image_nix_path,
+                hostname,
+                expected_build_time,
+                verbose=verbose,
+                disk_size=disk_size_mb,
             )
 
         # Save the build time for future runs
