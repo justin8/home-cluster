@@ -11,7 +11,7 @@ rootpw --lock
 # System services
 services --enabled="sshd,chronyd"
 # System bootloader configuration
-bootloader --location=mbr --boot-drive=sda
+bootloader --location=mbr --boot-drive=sda --timeout=1
 # Clear the Master Boot Record
 zerombr
 # Partition clearing information
@@ -38,4 +38,10 @@ chmod 600 /root/.ssh/authorized_keys
 
 # Configure SSH to allow root login with key
 sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin prohibit-password/' /etc/ssh/sshd_config
+
+# Configure login screen to show IP address
+cat > /etc/issue << EOF
+Fedora Linux \r (\l)
+IP Address: \4
+EOF
 %end
