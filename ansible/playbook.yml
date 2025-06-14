@@ -1,9 +1,14 @@
-- hosts: all
+- name: Default
+  hosts: all
   become: no
   roles:
     - nix-update
 
-- hosts: dns
-  become: no
-  roles:
-    - dnsmasq
+- name: DNS
+  hosts: all
+  connection: local
+  tasks:
+    - name: Include DNS role
+      include_role:
+        name: dnsmasq
+      when: "'dns' in ansible_local.roles.roles"
