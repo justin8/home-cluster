@@ -8,9 +8,9 @@
     mode: "0755"
   become: yes
 
-- name: Copy configuration.nix
-  copy:
-    src: configuration.nix
+- name: Template configuration.nix
+  template:
+    src: configuration.nix.j2
     dest: /etc/nixos/configuration.nix
     mode: "0644"
   become: yes
