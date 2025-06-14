@@ -15,7 +15,6 @@
     after = [ "network-online.target" ];
     wants = [ "network-online.target" ];
     wantedBy = [ "multi-user.target" ];
-    path = [ pkgs.ansible pkgs.git ];
     
     serviceConfig = {
       Type = "oneshot";
