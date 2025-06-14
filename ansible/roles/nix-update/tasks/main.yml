@@ -23,7 +23,7 @@
   become: yes
 
 - name: Generate hardware configuration if it doesn't exist
-  command: nixos-generate-config --root /
+  command: nixos-generate-config
   args:
     creates: /etc/nixos/hardware-configuration.nix
   become: yes
