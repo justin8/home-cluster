@@ -127,6 +127,7 @@ def build_vm_image_file(image_nix_path, hostname, expected_build_time):
 
         # Start timing
         start_time = time.time()
+        over_time = False
 
         # Start the build process
         process = subprocess.Popen(
@@ -135,9 +136,16 @@ def build_vm_image_file(image_nix_path, hostname, expected_build_time):
 
         # Update progress while process is running
         while process.poll() is None:
-            if expected_build_time:
-                elapsed = time.time() - start_time
-                progress.update(task, completed=min(elapsed, expected_build_time))
+            elapsed = time.time() - start_time
+            if not over_time and elapsed >= expected_build_time:
+                over_time = True
+                # Optionally update description to show it's taking longer
+                progress.update(
+                    task,
+                    description="[yellow]Still building (taking longer than expected)...",
+                )
+            # Continue to advance the bar even after expected time
+            progress.update(task, completed=elapsed)
             time.sleep(0.1)
 
         # Process completed
@@ -153,8 +161,8 @@ def build_vm_image_file(image_nix_path, hostname, expected_build_time):
         # Complete the progress bar
         progress.update(
             task,
-            completed=expected_build_time if expected_build_time else 100,
-            total=100,
+            completed=build_time,
+            total=max(build_time, expected_build_time),
         )
 
     # Extract the image path from output
@@ -295,7 +303,7 @@ def main(vm_id, vm_host, hostname):
             )
 
         # Save the build time for future runs
-        settings["expected_build_time"] = build_time
+        settings["expected_build_time"] = build_time * 1.1
         save_settings(settings)
 
         click.echo(f"Image built successfully in {build_time:.1f}s: {image_path}")
