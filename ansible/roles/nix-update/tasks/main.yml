@@ -27,7 +27,7 @@
   args:
     creates: /etc/nixos/hardware-configuration.nix
   become: yes
-  when: not hardware_config.stat.exists and config_copy.changed
+  when: not hardware_config.stat.exists
 
 - name: Rebuild NixOS configuration
   command: nixos-rebuild switch
