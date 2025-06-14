@@ -201,12 +201,57 @@ def deploy_to_proxmox(image_path, vm_id, vm_host):
             client.close()
             return False
 
-        # Copy the image to the host using SFTP
+        # Copy the image to the host using SFTP with progress bar
         remote_path = f"/var/lib/vz/images/{vm_id}/vm-{vm_id}-disk-0.qcow2"
         click.echo(f"Copying image to {vm_host}:{remote_path}...")
-        sftp = client.open_sftp()
-        sftp.put(image_path, remote_path)
-        sftp.close()
+
+        # Get file size
+        file_size = os.path.getsize(image_path)
+
+        # Setup progress bar for file transfer
+        with Progress(
+            TextColumn("[bold blue]Uploading...", justify="right"),
+            BarColumn(complete_style="green"),
+            TextColumn("[progress.percentage]{task.percentage:>3.1f}%"),
+            TextColumn("•"),
+            TimeElapsedColumn(),
+            TextColumn("•"),
+            TimeRemainingColumn(),
+            TextColumn("•"),
+            TextColumn("{task.fields[speed]:.2f} MB/s"),
+        ) as progress:
+            task = progress.add_task("Uploading", total=file_size, speed=0)
+
+            # Open SFTP connection
+            sftp = client.open_sftp()
+
+            # Track transfer speed
+            start_time = time.time()
+            last_update_time = start_time
+            last_bytes = 0
+
+            # Define callback for progress updates
+            def update_progress(transferred, total):
+                nonlocal last_update_time, last_bytes
+
+                # Update progress bar
+                progress.update(task, completed=transferred)
+
+                # Calculate and update speed every second
+                current_time = time.time()
+                if current_time - last_update_time >= 1.0:
+                    elapsed = current_time - last_update_time
+                    bytes_since_last = transferred - last_bytes
+                    speed_mbps = (bytes_since_last / 1024 / 1024) / elapsed
+                    progress.update(task, speed=speed_mbps)
+
+                    # Update tracking variables
+                    last_update_time = current_time
+                    last_bytes = transferred
+
+            # Start transfer with callback
+            sftp.put(image_path, remote_path, callback=update_progress)
+            sftp.close()
 
         # Start the VM
         click.echo(f"Starting VM {vm_id}...")
