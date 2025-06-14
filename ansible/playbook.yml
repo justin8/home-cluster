@@ -11,4 +11,4 @@
     - name: Include DNS role
       include_role:
         name: dnsmasq
-      when: "'dns' in ansible_local.roles.roles"
+      when: ansible_hostname is match('dns*')
