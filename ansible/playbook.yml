@@ -3,7 +3,7 @@
   roles:
     - nix-update
 
-- hosts: dns*
+- hosts: dns
   become: no
   roles:
     - dnsmasq
