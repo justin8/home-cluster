@@ -1,5 +1,5 @@
 # Samba shares for storage.dray.id.au
-samba_shares:
+smb_shares:
   - name: Backups
     path: /storage/backups
     valid_users: [justin, celeste]

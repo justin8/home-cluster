@@ -68,6 +68,7 @@
       force create mode = 665
       force directory mode = 775
     samba_users: "{{ users }}"
+    samba_shares: "{{ smb_shares }}"
     samba_server_min_protocol: SMB2
     samba_server_max_protocol: SMB3
     samba_server_interfaces:
