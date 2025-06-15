@@ -21,9 +21,9 @@
     group: root
     mode: "0700"
 
-- name: Copy authorized_keys for root
+- name: Set authorized_keys for root from variable
   ansible.builtin.copy:
-    src: authorized_keys
+    content: "{{ ssh_authorized_keys | join('\n') }}\n"
     dest: /root/.ssh/authorized_keys
     owner: root
     group: root
