@@ -1,11 +1,17 @@
 ---
 # tasks for users role
+- name: Install zsh
+  ansible.builtin.package:
+    name: zsh
+    state: present
+
 - name: Ensure system users exist
   ansible.builtin.user:
     name: "{{ item.name }}"
     state: present
-    shell: /sbin/nologin
+    shell: /usr/bin/zsh
     uid: "{{ item.uid | default(omit) }}"
+    password: "{{ item.password | default(omit) | password_hash('sha512') }}"
   loop: "{{ users }}"
   loop_control:
     label: "{{ item.name }}"
