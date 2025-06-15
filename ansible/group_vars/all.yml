@@ -1,0 +1,13 @@
+aws_region: ap-southeast-2
+
+# Global Ansible variables for all hosts
+users:
+  - name: justin
+    password: "{{ lookup('amazon.aws.ssm_parameter', '/home-cluster/users/justin/password') }}"
+  - name: celeste
+    password: "{{ lookup('amazon.aws.ssm_parameter', '/home-cluster/users/celeste/password') }}"
+  - name: downloads
+    password: "{{ lookup('amazon.aws.ssm_parameter', '/home-cluster/users/downloads/password') }}"
+    uid: 2000
+  - name: homeassistant-backups
+    password: "{{ lookup('amazon.aws.ssm_parameter', '/home-cluster/users/homeassistant-backups/password') }}"

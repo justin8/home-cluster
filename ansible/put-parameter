@@ -1,0 +1,9 @@
+#!/bin/bash
+
+if [ $# -ne 2 ]; then
+  echo "Usage: $0 <parameter-name> <parameter-value>"
+  echo "Example: $0 users/justin/password mysecretpassword"
+  exit 1
+fi
+
+aws ssm put-parameter --name "/home-cluster/$1" --value "$2" --type SecureString --overwrite

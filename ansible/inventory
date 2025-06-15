@@ -1,5 +1,4 @@
 [all]
-localhost ansible_connection=local
 
 [storage]
 ;storage.dray.id.au

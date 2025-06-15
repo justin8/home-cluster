@@ -11,6 +11,7 @@
     regexp: "^#?PermitRootLogin"
     line: "PermitRootLogin prohibit-password"
     validate: /usr/sbin/sshd -T -f %s
+  notify: Restart sshd
 
 - name: Ensure root .ssh directory exists
   ansible.builtin.file:
@@ -27,8 +28,3 @@
     owner: root
     group: root
     mode: "0600"
-
-- name: Restart sshd
-  ansible.builtin.service:
-    name: sshd
-    state: restarted

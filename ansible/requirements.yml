@@ -1,3 +1,8 @@
 roles:
   - name: "tigattack.mergerfs"
     version: "2.0.1"
+collections:
+  - name: "vladgh.samba"
+    version: "3.5.1"
+  - name: "amazon.aws"
+    version: "10.1.0"
