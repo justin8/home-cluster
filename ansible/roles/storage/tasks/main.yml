@@ -1,0 +1,32 @@
+---
+# tasks for storage role
+- name: Install snapraid
+  ansible.builtin.yum:
+    name: snapraid
+    state: present
+
+- name: Find disks labeled data-*
+  ansible.builtin.command: lsblk -o NAME,LABEL -P
+  register: lsblk_out
+
+- name: Set fact for data disks
+  ansible.builtin.set_fact:
+    data_disks: "{{ lsblk_out.stdout_lines | select('search', 'LABEL=\"data-') | map('regex_search', 'NAME=\"([^\"]+)\" LABEL=\"(data-[^\"]+)\"', '\\2,\\1') | list }}"
+
+- name: Create mount points
+  ansible.builtin.file:
+    path: "/mnt/{{ item.split(',')[0] }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  loop: "{{ data_disks }}"
+
+- name: Mount data disks
+  ansible.builtin.mount:
+    path: "/mnt/{{ item.split(',')[0] }}"
+    src: "/dev/disk/by-label/{{ item.split(',')[0] }}"
+    fstype: xfs
+    state: mounted
+  loop: "{{ data_disks }}"
+  when: item is defined

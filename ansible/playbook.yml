@@ -1,0 +1,15 @@
+---
+- hosts: all
+  become: true
+  roles:
+    - ssh-access
+
+- hosts: dns
+  become: true
+  roles:
+    - dns
+
+- hosts: storage
+  become: true
+  roles:
+    - storage
