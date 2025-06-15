@@ -1,6 +1,5 @@
 aws_region: ap-southeast-2
 
-# Global Ansible variables for all hosts
 ssh_authorized_keys:
   - ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBF88ymIneFCORv9MOMjHDWD5dswKXM/nbRNtuUP3uS0Icu0ROvWKjP6JWow2PCERWx6YVQV7adzzqUhI1K18W8Q= justin@hades
   - ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBDVritj4bQDwofH/hgzNmYjOAjufpgL4K28n+ppRu77ylDHAl8Jb6/hN/qC+wGR64a34r0csFaxTzXmrO+0djxs= justin@hestia

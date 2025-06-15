@@ -1,7 +1,7 @@
 ---
 # tasks for storage role
 - name: Install snapraid
-  ansible.builtin.yum:
+  ansible.builtin.package:
     name: snapraid
     state: present
 

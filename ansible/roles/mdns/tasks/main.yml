@@ -1,8 +1,8 @@
 ---
 # tasks for mdns role
-- name: Install avahi-daemon
-  ansible.builtin.yum:
-    name: avahi
+- name: Install mDNS/Avahi package
+  ansible.builtin.package:
+    name: "{{ 'avahi' if ansible_facts.os_family in ['RedHat'] else 'avahi-daemon' }}"
     state: present
 
 - name: Ensure avahi-daemon is started and enabled

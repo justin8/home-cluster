@@ -2,3 +2,7 @@
 
 [storage]
 storage.dray.id.au
+
+[proxmox]
+leto.dray.id.au
+rhea.dray.id.au

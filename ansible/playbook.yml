@@ -3,9 +3,9 @@
   become: true
   roles:
     - ssh-access
-    - mdns
 
 - hosts: storage
   become: true
   roles:
+    - mdns
     - storage
