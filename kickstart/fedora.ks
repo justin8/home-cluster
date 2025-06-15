@@ -33,6 +33,8 @@ openssh-server
 # Enable SSH root login with key
 mkdir -p /root/.ssh
 echo "ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBF88ymIneFCORv9MOMjHDWD5dswKXM/nbRNtuUP3uS0Icu0ROvWKjP6JWow2PCERWx6YVQV7adzzqUhI1K18W8Q= justin@hades" > /root/.ssh/authorized_keys
+echo "ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBDVritj4bQDwofH/hgzNmYjOAjufpgL4K28n+ppRu77ylDHAl8Jb6/hN/qC+wGR64a34r0csFaxTzXmrO+0djxs= justin@hestia" >> /root/.ssh/authorized_keys
+echo "ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBMFBv5hR9yKLqpZ815Vn+iGDAxW7Zk3Iwg5VTsw3A10hC5+fYNaZUjFi8FxcaQfqYyuFmtBsIxMa1e7gADSIJC0= justindray@hephaestus" >> /root/.ssh/authorized_keys
 chmod 700 /root/.ssh
 chmod 600 /root/.ssh/authorized_keys
 
