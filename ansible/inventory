@@ -1,8 +1,7 @@
 [all]
 
 [storage]
-;storage.dray.id.au
-192.168.4.247
+storage.dray.id.au
 
 [dns]
 dns.dray.id.au

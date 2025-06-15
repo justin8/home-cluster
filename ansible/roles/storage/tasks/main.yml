@@ -67,40 +67,6 @@
       force group = downloads
       force create mode = 665
       force directory mode = 775
-    samba_shares:
-      - name: Backups
-        path: /storage/backups
-        valid_users: [justin, celeste, downloads, homeassistant-backups]
-      - name: homeassistant-backups
-        path: /storage/backups/homeassistant
-        valid_users: [downloads, homeassistant-backups]
-      - name: Console
-        path: /storage/console
-        write_list: [justin, celeste]
-      - name: Manga-Comics
-        path: /storage/manga-comics
-        write_list: [justin, celeste]
-      - name: Books
-        path: /storage/books
-        write_list: [justin, celeste]
-      - name: Movies
-        path: /storage/movies
-        write_list: [justin, celeste]
-      - name: OSes
-        path: /storage/OSes
-        write_list: [justin, celeste]
-      - name: TV
-        path: /storage/tv
-        write_list: [justin, celeste]
-      - name: Photos
-        path: /storage/photos
-        write_list: [justin, celeste]
-      - name: Downloads
-        path: /storage/downloads
-        write_list: [justin, celeste]
-      - name: Games
-        path: /storage/games
-        write_list: [justin, celeste]
     samba_users: "{{ users }}"
     samba_server_min_protocol: SMB2
     samba_server_max_protocol: SMB3
