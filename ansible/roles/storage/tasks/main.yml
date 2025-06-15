@@ -77,6 +77,14 @@
     samba_server_bind_interfaces_only: true
   when: data_disks | length > 0
 
+- name: Open Samba ports in firewalld
+  ansible.posix.firewalld:
+    service: samba
+    permanent: true
+    state: enabled
+    immediate: true
+  when: data_disks | length > 0
+
 # --- Cleanup section: unmount and remove stale mount points and mergerfs if no data disks ---
 
 - name: Find existing /mnt/data-* mount points

@@ -5,11 +5,6 @@
     - ssh-access
     - mdns
 
-- hosts: dns
-  become: true
-  roles:
-    - dns
-
 - hosts: storage
   become: true
   roles:

@@ -28,3 +28,10 @@
     regexp: "^hosts:"
     line: "hosts: files mdns_minimal [NOTFOUND=return] resolve [!UNAVAIL=return] dns mdns myhostname"
     backup: true
+
+- name: Open mDNS (Avahi) service in firewalld
+  ansible.posix.firewalld:
+    service: mdns
+    permanent: true
+    state: enabled
+    immediate: true
