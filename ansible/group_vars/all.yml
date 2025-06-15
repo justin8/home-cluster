@@ -8,11 +8,11 @@ ssh_authorized_keys:
 
 users:
   - name: justin
+    uid: 1000
     password: "{{ lookup('amazon.aws.ssm_parameter', '/home-cluster/users/justin/password') }}"
   - name: celeste
+    uid: 1001
     password: "{{ lookup('amazon.aws.ssm_parameter', '/home-cluster/users/celeste/password') }}"
   - name: downloads
     password: "{{ lookup('amazon.aws.ssm_parameter', '/home-cluster/users/downloads/password') }}"
     uid: 2000
-  - name: homeassistant-backups
-    password: "{{ lookup('amazon.aws.ssm_parameter', '/home-cluster/users/homeassistant-backups/password') }}"

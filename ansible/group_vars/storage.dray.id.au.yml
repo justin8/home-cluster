@@ -2,10 +2,7 @@
 samba_shares:
   - name: Backups
     path: /storage/backups
-    valid_users: [justin, celeste, downloads, homeassistant-backups]
-  - name: homeassistant-backups
-    path: /storage/backups/homeassistant
-    valid_users: [downloads, homeassistant-backups]
+    valid_users: [justin, celeste]
   - name: Console
     path: /storage/console
     write_list: [justin, celeste]
