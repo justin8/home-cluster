@@ -3,6 +3,7 @@
   become: true
   roles:
     - ssh-access
+    - mdns
 
 - hosts: dns
   become: true

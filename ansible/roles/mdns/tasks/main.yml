@@ -1,0 +1,30 @@
+---
+# tasks for mdns role
+- name: Install avahi-daemon
+  ansible.builtin.yum:
+    name: avahi
+    state: present
+
+- name: Ensure avahi-daemon is started and enabled
+  ansible.builtin.service:
+    name: avahi-daemon
+    state: started
+    enabled: true
+
+- name: Ensure mDNS is enabled in /etc/systemd/resolved.conf
+  ansible.builtin.blockinfile:
+    path: /etc/systemd/resolved.conf
+    create: true
+    block: |
+      [Resolve]
+      MulticastDNS=yes
+    marker: "# {mark} ANSIBLE MANAGED BLOCK: mDNS configuration"
+    backup: true
+  notify: Restart systemd-resolved
+
+- name: Ensure nsswitch.conf uses mdns for hosts
+  ansible.builtin.lineinfile:
+    path: /etc/nsswitch.conf
+    regexp: "^hosts:"
+    line: "hosts: files mdns_minimal [NOTFOUND=return] resolve [!UNAVAIL=return] dns mdns myhostname"
+    backup: true
