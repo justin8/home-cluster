@@ -1,0 +1,11 @@
+---
+# tasks for users role
+- name: Ensure system users exist
+  ansible.builtin.user:
+    name: "{{ item.name }}"
+    state: present
+    shell: /sbin/nologin
+    uid: "{{ item.uid | default(omit) }}"
+  loop: "{{ users }}"
+  loop_control:
+    label: "{{ item.name }}"

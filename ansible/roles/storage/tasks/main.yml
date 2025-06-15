@@ -47,16 +47,6 @@
     mergerfs_remove_undefined_mounts: true
   when: data_disks | length > 0
 
-- name: Ensure system users exist
-  ansible.builtin.user:
-    name: "{{ item.name }}"
-    state: present
-    shell: /sbin/nologin
-    uid: "{{ item.uid | default(omit) }}"
-  loop: "{{ users }}"
-  loop_control:
-    label: "{{ item.name }}"
-
 # --- Samba server configuration using vladgh.samba collection ---
 - name: Configure Samba server
   ansible.builtin.include_role:

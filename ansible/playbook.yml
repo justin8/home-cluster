@@ -8,4 +8,5 @@
   become: true
   roles:
     - mdns
+    - users
     - storage
