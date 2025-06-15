@@ -39,6 +39,9 @@ chmod 600 /root/.ssh/authorized_keys
 # Configure SSH to allow root login with key
 sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin prohibit-password/' /etc/ssh/sshd_config
 
+# Install ansible after as it's not a part of the ISO's core packages
+dnf install -y ansible
+
 # Configure login screen to show IP address
 cat > /etc/issue << EOF
 Fedora Linux \r (\l)
