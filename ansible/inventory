@@ -1,2 +1,9 @@
 [all]
 localhost ansible_connection=local
+
+[storage]
+;storage.dray.id.au
+192.168.4.247
+
+[dns]
+dns.dray.id.au

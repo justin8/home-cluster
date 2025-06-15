@@ -6,27 +6,31 @@
     state: present
 
 - name: Find disks labeled data-*
-  ansible.builtin.command: lsblk -o NAME,LABEL -P
-  register: lsblk_out
+  ansible.builtin.find:
+    paths: /dev/disk/by-label
+    patterns: "data-*"
+    file_type: any
+  register: data_disk_find
 
 - name: Set fact for data disks
   ansible.builtin.set_fact:
-    data_disks: "{{ lsblk_out.stdout_lines | select('search', 'LABEL=\"data-') | map('regex_search', 'NAME=\"([^\"]+)\" LABEL=\"(data-[^\"]+)\"', '\\2,\\1') | list }}"
+    data_disks: "{{ data_disk_find.files | map(attribute='path') | list }}"
 
 - name: Create mount points
   ansible.builtin.file:
-    path: "/mnt/{{ item.split(',')[0] }}"
+    path: "/mnt/{{ item | basename }}"
     state: directory
     owner: root
     group: root
-    mode: '0755'
+    mode: "0755"
   loop: "{{ data_disks }}"
+  when: data_disks | length > 0
 
 - name: Mount data disks
   ansible.builtin.mount:
-    path: "/mnt/{{ item.split(',')[0] }}"
-    src: "/dev/disk/by-label/{{ item.split(',')[0] }}"
-    fstype: xfs
+    path: "/mnt/{{ item | basename }}"
+    src: "{{ item }}"
+    fstype: ext4
     state: mounted
   loop: "{{ data_disks }}"
-  when: item is defined
+  when: data_disks | length > 0
