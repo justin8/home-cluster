@@ -1,12 +1,19 @@
 ---
-- hosts: all
+- name: All hosts
+  hosts: all:!openwrt
   become: true
   roles:
     - ssh-access
 
-- hosts: storage
+- name: Storage
+  hosts: storage
   become: true
   roles:
     - mdns
     - users
     - storage
+
+- name: Openwrt
+  hosts: openwrt
+  roles:
+    - dns-openwrt

@@ -3,7 +3,7 @@
   ansible.builtin.service:
     name: sshd
     state: started
-    enabled: yes
+    enabled: true
 
 - name: Allow root login with SSH keys
   ansible.builtin.lineinfile:

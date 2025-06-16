@@ -334,3 +334,4 @@ dist
 *.iso
 
 .direnv
+.ansible

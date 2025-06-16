@@ -1,0 +1,7 @@
+# dnsmasq hosts file - managed by Ansible
+
+{% if dns_hosts is defined %}
+{% for entry in dns_hosts %}
+{{ entry.ip }} {{ entry.aliases | join(' ') }}
+{% endfor %}
+{% endif %}

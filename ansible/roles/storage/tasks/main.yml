@@ -27,7 +27,7 @@
   when: data_disks | length > 0
 
 - name: Mount data disks
-  ansible.builtin.mount:
+  ansible.posix.mount:
     path: "/mnt/{{ item | basename }}"
     src: "{{ item }}"
     fstype: ext4
@@ -43,7 +43,10 @@
       - path: /storage
         branches:
           - /mnt/data-*
-        options: "defaults,nonempty,default_permissions,allow_other,use_ino,cache.files=off,moveonenospc=true,dropcacheonclose=true,category.create=pfrd,minfreespace=1G,posix_acl=true,fsname=mergerfs"
+        options: >
+          defaults,nonempty,default_permissions,allow_other,use_ino,cache.files=off,
+          moveonenospc=true,dropcacheonclose=true,category.create=pfrd,
+          minfreespace=1G,posix_acl=true,fsname=mergerfs
     mergerfs_remove_undefined_mounts: true
   when: data_disks | length > 0
 
@@ -85,9 +88,10 @@
   register: existing_mounts
 
 - name: Unmount and remove stale mount points
+  when: existing_mounts.matched > 0
   block:
     - name: Unmount stale mount point
-      ansible.builtin.mount:
+      ansible.posix.mount:
         path: "{{ item.path }}"
         state: unmounted
       loop: "{{ existing_mounts.files | rejectattr('path', 'in', data_disks | map('basename') | map('regex_replace', '^', '/mnt/')) | list }}"
@@ -100,4 +104,3 @@
       loop: "{{ existing_mounts.files | rejectattr('path', 'in', data_disks | map('basename') | map('regex_replace', '^', '/mnt/')) | list }}"
       loop_control:
         label: "{{ item.path }}"
-  when: existing_mounts.matched > 0

@@ -4,6 +4,7 @@ ssh_authorized_keys:
   - ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBF88ymIneFCORv9MOMjHDWD5dswKXM/nbRNtuUP3uS0Icu0ROvWKjP6JWow2PCERWx6YVQV7adzzqUhI1K18W8Q= justin@hades
   - ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBDVritj4bQDwofH/hgzNmYjOAjufpgL4K28n+ppRu77ylDHAl8Jb6/hN/qC+wGR64a34r0csFaxTzXmrO+0djxs= justin@hestia
   - ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBMFBv5hR9yKLqpZ815Vn+iGDAxW7Zk3Iwg5VTsw3A10hC5+fYNaZUjFi8FxcaQfqYyuFmtBsIxMa1e7gADSIJC0= justindray@hephaestus
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPt7A1aDp0wZydxiGiJgbfCBYl9irx9+rruwNDhfkY73 justin@hades
 
 users:
   - name: justin
@@ -15,3 +16,39 @@ users:
   - name: downloads
     password: "{{ lookup('amazon.aws.ssm_parameter', '/home-cluster/users/downloads/password') }}"
     uid: 2000
+
+dns_hosts:
+  - ip: 192.168.4.1
+    aliases:
+      - cerberus.dray.id.au
+  - ip: 192.168.4.10
+    aliases:
+      - home-assistant-au.dray.id.au
+      - mqtt.dray.id.au
+  - ip: 192.168.4.15
+    aliases:
+      - rhea.dray.id.au
+  - ip: 192.168.4.16
+    aliases:
+      - storage.dray.id.au
+  - ip: 192.168.4.20
+    aliases:
+      - hestia.dray.id.au
+      - auth.dray.id.au
+      - traefik.dray.id.au
+      - grafana.dray.id.au
+      - immich.dray.id.au
+      - kavita.dray.id.au
+      - livesync.dray.id.au
+      - prometheus.dray.id.au
+      - prowlarr.dray.id.au
+      - radarr.dray.id.au
+      - sabnzbd.dray.id.au
+      - sonarr.dray.id.au
+      - syncthing.dray.id.au
+      - teslamate-grafana.dray.id.au
+      - teslamate.dray.id.au
+      - transmission.dray.id.au
+  - ip: 192.168.4.25
+    aliases:
+      - leto.dray.id.au
