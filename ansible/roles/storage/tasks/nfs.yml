@@ -1,0 +1,5 @@
+---
+# Placeholder for NFS server tasks
+- name: Placeholder for NFS server setup
+  debug:
+    msg: "NFS server setup tasks go here."

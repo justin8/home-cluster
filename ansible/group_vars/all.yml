@@ -17,6 +17,12 @@ users:
     password: "{{ lookup('amazon.aws.ssm_parameter', '/home-cluster/users/downloads/password') }}"
     uid: 2000
 
+smtp:
+  username: "{{ lookup('amazon.aws.ssm_parameter', '/home-cluster/smtp/username') }}"
+  password: "{{ lookup('amazon.aws.ssm_parameter', '/home-cluster/smtp/password') }}"
+  server: email-smtp.ap-southeast-2.amazonaws.com
+  port: 587
+
 dns_hosts:
   - ip: 192.168.4.1
     aliases:

@@ -1,0 +1,13 @@
+parity /mnt/parity-1/snapraid.parity
+content /mnt/data-1/.snapraid.content
+content /mnt/parity-1/.snapraid.content
+exclude /lost+found/
+exclude .snapshots/
+exclude /tmp/
+exclude /temp/
+exclude /downloads/
+exclude .DS_Store
+exclude .snapraid.content
+{% for disk in data_disks %}
+data d{{ loop.index }} /mnt/{{ disk | basename }}
+{% endfor %}
