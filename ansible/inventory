@@ -1,4 +1,5 @@
 [all]
+localhost
 
 [openwrt]
 cerberus.dray.id.au
