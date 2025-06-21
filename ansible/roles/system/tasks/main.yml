@@ -1,0 +1,48 @@
+---
+# tasks for system role (users + email)
+- name: Install zsh
+  ansible.builtin.package:
+    name: zsh
+    state: present
+  tags:
+    - users
+
+- name: Ensure system users exist
+  ansible.builtin.user:
+    name: "{{ item.name }}"
+    state: present
+    shell: /usr/bin/zsh
+    uid: "{{ item.uid | default(omit) }}"
+    password: "{{ item.password | default(omit) | password_hash('sha512') }}"
+    groups: "{{ item.groups | default(omit) }}"
+  loop: "{{ users }}"
+  loop_control:
+    label: "{{ item.name }}"
+  tags:
+    - users
+
+- name: Install msmtp
+  ansible.builtin.package:
+    name: msmtp
+    state: present
+  tags:
+    - email
+
+- name: Create msmtp config
+  ansible.builtin.template:
+    src: msmtprc.j2
+    dest: /etc/msmtprc
+    owner: root
+    group: root
+    mode: '0600'
+  tags:
+    - email
+
+- name: Symlink msmtp as sendmail
+  ansible.builtin.file:
+    src: /usr/bin/msmtp
+    dest: /usr/sbin/sendmail
+    state: link
+    force: true
+  tags:
+    - email

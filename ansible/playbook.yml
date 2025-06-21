@@ -4,11 +4,11 @@
   roles:
     - ssh-access
     - mdns
+    - system
 
 - name: Storage
   hosts: storage
   roles:
-    - users
     - storage
 
 - name: Openwrt

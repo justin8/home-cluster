@@ -1,4 +1,4 @@
-aws_region: ap-southeast-2
+AWS_REGION: ap-southeast-2
 
 ssh_authorized_keys:
   - ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBF88ymIneFCORv9MOMjHDWD5dswKXM/nbRNtuUP3uS0Icu0ROvWKjP6JWow2PCERWx6YVQV7adzzqUhI1K18W8Q= justin@hades
@@ -23,6 +23,7 @@ users:
       - downloads
 
 smtp:
+  from: "{{ ansible_hostname }}@dray.id.au"
   username: "{{ lookup('amazon.aws.ssm_parameter', '/home-cluster/smtp/username') }}"
   password: "{{ lookup('amazon.aws.ssm_parameter', '/home-cluster/smtp/password') }}"
   server: email-smtp.ap-southeast-2.amazonaws.com
