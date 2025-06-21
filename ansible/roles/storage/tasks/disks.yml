@@ -1,49 +1,110 @@
 ---
-- name: Find disks labeled data-*
+# 1. Ensure cryptsetup is installed
+- name: Ensure cryptsetup is installed
+  ansible.builtin.package:
+    name: cryptsetup
+    state: present
+
+# 2. Create keyfile directory with correct permissions and SELinux context
+- name: Ensure /etc/cryptsetup-keys.d exists
+  ansible.builtin.file:
+    path: /etc/cryptsetup-keys.d
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+
+- name: Write base64-decoded disk encryption key to keyfile
+  ansible.builtin.copy:
+    content: "{{ disk_encryption_key | b64decode }}"
+    dest: /etc/cryptsetup-keys.d/data-disk.key
+    owner: root
+    group: root
+    mode: "0400"
+
+# 3. Find data and parity partitions by partlabel (separately, support multiple parity disks)
+- name: Find partitions labeled data-*
   ansible.builtin.find:
-    paths: /dev/disk/by-label
+    paths: /dev/disk/by-partlabel
     patterns: "data-*"
     file_type: any
-  register: data_disk_find
+  register: data_part_find
+
+- name: Find partitions labeled parity-*
+  ansible.builtin.find:
+    paths: /dev/disk/by-partlabel
+    patterns: "parity-*"
+    file_type: any
+  register: parity_part_find
 
 - name: Set fact for data disks
   ansible.builtin.set_fact:
-    data_disks: "{{ data_disk_find.files | map(attribute='path') | list }}"
+    data_partitions: "{{ data_part_find.files | map(attribute='path') | list }}"
 
-- name: Create data disk mount points
+- name: Set fact for parity disks
+  ansible.builtin.set_fact:
+    parity_partitions: "{{ parity_part_find.files | map(attribute='path') | list }}"
+
+- name: Set fact for all encrypted partitions
+  ansible.builtin.set_fact:
+    encrypted_partitions: "{{ data_partitions + parity_partitions }}"
+
+# 4. Configure /etc/crypttab for each encrypted partition
+- name: Configure /etc/crypttab for encrypted partitions
+  ansible.builtin.lineinfile:
+    path: /etc/crypttab
+    create: yes
+    regexp: "^crypt-{{ item | basename }} "
+    line: "crypt-{{ item | basename }} {{ item }} /etc/cryptsetup-keys.d/data-disk.key luks"
+    state: present
+  loop: "{{ encrypted_partitions }}"
+  when: encrypted_partitions | length > 0
+
+# After the crypttab modification task, decrypt partitions straight away
+- name: Decrypt partitions now
+  ansible.builtin.shell: |
+    systemctl daemon-reload
+    systemctl restart 'systemd-cryptsetup@*.service'
+  when: encrypted_partitions | length > 0
+
+# 5. Create mount points for decrypted devices
+- name: Create mount points for decrypted devices
   ansible.builtin.file:
     path: "/mnt/{{ item | basename }}"
     state: directory
     owner: root
     group: root
     mode: "0755"
-  loop: "{{ data_disks }}"
-  when: data_disks | length > 0
+  loop: "{{ encrypted_partitions }}"
+  when: encrypted_partitions | length > 0
 
-- name: Mount data disks
-  ansible.posix.mount:
-    path: "/mnt/{{ item | basename }}"
-    src: "{{ item }}"
-    fstype: ext4
-    state: mounted
-  loop: "{{ data_disks }}"
-  when: data_disks | length > 0
+# Remove unmanaged /dev/mapper/crypt-* lines from /etc/fstab
+- name: Remove unmanaged crypt devices from fstab
+  ansible.builtin.lineinfile:
+    path: /etc/fstab
+    regexp: "^/dev/mapper/crypt-"
+    state: absent
+    backup: yes
 
-- name: Create parity disk mount point
-  ansible.builtin.file:
-    path: "/mnt/parity-1"
-    state: directory
-    owner: root
-    group: root
-    mode: "0755"
+# 6. Ensure /etc/fstab has entries for decrypted devices
+- name: Ensure /etc/fstab has entries for decrypted devices
+  ansible.builtin.lineinfile:
+    path: /etc/fstab
+    create: yes
+    regexp: "^/dev/mapper/crypt-{{ item | basename }} "
+    line: "/dev/mapper/crypt-{{ item | basename }} /mnt/{{ item | basename }} ext4 defaults 0 2"
+    state: present
+  loop: "{{ encrypted_partitions }}"
+  when: encrypted_partitions | length > 0
 
-- name: Mount parity disk
-  ansible.posix.mount:
-    path: /mnt/parity-1
-    src: /dev/disk/by-label/parity-1
-    fstype: ext4
-    state: mounted
+- name: Mount all filesystems
+  ansible.builtin.shell: |
+    systemctl daemon-reload
+    mount -a
+  changed_when: true
+  when: encrypted_partitions | length > 0
 
+# 7. Configure mergerfs pool at /storage using tigattack.mergerfs role
 - name: Configure mergerfs pool at /storage using tigattack.mergerfs role
   ansible.builtin.include_role:
     name: tigattack.mergerfs
@@ -54,8 +115,9 @@
           - /mnt/data-*
         options: defaults,nonempty,default_permissions,allow_other,use_ino,cache.files=off,moveonenospc=true,dropcacheonclose=true,category.create=pfrd,minfreespace=1G,posix_acl=true,fsname=mergerfs
     mergerfs_remove_undefined_mounts: true
-  when: data_disks | length > 0
+  when: encrypted_partitions | length > 0
 
+# 8. Install snapraid and snapraid-runner
 - name: Install snapraid
   ansible.builtin.package:
     name: snapraid
@@ -114,7 +176,7 @@
     job: "/opt/snapraid-runner/snapraid-runner.py -c /opt/snapraid-runner/snapraid-runner.conf"
     state: present
 
-# Cleanup section: unmount and remove stale mount points and mergerfs if no data disks
+# 9. Cleanup section: unmount and remove stale mount points and mergerfs if no data disks
 - name: Find existing /mnt/data-* mount points
   ansible.builtin.find:
     paths: /mnt
@@ -129,13 +191,13 @@
       ansible.posix.mount:
         path: "{{ item.path }}"
         state: unmounted
-      loop: "{{ existing_mounts.files | rejectattr('path', 'in', data_disks | map('basename') | map('regex_replace', '^', '/mnt/')) | list }}"
+      loop: "{{ existing_mounts.files | rejectattr('path', 'in', encrypted_partitions | map('basename') | map('regex_replace', '^', '/mnt/')) | list }}"
       loop_control:
         label: "{{ item.path }}"
     - name: Remove stale mount point directory
       ansible.builtin.file:
         path: "{{ item.path }}"
         state: absent
-      loop: "{{ existing_mounts.files | rejectattr('path', 'in', data_disks | map('basename') | map('regex_replace', '^', '/mnt/')) | list }}"
+      loop: "{{ existing_mounts.files | rejectattr('path', 'in', encrypted_partitions | map('basename') | map('regex_replace', '^', '/mnt/')) | list }}"
       loop_control:
         label: "{{ item.path }}"

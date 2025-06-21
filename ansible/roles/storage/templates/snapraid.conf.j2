@@ -1,4 +1,6 @@
-parity /mnt/parity-1/snapraid.parity
+{% for disk in parity_partitions %}
+parity /mnt/{{ disk | basename }}/snapraid.parity
+{% endfor %}
 content /mnt/data-1/.snapraid.content
 content /mnt/parity-1/.snapraid.content
 exclude /lost+found/
@@ -8,6 +10,6 @@ exclude /temp/
 exclude /downloads/
 exclude .DS_Store
 exclude .snapraid.content
-{% for disk in data_disks %}
+{% for disk in data_partitions %}
 data d{{ loop.index }} /mnt/{{ disk | basename }}
 {% endfor %}

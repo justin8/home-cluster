@@ -7,15 +7,20 @@ ssh_authorized_keys:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPt7A1aDp0wZydxiGiJgbfCBYl9irx9+rruwNDhfkY73 justin@hades
 
 users:
-  - name: justin
-    uid: 1000
-    password: "{{ lookup('amazon.aws.ssm_parameter', '/home-cluster/users/justin/password') }}"
-  - name: celeste
-    uid: 1001
-    password: "{{ lookup('amazon.aws.ssm_parameter', '/home-cluster/users/celeste/password') }}"
   - name: downloads
     password: "{{ lookup('amazon.aws.ssm_parameter', '/home-cluster/users/downloads/password') }}"
     uid: 2000
+  - name: justin
+    uid: 1000
+    password: "{{ lookup('amazon.aws.ssm_parameter', '/home-cluster/users/justin/password') }}"
+    groups:
+      - downloads
+      - wheel
+  - name: celeste
+    uid: 1001
+    password: "{{ lookup('amazon.aws.ssm_parameter', '/home-cluster/users/celeste/password') }}"
+    groups:
+      - downloads
 
 smtp:
   username: "{{ lookup('amazon.aws.ssm_parameter', '/home-cluster/smtp/username') }}"

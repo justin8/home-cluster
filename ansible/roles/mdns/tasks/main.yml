@@ -24,6 +24,7 @@
       MulticastDNS=yes
     marker: "# {mark} ANSIBLE MANAGED BLOCK: mDNS configuration"
     backup: true
+    mode: 644
   notify: Restart systemd-resolved
   tags:
     - mdns

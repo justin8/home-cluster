@@ -37,3 +37,5 @@ nfs_exports:
   - name: "hestia.dray.id.au"
     path: /storage
     nfs_options: rw,no_root_squash
+
+disk_encryption_key: "{{ lookup('amazon.aws.ssm_parameter', '/home-cluster/storage/encryptionkey') }}"

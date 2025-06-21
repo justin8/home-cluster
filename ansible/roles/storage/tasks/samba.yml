@@ -10,13 +10,14 @@
       force directory mode = 775
     samba_users: "{{ users }}"
     samba_shares: "{{ smb_shares }}"
+    samba_load_homes: true
     samba_server_min_protocol: SMB2
     samba_server_max_protocol: SMB3
     samba_server_interfaces:
       - lo
       - eth0
     samba_server_bind_interfaces_only: true
-  when: data_disks | length > 0
+  when: data_partitions | length > 0
   tags:
     - samba
 
@@ -26,6 +27,6 @@
     permanent: true
     state: enabled
     immediate: true
-  when: data_disks | length > 0
+  when: data_partitions | length > 0
   tags:
     - samba
