@@ -174,8 +174,9 @@
     user: root
     minute: 0
     hour: 5
-    job: "/opt/snapraid-runner/snapraid-runner.py -c /opt/snapraid-runner/snapraid-runner.conf"
+    job: "/opt/snapraid-runner/snapraid-runner.py -c /opt/snapraid-runner/snapraid-runner.conf && curl -fsS -m 10 --retry 5 -o /dev/null {{snapraid_runner_healthcheck_url}}"
     state: present
+
 
 # 9. Setup /home for samba user shares
 - name: Bind mount /storage/home to /home
