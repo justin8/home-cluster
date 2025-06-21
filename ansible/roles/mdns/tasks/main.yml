@@ -4,12 +4,16 @@
   ansible.builtin.package:
     name: "{{ 'avahi' if ansible_facts.os_family in ['RedHat'] else 'avahi-daemon' }}"
     state: present
+  tags:
+    - mdns
 
 - name: Ensure avahi-daemon is started and enabled
   ansible.builtin.service:
     name: avahi-daemon
     state: started
     enabled: true
+  tags:
+    - mdns
 
 - name: Ensure mDNS is enabled in /etc/systemd/resolved.conf
   ansible.builtin.blockinfile:
@@ -21,6 +25,8 @@
     marker: "# {mark} ANSIBLE MANAGED BLOCK: mDNS configuration"
     backup: true
   notify: Restart systemd-resolved
+  tags:
+    - mdns
 
 - name: Ensure nsswitch.conf uses mdns for hosts
   ansible.builtin.lineinfile:
@@ -28,6 +34,8 @@
     regexp: "^hosts:"
     line: "hosts: files mdns_minimal [NOTFOUND=return] resolve [!UNAVAIL=return] dns mdns myhostname"
     backup: true
+  tags:
+    - mdns
 
 - name: Open mDNS (Avahi) service in firewalld
   ansible.posix.firewalld:
@@ -35,3 +43,5 @@
     permanent: true
     state: enabled
     immediate: true
+  tags:
+    - mdns

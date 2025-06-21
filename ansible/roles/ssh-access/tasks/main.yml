@@ -4,6 +4,8 @@
     name: sshd
     state: started
     enabled: true
+  tags:
+    - ssh
 
 - name: Allow root login with SSH keys
   ansible.builtin.lineinfile:
@@ -12,6 +14,8 @@
     line: "PermitRootLogin prohibit-password"
     validate: /usr/sbin/sshd -T -f %s
   notify: Restart sshd
+  tags:
+    - ssh
 
 - name: Ensure root .ssh directory exists
   ansible.builtin.file:
@@ -20,6 +24,8 @@
     owner: root
     group: root
     mode: "0700"
+  tags:
+    - ssh
 
 - name: Set authorized_keys for root from variable
   ansible.builtin.copy:
@@ -28,3 +34,5 @@
     owner: root
     group: root
     mode: "0600"
+  tags:
+    - ssh
