@@ -1,0 +1,5 @@
+{% for share in shares | default([]) %}
+{% if share.nfs_exports is defined %}
+{{ share.path }} {% for host in share.nfs_exports %}{{ host }}({{ nfs_default_options }},fsid={{ (share.path ~ host) | hash('md5') | int(base=16) % 4294967295 }}) {% endfor %}
+{% endif %}
+{% endfor %}

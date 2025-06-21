@@ -1,5 +1,4 @@
 ---
-# Tasks for Samba server configuration
 - name: Configure Samba server
   ansible.builtin.include_role:
     name: vladgh.samba.server
@@ -10,7 +9,7 @@
       force create mode = 665
       force directory mode = 775
     samba_users: "{{ users }}"
-    samba_shares: "{{ smb_shares }}"
+    samba_shares: "{{ shares }}"
     samba_server_min_protocol: SMB2
     samba_server_max_protocol: SMB3
     samba_server_interfaces:
@@ -18,6 +17,8 @@
       - eth0
     samba_server_bind_interfaces_only: true
   when: data_disks | length > 0
+  tags:
+    - samba
 
 - name: Open Samba ports in firewalld
   ansible.posix.firewalld:
@@ -26,3 +27,5 @@
     state: enabled
     immediate: true
   when: data_disks | length > 0
+  tags:
+    - samba

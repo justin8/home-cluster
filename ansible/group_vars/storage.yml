@@ -1,8 +1,10 @@
 # Samba shares for storage.dray.id.au
-smb_shares:
+shares:
   - name: Backups
     path: /storage/backups
     valid_users: [justin, celeste]
+    nfs_exports:
+      - hestia.dray.id.au
   - name: Console
     path: /storage/console
     write_list: [justin, celeste]
@@ -30,3 +32,5 @@ smb_shares:
   - name: Games
     path: /storage/games
     write_list: [justin, celeste]
+
+nfs_default_options: rw,no_root_squash

@@ -1,5 +1,48 @@
 ---
-# Placeholder for NFS server tasks
-- name: Placeholder for NFS server setup
-  debug:
-    msg: "NFS server setup tasks go here."
+- name: Install NFS server packages
+  ansible.builtin.package:
+    name:
+      - nfs-utils
+      - rpcbind
+    state: present
+  tags:
+    - nfs
+
+- name: Enable and start rpcbind service
+  ansible.builtin.service:
+    name: rpcbind
+    enabled: true
+    state: started
+  tags:
+    - nfs
+
+- name: Generate NFS exports file if there are any exports
+  ansible.builtin.template:
+    src: exports.j2
+    dest: /etc/exports
+    owner: root
+    group: root
+    mode: "0644"
+  when: shares | selectattr('nfs_exports', 'defined') | list | length > 0
+  notify: Reload NFS exports
+  tags:
+    - nfs
+
+- name: Enable and start nfs-server if there are NFS exports
+  ansible.builtin.service:
+    name: nfs-server
+    enabled: true
+    state: started
+  when: shares | selectattr('nfs_exports', 'defined') | list | length > 0
+  tags:
+    - nfs
+
+- name: Open NFS ports in firewalld
+  ansible.posix.firewalld:
+    service: nfs
+    permanent: true
+    state: enabled
+    immediate: true
+  when: shares | selectattr('nfs_exports', 'defined') | list | length > 0
+  tags:
+    - nfs
