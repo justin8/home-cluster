@@ -116,7 +116,6 @@
         branches:
           - /mnt/data-*
         options: defaults,nonempty,default_permissions,allow_other,use_ino,cache.files=off,moveonenospc=true,dropcacheonclose=true,category.create=pfrd,minfreespace=1G,posix_acl=true,fsname=mergerfs
-    mergerfs_remove_undefined_mounts: true
   when: encrypted_partitions | length > 0
 
 # 8. Install snapraid and snapraid-runner
