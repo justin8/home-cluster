@@ -4,6 +4,7 @@
   ansible.builtin.package:
     name: zsh
     state: present
+  tags: users
 
 - name: Ensure system users exist
   ansible.builtin.user:
@@ -12,6 +13,8 @@
     shell: /usr/bin/zsh
     uid: "{{ item.uid | default(omit) }}"
     password: "{{ item.password | default(omit) | password_hash('sha512') }}"
+    groups: "{{ item.groups | default(omit) }}"
   loop: "{{ users }}"
   loop_control:
     label: "{{ item.name }}"
+  tags: users
