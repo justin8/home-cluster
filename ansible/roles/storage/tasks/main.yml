@@ -1,5 +1,11 @@
 ---
-# tasks for storage role
+- name: Disable SELinux
+  ansible.posix.selinux:
+    state: disabled
+  tags:
+    - selinux
+    - samba
+
 - name: Include disks, SnapRAID, and mergerfs tasks
   ansible.builtin.import_tasks: disks.yml
 

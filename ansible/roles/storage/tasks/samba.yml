@@ -1,13 +1,20 @@
 ---
+- name: Set share options for downloads user/group
+  ansible.builtin.set_fact:
+    smb_shares: >
+      {{ smb_shares | map('combine', {
+        'user': 'downloads',
+        'group': 'downloads',
+        'force_create_mode': '0665',
+        'force_directory_mode': '0775'
+      }) | list }}
+  when: smb_shares is defined and smb_shares | length > 0
+  tags: samba
+
 - name: Configure Samba server
   ansible.builtin.include_role:
     name: vladgh.samba.server
   vars:
-    samba_global_config_extras: |
-      force user = downloads
-      force group = downloads
-      force create mode = 665
-      force directory mode = 775
     samba_users: "{{ users }}"
     samba_shares: "{{ smb_shares }}"
     samba_load_homes: true
@@ -17,7 +24,7 @@
       - lo
       - eth0
     samba_server_bind_interfaces_only: true
-  when: data_partitions | length > 0
+  when: smb_shares is defined and smb_shares | length > 0
   tags:
     - samba
 
@@ -27,6 +34,6 @@
     permanent: true
     state: enabled
     immediate: true
-  when: data_partitions | length > 0
+  when: smb_shares is defined and smb_shares | length > 0
   tags:
     - samba

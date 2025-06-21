@@ -53,7 +53,8 @@
 - name: Configure /etc/crypttab for encrypted partitions
   ansible.builtin.lineinfile:
     path: /etc/crypttab
-    create: yes
+    create: true
+    mode: 644
     regexp: "^crypt-{{ item | basename }} "
     line: "crypt-{{ item | basename }} {{ item }} /etc/cryptsetup-keys.d/data-disk.key luks"
     state: present
@@ -84,16 +85,17 @@
     path: /etc/fstab
     regexp: "^/dev/mapper/crypt-"
     state: absent
-    backup: yes
+    backup: true
 
 # 6. Ensure /etc/fstab has entries for decrypted devices
 - name: Ensure /etc/fstab has entries for decrypted devices
   ansible.builtin.lineinfile:
     path: /etc/fstab
-    create: yes
+    create: true
     regexp: "^/dev/mapper/crypt-{{ item | basename }} "
     line: "/dev/mapper/crypt-{{ item | basename }} /mnt/{{ item | basename }} ext4 defaults 0 2"
     state: present
+    mode: 644
   loop: "{{ encrypted_partitions }}"
   when: encrypted_partitions | length > 0
 
@@ -133,11 +135,11 @@
     repo: "https://github.com/justin8/snapraid-runner.git"
     dest: /opt/snapraid-runner
     version: master
-    update: yes
-    force: yes
-    accept_hostkey: yes
-    clone: yes
-    bare: no
+    update: true
+    force: true
+    accept_hostkey: true
+    clone: true
+    bare: false
     depth: 1
 
 - name: Install snapraid-runner.conf
@@ -176,7 +178,19 @@
     job: "/opt/snapraid-runner/snapraid-runner.py -c /opt/snapraid-runner/snapraid-runner.conf"
     state: present
 
-# 9. Cleanup section: unmount and remove stale mount points and mergerfs if no data disks
+# 9. Setup /home for samba user shares
+- name: Bind mount /storage/home to /home
+  ansible.builtin.lineinfile:
+    path: /etc/fstab
+    line: "/storage/home /home none bind 0 0"
+    state: present
+
+- name: Ensure /home is mounted
+  ansible.builtin.shell: |
+    mount -a
+  changed_when: true
+
+# 10. Cleanup section: unmount and remove stale mount points and mergerfs if no data disks
 - name: Find existing /mnt/data-* mount points
   ansible.builtin.find:
     paths: /mnt

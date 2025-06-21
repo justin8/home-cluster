@@ -1,14 +1,12 @@
 ---
 - name: All hosts
   hosts: all:!openwrt
-  become: true
   roles:
     - ssh-access
     - mdns
 
 - name: Storage
   hosts: storage
-  become: true
   roles:
     - users
     - storage

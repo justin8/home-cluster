@@ -31,7 +31,7 @@ openssh-server
 
 %post
 # Install ansible after as it's not a part of the ISO's core packages. Then run it
-dnf install -y ansible git
+dnf install -y ansible git python3-libselinux
 ansible-pull -U https://github.com/justin8/home-cluster.git ansible/playbook.yml -i ansible/inventory
 
 # Configure login screen to show IP address
