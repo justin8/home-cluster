@@ -4,6 +4,8 @@
   ansible.builtin.package:
     name: cryptsetup
     state: present
+  tags:
+    - disks
 
 # 2. Create keyfile directory with correct permissions and SELinux context
 - name: Ensure /etc/cryptsetup-keys.d exists
@@ -13,6 +15,8 @@
     owner: root
     group: root
     mode: "0700"
+  tags:
+    - disks
 
 - name: Write base64-decoded disk encryption key to keyfile
   ansible.builtin.copy:
@@ -21,6 +25,8 @@
     owner: root
     group: root
     mode: "0400"
+  tags:
+    - disks
 
 # 3. Find data and parity partitions by partlabel (separately, support multiple parity disks)
 - name: Find partitions labeled data-*
@@ -29,6 +35,9 @@
     patterns: "data-*"
     file_type: any
   register: data_part_find
+  tags:
+    - snapraid
+    - disks
 
 - name: Find partitions labeled parity-*
   ansible.builtin.find:
@@ -36,18 +45,30 @@
     patterns: "parity-*"
     file_type: any
   register: parity_part_find
+  tags:
+    - snapraid
+    - disks
 
 - name: Set fact for data disks
   ansible.builtin.set_fact:
     data_partitions: "{{ data_part_find.files | map(attribute='path') | list }}"
+  tags:
+    - snapraid
+    - disks
 
 - name: Set fact for parity disks
   ansible.builtin.set_fact:
     parity_partitions: "{{ parity_part_find.files | map(attribute='path') | list }}"
+  tags:
+    - snapraid
+    - disks
 
 - name: Set fact for all encrypted partitions
   ansible.builtin.set_fact:
     encrypted_partitions: "{{ data_partitions + parity_partitions }}"
+  tags:
+    - snapraid
+    - disks
 
 # 4. Configure /etc/crypttab for each encrypted partition
 - name: Configure /etc/crypttab for encrypted partitions
@@ -60,6 +81,8 @@
     state: present
   loop: "{{ encrypted_partitions }}"
   when: encrypted_partitions | length > 0
+  tags:
+    - disks
 
 # After the crypttab modification task, decrypt partitions straight away
 - name: Decrypt partitions now
@@ -67,6 +90,8 @@
     systemctl daemon-reload
     systemctl restart 'systemd-cryptsetup@*.service'
   when: encrypted_partitions | length > 0
+  tags:
+    - disks
 
 # 5. Create mount points for decrypted devices
 - name: Create mount points for decrypted devices
@@ -78,6 +103,8 @@
     mode: "0755"
   loop: "{{ encrypted_partitions }}"
   when: encrypted_partitions | length > 0
+  tags:
+    - disks
 
 # Remove unmanaged /dev/mapper/crypt-* lines from /etc/fstab
 - name: Remove unmanaged crypt devices from fstab
@@ -98,6 +125,8 @@
     mode: 644
   loop: "{{ encrypted_partitions }}"
   when: encrypted_partitions | length > 0
+  tags:
+    - disks
 
 - name: Mount all filesystems
   ansible.builtin.shell: |
@@ -105,6 +134,8 @@
     mount -a
   changed_when: true
   when: encrypted_partitions | length > 0
+  tags:
+    - disks
 
 # 7. Configure mergerfs pool at /storage using tigattack.mergerfs role
 - name: Configure mergerfs pool at /storage using tigattack.mergerfs role
@@ -117,17 +148,32 @@
           - /mnt/data-*
         options: defaults,nonempty,default_permissions,allow_other,use_ino,cache.files=off,moveonenospc=true,dropcacheonclose=true,category.create=pfrd,minfreespace=1G,posix_acl=true,fsname=mergerfs
   when: encrypted_partitions | length > 0
+  tags:
+    - disks
+
+- name: Bind mount /storage/home to /home
+  ansible.builtin.lineinfile:
+    path: /etc/fstab
+    line: "/storage/home /home none bind 0 0"
+    state: present
+  tags:
+    - disks
+
+- name: Ensure /home is mounted
+  ansible.builtin.shell: |
+    mount -a
+  changed_when: true
+  tags:
+    - disks
 
 # 8. Install snapraid and snapraid-runner
 - name: Install snapraid
   ansible.builtin.package:
     name: snapraid
     state: present
-
-- name: Ensure git is installed (for snapraid-runner)
-  ansible.builtin.package:
-    name: git
-    state: present
+  tags:
+    - snapraid
+    - disks
 
 - name: Download or update snapraid-runner from GitHub
   ansible.builtin.git:
@@ -140,6 +186,9 @@
     clone: true
     bare: false
     depth: 1
+  tags:
+    - snapraid
+    - disks
 
 - name: Install snapraid-runner.conf
   ansible.builtin.template:
@@ -148,6 +197,9 @@
     owner: root
     group: root
     mode: "0600"
+  tags:
+    - snapraid
+    - disks
 
 - name: Install snapraid.conf
   ansible.builtin.template:
@@ -156,17 +208,9 @@
     owner: root
     group: root
     mode: "0644"
-
-- name: Ensure cronie (cron daemon) is installed
-  ansible.builtin.package:
-    name: cronie
-    state: present
-
-- name: Ensure crond service is enabled and running
-  ansible.builtin.service:
-    name: crond
-    state: started
-    enabled: true
+  tags:
+    - snapraid
+    - disks
 
 - name: Ensure snapraid-runner daily cron job exists
   ansible.builtin.cron:
@@ -174,29 +218,21 @@
     user: root
     minute: 0
     hour: 5
-    job: "/opt/snapraid-runner/snapraid-runner.py -c /opt/snapraid-runner/snapraid-runner.conf && curl -fsS -m 10 --retry 5 -o /dev/null {{snapraid_runner_healthcheck_url}}"
+    job: "/opt/snapraid-runner/snapraid-runner.py -c /opt/snapraid-runner/snapraid-runner.conf"
     state: present
+  tags:
+    - snapraid
+    - disks
 
-
-# 9. Setup /home for samba user shares
-- name: Bind mount /storage/home to /home
-  ansible.builtin.lineinfile:
-    path: /etc/fstab
-    line: "/storage/home /home none bind 0 0"
-    state: present
-
-- name: Ensure /home is mounted
-  ansible.builtin.shell: |
-    mount -a
-  changed_when: true
-
-# 10. Cleanup section: unmount and remove stale mount points and mergerfs if no data disks
+# 9. Cleanup section: unmount and remove stale mount points and mergerfs if no data disks
 - name: Find existing /mnt/data-* mount points
   ansible.builtin.find:
     paths: /mnt
     patterns: "data-*"
     file_type: directory
   register: existing_mounts
+  tags:
+    - disks
 
 - name: Unmount and remove stale mount points
   when: existing_mounts.matched > 0
@@ -215,3 +251,5 @@
       loop: "{{ existing_mounts.files | rejectattr('path', 'in', encrypted_partitions | map('basename') | map('regex_replace', '^', '/mnt/')) | list }}"
       loop_control:
         label: "{{ item.path }}"
+  tags:
+    - disks

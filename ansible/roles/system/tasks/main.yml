@@ -1,11 +1,24 @@
 ---
-# tasks for system role (users + email)
-- name: Install zsh
+- name: Install system packages
   ansible.builtin.package:
-    name: zsh
+    name:
+      - cronie
+      - curl
+      - git
+      - msmtp
+      - uv
+      - zsh
     state: present
   tags:
     - users
+    - email
+    - snapraid
+
+- name: Ensure crond service is enabled and running
+  ansible.builtin.service:
+    name: crond
+    state: started
+    enabled: true
 
 - name: Ensure system users exist
   ansible.builtin.user:
@@ -20,13 +33,6 @@
     label: "{{ item.name }}"
   tags:
     - users
-
-- name: Install msmtp
-  ansible.builtin.package:
-    name: msmtp
-    state: present
-  tags:
-    - email
 
 - name: Create msmtp config
   ansible.builtin.template:
