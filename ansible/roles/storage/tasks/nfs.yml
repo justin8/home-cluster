@@ -16,24 +16,24 @@
   tags:
     - nfs
 
-- name: Generate NFS exports file if there are any exports
+- name: Generate NFS exports file
   ansible.builtin.template:
     src: exports.j2
     dest: /etc/exports
     owner: root
     group: root
     mode: "0644"
-  when: shares | selectattr('nfs_exports', 'defined') | list | length > 0
+  when: nfs_exports is defined
   notify: Reload NFS exports
   tags:
     - nfs
 
-- name: Enable and start nfs-server if there are NFS exports
+- name: Enable and start nfs-server
   ansible.builtin.service:
     name: nfs-server
     enabled: true
     state: started
-  when: shares | selectattr('nfs_exports', 'defined') | list | length > 0
+  when: nfs_exports is defined
   tags:
     - nfs
 
@@ -43,6 +43,6 @@
     permanent: true
     state: enabled
     immediate: true
-  when: shares | selectattr('nfs_exports', 'defined') | list | length > 0
+  when: nfs_exports is defined
   tags:
     - nfs
