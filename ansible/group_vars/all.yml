@@ -7,6 +7,7 @@ ssh_authorized_keys:
 backup_encryption_passphrase: "{{ lookup('amazon.aws.ssm_parameter', '/home-cluster/backups/encryption-passphrase') }}"
 backup_repository_host: "{{ lookup('amazon.aws.ssm_parameter', '/home-cluster/backups/repository_host') }}"
 backup_repository_username: "{{ lookup('amazon.aws.ssm_parameter', '/home-cluster/backups/repository_username') }}"
+backup_repository_password: "{{ lookup('amazon.aws.ssm_parameter', '/home-cluster/backups/repository_password') }}"
 backup_repository_port: 23
 
 users:

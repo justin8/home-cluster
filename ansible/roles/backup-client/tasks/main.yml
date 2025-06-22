@@ -23,7 +23,10 @@
     owner: root
     group: root
     mode: "0600"
-  notify: Initialize Borg Repository
+  notify:
+    - Ensure repository host key is in known_hosts
+    - Copy SSH key to repository host
+    - Initialize Borg Repository
   tags: [backup-client]
 
 - name: Enable and start borgmatic systemd timer
