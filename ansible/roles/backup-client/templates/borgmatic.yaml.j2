@@ -17,6 +17,8 @@ encryption_passphrase: "{{ backup_encryption_passphrase }}"
 keep_daily: {{ backup_retention_keep_daily | default(7) }}
 keep_weekly: {{ backup_retention_keep_weekly | default(4) }}
 
+verbosity: 2
+
 {% if backup_healthcheck_url %}
 healthchecks:
   ping_url: {{ backup_healthcheck_url }}
