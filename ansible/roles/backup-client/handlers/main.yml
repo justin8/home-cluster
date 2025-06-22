@@ -1,0 +1,7 @@
+---
+- name: Initialize Borg Repository
+  ansible.builtin.command:
+    cmd: borgmatic --config /etc/borgmatic/config.yaml init --encryption repokey
+  listen: Initialize Borg Repository
+  changed_when: false
+  tags: [backup-client]

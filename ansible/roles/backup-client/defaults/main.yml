@@ -1,12 +1,12 @@
 ---
-backup:
-  exclude_patterns: []
-  retention:
-    keep_daily: 7
-    keep_weekly: 4
-  repository_host: ""
-  encryption_passphrase: ""
-  source_directories: []
-  healthcheck_url: ""
-  before_commands: []
-  after_commands: []
+backup_exclude_patterns: []
+backup_retention_keep_daily: 7
+backup_retention_keep_weekly: 4
+backup_repository_host: ""
+backup_repository_username: ""
+backup_repository_port: ""
+backup_encryption_passphrase: ""
+backup_source_directories: []
+backup_healthcheck_url: ""
+backup_before_commands: []
+backup_after_commands: []

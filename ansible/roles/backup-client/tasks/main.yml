@@ -23,6 +23,7 @@
     owner: root
     group: root
     mode: "0600"
+  notify: Initialize Borg Repository
   tags: [backup-client]
 
 - name: Enable and start borgmatic systemd timer
@@ -30,4 +31,45 @@
     name: borgmatic.timer
     enabled: true
     state: started
+  tags: [backup-client]
+
+- name: Ensure /root/.ssh and /root/.ssh/config.d directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+  loop:
+    - /root/.ssh
+    - /root/.ssh/config.d
+  tags: [backup-client]
+
+- name: Ensure /root/.ssh/config exists and includes config.d/backup
+  ansible.builtin.lineinfile:
+    path: /root/.ssh/config
+    line: "Include config.d/backup"
+    create: true
+    owner: root
+    group: root
+    mode: "0600"
+    insertafter: BOF
+  tags: [backup-client]
+
+- name: Template backup SSH config to /root/.ssh/config.d/backup
+  ansible.builtin.template:
+    src: ssh_config.j2
+    dest: /root/.ssh/config.d/backup
+    owner: root
+    group: root
+    mode: "0600"
+  when: backup_repository_host != ""
+  tags: [backup-client]
+
+- name: Validate borgmatic config
+  ansible.builtin.command:
+    cmd: borgmatic config validate
+  register: borgmatic_validate_result
+  changed_when: false
+  failed_when: borgmatic_validate_result.rc != 0
   tags: [backup-client]

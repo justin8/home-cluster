@@ -16,3 +16,8 @@
   hosts: openwrt
   roles:
     - dns-openwrt
+
+- name: Hestia
+  hosts: hestia
+  roles:
+    - backup-client

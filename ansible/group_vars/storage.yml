@@ -39,22 +39,21 @@ nfs_exports:
 disk_encryption_key: "{{ lookup('amazon.aws.ssm_parameter', '/home-cluster/storage/encryptionkey') }}"
 snapraid_runner_healthcheck_url: "{{ lookup('amazon.aws.ssm_parameter', '/home-cluster/storage/snapraid-runner-healthcheck-url') }}"
 
-backup:
-  source_directories:
-    - /storage/backups
-    - /storage/home
-    - /storage/immich
-    - /storage/syncthing
-  exclude_patterns:
-    - "/storage/home/*/.local"
-    - "*.log"
-    - "*.pyc"
-    - "*.vscode-server*"
-    - "*/.npm"
-    - "*/.dotfiles"
-    - "*/.cache"
-    - "*/.cargo"
-    - "*/.rustup"
-    - "*/.virtualenvs"
-    - "*/.config/yadm"
-  healthcheck_url: "{{ lookup('amazon.aws.ssm_parameter', '/home-cluster/storage/backup-healthcheck-url') }}"
+backup_source_directories:
+  - /storage/backups
+  - /storage/home
+  - /storage/immich
+  - /storage/syncthing
+backup_exclude_patterns:
+  - "/storage/home/*/.local"
+  - "*.log"
+  - "*.pyc"
+  - "*.vscode-server*"
+  - "*/.npm"
+  - "*/.dotfiles"
+  - "*/.cache"
+  - "*/.cargo"
+  - "*/.rustup"
+  - "*/.virtualenvs"
+  - "*/.config/yadm"
+backup_healthcheck_url: "{{ lookup('amazon.aws.ssm_parameter', '/home-cluster/storage/backup-healthcheck-url') }}"

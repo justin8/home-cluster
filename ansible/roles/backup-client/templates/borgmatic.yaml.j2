@@ -1,47 +1,41 @@
-location:
-  source_directories:
-    {% for dir in backup.source_directories %}
-    - {{ dir }}
-    {% endfor %}
-  repositories:
-    - label: {{ backup.repository_host }}
-      path: "ssh://{{ backup.repository_host }}/./borg/{{ inventory_hostname }}"
-  exclude_patterns:
-    {% for pattern in backup.exclude_patterns %}
-    - {{ pattern }}
-    {% endfor %}
-  exclude_if_present:
-    - .nobackup
+source_directories:
+{% for dir in backup_source_directories %}
+  - {{ dir }}
+{% endfor %}
+repositories:
+  - label: {{ backup_repository_host }}
+    path: "ssh://{{ backup_repository_host }}/./borg/{{ inventory_hostname }}"
+exclude_patterns:
+{% for pattern in backup_exclude_patterns %}
+  - "{{ pattern }}"
+{% endfor %}
+exclude_if_present:
+  - .nobackup
 
-storage:
-  encryption_passphrase: "{{ backup.encryption_passphrase }}"
+encryption_passphrase: "{{ backup_encryption_passphrase }}"
 
-retention:
-  keep_daily: {{ backup.retention.keep_daily | default(7) }}
-  keep_weekly: {{ backup.retention.keep_weekly | default(4) }}
+keep_daily: {{ backup_retention_keep_daily | default(7) }}
+keep_weekly: {{ backup_retention_keep_weekly | default(4) }}
 
-consistency:
-  checks:
-    - repository
-    - archives
-
-{% if backup.healthcheck_url is defined and backup.healthcheck_url %}
+{% if backup_healthcheck_url %}
 healthchecks:
-  ping_url: {{ backup.healthcheck_url }}
+  ping_url: {{ backup_healthcheck_url }}
 {% endif %}
 
+{% if backup_before_commands or backup_after_commands %}
 commands:
-{% if backup.before_commands is defined and backup.before_commands %}
+{% if backup_before_commands %}
   - before: action
     run:
-{% for cmd in backup.before_commands %}
+{% for cmd in backup_before_commands %}
       - {{ cmd }}
 {% endfor %}
 {% endif %}
-{% if backup.after_commands is defined and backup.after_commands %}
+{% if backup_after_commands %}
   - after: action
     run:
-{% for cmd in backup.after_commands %}
+{% for cmd in backup_after_commands %}
       - {{ cmd }}
 {% endfor %}
+{% endif %}
 {% endif %}
