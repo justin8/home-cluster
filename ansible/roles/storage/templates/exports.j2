@@ -1,3 +1,3 @@
 {% for export in nfs_exports | default([]) %}
-{{ export.path }} {{ export.name }}({{ export.nfs_options }},fsid={{ (export.path ~ export.name) | hash('md5') | int(base=16) % 4294967295 }})
+{{ export.path }} {{ export.name }}({{ export.nfs_options }},fsid={{ (export.path ~ export.name) | hash('md5') | int(base=16) % 100000 }})
 {% endfor %}
