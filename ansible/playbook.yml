@@ -1,8 +1,12 @@
 ---
-- name: All hosts
-  hosts: all:!openwrt
+- name: All hosts except openwrt
+  hosts: all:!openwrt:!proxmox
   roles:
     - ssh-access
+
+- name: All hosts except openwrt and proxmox
+  hosts: all:!openwrt:!proxmox
+  roles:
     - mdns
     - system
 
