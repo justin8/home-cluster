@@ -14,9 +14,9 @@
     - email
     - snapraid
 
-- name: Ensure crond service is enabled and running
+- name: Ensure cron service is enabled and running
   ansible.builtin.service:
-    name: crond
+    name: "{{ 'crond' if ansible_facts['os_family'] in ['RedHat', 'Fedora'] else 'cronie' }}"
     state: started
     enabled: true
 
@@ -63,3 +63,12 @@
     force: true
   tags:
     - email
+
+- name: Disable firewalld # noqa ignore-errors
+  ansible.builtin.service:
+    name: firewalld
+    state: stopped
+    enabled: false
+  ignore_errors: true
+  tags:
+    - firewalld

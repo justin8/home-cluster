@@ -1,5 +1,6 @@
 ---
-backup_exclude_patterns: []
+backup_exclude_patterns:
+  - "*.pyc"
 backup_retention_keep_daily: 7
 backup_retention_keep_weekly: 4
 backup_repository_host: ""

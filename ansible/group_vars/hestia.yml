@@ -1,0 +1,10 @@
+backup_source_directories:
+  - /etc
+  - /apps/.snapshots/backup
+
+backup_healthcheck_url: "{{ lookup('amazon.aws.ssm_parameter', '/home-cluster/hestia/backup-healthcheck-url') }}"
+backup_before_commands:
+  - btrfs subvolume delete /apps/.snapshots/backup || true
+  - btrfs subvolume snapshot /apps /apps/.snapshots/backup
+backup_after_commands:
+  - btrfs subvolume delete /apps/.snapshots/backup || true

@@ -36,13 +36,3 @@
   when: nfs_exports is defined
   tags:
     - nfs
-
-- name: Open NFS ports in firewalld
-  ansible.posix.firewalld:
-    service: nfs
-    permanent: true
-    state: enabled
-    immediate: true
-  when: nfs_exports is defined
-  tags:
-    - nfs

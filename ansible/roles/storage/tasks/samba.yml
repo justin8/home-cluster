@@ -27,13 +27,3 @@
   when: smb_shares is defined and smb_shares | length > 0
   tags:
     - samba
-
-- name: Open Samba ports in firewalld
-  ansible.posix.firewalld:
-    service: samba
-    permanent: true
-    state: enabled
-    immediate: true
-  when: smb_shares is defined and smb_shares | length > 0
-  tags:
-    - samba
