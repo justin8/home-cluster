@@ -4,6 +4,10 @@ ssh_authorized_keys:
   - ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBMFBv5hR9yKLqpZ815Vn+iGDAxW7Zk3Iwg5VTsw3A10hC5+fYNaZUjFi8FxcaQfqYyuFmtBsIxMa1e7gADSIJC0= justindray@hephaestus
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPt7A1aDp0wZydxiGiJgbfCBYl9irx9+rruwNDhfkY73 justin@hades
 
+backup:
+  encryption_passphrase: "{{ lookup('amazon.aws.ssm_parameter', '/home-cluster/backups/encryption-passphrase') }}"
+  repository_host: demeter.dray.id.au
+
 users:
   - name: downloads
     password: "{{ lookup('amazon.aws.ssm_parameter', '/home-cluster/users/downloads/password') }}"

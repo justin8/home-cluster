@@ -1,0 +1,33 @@
+---
+- name: Install borgbackup and borgmatic
+  ansible.builtin.package:
+    name:
+      - borgbackup
+      - borgmatic
+    state: present
+  tags: [backup-client]
+
+- name: Ensure borgmatic config directory exists
+  ansible.builtin.file:
+    path: /etc/borgmatic
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+  tags: [backup-client]
+
+- name: Generate borgmatic config
+  ansible.builtin.template:
+    src: borgmatic.yaml.j2
+    dest: /etc/borgmatic/config.yaml
+    owner: root
+    group: root
+    mode: "0600"
+  tags: [backup-client]
+
+- name: Enable and start borgmatic systemd timer
+  ansible.builtin.systemd:
+    name: borgmatic.timer
+    enabled: true
+    state: started
+  tags: [backup-client]

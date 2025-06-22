@@ -10,6 +10,7 @@
   hosts: storage
   roles:
     - storage
+    - backup-client
 
 - name: Openwrt
   hosts: openwrt

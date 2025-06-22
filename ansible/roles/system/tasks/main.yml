@@ -34,13 +34,24 @@
   tags:
     - users
 
+- name: Ensure root has an ECDSA SSH key
+  community.crypto.openssh_keypair:
+    path: /root/.ssh/id_ecdsa
+    type: ecdsa
+    size: 521
+    owner: root
+    group: root
+    mode: "0600"
+    state: present
+  when: not lookup('ansible.builtin.file', '/root/.ssh/id_ecdsa', errors='ignore')
+
 - name: Create msmtp config
   ansible.builtin.template:
     src: msmtprc.j2
     dest: /etc/msmtprc
     owner: root
     group: root
-    mode: '0600'
+    mode: "0600"
   tags:
     - email
 

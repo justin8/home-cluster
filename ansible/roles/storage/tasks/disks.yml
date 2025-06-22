@@ -75,7 +75,7 @@
   ansible.builtin.lineinfile:
     path: /etc/crypttab
     create: true
-    mode: 644
+    mode: "0644"
     regexp: "^crypt-{{ item | basename }} "
     line: "crypt-{{ item | basename }} {{ item }} /etc/cryptsetup-keys.d/data-disk.key luks"
     state: present
@@ -85,11 +85,12 @@
     - disks
 
 # After the crypttab modification task, decrypt partitions straight away
-- name: Decrypt partitions now
+- name: Decrypt partitions now # noqa command-instead-of-module
   ansible.builtin.shell: |
     systemctl daemon-reload
     systemctl restart 'systemd-cryptsetup@*.service'
   when: encrypted_partitions | length > 0
+  changed_when: true
   tags:
     - disks
 
@@ -122,13 +123,13 @@
     regexp: "^/dev/mapper/crypt-{{ item | basename }} "
     line: "/dev/mapper/crypt-{{ item | basename }} /mnt/{{ item | basename }} ext4 defaults 0 2"
     state: present
-    mode: 644
+    mode: "0644"
   loop: "{{ encrypted_partitions }}"
   when: encrypted_partitions | length > 0
   tags:
     - disks
 
-- name: Mount all filesystems
+- name: Mount all filesystems # noqa command-instead-of-module
   ansible.builtin.shell: |
     systemctl daemon-reload
     mount -a
@@ -159,7 +160,7 @@
   tags:
     - disks
 
-- name: Ensure /home is mounted
+- name: Ensure /home is mounted # noqa command-instead-of-module
   ansible.builtin.shell: |
     mount -a
   changed_when: true
@@ -236,6 +237,8 @@
 
 - name: Unmount and remove stale mount points
   when: existing_mounts.matched > 0
+  tags:
+    - disks
   block:
     - name: Unmount stale mount point
       ansible.posix.mount:
@@ -251,5 +254,3 @@
       loop: "{{ existing_mounts.files | rejectattr('path', 'in', encrypted_partitions | map('basename') | map('regex_replace', '^', '/mnt/')) | list }}"
       loop_control:
         label: "{{ item.path }}"
-  tags:
-    - disks
