@@ -23,7 +23,6 @@
     owner: root
     group: root
     mode: "0644"
-  when: nfs_exports is defined
   notify: Reload NFS exports
   tags:
     - nfs
@@ -33,6 +32,16 @@
     name: nfs-server
     enabled: true
     state: started
-  when: nfs_exports is defined
+  tags:
+    - nfs
+
+- name: Disable NFS delegation
+  ansible.posix.sysctl:
+    name: fs.leases-enable
+    value: 0
+    state: present
+    sysctl_set: yes
+  notify:
+    - Restart nfs-server
   tags:
     - nfs
