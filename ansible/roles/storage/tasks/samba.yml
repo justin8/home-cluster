@@ -3,7 +3,7 @@
   ansible.builtin.set_fact:
     smb_shares: >
       {{ smb_shares | map('combine', {
-        'user': 'downloads',
+        'owner': 'downloads',
         'group': 'downloads',
         'force_create_mode': '0665',
         'force_directory_mode': '0775'
