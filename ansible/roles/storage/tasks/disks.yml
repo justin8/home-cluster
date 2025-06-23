@@ -51,21 +51,21 @@
 
 - name: Set fact for data disks
   ansible.builtin.set_fact:
-    data_partitions: "{{ data_part_find.files | map(attribute='path') | list }}"
+    data_partitions: "{{ data_part_find.files | map(attribute='path') | list | sort }}"
   tags:
     - snapraid
     - disks
 
 - name: Set fact for parity disks
   ansible.builtin.set_fact:
-    parity_partitions: "{{ parity_part_find.files | map(attribute='path') | list }}"
+    parity_partitions: "{{ parity_part_find.files | map(attribute='path') | list | sort }}"
   tags:
     - snapraid
     - disks
 
 - name: Set fact for all encrypted partitions
   ansible.builtin.set_fact:
-    encrypted_partitions: "{{ data_partitions + parity_partitions }}"
+    encrypted_partitions: "{{ (data_partitions + parity_partitions) | sort }}"
   tags:
     - snapraid
     - disks
