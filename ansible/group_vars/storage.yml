@@ -43,6 +43,7 @@ backup_source_directories:
   - /storage/backups
   - /storage/home
   - /storage/immich
+  - /storage/photos
   - /storage/syncthing
 backup_exclude_patterns:
   - "/storage/home/*/.local"
