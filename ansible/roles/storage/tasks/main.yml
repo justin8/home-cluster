@@ -14,3 +14,6 @@
 
 - name: Include NFS server tasks (placeholder)
   ansible.builtin.import_tasks: nfs.yml
+
+- name: Include monitoring tasks
+  ansible.builtin.import_tasks: monitoring.yml
