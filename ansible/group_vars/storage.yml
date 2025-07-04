@@ -35,6 +35,9 @@ nfs_exports:
   - name: "hestia.dray.id.au"
     path: /storage
     nfs_options: rw,no_root_squash,no_subtree_check,sec=sys
+  - name: "hades.local"
+    path: /storage
+    nfs_options: rw,no_root_squash,no_subtree_check,sec=sys
 
 disk_encryption_key: "{{ lookup('amazon.aws.ssm_parameter', '/home-cluster/storage/encryptionkey') }}"
 snapraid_runner_healthcheck_url: "{{ lookup('amazon.aws.ssm_parameter', '/home-cluster/storage/snapraid-runner-healthcheck-url') }}"
