@@ -16,13 +16,12 @@
     - mdns
 
 - name: Ensure mDNS is enabled in /etc/systemd/resolved.conf
-  ansible.builtin.blockinfile:
+  ansible.builtin.lineinfile:
     path: /etc/systemd/resolved.conf
     create: true
-    block: |
-      [Resolve]
-      MulticastDNS=yes
-    marker: "# {mark} ANSIBLE MANAGED BLOCK: mDNS configuration"
+    regexp: '^#?MulticastDNS='
+    line: 'MulticastDNS=yes'
+    insertafter: '\[Resolve\]'
     backup: true
     mode: 644
   notify: Restart systemd-resolved
