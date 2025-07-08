@@ -1,0 +1,11 @@
+[project]
+name = "home-cluster"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "ansible>=11.7.0",
+    "boto3>=1.39.3",
+    "passlib>=1.7.4",
+]
