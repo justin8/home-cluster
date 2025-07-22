@@ -1,0 +1,5 @@
+---
+creation_rules:
+  - path_regex: .*\.ya?ml
+    encrypted_regex: (secret|token|key)
+    gcp_kms: projects/home-cluster-466710/locations/global/keyRings/sops/cryptoKeys/sops-key

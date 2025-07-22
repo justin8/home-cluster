@@ -1,0 +1,56 @@
+---
+clusterName: home-cluster
+talosVersion: v1.10.5
+kubernetesVersion: v1.33.3
+endpoint: https://192.168.4.8:6443
+domain: cluster.local
+allowSchedulingOnMasters: true
+additionalApiServerCertSans:
+  - home-cluster.local
+  - home-cluster.dray.id.au 
+clusterPodNets:
+  - 10.244.0.0/16
+clusterSvcNets:
+  - 10.96.0.0/12
+cniConfig:
+  name: flannel
+patches:
+  - |-
+    - op: add
+      path: /machine/env
+      value:
+        GRPC_GO_LOG_SEVERITY_LEVEL: error
+nodes:
+  - hostname: controlplane
+    ipAddress: 192.168.4.192, 192.168.4.247, 192.168.4.120
+    controlPlane: true
+    ignoreHostname: true
+    certSans:
+      - 192.168.4.8
+      - home-cluster.local
+      - home-cluster.dray.id.au
+    machineSpec:
+      mode: metal
+      arch: amd64
+      useUKI: true
+      secureboot: false
+    schematic:
+      customization:
+        extraKernelArgs:
+          - net.ifnames=0
+        systemExtensions:
+          officialExtensions:
+            - siderolabs/intel-ucode
+            - siderolabs/i915
+    installDiskSelector:
+      size: '>= 4GB'
+    nameservers:
+      - 192.168.4.1
+    networkInterfaces:
+      - deviceSelector:
+          #hardwareAddr:  '*'
+          driver: virtio_net
+        dhcp: true
+        vip:
+          ip: 192.168.4.8
+
