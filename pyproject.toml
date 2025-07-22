@@ -9,3 +9,8 @@ dependencies = [
     "boto3>=1.39.3",
     "passlib>=1.7.4",
 ]
+
+[dependency-groups]
+dev = [
+    "ipython>=9.4.0",
+]
