@@ -1,0 +1,16 @@
+{
+  "name": "home-cluster",
+  "main": "index.ts",
+  "scripts": {
+    "login": "pulumi login 's3://jdray-pulumi-state?region=us-east-1'"
+  },
+  "devDependencies": {
+    "@types/node": "^18",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@pulumi/aws": "^7.1.0",
+    "@pulumi/kubernetes": "^4.0.0",
+    "@pulumi/pulumi": "^3.113.0"
+  }
+}

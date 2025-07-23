@@ -12,6 +12,8 @@ pkgs.mkShell {
     #talhelper # Need to update to the next nix release for this to be included
     kubectl
     google-cloud-sdk
+    pulumi
+    pulumiPackages.pulumi-language-nodejs
   ];
 
   shellHook = ''
