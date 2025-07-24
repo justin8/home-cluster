@@ -7,7 +7,7 @@ domain: cluster.local
 allowSchedulingOnMasters: true
 additionalApiServerCertSans:
   - home-cluster.local
-  - home-cluster.dray.id.au 
+  - home-cluster.dray.id.au
 clusterPodNets:
   - 10.244.0.0/16
 clusterSvcNets:
@@ -25,6 +25,8 @@ nodes:
     ipAddress: 192.168.4.192, 192.168.4.247, 192.168.4.120
     controlPlane: true
     ignoreHostname: true
+    nodeLabels:
+      node.kubernetes.io/exclude-from-external-load-balancers: "false"
     certSans:
       - 192.168.4.8
       - home-cluster.local
@@ -43,7 +45,7 @@ nodes:
             - siderolabs/intel-ucode
             - siderolabs/i915
     installDiskSelector:
-      size: '>= 4GB'
+      size: ">= 4GB"
     nameservers:
       - 192.168.4.1
     networkInterfaces:
@@ -53,4 +55,3 @@ nodes:
         dhcp: true
         vip:
           ip: 192.168.4.8
-

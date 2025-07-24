@@ -1,13 +1,16 @@
 import * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
 
-// Minikube does not implement services of type `LoadBalancer`; require the user to specify if we're
-// running on minikube, and if so, create only services of type ClusterIP.
+import { MetalLB } from "./src/metallb";
+
 const config = new pulumi.Config();
-const isMinikube = config.requireBoolean("isMinikube");
+
+const metallb = new MetalLB("metallb", {
+  addresses: ["192.168.4.80-192.168.4.100"],
+});
 
 const appName = "nginx";
-const appLabels = { app: appName };
+const appLabels = { app: "foo" };
 const deployment = new k8s.apps.v1.Deployment(appName, {
   spec: {
     selector: { matchLabels: appLabels },
@@ -23,15 +26,12 @@ const deployment = new k8s.apps.v1.Deployment(appName, {
 const frontend = new k8s.core.v1.Service(appName, {
   metadata: { labels: deployment.spec.template.metadata.labels },
   spec: {
-    type: isMinikube ? "ClusterIP" : "LoadBalancer",
+    type: "LoadBalancer",
     ports: [{ port: 80, targetPort: 80, protocol: "TCP" }],
     selector: appLabels,
   },
 });
 
-// When "done", this will print the public IP.
-export const ip = isMinikube
-  ? frontend.spec.clusterIP
-  : frontend.status.loadBalancer.apply(
-      (lb) => lb.ingress[0].ip || lb.ingress[0].hostname
-    );
+export const ip = frontend.status.loadBalancer.apply(
+  (lb) => lb.ingress[0].ip || lb.ingress[0].hostname
+);

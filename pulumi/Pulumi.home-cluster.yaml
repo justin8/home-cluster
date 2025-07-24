@@ -1,5 +1,1 @@
-encryptionsalt: v1:1F14dPfhznE=:v1:wJCqYDxMsNMHqjOu:193jbMwwvoC3BGWBG+/svQnR209xig==
-config:
-  home-cluster:isMinikube: "true"
-  home-cluster:foo:
-    secure: v1:9yDtxnueC9vrDVkj:9LwDKXwvsAPDaInbi0SUeWcp+TA=
+encryptionsalt: v1:q9ZxgKTkXOU=:v1:A/SJ2CWVukh3Ok56:o7Z86FNMmjbLdSojjwTUiGBm3Gpn3Q==
