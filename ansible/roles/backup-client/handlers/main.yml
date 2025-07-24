@@ -2,16 +2,16 @@
 - name: Ensure repository host key is in known_hosts
   ansible.builtin.shell:
     cmd: |
-      keyscan_output=$(ssh-keyscan -qp {{backup_repository_port}} {{ backup_repository_host }})
+      keyscan_output=$(ssh-keyscan -qp {{backup_repository_port}} {{ secret_backup_repository_host }})
       grep -qxF "$keyscan_output" /root/.ssh/known_hosts || echo "$keyscan_output" >> /root/.ssh/known_hosts
-  when: backup_repository_host
+  when: secret_backup_repository_host
   changed_when: false
   tags: [backup-client]
 
 - name: Copy SSH key to repository host
   ansible.builtin.command:
-    cmd: sshpass -p {{ backup_repository_password }} ssh-copy-id -s {{ backup_repository_host }}
-  when: backup_repository_password
+    cmd: sshpass -p {{ secret_backup_repository_password }} ssh-copy-id -s {{ secret_backup_repository_host }}
+  when: secret_backup_repository_password
   changed_when: false
   tags: [backup-client]
 

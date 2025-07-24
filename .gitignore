@@ -335,3 +335,4 @@ dist
 
 .direnv
 .ansible
+.sops-age.key

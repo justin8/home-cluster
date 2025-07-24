@@ -1,0 +1,7 @@
+{
+  "recommendations": [
+    "pulumi.pulumi",
+    "mkhl.direnv",
+    "@signageos/vscode-sops"
+  ]
+}

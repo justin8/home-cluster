@@ -6,3 +6,5 @@ collections:
     version: "3.5.1"
   - name: "amazon.aws"
     version: "10.1.0"
+  - name: "community.sops"
+    version: "2.2.0"

@@ -5,9 +5,9 @@ This role installs and configures borgbackup and borgmatic for automated backups
 ## Variables
 
 - `backup_source_directories` (list, required): Directories to back up.
-- `backup_repository_host` (string, required): SSH host for the backup repository (e.g., `demeter.dray.id.au`).
+- `secret_backup_repository_host` (string, required): SSH host for the backup repository (e.g., `demeter.dray.id.au`).
 - `backup_exclude_patterns` (list, optional): Patterns to exclude from backup.
-- `backup_encryption_passphrase` (string, required): Encryption passphrase, should be securely managed.
+- `secret_backup_encryption_passphrase` (string, required): Encryption passphrase, should be securely managed.
 - `backup_retention` (dict, optional): Retention policy. Defaults: `{ keep_daily: 7, keep_weekly: 4 }`
 - `backup_healthcheck_url` (string, optional): If set, adds a healthchecks.io ping URL to the config.
 - `backup_before_commands` (list, optional): Commands to run before backup (see below).
@@ -23,11 +23,11 @@ This role installs and configures borgbackup and borgmatic for automated backups
         backup_source_directories:
           - /home
           - /etc
-        backup_repository_host: demeter.dray.id.au
+        secret_backup_repository_host: demeter.dray.id.au
         backup_exclude_patterns:
           - '*.cache'
           - '*.tmp'
-        backup_encryption_passphrase: "{{ lookup('aws_ssm', 'backup_encryption_passphrase', region='ap-southeast-2') }}"
+        secret_backup_encryption_passphrase: "{{ lookup('aws_ssm', 'secret_backup_encryption_passphrase', region='ap-southeast-2') }}"
         backup_retention:
           keep_daily: 7
           keep_weekly: 4

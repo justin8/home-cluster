@@ -22,9 +22,9 @@ This directory contains the Ansible automation for managing the home-cluster inf
    ./setup-galaxy.sh
    ```
 
-2. **AWS Credentials**
+2. **Secrets Management**
 
-   Some secrets (such as passwords or tokens) are stored in AWS Secrets Manager. Ensure you have valid AWS credentials (e.g., via `~/.aws/credentials` or environment variables) before running playbooks that access secrets.
+   Secrets are managed using SOPS with Age encryption. The Age key is automatically available when using the Nix shell from the repository root.
 
 3. **Running the Playbook**
 
@@ -39,18 +39,19 @@ This directory contains the Ansible automation for managing the home-cluster inf
    ```
 
 4. **Managing Secrets**
-   - Secrets are automatically prefixed with /home-cluster, so for example a user's password will be 'users/$username/password' for the secret name
 
-   - To **read** a secret:
+   Secrets are stored in `group_vars/secrets.sops.yml` and encrypted with SOPS.
+
+   - To **edit** secrets:
 
      ```sh
-     ./get-parameter <secret-name>
+     sops group_vars/secrets.sops.yml
      ```
 
-   - To **update** a secret:
+   - To **view** secrets:
 
      ```sh
-     ./put-parameter <secret-name> <value>
+     sops -d group_vars/secrets.sops.yml
      ```
 
 See each role's README for more details on its configuration and variables.

@@ -1,9 +1,0 @@
-#!/bin/bash
-
-if [ $# -ne 1 ]; then
-  echo "Usage: $0 <parameter-name>"
-  echo "Example: $0 users/justin/password"
-  exit 1
-fi
-
-aws ssm get-parameter --name "/home-cluster/$1"

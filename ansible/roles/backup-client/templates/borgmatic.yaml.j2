@@ -3,8 +3,8 @@ source_directories:
   - {{ dir }}
 {% endfor %}
 repositories:
-  - label: {{ backup_repository_host }}
-    path: "ssh://{{ backup_repository_host }}/./borg/{{ inventory_hostname }}"
+  - label: {{ secret_backup_repository_host }}
+    path: "ssh://{{ secret_backup_repository_host }}/./borg/{{ inventory_hostname }}"
 exclude_patterns:
 {% for pattern in backup_exclude_patterns %}
   - "{{ pattern }}"
@@ -12,7 +12,7 @@ exclude_patterns:
 exclude_if_present:
   - .nobackup
 
-encryption_passphrase: "{{ backup_encryption_passphrase }}"
+encryption_passphrase: "{{ secret_backup_encryption_passphrase }}"
 
 keep_daily: {{ backup_retention_keep_daily | default(7) }}
 keep_weekly: {{ backup_retention_keep_weekly | default(4) }}

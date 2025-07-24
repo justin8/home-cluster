@@ -29,7 +29,7 @@
 
 - name: Set authorized_keys for root from variable
   ansible.builtin.copy:
-    content: "{{ ssh_authorized_keys | join('\n') }}\n"
+    content: "{{ secret_ssh_authorized_keys | join('\n') }}\n"
     dest: /root/.ssh/authorized_keys
     owner: root
     group: root

@@ -1,5 +1,8 @@
 ---
 creation_rules:
+  - path_regex: .*secrets.*\.ya?ml
+    encrypted_regex: .
+    age: age1me7as6xhtzy8eqsqlxgf0v6eq692nstv69eg3hjfrksksm4cm9wspmspwz
   - path_regex: .*\.ya?ml
-    encrypted_regex: (secret|token|key)
-    gcp_kms: projects/home-cluster-466710/locations/global/keyRings/sops/cryptoKeys/sops-key
+    encrypted_regex: (secret|token|key|passphrase|password|username|url)
+    age: age1me7as6xhtzy8eqsqlxgf0v6eq692nstv69eg3hjfrksksm4cm9wspmspwz

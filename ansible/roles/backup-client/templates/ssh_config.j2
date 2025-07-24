@@ -1,4 +1,4 @@
-Host {{ backup_repository_host }}
-{% if backup_repository_username %}  User {{ backup_repository_username }}
+Host {{ secret_backup_repository_host }}
+{% if secret_backup_repository_username %}  User {{ secret_backup_repository_username }}
 {% endif %}{% if backup_repository_port %}  Port {{ backup_repository_port }}
 {% endif %}
