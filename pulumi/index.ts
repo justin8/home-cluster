@@ -6,7 +6,7 @@ import { MetalLB } from "./src/metallb";
 const config = new pulumi.Config();
 
 const metallb = new MetalLB("metallb", {
-  addresses: ["192.168.4.80-192.168.4.100"],
+  addresses: config.requireObject<string[]>("metallb_addresses"),
 });
 
 const appName = "nginx";

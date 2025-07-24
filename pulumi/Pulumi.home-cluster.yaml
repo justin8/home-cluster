@@ -1,1 +1,3 @@
 encryptionsalt: v1:q9ZxgKTkXOU=:v1:A/SJ2CWVukh3Ok56:o7Z86FNMmjbLdSojjwTUiGBm3Gpn3Q==
+config:
+  home-cluster:metallb_addresses: '["192.168.4.80-192.168.4.100"]'
