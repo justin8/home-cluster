@@ -1,3 +1,11 @@
 encryptionsalt: v1:q9ZxgKTkXOU=:v1:A/SJ2CWVukh3Ok56:o7Z86FNMmjbLdSojjwTUiGBm3Gpn3Q==
 config:
   home-cluster:metallb_addresses: '["192.168.4.80-192.168.4.100"]'
+  home-cluster:cert_manager_email:
+    secure: v1:sLBu7EvYreXVBIGa:GwKAa8qHpSCsYwelP8AUe3HJ3STDK5P36sU4y8x+
+  home-cluster:cloudflare_email:
+    secure: v1:NO55dVBSXCADUkd+:wnbaYuKr9jJHXi8fUEKYcYUAkzD257Zn/VSiiVqI
+  home-cluster:domain:
+    secure: v1:uxJHS9i83/jM0y9e:kNAjOeaHsCUifj8u1dPiQV0DsTScdDzTpns=
+  home-cluster:cloudflare_api_token:
+    secure: v1:Xtm1KLjkWLFWfNnn:8aaFPJxMKlOCmaGMoXt2+029z5Hgdjz6YoBXyePfBHT/DwpYZUoJ4wIBTrKYZGb+pdYjqHl0lmA=
