@@ -1,5 +1,6 @@
 import * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
+import { reflectorAnnotation } from "../../utils";
 
 declare var require: any;
 export const DEFAULT_CERT_SECRET_NAME = "default-tls";
@@ -236,8 +237,3 @@ function ClusterIssuer(
 
 }
 
-function reflectorAnnotation(key: pulumi.Input<string>, value: pulumi.Input<string>) {
-  return {
-    [`reflector.v1.k8s.emberstack.com/reflection-${key}`]: value,
-  };
-}
