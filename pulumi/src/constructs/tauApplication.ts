@@ -1,7 +1,9 @@
 import * as pulumi from "@pulumi/pulumi";
+import { VolumeManager } from "./volumeManager";
 
 export abstract class TauApplication extends pulumi.ComponentResource {
   public readonly labels: { app: string };
+  public readonly volumeManager: VolumeManager;
 
   constructor(name: string, opts?: pulumi.ComponentResourceOptions) {
     const labels = { app: name };
@@ -30,5 +32,6 @@ export abstract class TauApplication extends pulumi.ComponentResource {
     });
     
     this.labels = labels;
+    this.volumeManager = new VolumeManager(this);
   }
 }

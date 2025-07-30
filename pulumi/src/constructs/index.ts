@@ -1,3 +1,2 @@
-export { createNFSStorage } from "./nfs-storage";
 export { TauApplication } from "./tauApplication";
-
+export { VolumeManager } from "./volumeManager";
