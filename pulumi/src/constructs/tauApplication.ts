@@ -13,8 +13,8 @@ export abstract class TauApplication extends pulumi.ComponentResource {
             metadata: {
               ...args.props.metadata,
               labels: {
-                ...args.props.metadata?.labels,
                 ...labels,
+                ...args.props.metadata?.labels,
               },
             },
           },
