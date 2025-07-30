@@ -3,6 +3,7 @@ import * as pulumi from "@pulumi/pulumi";
 import { DemoApp } from "./src/applications/demo-app";
 import { CertManager } from "./src/core-services/cert-manager";
 import { MetalLB } from "./src/core-services/metallb";
+import { NFSCSI } from "./src/core-services/nfs-csi";
 
 const config = new pulumi.Config();
 
@@ -16,6 +17,8 @@ const certManager = new CertManager("cert-manager", {
   cloudflareAPIToken: config.requireSecret("cloudflare_api_token"),
   domain: config.require("domain"),
 });
+
+const nfsCsi = new NFSCSI("nfs-csi");
 
 const demoApp = new DemoApp("demo-app");
 

@@ -9,3 +9,5 @@ config:
     secure: v1:uxJHS9i83/jM0y9e:kNAjOeaHsCUifj8u1dPiQV0DsTScdDzTpns=
   home-cluster:cloudflare_api_token:
     secure: v1:Xtm1KLjkWLFWfNnn:8aaFPJxMKlOCmaGMoXt2+029z5Hgdjz6YoBXyePfBHT/DwpYZUoJ4wIBTrKYZGb+pdYjqHl0lmA=
+  home-cluster:nfs_hostname:
+    secure: v1:Ngaku0rDgqX7B4p+:SnLk4DkIY7aYX5NZIaJAIC2P67Js8hXsuoY9vyOvpciWiQ==
