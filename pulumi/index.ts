@@ -8,7 +8,7 @@ import { NFSCSI } from "./src/core-services/nfs-csi";
 const config = new pulumi.Config();
 
 const metallb = new MetalLB("metallb", {
-  addresses: config.requireObject<string[]>("metallb_addresses"),
+  addresses: config.requireObject<string[]>("ip_address_pool"),
 });
 
 const certManager = new CertManager("cert-manager", {
