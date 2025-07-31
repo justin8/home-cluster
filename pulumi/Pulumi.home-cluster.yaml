@@ -1,6 +1,6 @@
 encryptionsalt: v1:q9ZxgKTkXOU=:v1:A/SJ2CWVukh3Ok56:o7Z86FNMmjbLdSojjwTUiGBm3Gpn3Q==
 config:
-  home-cluster:ip_address_pool: '["192.168.4.80-192.168.4.100"]'
+  home-cluster:ip_address_pool: "192.168.4.80-192.168.4.100"
   home-cluster:cert_manager_email:
     secure: v1:sLBu7EvYreXVBIGa:GwKAa8qHpSCsYwelP8AUe3HJ3STDK5P36sU4y8x+
   home-cluster:cloudflare_email:
@@ -11,3 +11,5 @@ config:
     secure: v1:Xtm1KLjkWLFWfNnn:8aaFPJxMKlOCmaGMoXt2+029z5Hgdjz6YoBXyePfBHT/DwpYZUoJ4wIBTrKYZGb+pdYjqHl0lmA=
   home-cluster:nfs_hostname:
     secure: v1:Ngaku0rDgqX7B4p+:SnLk4DkIY7aYX5NZIaJAIC2P67Js8hXsuoY9vyOvpciWiQ==
+  home-cluster:public_ingress_ip: 192.168.4.70
+  home-cluster:private_ingress_ip: 192.168.4.71

@@ -2,13 +2,15 @@ import * as pulumi from "@pulumi/pulumi";
 
 import { DemoApp } from "./src/applications/demo-app";
 import { CertManager } from "./src/core-services/cert-manager";
+import { IngressControllers } from "./src/core-services/ingress-controllers";
 import { MetalLB } from "./src/core-services/metallb";
 import { NFSCSI } from "./src/core-services/nfs-csi";
+
 
 const config = new pulumi.Config();
 
 const metallb = new MetalLB("metallb", {
-  addresses: config.requireObject<string[]>("ip_address_pool"),
+  addresses: [config.require("ip_address_pool")],
 });
 
 const certManager = new CertManager("cert-manager", {
@@ -20,6 +22,10 @@ const certManager = new CertManager("cert-manager", {
 
 const nfsCsi = new NFSCSI("nfs-csi");
 
+const ingressControllers = new IngressControllers("ingress-controllers", {});
+
 const demoApp = new DemoApp("demo-app");
 
 export const demoHostname = demoApp.hostname;
+export const publicIngressClass = ingressControllers.publicIngressClass;
+export const privateIngressClass = ingressControllers.privateIngressClass;
