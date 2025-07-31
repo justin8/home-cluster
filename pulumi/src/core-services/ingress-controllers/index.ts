@@ -42,6 +42,25 @@ export class IngressControllers extends pulumi.ComponentResource {
         )
     );
 
+    const advertisements = configs.map(
+      ({ type }, i) =>
+        new k8s.apiextensions.CustomResource(
+          `${appName}-${type}-l2-advertisement`,
+          {
+            apiVersion: "metallb.io/v1beta1",
+            kind: "L2Advertisement",
+            metadata: {
+              name: `${type}-ingress`,
+              namespace: "metallb-system",
+            },
+            spec: {
+              ipAddressPools: [`${type}-ingress`],
+            },
+          },
+          { parent: this, dependsOn: [pools[i]] }
+        )
+    );
+
     configs.forEach(
       ({ type }, i) =>
         new k8s.helm.v3.Release(
@@ -69,7 +88,7 @@ export class IngressControllers extends pulumi.ComponentResource {
               },
             },
           },
-          { parent: this, dependsOn: [pools[i]] }
+          { parent: this, dependsOn: [pools[i], advertisements[i]] }
         )
     );
 

@@ -6,26 +6,21 @@ import { IngressControllers } from "./src/core-services/ingress-controllers";
 import { MetalLB } from "./src/core-services/metallb";
 import { NFSCSI } from "./src/core-services/nfs-csi";
 
-
 const config = new pulumi.Config();
 
-const metallb = new MetalLB("metallb", {
+new MetalLB("metallb", {
   addresses: [config.require("ip_address_pool")],
 });
 
-const certManager = new CertManager("cert-manager", {
+new CertManager("cert-manager", {
   email: config.require("cert_manager_email"),
   cloudflareEmail: config.require("cloudflare_email"),
   cloudflareAPIToken: config.requireSecret("cloudflare_api_token"),
   domain: config.require("domain"),
 });
 
-const nfsCsi = new NFSCSI("nfs-csi");
+new NFSCSI("nfs-csi");
 
-const ingressControllers = new IngressControllers("ingress-controllers", {});
+new IngressControllers("ingress-controllers", {});
 
-const demoApp = new DemoApp("demo-app");
-
-export const demoHostname = demoApp.hostname;
-export const publicIngressClass = ingressControllers.publicIngressClass;
-export const privateIngressClass = ingressControllers.privateIngressClass;
+new DemoApp("demo-app");

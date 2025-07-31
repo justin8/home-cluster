@@ -1,9 +1,10 @@
 import * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
 import { reflectorAnnotation } from "../../utils";
+import { DEFAULT_TLS_SECRET } from "../../constants";
 
 declare var require: any;
-export const DEFAULT_CERT_SECRET_NAME = "default-tls";
+export const DEFAULT_CERT_SECRET_NAME = DEFAULT_TLS_SECRET;
 
 export enum CertIssuerType {
   PROD = "letsencrypt-prod",
@@ -134,7 +135,7 @@ export class CertManager extends pulumi.ComponentResource {
           namespace: namespace,
         },
         spec: {
-          secretName: DEFAULT_CERT_SECRET_NAME,
+          secretName: DEFAULT_TLS_SECRET,
           issuerRef: {
             name: defaultCertIssuer,
             kind: "ClusterIssuer",

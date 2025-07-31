@@ -3,16 +3,13 @@ import * as pulumi from "@pulumi/pulumi";
 import { TauApplication } from "../../constructs";
 
 export class DemoApp extends TauApplication {
-  public readonly service: k8s.core.v1.Service;
-  public readonly deployment: k8s.apps.v1.Deployment;
-
   constructor(name: string, opts?: pulumi.ComponentResourceOptions) {
     super(name, opts);
 
     const gamesMount = this.volumeManager.addNFSMount("/storage/games");
     const moviesMount = this.volumeManager.addNFSMount("/storage/movies");
 
-    this.deployment = new k8s.apps.v1.Deployment(
+    new k8s.apps.v1.Deployment(
       name,
       {
         spec: {
@@ -37,22 +34,18 @@ export class DemoApp extends TauApplication {
       { parent: this }
     );
 
-    this.service = new k8s.core.v1.Service(
-      name,
-      {
-        spec: {
-          type: "LoadBalancer",
-          ports: [{ port: 80, targetPort: 80, protocol: "TCP" }],
-          selector: this.labels,
-        },
-      },
-      { parent: this }
-    );
-  }
+    // new k8s.core.v1.Service(
+    //   name,
+    //   {
+    //     spec: {
+    //       type: "LoadBalancer",
+    //       ports: [{ port: 80, targetPort: 80, protocol: "TCP" }],
+    //       selector: this.labels,
+    //     },
+    //   },
+    //   { parent: this }
+    // );
 
-  public get hostname() {
-    return this.service.status.loadBalancer.apply(
-      (lb) => lb.ingress[0].hostname || lb.ingress[0].ip
-    );
+    this.createIngress(80);
   }
 }
