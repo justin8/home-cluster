@@ -1,10 +1,7 @@
 import * as pulumi from "@pulumi/pulumi";
 
 import { DemoApp } from "./src/applications/demo-app";
-import { CertManager } from "./src/core-services/cert-manager";
-import { IngressControllers } from "./src/core-services/ingress-controllers";
-import { MetalLB } from "./src/core-services/metallb";
-import { NFSCSI } from "./src/core-services/nfs-csi";
+import { CertManager, IngressControllers, Longhorn, MetalLB, NFSCSI } from "./src/core-services";
 
 const config = new pulumi.Config();
 
@@ -20,6 +17,8 @@ const certManager = new CertManager("cert-manager", {
 });
 
 const nfsCsi = new NFSCSI("nfs-csi");
+
+const longhorn = new Longhorn("longhorn");
 
 // Ingress controllers depend on MetalLB
 const ingressControllers = new IngressControllers("ingress-controllers", {}, {

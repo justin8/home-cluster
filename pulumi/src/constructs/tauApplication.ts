@@ -1,6 +1,5 @@
-import * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
-import { DEFAULT_TLS_SECRET, PRIVATE_INGRESS_CLASS, PUBLIC_INGRESS_CLASS } from "../constants";
+import { createIngress, createService } from "../utils";
 import { VolumeManager } from "./volumeManager";
 
 interface CreateIngressArgs {
@@ -18,7 +17,6 @@ export abstract class TauApplication extends pulumi.ComponentResource {
   public readonly volumeManager: VolumeManager;
   public readonly domain: string;
   public readonly applicationDomain: string;
-  public readonly defaultTlsSecret: string;
 
   constructor(name: string, opts?: pulumi.ComponentResourceOptions) {
     const config = new pulumi.Config();
@@ -49,70 +47,39 @@ export abstract class TauApplication extends pulumi.ComponentResource {
       {
         ...opts,
         transformations: [...(opts?.transformations || []), transformation],
-      }
+      },
     );
 
     this.labels = labels;
     this.volumeManager = new VolumeManager(this);
     this.domain = config.require("domain");
     this.applicationDomain = `${name}.${this.domain}`;
-    this.defaultTlsSecret = DEFAULT_TLS_SECRET;
   }
 
   protected createIngress(args: CreateIngressArgs) {
-    const { port, targetPort = port, public: isPublic = false, subdomain = this.labels.app } = args;
-    const ingressClass = isPublic ? PUBLIC_INGRESS_CLASS : PRIVATE_INGRESS_CLASS;
+    const {
+      port,
+      targetPort = port,
+      public: isPublic = false,
+      subdomain = this.labels.app,
+    } = args;
     const appDomain = `${subdomain}.${this.domain}`;
-    const service = new k8s.core.v1.Service(
-      `${this.labels.app}-service`,
-      {
-        spec: {
-          type: "ClusterIP",
-          ports: [{ port, targetPort, protocol: "TCP" }],
-          selector: this.labels,
-        },
-      },
-      { parent: this }
-    );
 
-    const ingress = new k8s.networking.v1.Ingress(
-      `${this.labels.app}-ingress`,
-      {
-        metadata: {
-          annotations: {
-            "pulumi.com/skipAwait": "true",
-          },
-        },
-        spec: {
-          ingressClassName: ingressClass,
-          tls: [
-            {
-              hosts: [appDomain],
-              secretName: this.defaultTlsSecret,
-            },
-          ],
-          rules: [
-            {
-              host: appDomain,
-              http: {
-                paths: [
-                  {
-                    path: "/",
-                    pathType: "Prefix",
-                    backend: {
-                      service: {
-                        name: service.metadata.name,
-                        port: { number: port },
-                      },
-                    },
-                  },
-                ],
-              },
-            },
-          ],
-        },
-      },
-      { parent: this }
-    );
+    const service = createService({
+      name: `${this.labels.app}-service`,
+      port,
+      targetPort,
+      selector: this.labels,
+      parent: this,
+    });
+
+    createIngress({
+      name: `${this.labels.app}-ingress`,
+      host: appDomain,
+      serviceName: service.metadata.name,
+      servicePort: port,
+      public: isPublic,
+      parent: this,
+    });
   }
 }

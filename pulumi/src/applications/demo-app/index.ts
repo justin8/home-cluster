@@ -6,9 +6,17 @@ export class DemoApp extends TauApplication {
   constructor(name: string, opts?: pulumi.ComponentResourceOptions) {
     super(name, opts);
 
-    // Define any NFS mounts needed for the application
+    // Define volumes for the application
+    // NFS mounts for shared network storage
     const gamesMount = this.volumeManager.addNFSMount("/storage/games");
     const moviesMount = this.volumeManager.addNFSMount("/storage/movies");
+
+    // Longhorn volumes for persistent block storage
+    // const dataMount = this.volumeManager.createVolume("/data/demo", {
+    //   size: "5Gi",
+    //   backupEnabled: true,
+    //   backupSchedule: "0 3 * * *" // Daily backup at 3am
+    // });
 
     // Deploy some resources for the application
     new k8s.apps.v1.Deployment(
@@ -25,15 +33,24 @@ export class DemoApp extends TauApplication {
                   name: name,
                   image: "nginx",
                   ports: [{ containerPort: 80, protocol: "TCP" }],
-                  volumeMounts: [gamesMount, moviesMount],
+                  volumeMounts: [
+                    gamesMount,
+                    moviesMount,
+                    // dataMount
+                  ],
                 },
               ],
-              volumes: this.volumeManager.getVolumes(),
+              // Pass the actual volume mounts to get only the volumes we need
+              volumes: this.volumeManager.getVolumes([
+                gamesMount,
+                moviesMount,
+                // dataMount
+              ]),
             },
           },
         },
       },
-      { parent: this }
+      { parent: this },
     );
 
     // Get an external IP for the service
@@ -46,7 +63,7 @@ export class DemoApp extends TauApplication {
           selector: this.labels,
         },
       },
-      { parent: this }
+      { parent: this },
     );
 
     // Create an Ingress resource to expose the application
