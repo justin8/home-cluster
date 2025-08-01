@@ -1,6 +1,6 @@
 import * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
-import { DEFAULT_TLS_SECRET } from "../../constants";
+import { DEFAULT_TLS_SECRET, PUBLIC_INGRESS_CLASS } from "../../constants";
 import { reflectorAnnotation } from "../../utils";
 
 declare var require: any;
@@ -8,7 +8,7 @@ export const DEFAULT_CERT_SECRET_NAME = DEFAULT_TLS_SECRET;
 
 export enum CertIssuerType {
   PROD = "letsencrypt-prod",
-  STAGING = "letsencrypt-staging"
+  STAGING = "letsencrypt-staging",
 }
 
 export interface CertManagerArgs {
@@ -26,7 +26,7 @@ export class CertManager extends pulumi.ComponentResource {
   constructor(
     appName: string,
     args: CertManagerArgs,
-    opts?: pulumi.ComponentResourceOptions
+    opts?: pulumi.ComponentResourceOptions,
   ) {
     super(appName, appName, {}, opts);
 
@@ -34,12 +34,14 @@ export class CertManager extends pulumi.ComponentResource {
 
     const email = args.email;
     const cloudflareEmail = args.cloudflareEmail;
-    const cloudflareAPIToken = args.cloudflareAPIToken
+    const cloudflareAPIToken = args.cloudflareAPIToken;
     const domain = args.domain;
     const namespace = args.namespace || "cert-manager";
-    const ingressClass = args.ingressClass || "nginx"
-    const defaultCertAllowedNamespaces = args.defaultCertAllowedNamespaces || "default,kube-system,cert-manager,traefik-private,traefik-public";
-    const defaultCertIssuer = args.defaultCertIssuer || CertIssuerType.PROD
+    const ingressClass = args.ingressClass || PUBLIC_INGRESS_CLASS;
+    const defaultCertAllowedNamespaces =
+      args.defaultCertAllowedNamespaces ||
+      "default,kube-system,cert-manager,traefik-private,traefik-public";
+    const defaultCertIssuer = args.defaultCertIssuer || CertIssuerType.PROD;
 
     const ns = new k8s.core.v1.Namespace(
       `${appName}-ns`,
@@ -48,7 +50,7 @@ export class CertManager extends pulumi.ComponentResource {
           name: namespace,
         },
       },
-      { parent: this }
+      { parent: this },
     );
 
     const reflector = new k8s.helm.v3.Release("reflector", {
@@ -73,29 +75,28 @@ export class CertManager extends pulumi.ComponentResource {
       values: {
         extraArgs: [
           "--dns01-recursive-nameservers-only",
-          "--dns01-recursive-nameservers=1.1.1.1:53,1.0.0.1:53"
+          "--dns01-recursive-nameservers=1.1.1.1:53,1.0.0.1:53",
         ],
         installCRDs: true,
       }
     }, { parent: this });
 
-    const cloudflareSecret = new k8s.core.v1.Secret(`${appName}-cloudflare-api-token`,
+    const cloudflareSecret = new k8s.core.v1.Secret(
+      `${appName}-cloudflare-api-token`,
       {
         metadata: {
           name: "cloudflare-api-token",
           namespace: namespace,
         },
         stringData: {
-          "api-token": cloudflareAPIToken
+          "api-token": cloudflareAPIToken,
         },
       },
       {
         parent: this,
-        dependsOn: [
-          certManager
-        ],
+        dependsOn: [certManager],
       },
-    )
+    );
 
     const prodClusterIssuer = ClusterIssuer({
       appName,
@@ -106,8 +107,7 @@ export class CertManager extends pulumi.ComponentResource {
       cloudflareEmail,
       cloudflareSecret,
       prod: true,
-    }
-    );
+    });
 
     ClusterIssuer({
       appName,
@@ -117,11 +117,11 @@ export class CertManager extends pulumi.ComponentResource {
       ingressClass,
       cloudflareEmail,
       cloudflareSecret,
-      prod: false
-    }
-    );
+      prod: false,
+    });
 
-    new k8s.apiextensions.CustomResource(`${appName}-default-certificate`,
+    new k8s.apiextensions.CustomResource(
+      `${appName}-default-certificate`,
       {
         kind: "Certificate",
         apiVersion: "cert-manager.io/v1",
@@ -140,40 +140,51 @@ export class CertManager extends pulumi.ComponentResource {
           secretTemplate: {
             annotations: {
               ...reflectorAnnotation("allowed", "true"),
-              ...reflectorAnnotation("allowed-namespaces", defaultCertAllowedNamespaces),
+              ...reflectorAnnotation(
+                "allowed-namespaces",
+                defaultCertAllowedNamespaces,
+              ),
               ...reflectorAnnotation("auto-enabled", "true"),
-              ...reflectorAnnotation("auto-namespaces", defaultCertAllowedNamespaces),
-            }
+              ...reflectorAnnotation(
+                "auto-namespaces",
+                defaultCertAllowedNamespaces,
+              ),
+            },
           },
         },
       },
       {
         parent: this,
-        dependsOn: [
-          certManager,
-          prodClusterIssuer,
-          reflector
-        ],
-      }
+        dependsOn: [certManager, prodClusterIssuer, reflector],
+      },
     );
   }
 }
 
 interface ClusterIssuerArgs {
-  appName: pulumi.Input<string>,
-  namespace: pulumi.Input<string>,
-  email: pulumi.Input<string>,
-  domain: pulumi.Input<string>,
-  ingressClass: pulumi.Input<string>,
-  cloudflareEmail: pulumi.Input<string>,
-  cloudflareSecret: k8s.core.v1.Secret,
-  prod: boolean,
+  appName: pulumi.Input<string>;
+  namespace: pulumi.Input<string>;
+  email: pulumi.Input<string>;
+  domain: pulumi.Input<string>;
+  ingressClass: pulumi.Input<string>;
+  cloudflareEmail: pulumi.Input<string>;
+  cloudflareSecret: k8s.core.v1.Secret;
+  prod: boolean;
 }
 
 function ClusterIssuer(
-  args: ClusterIssuerArgs
+  args: ClusterIssuerArgs,
 ): k8s.apiextensions.CustomResource {
-  const { appName, namespace, email, domain, ingressClass, cloudflareEmail, cloudflareSecret, prod } = args;
+  const {
+    appName,
+    namespace,
+    email,
+    domain,
+    ingressClass,
+    cloudflareEmail,
+    cloudflareSecret,
+    prod,
+  } = args;
   let server, name, privateKeySecretName;
   if (prod) {
     server = "https://acme-v02.api.letsencrypt.org/directory";
@@ -185,7 +196,8 @@ function ClusterIssuer(
     privateKeySecretName = "letsencrypt-staging-account-key";
   }
 
-  return new k8s.apiextensions.CustomResource(`${appName}-letsencrypt-${prod ? "prod" : "staging"}-issuer`,
+  return new k8s.apiextensions.CustomResource(
+    `${appName}-letsencrypt-${prod ? "prod" : "staging"}-issuer`,
     {
       kind: "ClusterIssuer",
       apiVersion: "cert-manager.io/v1",
@@ -203,8 +215,8 @@ function ClusterIssuer(
           solvers: [
             {
               http01: {
-                ingress: { class: ingressClass }
-              }
+                ingress: { class: ingressClass },
+              },
             },
             {
               selector: {
@@ -215,21 +227,17 @@ function ClusterIssuer(
                   email: cloudflareEmail,
                   apiTokenSecretRef: {
                     name: cloudflareSecret.metadata.name,
-                    key: "api-token"
-                  }
-                }
-              }
-            }
-          ]
+                    key: "api-token",
+                  },
+                },
+              },
+            },
+          ],
         },
-      }
+      },
     },
     {
-      dependsOn: [
-        cloudflareSecret,
-      ]
-    }
-  )
-
+      dependsOn: [cloudflareSecret],
+    },
+  );
 }
-
