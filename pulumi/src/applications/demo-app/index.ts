@@ -6,9 +6,11 @@ export class DemoApp extends TauApplication {
   constructor(name: string, opts?: pulumi.ComponentResourceOptions) {
     super(name, opts);
 
+    // Define any NFS mounts needed for the application
     const gamesMount = this.volumeManager.addNFSMount("/storage/games");
     const moviesMount = this.volumeManager.addNFSMount("/storage/movies");
 
+    // Deploy some resources for the application
     new k8s.apps.v1.Deployment(
       name,
       {
@@ -48,6 +50,6 @@ export class DemoApp extends TauApplication {
     );
 
     // Create an Ingress resource to expose the application
-    // this.createIngress({ port: 80 });
+    this.createIngress({ port: 80 });
   }
 }
