@@ -3,6 +3,16 @@ import * as pulumi from "@pulumi/pulumi";
 import { DEFAULT_TLS_SECRET, PRIVATE_INGRESS_CLASS } from "../constants";
 import { VolumeManager } from "./volumeManager";
 
+interface CreateIngressArgs {
+  port: number;
+  /** @default port */
+  targetPort?: number;
+  /** @default "traefik-private" */
+  ingressClass?: string;
+  /** @default name */
+  subdomain?: string;
+}
+
 export abstract class TauApplication extends pulumi.ComponentResource {
   public readonly labels: { app: string };
   public readonly volumeManager: VolumeManager;
@@ -49,11 +59,9 @@ export abstract class TauApplication extends pulumi.ComponentResource {
     this.defaultTlsSecret = DEFAULT_TLS_SECRET;
   }
 
-  protected createIngress(
-    port: number,
-    targetPort: number = port,
-    ingressClass: string = PRIVATE_INGRESS_CLASS
-  ) {
+  protected createIngress(args: CreateIngressArgs) {
+    const { port, targetPort = port, ingressClass = PRIVATE_INGRESS_CLASS, subdomain = this.labels.app } = args;
+    const appDomain = `${subdomain}.${this.domain}`;
     const service = new k8s.core.v1.Service(
       `${this.labels.app}-service`,
       {
@@ -73,13 +81,13 @@ export abstract class TauApplication extends pulumi.ComponentResource {
           ingressClassName: ingressClass,
           tls: [
             {
-              hosts: [this.applicationDomain],
+              hosts: [appDomain],
               secretName: this.defaultTlsSecret,
             },
           ],
           rules: [
             {
-              host: this.applicationDomain,
+              host: appDomain,
               http: {
                 paths: [
                   {

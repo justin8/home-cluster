@@ -34,18 +34,20 @@ export class DemoApp extends TauApplication {
       { parent: this }
     );
 
-    // new k8s.core.v1.Service(
-    //   name,
-    //   {
-    //     spec: {
-    //       type: "LoadBalancer",
-    //       ports: [{ port: 80, targetPort: 80, protocol: "TCP" }],
-    //       selector: this.labels,
-    //     },
-    //   },
-    //   { parent: this }
-    // );
+    // Get an external IP for the service
+    new k8s.core.v1.Service(
+      name,
+      {
+        spec: {
+          type: "LoadBalancer",
+          ports: [{ port: 80, targetPort: 80, protocol: "TCP" }],
+          selector: this.labels,
+        },
+      },
+      { parent: this }
+    );
 
-    this.createIngress(80);
+    // Create an Ingress resource to expose the application
+    // this.createIngress({ port: 80 });
   }
 }
