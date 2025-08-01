@@ -1,7 +1,7 @@
 import * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
-import { reflectorAnnotation } from "../../utils";
 import { DEFAULT_TLS_SECRET } from "../../constants";
+import { reflectorAnnotation } from "../../utils";
 
 declare var require: any;
 export const DEFAULT_CERT_SECRET_NAME = DEFAULT_TLS_SECRET;
@@ -38,7 +38,7 @@ export class CertManager extends pulumi.ComponentResource {
     const domain = args.domain;
     const namespace = args.namespace || "cert-manager";
     const ingressClass = args.ingressClass || "nginx"
-    const defaultCertAllowedNamespaces = args.defaultCertAllowedNamespaces || "default,kube-system,cert-manager";
+    const defaultCertAllowedNamespaces = args.defaultCertAllowedNamespaces || "default,kube-system,cert-manager,traefik-private,traefik-public";
     const defaultCertIssuer = args.defaultCertIssuer || CertIssuerType.PROD
 
     const ns = new k8s.core.v1.Namespace(

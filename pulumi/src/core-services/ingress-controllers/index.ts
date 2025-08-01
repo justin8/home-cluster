@@ -1,5 +1,6 @@
 import * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
+import { DEFAULT_TLS_SECRET } from "../../constants";
 
 export interface IngressControllersArgs {
   publicIP?: pulumi.Input<string>;
@@ -18,6 +19,9 @@ export class IngressControllers extends pulumi.ComponentResource {
     ip: pulumi.Input<string>,
     dependencies: pulumi.Resource[] = []
   ) {
+    const config = new pulumi.Config();
+    const domain = config.require("domain");
+    const isPrivate = type === "private";
     const pool = new k8s.apiextensions.CustomResource(
       `${appName}-${type}-pool`,
       {
@@ -27,7 +31,7 @@ export class IngressControllers extends pulumi.ComponentResource {
           name: `${type}-ingress`,
           namespace: "metallb-system",
         },
-        spec: { 
+        spec: {
           addresses: [pulumi.interpolate`${ip}/32`],
           autoAssign: false
         },
@@ -73,10 +77,69 @@ export class IngressControllers extends pulumi.ComponentResource {
           },
           providers: {
             kubernetesIngress: { ingressClass: `traefik-${type}` },
+            kubernetesCRD: {
+              namespaces: [`traefik-${type}`],
+            },
           },
+          ports: {
+            web: {
+              redirectTo: {
+                port: "websecure",
+              },
+            },
+          },
+          ingressRoute: {
+            dashboard: {
+              enabled: false,
+            },
+          },
+
         },
       },
       { parent: this, dependsOn: [pool, advertisement, ...dependencies] }
+    );
+  }
+
+  private createDashboard(type: string, traefik: k8s.helm.v3.Release, domain: string) {
+    const middleware = new k8s.apiextensions.CustomResource(
+      `${type}-dashboard-ip-allowlist`,
+      {
+        apiVersion: "traefik.io/v1alpha1",
+        kind: "Middleware",
+        metadata: {
+          name: "local-ip-allowlist",
+          namespace: `traefik-${type}`,
+        },
+        spec: {
+          ipAllowList: {
+            sourceRange: ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"],
+          },
+        },
+      },
+      { parent: this, dependsOn: [traefik] }
+    );
+
+    new k8s.apiextensions.CustomResource(
+      `${type}-dashboard-ingressroute`,
+      {
+        apiVersion: "traefik.io/v1alpha1",
+        kind: "IngressRoute",
+        metadata: {
+          name: "dashboard",
+          namespace: `traefik-${type}`,
+        },
+        spec: {
+          entryPoints: ["websecure"],
+          routes: [{
+            match: pulumi.interpolate`Host(\`traefik-${type}.${domain}\`)`,
+            kind: "Rule",
+            middlewares: [{ name: "local-ip-allowlist", namespace: `traefik-${type}` }],
+            services: [{ name: "api@internal", kind: "TraefikService" }],
+          }],
+          tls: { secretName: DEFAULT_TLS_SECRET },
+        },
+      },
+      { parent: this, dependsOn: [middleware] }
     );
   }
 
@@ -93,6 +156,13 @@ export class IngressControllers extends pulumi.ComponentResource {
 
     const publicTraefik = this.createIngressController(appName, "public", publicIP);
     const privateTraefik = this.createIngressController(appName, "private", privateIP, [publicTraefik]);
+
+    const domain = config.require("domain");
+
+    this.createDashboard("public", publicTraefik, domain);
+    this.createDashboard("private", privateTraefik, domain);
+
+
 
     this.publicIngressClass = pulumi.output("traefik-public");
     this.privateIngressClass = pulumi.output("traefik-private");
