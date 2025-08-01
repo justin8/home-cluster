@@ -45,6 +45,11 @@ export class MetalLB extends pulumi.ComponentResource {
         repo: "https://metallb.github.io/metallb",
       },
       namespace: ns.metadata.name,
+      values: {
+        speaker: {
+          ignoreExcludeLB: true,
+        },
+      },
     });
 
     const addressPool = new k8s.apiextensions.CustomResource(
