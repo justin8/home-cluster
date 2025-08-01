@@ -8,19 +8,31 @@ import { NFSCSI } from "./src/core-services/nfs-csi";
 
 const config = new pulumi.Config();
 
-new MetalLB("metallb", {
+const metallb = new MetalLB("metallb", {
   addresses: [config.require("ip_address_pool")],
 });
 
-new CertManager("cert-manager", {
+const certManager = new CertManager("cert-manager", {
   email: config.require("cert_manager_email"),
   cloudflareEmail: config.require("cloudflare_email"),
   cloudflareAPIToken: config.requireSecret("cloudflare_api_token"),
   domain: config.require("domain"),
 });
 
-new NFSCSI("nfs-csi");
+const nfsCsi = new NFSCSI("nfs-csi");
 
-new IngressControllers("ingress-controllers", {});
+// Ingress controllers depend on MetalLB
+const ingressControllers = new IngressControllers("ingress-controllers", {}, {
+  dependsOn: [metallb],
+});
 
-new DemoApp("demo-app");
+// Core services dependency for all applications
+const coreServices = [metallb, certManager, nfsCsi, ingressControllers];
+
+// Applications depend on all core services
+new DemoApp("demo-app", {
+  dependsOn: coreServices,
+});
+
+export const publicIngressIP = ingressControllers.publicIP;
+export const privateIngressIP = ingressControllers.privateIP;
