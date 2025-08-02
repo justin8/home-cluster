@@ -21,3 +21,6 @@ export function parseIPRange(range: string): string[] {
 
   return ips;
 }
+
+// Export Authelia utilities
+export * from "./authelia";

@@ -6,6 +6,9 @@ export class DemoApp extends TauApplication {
   constructor(name: string, opts?: pulumi.ComponentResourceOptions) {
     super(name, opts);
 
+    const config = new pulumi.Config();
+    const enableAuth = config.getBoolean("demo_app_auth") || false;
+
     // Define any NFS mounts needed for the application
     const gamesMount = this.volumeManager.addNFSMount("/storage/games");
     const moviesMount = this.volumeManager.addNFSMount("/storage/movies");
@@ -50,6 +53,12 @@ export class DemoApp extends TauApplication {
     );
 
     // Create an Ingress resource to expose the application
-    this.createIngress({ port: 80 });
+    // Demonstrate auth configuration - can be enabled via config
+    this.createIngress({ 
+      port: 80,
+      auth: enableAuth ? this.enableAuth({
+        bypassPaths: ["/health", "/metrics"],
+      }) : this.disableAuth(),
+    });
   }
 }
