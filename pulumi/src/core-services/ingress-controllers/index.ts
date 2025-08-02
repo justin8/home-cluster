@@ -55,7 +55,7 @@ export class IngressControllers extends pulumi.ComponentResource {
       `${appName}-${type}`,
       {
         chart: "traefik",
-        version: "30.1.0",
+        version: "37.0.0",
         repositoryOpts: { repo: "https://traefik.github.io/charts" },
         namespace: `traefik-${type}`,
         createNamespace: true,
