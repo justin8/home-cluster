@@ -9,11 +9,7 @@ export interface MetalLBArgs {
 }
 
 export class MetalLB extends pulumi.ComponentResource {
-  constructor(
-    appName: string,
-    args: MetalLBArgs,
-    opts?: pulumi.ComponentResourceOptions
-  ) {
+  constructor(appName: string, args: MetalLBArgs, opts?: pulumi.ComponentResourceOptions) {
     super(appName, appName, {}, opts);
 
     const config: pulumi.Config = new pulumi.Config(appName);
@@ -36,19 +32,23 @@ export class MetalLB extends pulumi.ComponentResource {
       { parent: this }
     );
 
-    const helm = new k8s.helm.v3.Release("metallb", {
-      chart: "metallb",
-      version: "v0.15",
-      repositoryOpts: {
-        repo: "https://metallb.github.io/metallb",
-      },
-      namespace: ns.metadata.name,
-      values: {
-        speaker: {
-          ignoreExcludeLB: true,
+    const helm = new k8s.helm.v3.Release(
+      "metallb",
+      {
+        chart: "metallb",
+        version: "v0.15",
+        repositoryOpts: {
+          repo: "https://metallb.github.io/metallb",
+        },
+        namespace: ns.metadata.name,
+        values: {
+          speaker: {
+            ignoreExcludeLB: true,
+          },
         },
       },
-    }, { parent: this });
+      { parent: this }
+    );
 
     const addressPool = new k8s.apiextensions.CustomResource(
       `${appName}-address-pool`,

@@ -32,8 +32,10 @@ export class IngressControllers extends pulumi.ComponentResource {
           namespace: "metallb-system",
         },
         spec: {
-          addresses: [pulumi.interpolate`${ip}/32`],
-          autoAssign: false
+          spec: {
+            addresses: [pulumi.interpolate`${ip}/32`],
+            autoAssign: false,
+          },
         },
       },
       { parent: this, dependsOn: dependencies }
@@ -93,7 +95,6 @@ export class IngressControllers extends pulumi.ComponentResource {
               enabled: false,
             },
           },
-
         },
       },
       { parent: this, dependsOn: [pool, advertisement, ...dependencies] }
@@ -130,12 +131,14 @@ export class IngressControllers extends pulumi.ComponentResource {
         },
         spec: {
           entryPoints: ["websecure"],
-          routes: [{
-            match: pulumi.interpolate`Host(\`traefik-${type}.${domain}\`)`,
-            kind: "Rule",
-            middlewares: [{ name: "local-ip-allowlist", namespace: `traefik-${type}` }],
-            services: [{ name: "api@internal", kind: "TraefikService" }],
-          }],
+          routes: [
+            {
+              match: pulumi.interpolate`Host(\`traefik-${type}.${domain}\`)`,
+              kind: "Rule",
+              middlewares: [{ name: "local-ip-allowlist", namespace: `traefik-${type}` }],
+              services: [{ name: "api@internal", kind: "TraefikService" }],
+            },
+          ],
           tls: { secretName: DEFAULT_TLS_SECRET },
         },
       },
@@ -155,14 +158,14 @@ export class IngressControllers extends pulumi.ComponentResource {
     const privateIP = args.privateIP || config.require("private_ingress_ip");
 
     const publicTraefik = this.createIngressController(appName, "public", publicIP);
-    const privateTraefik = this.createIngressController(appName, "private", privateIP, [publicTraefik]);
+    const privateTraefik = this.createIngressController(appName, "private", privateIP, [
+      publicTraefik,
+    ]);
 
     const domain = config.require("domain");
 
     this.createDashboard("public", publicTraefik, domain);
     this.createDashboard("private", privateTraefik, domain);
-
-
 
     this.publicIngressClass = pulumi.output("traefik-public");
     this.privateIngressClass = pulumi.output("traefik-private");

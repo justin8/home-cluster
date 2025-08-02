@@ -23,11 +23,7 @@ export interface CertManagerArgs {
 }
 
 export class CertManager extends pulumi.ComponentResource {
-  constructor(
-    appName: string,
-    args: CertManagerArgs,
-    opts?: pulumi.ComponentResourceOptions,
-  ) {
+  constructor(appName: string, args: CertManagerArgs, opts?: pulumi.ComponentResourceOptions) {
     super(appName, appName, {}, opts);
 
     const config: pulumi.Config = new pulumi.Config(appName);
@@ -50,36 +46,44 @@ export class CertManager extends pulumi.ComponentResource {
           name: namespace,
         },
       },
-      { parent: this },
+      { parent: this }
     );
 
-    const reflector = new k8s.helm.v3.Release("reflector", {
-      chart: "reflector",
-      version: "9.1.22",
-      repositoryOpts: {
-        repo: "https://emberstack.github.io/helm-charts",
+    const reflector = new k8s.helm.v3.Release(
+      "reflector",
+      {
+        chart: "reflector",
+        version: "9.1.22",
+        repositoryOpts: {
+          repo: "https://emberstack.github.io/helm-charts",
+        },
+        namespace: ns.metadata.name,
+        values: {
+          priorityClassName: "system-cluster-critical",
+        },
       },
-      namespace: ns.metadata.name,
-      values: {
-        priorityClassName: "system-cluster-critical",
-      }
-    }, { parent: this });
+      { parent: this }
+    );
 
-    const certManager = new k8s.helm.v3.Release("certmanager", {
-      chart: "cert-manager",
-      version: "v1.18.2",
-      repositoryOpts: {
-        repo: "https://charts.jetstack.io",
+    const certManager = new k8s.helm.v3.Release(
+      "certmanager",
+      {
+        chart: "cert-manager",
+        version: "v1.18.2",
+        repositoryOpts: {
+          repo: "https://charts.jetstack.io",
+        },
+        namespace: ns.metadata.name,
+        values: {
+          extraArgs: [
+            "--dns01-recursive-nameservers-only",
+            "--dns01-recursive-nameservers=1.1.1.1:53,1.0.0.1:53",
+          ],
+          installCRDs: true,
+        },
       },
-      namespace: ns.metadata.name,
-      values: {
-        extraArgs: [
-          "--dns01-recursive-nameservers-only",
-          "--dns01-recursive-nameservers=1.1.1.1:53,1.0.0.1:53",
-        ],
-        installCRDs: true,
-      }
-    }, { parent: this });
+      { parent: this }
+    );
 
     const cloudflareSecret = new k8s.core.v1.Secret(
       `${appName}-cloudflare-api-token`,
@@ -95,7 +99,7 @@ export class CertManager extends pulumi.ComponentResource {
       {
         parent: this,
         dependsOn: [certManager],
-      },
+      }
     );
 
     const prodClusterIssuer = ClusterIssuer({
@@ -140,15 +144,9 @@ export class CertManager extends pulumi.ComponentResource {
           secretTemplate: {
             annotations: {
               ...reflectorAnnotation("allowed", "true"),
-              ...reflectorAnnotation(
-                "allowed-namespaces",
-                defaultCertAllowedNamespaces,
-              ),
+              ...reflectorAnnotation("allowed-namespaces", defaultCertAllowedNamespaces),
               ...reflectorAnnotation("auto-enabled", "true"),
-              ...reflectorAnnotation(
-                "auto-namespaces",
-                defaultCertAllowedNamespaces,
-              ),
+              ...reflectorAnnotation("auto-namespaces", defaultCertAllowedNamespaces),
             },
           },
         },
@@ -156,7 +154,7 @@ export class CertManager extends pulumi.ComponentResource {
       {
         parent: this,
         dependsOn: [certManager, prodClusterIssuer, reflector],
-      },
+      }
     );
   }
 }
@@ -172,9 +170,7 @@ interface ClusterIssuerArgs {
   prod: boolean;
 }
 
-function ClusterIssuer(
-  args: ClusterIssuerArgs,
-): k8s.apiextensions.CustomResource {
+function ClusterIssuer(args: ClusterIssuerArgs): k8s.apiextensions.CustomResource {
   const {
     appName,
     namespace,
@@ -238,6 +234,6 @@ function ClusterIssuer(
     },
     {
       dependsOn: [cloudflareSecret],
-    },
+    }
   );
 }

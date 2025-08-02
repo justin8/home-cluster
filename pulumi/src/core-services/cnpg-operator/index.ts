@@ -1,0 +1,1 @@
+export { CNPGOperator } from "./operator";

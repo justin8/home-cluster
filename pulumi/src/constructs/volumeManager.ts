@@ -32,11 +32,7 @@ export class VolumeManager {
   /**
    * Creates a Longhorn PVC using dynamic provisioning
    */
-  private createLonghornStorage(
-    name: string,
-    mountPath: string,
-    options: VolumeOptions,
-  ) {
+  private createLonghornStorage(name: string, mountPath: string, options: VolumeOptions) {
     const storageClass = options.storageClass || "longhorn";
     const size = options.size || "1Gi";
     const accessModes = options.accessModes || ["ReadWriteOnce"];
@@ -57,7 +53,7 @@ export class VolumeManager {
           },
         },
       },
-      { parent: this.parent },
+      { parent: this.parent }
     );
 
     return { pvc };
@@ -88,7 +84,7 @@ export class VolumeManager {
           labels: {},
         },
       },
-      { parent: this.parent },
+      { parent: this.parent }
     );
   }
 
@@ -98,10 +94,7 @@ export class VolumeManager {
    * @param options Volume configuration options
    * @returns A volume mount object for use in container spec
    */
-  addNFSMount(
-    nfsPath: string,
-    options: VolumeOptions = {},
-  ): k8s.types.input.core.v1.VolumeMount {
+  addNFSMount(nfsPath: string, options: VolumeOptions = {}): k8s.types.input.core.v1.VolumeMount {
     const volumeName = `nfs-${nfsPath.replace(/[^a-z0-9]/gi, "-").toLowerCase()}`;
 
     if (!this.storageMap.has(nfsPath)) {
@@ -126,15 +119,15 @@ export class VolumeManager {
    * @returns Array of volume definitions for pod spec
    */
   getVolumes(
-    volumeMounts?: k8s.types.input.core.v1.VolumeMount[],
+    volumeMounts?: k8s.types.input.core.v1.VolumeMount[]
   ): k8s.types.input.core.v1.Volume[] {
     if (!volumeMounts) {
       return this.volumes; // Return all volumes if no mounts specified
     }
 
     // Filter volumes to only include those referenced in the volumeMounts
-    const volumeNames = volumeMounts.map((mount) => mount.name);
-    return this.volumes.filter((vol) => volumeNames.includes(vol.name));
+    const volumeNames = volumeMounts.map(mount => mount.name);
+    return this.volumes.filter(vol => volumeNames.includes(vol.name));
   }
 
   /**
@@ -145,7 +138,7 @@ export class VolumeManager {
    */
   createVolume(
     mountPath: string,
-    options: VolumeOptions = {},
+    options: VolumeOptions = {}
   ): k8s.types.input.core.v1.VolumeMount {
     // Generate a safe name for the volume
     const volumeId = uuidv4().substring(0, 8);
@@ -163,10 +156,7 @@ export class VolumeManager {
 
       // Set up backup if enabled
       if (options.backupEnabled) {
-        this.setupBackupForVolume(
-          shortName,
-          options.backupSchedule || "0 3 * * *",
-        ); // Default daily at 3am
+        this.setupBackupForVolume(shortName, options.backupSchedule || "0 3 * * *"); // Default daily at 3am
       }
     }
 
@@ -180,10 +170,7 @@ export class VolumeManager {
     return this.storageMap.get(path);
   }
 
-  private createNFSPersistentVolume(
-    name: string,
-    path: string,
-  ): k8s.core.v1.PersistentVolume {
+  private createNFSPersistentVolume(name: string, path: string): k8s.core.v1.PersistentVolume {
     const volumeHandle = `${this.nfsHostname}/${path}`;
     return new k8s.core.v1.PersistentVolume(
       name,
@@ -202,7 +189,7 @@ export class VolumeManager {
           },
         },
       },
-      { parent: this.parent },
+      { parent: this.parent }
     );
   }
 
@@ -217,7 +204,7 @@ export class VolumeManager {
           volumeName: pv.metadata.name,
         },
       },
-      { parent: this.parent },
+      { parent: this.parent }
     );
 
     return { pv, pvc };

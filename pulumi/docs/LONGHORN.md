@@ -44,7 +44,7 @@ When running on Talos Linux, the following prerequisites are required:
 const volumeMount = this.volumeManager.createVolume("/path/to/mount", {
   size: "10Gi",
   backupEnabled: true,
-  backupSchedule: "0 3 * * *" // Daily at 3am
+  backupSchedule: "0 3 * * *", // Daily at 3am
 });
 ```
 
@@ -54,19 +54,19 @@ const volumeMount = this.volumeManager.createVolume("/path/to/mount", {
 // Data directory mount
 const dataMount = this.volumeManager.createVolume("/data/my-app", {
   size: "10Gi",
-  backupEnabled: true
+  backupEnabled: true,
 });
 
 // Config directory mount
 const configMount = this.volumeManager.createVolume("/config/my-app", {
-  size: "1Gi"
+  size: "1Gi",
 });
 
 // Shared volume with ReadWriteMany access
 const sharedMount = this.volumeManager.createVolume("/shared/files", {
   size: "20Gi",
   accessModes: ["ReadWriteMany"],
-  backupEnabled: true
+  backupEnabled: true,
 });
 ```
 
@@ -74,33 +74,35 @@ const sharedMount = this.volumeManager.createVolume("/shared/files", {
 
 ```typescript
 // Create mounts
-const nfsMount = this.volumeManager.addNFSMount("/storage/media")
-const longhornMount = this.volumeManager.createVolume("/data/app", { 
+const nfsMount = this.volumeManager.addNFSMount("/storage/media");
+const longhornMount = this.volumeManager.createVolume("/data/app", {
   size: "10Gi",
-  backupEnabled: true
-})
+  backupEnabled: true,
+});
 
 // In your TauApplication implementation:
 new k8s.apps.v1.Deployment("my-app", {
   spec: {
     template: {
       spec: {
-        containers: [{
-          name: "app",
-          image: "nginx",
-          volumeMounts: [
-            // NFS mount for shared network files
-            nfsMount,
-            
-            // Longhorn volumes for persistent data
-            longhornMount,
-          ]
-        }],
+        containers: [
+          {
+            name: "app",
+            image: "nginx",
+            volumeMounts: [
+              // NFS mount for shared network files
+              nfsMount,
+
+              // Longhorn volumes for persistent data
+              longhornMount,
+            ],
+          },
+        ],
         // Pass the volume mounts to only include volumes needed by this container
-        volumes: this.volumeManager.getVolumes([nfsMount, longhornMount])
-      }
-    }
-  }
+        volumes: this.volumeManager.getVolumes([nfsMount, longhornMount]),
+      },
+    },
+  },
 });
 ```
 
@@ -108,13 +110,13 @@ new k8s.apps.v1.Deployment("my-app", {
 
 All volume creation methods accept these options:
 
-| Option           | Description                       | Default                   |
-| ---------------- | --------------------------------- | ------------------------- |
-| `size`           | Storage size (e.g. "1Gi", "10Gi") | "1Gi"                     |
-| `storageClass`   | Kubernetes StorageClass           | "longhorn"                |
-| `accessModes`    | Volume access modes               | `["ReadWriteOnce"]`       |
-| `backupEnabled`  | Enable recurring backups          | `false`                   |
-| `backupSchedule` | Cron expression for backups       | "0 3 ** *" (daily at 3am) |
+| Option           | Description                       | Default                      |
+| ---------------- | --------------------------------- | ---------------------------- |
+| `size`           | Storage size (e.g. "1Gi", "10Gi") | "1Gi"                        |
+| `storageClass`   | Kubernetes StorageClass           | "longhorn"                   |
+| `accessModes`    | Volume access modes               | `["ReadWriteOnce"]`          |
+| `backupEnabled`  | Enable recurring backups          | `false`                      |
+| `backupSchedule` | Cron expression for backups       | "0 3 \*\* \*" (daily at 3am) |
 
 ## Backup and Restore
 

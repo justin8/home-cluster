@@ -4,7 +4,7 @@ import { TauApplication } from "../../constructs";
 
 export class DemoApp extends TauApplication {
   constructor(name: string, opts?: pulumi.ComponentResourceOptions) {
-    super(name, opts);
+    super(name, {}, opts);
 
     // Define volumes for the application
     // NFS mounts for shared network storage
@@ -50,7 +50,7 @@ export class DemoApp extends TauApplication {
           },
         },
       },
-      { parent: this },
+      { parent: this }
     );
 
     // Get an external IP for the service
@@ -63,7 +63,7 @@ export class DemoApp extends TauApplication {
           selector: this.labels,
         },
       },
-      { parent: this },
+      { parent: this }
     );
 
     // Create an Ingress resource to expose the application
