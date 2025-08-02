@@ -4,6 +4,7 @@
 pkgs.mkShell {
   buildInputs = with pkgs; [
     (python312.withPackages (ps: with ps; [ uv ]))
+    nodejs_22
     git
     sops
     age
@@ -38,6 +39,7 @@ pkgs.mkShell {
 
     (
       cd pulumi
+      npm install
       pulumi install
       if [[ ! -e $HOME/.pulumi/credentials.json ]]; then
         pulumi login 's3://jdray-pulumi-state?region=us-east-1'
