@@ -1,0 +1,63 @@
+#!/bin/sh
+#
+# Pre-commit hook to run ruff and prettier on new files and fully staged modified files
+#
+
+# Get all staged files (new, modified, renamed, copied)
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=AMRC)
+
+# Get files that have unstaged changes
+UNSTAGED_FILES=$(git diff --name-only)
+
+# Filter out files that have unstaged changes (to avoid formatting partial changes)
+SAFE_TO_FORMAT=""
+for file in $STAGED_FILES; do
+    # Check if this file has unstaged changes
+    if ! echo "$UNSTAGED_FILES" | grep -q "^$file$"; then
+        SAFE_TO_FORMAT="$SAFE_TO_FORMAT $file"
+    fi
+done
+
+# Separate by file type, excluding SOPS files
+PYTHON_FILES=$(echo "$SAFE_TO_FORMAT" | tr ' ' '\n' | grep '\.py$' | grep -v '\.sops\.' | tr '\n' ' ')
+OTHER_FILES=$(echo "$SAFE_TO_FORMAT" | tr ' ' '\n' | grep -E '\.(yaml|yml|ts|js|json|md)$' | grep -v '\.sops\.' | tr '\n' ' ')
+
+# Format Python files with ruff
+if [ -n "$PYTHON_FILES" ]; then
+    echo "Running ruff format on Python files..."
+    
+    for file in $PYTHON_FILES; do
+        if [ -f "$file" ]; then
+            uvx ruff format "$file"
+            if [ $? -ne 0 ]; then
+                echo "Ruff formatting failed on $file. Please fix the issues and try again."
+                exit 1
+            fi
+            git add "$file"
+        fi
+    done
+fi
+
+# Format other files (YAML, TypeScript, JavaScript, JSON, Markdown) with prettier
+if [ -n "$OTHER_FILES" ]; then
+    echo "Running prettier on YAML/TypeScript/JavaScript/JSON/Markdown files..."
+    
+    for file in $OTHER_FILES; do
+        if [ -f "$file" ]; then
+            npx prettier --write "$file"
+            if [ $? -ne 0 ]; then
+                echo "Prettier formatting failed on $file. Please fix the issues and try again."
+                exit 1
+            fi
+            git add "$file"
+        fi
+    done
+fi
+
+if [ -n "$PYTHON_FILES" ] || [ -n "$OTHER_FILES" ]; then
+    echo "Code formatting complete."
+else
+    echo "No files safe to format (all staged files have unstaged changes or are SOPS files)."
+fi
+
+exit 0

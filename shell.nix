@@ -31,6 +31,11 @@ pkgs.mkShell {
       aws ssm get-parameter --name "/home-cluster/sops-age.key" --with-decryption --query "Parameter.Value" --output text > .sops-age.key
     fi
 
+    # Install git hooks
+    echo "Installing git hooks..."
+    cp git-hooks/* .git/hooks/
+    chmod +x .git/hooks/*
+
     (
       cd talos
       talhelper genconfig
