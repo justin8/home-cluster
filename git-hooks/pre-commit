@@ -27,7 +27,7 @@ if [ -n "$PYTHON_FILES" ]; then
     echo "Running ruff format on Python files..."
     
     for file in $PYTHON_FILES; do
-        if [ -f "$file" ]; then
+        if [ -f "$file" ] && ! [ -L "$file" ]; then
             uvx ruff format "$file"
             if [ $? -ne 0 ]; then
                 echo "Ruff formatting failed on $file. Please fix the issues and try again."
@@ -43,7 +43,7 @@ if [ -n "$OTHER_FILES" ]; then
     echo "Running prettier on YAML/TypeScript/JavaScript/JSON/Markdown files..."
     
     for file in $OTHER_FILES; do
-        if [ -f "$file" ]; then
+        if [ -f "$file" ] && ! [ -L "$file" ]; then
             npx prettier --write "$file"
             if [ $? -ne 0 ]; then
                 echo "Prettier formatting failed on $file. Please fix the issues and try again."
