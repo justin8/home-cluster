@@ -5,7 +5,7 @@
     "login": "pulumi login 's3://jdray-pulumi-state?region=us-east-1'"
   },
   "devDependencies": {
-    "@types/node": "^18",
+    "@types/node": "^22.0.0",
     "typescript": "^5.0.0"
   },
   "dependencies": {
