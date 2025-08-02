@@ -20,6 +20,29 @@ patches:
       path: /machine/env
       value:
         GRPC_GO_LOG_SEVERITY_LEVEL: error
+  - |-
+    - op: add
+      path: /machine/kubelet/extraMounts
+      value:
+        - destination: /var/lib/longhorn
+          type: bind
+          source: /var/lib/longhorn
+          options:
+            - bind
+            - rshared
+            - rw
+  - |-
+    - op: add
+      path: /machine/sysctls
+      value:
+        vm.nr_hugepages: "1024"
+  - |-
+    - op: add
+      path: /machine/kernel
+      value:
+        modules:
+          - name: nvme_tcp
+          - name: vfio_pci
 nodes:
   - hostname: controlplane
     ipAddress: 192.168.4.192, 192.168.4.247, 192.168.4.120
@@ -44,6 +67,8 @@ nodes:
           officialExtensions:
             - siderolabs/intel-ucode
             - siderolabs/i915
+            - siderolabs/iscsi-tools
+            - siderolabs/util-linux-tools
     installDiskSelector:
       size: ">= 4GB"
     nameservers:
