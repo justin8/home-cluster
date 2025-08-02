@@ -18,8 +18,6 @@ export interface CertManagerArgs {
   domain: pulumi.Input<string>;
   defaultCertAllowedNamespaces?: pulumi.Input<string>;
   defaultCertIssuer?: pulumi.Input<CertIssuerType>;
-  version?: pulumi.Input<string>;
-  reflectorVersion?: pulumi.Input<string>;
   namespace?: pulumi.Input<string>;
   ingressClass?: pulumi.Input<string>;
 }
@@ -38,8 +36,6 @@ export class CertManager extends pulumi.ComponentResource {
     const cloudflareEmail = args.cloudflareEmail;
     const cloudflareAPIToken = args.cloudflareAPIToken
     const domain = args.domain;
-    const version = args.version || "v1.18.2";
-    const reflectorVersion = args.reflectorVersion || "9.1.22"
     const namespace = args.namespace || "cert-manager";
     const ingressClass = args.ingressClass || "nginx"
     const defaultCertAllowedNamespaces = args.defaultCertAllowedNamespaces || "default,kube-system,cert-manager";
@@ -57,7 +53,7 @@ export class CertManager extends pulumi.ComponentResource {
 
     const reflector = new k8s.helm.v3.Release("reflector", {
       chart: "reflector",
-      version: reflectorVersion,
+      version: "9.1.22",
       repositoryOpts: {
         repo: "https://emberstack.github.io/helm-charts",
       },
@@ -65,12 +61,11 @@ export class CertManager extends pulumi.ComponentResource {
       values: {
         priorityClassName: "system-cluster-critical",
       }
-    }
-    )
+    }, { parent: this });
 
     const certManager = new k8s.helm.v3.Release("certmanager", {
       chart: "cert-manager",
-      version,
+      version: "v1.18.2",
       repositoryOpts: {
         repo: "https://charts.jetstack.io",
       },
@@ -82,7 +77,7 @@ export class CertManager extends pulumi.ComponentResource {
         ],
         installCRDs: true,
       }
-    });
+    }, { parent: this });
 
     const cloudflareSecret = new k8s.core.v1.Secret(`${appName}-cloudflare-api-token`,
       {

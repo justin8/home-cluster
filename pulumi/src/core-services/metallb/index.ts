@@ -6,7 +6,6 @@ declare var require: any;
 export interface MetalLBArgs {
   addresses: pulumi.Input<pulumi.Input<string>[]>;
   namespace?: pulumi.Input<string>;
-  version?: pulumi.Input<string>;
 }
 
 export class MetalLB extends pulumi.ComponentResource {
@@ -19,7 +18,6 @@ export class MetalLB extends pulumi.ComponentResource {
 
     const config: pulumi.Config = new pulumi.Config(appName);
 
-    const version = args.version || "v0.15";
     const namespace = args.namespace || "metallb-system";
     const addresses = args.addresses;
 
@@ -40,7 +38,7 @@ export class MetalLB extends pulumi.ComponentResource {
 
     const helm = new k8s.helm.v3.Release("metallb", {
       chart: "metallb",
-      version,
+      version: "v0.15",
       repositoryOpts: {
         repo: "https://metallb.github.io/metallb",
       },
@@ -50,7 +48,7 @@ export class MetalLB extends pulumi.ComponentResource {
           ignoreExcludeLB: true,
         },
       },
-    });
+    }, { parent: this });
 
     const addressPool = new k8s.apiextensions.CustomResource(
       `${appName}-address-pool`,

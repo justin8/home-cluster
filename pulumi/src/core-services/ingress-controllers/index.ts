@@ -4,7 +4,6 @@ import * as pulumi from "@pulumi/pulumi";
 export interface IngressControllersArgs {
   publicIP?: pulumi.Input<string>;
   privateIP?: pulumi.Input<string>;
-  version?: pulumi.Input<string>;
 }
 
 export class IngressControllers extends pulumi.ComponentResource {
@@ -17,7 +16,6 @@ export class IngressControllers extends pulumi.ComponentResource {
     appName: string,
     type: string,
     ip: pulumi.Input<string>,
-    version: pulumi.Input<string>,
     dependencies: pulumi.Resource[] = []
   ) {
     const pool = new k8s.apiextensions.CustomResource(
@@ -57,7 +55,7 @@ export class IngressControllers extends pulumi.ComponentResource {
       `${appName}-${type}`,
       {
         chart: "traefik",
-        version,
+        version: "30.1.0",
         repositoryOpts: { repo: "https://traefik.github.io/charts" },
         namespace: `traefik-${type}`,
         createNamespace: true,
@@ -90,12 +88,11 @@ export class IngressControllers extends pulumi.ComponentResource {
     super(appName, appName, {}, opts);
 
     const config = new pulumi.Config();
-    const version = args.version || "30.1.0";
     const publicIP = args.publicIP || config.require("public_ingress_ip");
     const privateIP = args.privateIP || config.require("private_ingress_ip");
 
-    const publicTraefik = this.createIngressController(appName, "public", publicIP, version);
-    const privateTraefik = this.createIngressController(appName, "private", privateIP, version, [publicTraefik]);
+    const publicTraefik = this.createIngressController(appName, "public", publicIP);
+    const privateTraefik = this.createIngressController(appName, "private", privateIP, [publicTraefik]);
 
     this.publicIngressClass = pulumi.output("traefik-public");
     this.privateIngressClass = pulumi.output("traefik-private");

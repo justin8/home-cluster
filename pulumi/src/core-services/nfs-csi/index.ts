@@ -3,7 +3,6 @@ import * as pulumi from "@pulumi/pulumi";
 
 export interface NFSCSIArgs {
   namespace?: pulumi.Input<string>;
-  version?: pulumi.Input<string>;
 }
 
 export class NFSCSI extends pulumi.ComponentResource {
@@ -14,12 +13,11 @@ export class NFSCSI extends pulumi.ComponentResource {
   ) {
     super(appName, appName, {}, opts);
 
-    const version = args.version || "v4.11.0";
     const namespace = args.namespace || "kube-system";
 
     const helm = new k8s.helm.v3.Release("csi-driver-nfs", {
       chart: "csi-driver-nfs",
-      version,
+      version: "v4.11.0",
       repositoryOpts: {
         repo: "https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts",
       },
