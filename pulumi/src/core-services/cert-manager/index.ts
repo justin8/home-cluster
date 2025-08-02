@@ -53,7 +53,7 @@ export class CertManager extends pulumi.ComponentResource {
 
     const reflector = new k8s.helm.v3.Release("reflector", {
       chart: "reflector",
-      version: "9.1.21",
+      version: "9.1.22",
       repositoryOpts: {
         repo: "https://emberstack.github.io/helm-charts",
       },
