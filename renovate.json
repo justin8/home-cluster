@@ -11,7 +11,9 @@
     {
       "customType": "regex",
       "description": "Helm charts in Pulumi TypeScript files",
-      "fileMatch": ["pulumi/.*\\.ts$"],
+      "managerFilePatterns": [
+        "/pulumi/.*\\.ts$/"
+      ],
       "matchStrings": [
         "new k8s\\.helm\\.v3\\.Release\\([^,]+,\\s*{[^}]*chart:\\s*[\"'](?<depName>[^\"']+)[\"'][^}]*version:\\s*[\"'](?<currentValue>[^\"']+)[\"'][^}]*repositoryOpts:\\s*{[^}]*repo:\\s*[\"'](?<registryUrl>[^\"']+)[\"']"
       ],
