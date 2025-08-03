@@ -12,28 +12,28 @@ export interface LonghornArgs {
   defaultReplicaCount?: pulumi.Input<number>;
   backupTarget?: pulumi.Input<string>;
   backupTargetCredentialSecret?: pulumi.Input<string>;
-  /** @default "best-effort" - Options: disabled, best-effort, strict-local */
-  defaultDataLocality?: pulumi.Input<string>;
 }
 
 export class Longhorn extends pulumi.ComponentResource {
   public readonly namespace: pulumi.Input<string>;
 
-  constructor(
-    name: string,
-    args: LonghornArgs = {},
-    opts?: pulumi.ComponentResourceOptions,
-  ) {
+  constructor(name: string, args: LonghornArgs = {}, opts?: pulumi.ComponentResourceOptions) {
     super("tau:core-services:longhorn", name, {}, opts);
 
     // Set up defaults
     const version: pulumi.Input<string> = args.version || "1.9.1";
     const namespace: pulumi.Input<string> = args.namespace || "longhorn-system";
     const dataPath: pulumi.Input<string> = args.dataPath || "/var/lib/longhorn";
-    const defaultReplicaCount: pulumi.Input<number> =
-      args.defaultReplicaCount || 2;
-    const defaultDataLocality: pulumi.Input<string> =
-      args.defaultDataLocality || "best-effort";
+    const defaultReplicaCount: pulumi.Input<number> = args.defaultReplicaCount || 2;
+    const dataLocality: string = "best-effort";
+
+    const config = new pulumi.Config();
+    const domain = config.require("domain");
+
+    const nfsServer = config.requireSecret("nfs_hostname");
+    const backupPath = config.requireSecret("longhorn_nfs_backup_path");
+    const backupTarget: pulumi.Input<string> = pulumi.interpolate`nfs://${nfsServer}:${backupPath}`;
+    const backupTargetCredentialSecret: pulumi.Input<string> | undefined = undefined; // NFS doesn't use this
 
     // Create namespace for Longhorn
     const longhornNamespace = new k8s.core.v1.Namespace(
@@ -48,13 +48,10 @@ export class Longhorn extends pulumi.ComponentResource {
           },
         },
       },
-      { parent: this },
+      { parent: this }
     );
 
     this.namespace = namespace;
-
-    const config = new pulumi.Config();
-    const domain = config.require("domain");
 
     // Deploy Longhorn via Helm chart
     const longhornChart = new k8s.helm.v3.Release(
@@ -69,28 +66,20 @@ export class Longhorn extends pulumi.ComponentResource {
         values: {
           defaultSettings: {
             defaultReplicaCount: defaultReplicaCount,
-            defaultDataLocality: defaultDataLocality,
             storageMinimalAvailablePercentage: 10,
             createDefaultDiskLabeledNodes: true,
             defaultDataPath: dataPath,
+            defaultDataLocality: dataLocality,
             guaranteedEngineManagerCPU: 0.15,
             guaranteedReplicaManagerCPU: 0.15,
             concurrentReplicaRebuildPerNodeLimit: 1,
             replicaSoftAntiAffinity: "false", // REQUIRE different nodes for replicas
             replicaZoneSoftAntiAffinity: "true", // Prefer different zones if available
             replicaDiskSoftAntiAffinity: "false", // REQUIRE different disks for replicas
-            allowNodeDrainWithLastHealthyReplica: "true",
             upgradeChecker: "false",
-            priorityClass: "",
-            storageNetwork: "", // Use default network for storage traffic
+            // storageNetwork: "", // Use default network for storage traffic
             autoSalvage: "true", // Enable auto salvage to recover from unexpected failures
-            ...(args.backupTarget ? { backupTarget: args.backupTarget } : {}),
-            ...(args.backupTargetCredentialSecret
-              ? {
-                backupTargetCredentialSecret:
-                  args.backupTargetCredentialSecret,
-              }
-              : {}),
+
             // Settings for Talos Linux control plane nodes
             systemManagedComponentsNodeSelector: "false",
             taintToleration:
@@ -99,14 +88,21 @@ export class Longhorn extends pulumi.ComponentResource {
             replicaReplenishmentWaitInterval: "300", // Delay replica creation to prevent thrashing
             storageReservedPercentageForDefaultDisk: "30", // Reserve space to prevent disk full conditions
             kubernetesClusterAutoscalerEnabled: "false", // Disable since not using cluster autoscaler
-            nodeDownPodDeletionPolicy:
-              "delete-both-statefulset-and-deployment-pod", // Ensure pods are rescheduled when a node is down
+            nodeDownPodDeletionPolicy: "delete-both-statefulset-and-deployment-pod", // Ensure pods are rescheduled when a node is down
+          },
+          defaultBackupStore: {
+            backupTarget: backupTarget,
+            backupTargetCredentialSecret: backupTargetCredentialSecret,
           },
           persistence: {
             defaultClass: true,
             defaultClassReplicaCount: defaultReplicaCount,
-            reclaimPolicy: "Retain",
+            defaultDataLocality: dataLocality,
+            reclaimPolicy: "Retain", // TODO: Maybe set this to delete after testing backups more
             defaultFsType: "ext4",
+          },
+          preUpgradeChecker: {
+            jobEnabled: false,
           },
           csi: {
             // CSI sidecars can use a single replica to reduce resource usage
@@ -143,7 +139,6 @@ export class Longhorn extends pulumi.ComponentResource {
                 effect: "NoSchedule",
               },
             ],
-            priorityClass: "",
             nodeSelector: {}, // Run on any available node
           },
           longhornDriverDeployer: {
@@ -180,7 +175,7 @@ export class Longhorn extends pulumi.ComponentResource {
         skipAwait: false,
         createNamespace: false,
       },
-      { parent: this, dependsOn: [longhornNamespace] },
+      { parent: this, dependsOn: [longhornNamespace] }
     );
 
     // Create ingress for Longhorn UI

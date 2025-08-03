@@ -12,11 +12,11 @@ export class DemoApp extends TauApplication {
     const moviesMount = this.volumeManager.addNFSMount("/storage/movies");
 
     // Longhorn volumes for persistent block storage
-    // const dataMount = this.volumeManager.createVolume("/data/demo", {
-    //   size: "5Gi",
-    //   backupEnabled: true,
-    //   backupSchedule: "0 3 * * *" // Daily backup at 3am
-    // });
+    const dataMount = this.volumeManager.createVolume("/data/demo", {
+      size: "5Gi",
+      backupEnabled: true,
+      backupSchedule: "0 3 * * *", // Daily backup at 3am
+    });
 
     // Deploy some resources for the application
     new k8s.apps.v1.Deployment(
@@ -33,19 +33,11 @@ export class DemoApp extends TauApplication {
                   name: name,
                   image: "nginx",
                   ports: [{ containerPort: 80, protocol: "TCP" }],
-                  volumeMounts: [
-                    gamesMount,
-                    moviesMount,
-                    // dataMount
-                  ],
+                  volumeMounts: [gamesMount, moviesMount, dataMount],
                 },
               ],
               // Pass the actual volume mounts to get only the volumes we need
-              volumes: this.volumeManager.getVolumes([
-                gamesMount,
-                moviesMount,
-                // dataMount
-              ]),
+              volumes: this.volumeManager.getVolumes([gamesMount, moviesMount, dataMount]),
             },
           },
         },

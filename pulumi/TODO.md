@@ -3,11 +3,13 @@
 - [x] Cert-manager
 - [x] A service with remote storage (NFS)
 - [x] Dual ingress controllers (internal/public)
-- [ ] Figure out storage backups/volumes (longhorn?) - cut down and use a more minimal helm chart
+- [x] Figure out storage backups/volumes (longhorn?)
 - [ ] How to do restores
-- [ ] DNS resolution for ingress, locally and remote
+- [ ] Database provider
 - [ ] Auth
+- [ ] DNS resolution for ingress, locally and remote
 - [ ] Move services over
 - [ ] Network isolation and VLANs
 - [ ] Renovate bot to auto-update containers
 - [ ] Deploy from git using pulumi
+- [ ] Docker registry caching/mirroring

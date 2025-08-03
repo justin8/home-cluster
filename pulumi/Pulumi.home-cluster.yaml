@@ -13,3 +13,5 @@ config:
     secure: v1:Ngaku0rDgqX7B4p+:SnLk4DkIY7aYX5NZIaJAIC2P67Js8hXsuoY9vyOvpciWiQ==
   home-cluster:public_ingress_ip: 192.168.4.70
   home-cluster:private_ingress_ip: 192.168.4.71
+  home-cluster:longhorn_nfs_backup_path:
+    secure: v1:d5pcJ4pIEyJlnapg:PnqSOSYjX+lCRX+z0bN6EVFXeZTAVdYlxuGfd9yfpnRk5Tevl/VwNzY=

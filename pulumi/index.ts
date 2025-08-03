@@ -1,16 +1,7 @@
 import * as pulumi from "@pulumi/pulumi";
 
 import { DemoApp } from "./src/applications/demo-app";
-import { PostgresExample } from "./src/applications/postgres-example";
-
-import {
-  CertManager,
-  CNPGOperator,
-  IngressControllers,
-  Longhorn,
-  MetalLB,
-  NFSCSI,
-} from "./src/core-services";
+import { CertManager, IngressControllers, Longhorn, MetalLB, NFSCSI } from "./src/core-services";
 
 const config = new pulumi.Config();
 
@@ -29,7 +20,7 @@ const nfsCsi = new NFSCSI("nfs-csi");
 
 const longhorn = new Longhorn("longhorn");
 
-const cnpgOperator = new CNPGOperator("cnpg-operator", { dependsOn: [longhorn] });
+// const cnpgOperator = new CNPGOperator("cnpg-operator", { dependsOn: [longhorn] });
 
 // Ingress controllers depend on MetalLB
 const ingressControllers = new IngressControllers(
@@ -41,16 +32,23 @@ const ingressControllers = new IngressControllers(
 );
 
 // Core services dependency for all applications
-const coreServices = [metallb, certManager, nfsCsi, ingressControllers, cnpgOperator];
+const coreServices = [
+  metallb,
+  certManager,
+  nfsCsi,
+  ingressControllers,
+  longhorn,
+  // cnpgOperator,
+];
 
 // Applications depend on all core services
 new DemoApp("demo-app", {
   dependsOn: coreServices,
 });
 
-new PostgresExample("postgres-example", {
-  dependsOn: coreServices,
-});
+// new PostgresExample("postgres-example", {
+//   dependsOn: coreServices,
+// });
 
-export const publicIngressIP = ingressControllers.publicIP;
-export const privateIngressIP = ingressControllers.privateIP;
+// export const publicIngressIP = ingressControllers.publicIP;
+// export const privateIngressIP = ingressControllers.privateIP;
