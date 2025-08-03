@@ -22,6 +22,15 @@ patches:
         GRPC_GO_LOG_SEVERITY_LEVEL: error
   - |-
     - op: add
+      path: /machine/registries
+      value:
+        config:
+          docker.io:
+            auth:
+              username: ${dockerhub_username}
+              password: ${dockerhub_password}
+  - |-
+    - op: add
       path: /machine/kubelet/extraMounts
       value:
         - destination: /var/lib/longhorn
