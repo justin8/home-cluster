@@ -43,9 +43,13 @@ patches:
         modules:
           - name: nvme_tcp
           - name: vfio_pci
+  - |-
+    - op: replace
+      path: /machine/install/wipe
+      value: true
 nodes:
   - hostname: controlplane
-    ipAddress: 192.168.4.192, 192.168.4.247, 192.168.4.120
+    ipAddress: 192.168.4.120, 192.168.4.192, 192.168.4.247
     controlPlane: true
     ignoreHostname: true
     nodeLabels:
@@ -69,14 +73,22 @@ nodes:
             - siderolabs/i915
             - siderolabs/iscsi-tools
             - siderolabs/util-linux-tools
+    imageSchematic:
+      customization:
+        extraKernelArgs:
+          - net.ifnames=0
+        systemExtensions:
+          officialExtensions:
+            - siderolabs/intel-ucode
+            - siderolabs/i915
+            - siderolabs/iscsi-tools
+            - siderolabs/util-linux-tools
     installDiskSelector:
-      size: ">= 4GB"
+      size: "> 10GB"
     nameservers:
       - 192.168.4.1
     networkInterfaces:
-      - deviceSelector:
-          #hardwareAddr:  '*'
-          driver: virtio_net
+      - interface: eth0
         dhcp: true
         vip:
           ip: 192.168.4.8

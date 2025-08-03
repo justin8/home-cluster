@@ -11,6 +11,15 @@
 - Only use `talosctl` directly when targeting a single specific node
 - For single node operations, use the `-n <node>` flag with talhelper when possible
 
+## ⚠️ CRITICAL: New Node Initialization
+
+**ALWAYS USE `--insecure` FLAG WHEN APPLYING CONFIG TO NEW NODES**
+
+- **MANDATORY**: When initializing new nodes, MUST include `--insecure` as an extra argument
+- **REQUIRED SYNTAX**: `talhelper gencommand apply --extra-flags="--insecure" | bash`
+- **WHY REQUIRED**: New nodes don't have certificates yet and need insecure connection for initial setup
+- **APPLIES TO**: First-time node configuration only
+
 ## ⚠️ CRITICAL: Upgrade Operations
 
 **ALWAYS USE `--preserve` FLAG FOR ALL UPGRADES - NO EXCEPTIONS**
@@ -40,12 +49,18 @@
 
 ## Best Practices
 
-1. Always generate configs before applying: `direnv reload` (instead of `talhelper genconfig`)
+1. **Config Generation**: Use `direnv reload` to regenerate Talos configs (this replaces `talhelper genconfig`)
 2. Use SOPS for secret encryption
 3. Never commit unencrypted secrets to version control
 4. Validate configurations: `talhelper validate`
 5. Use `--debug` flag for troubleshooting
 6. Extension updates require both config apply AND upgrade to take effect
+
+## Config Generation
+
+- **Primary method**: `direnv reload` - Regenerates all Talos configurations
+- **Alternative**: `talhelper genconfig` - Direct config generation (use direnv reload instead)
+- **When to use**: Run `direnv reload` after making changes to talconfig.yaml or related files
 
 ## Examples
 
