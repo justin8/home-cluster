@@ -20,8 +20,6 @@ export class IngressControllers extends pulumi.ComponentResource {
     dependencies: pulumi.Resource[] = []
   ) {
     const config = new pulumi.Config();
-    const domain = config.require("domain");
-    const isPrivate = type === "private";
     const pool = new k8s.apiextensions.CustomResource(
       `${appName}-${type}-pool`,
       {
@@ -32,10 +30,8 @@ export class IngressControllers extends pulumi.ComponentResource {
           namespace: "metallb-system",
         },
         spec: {
-          spec: {
-            addresses: [pulumi.interpolate`${ip}/32`],
-            autoAssign: false,
-          },
+          addresses: [pulumi.interpolate`${ip}/32`],
+          autoAssign: false,
         },
       },
       { parent: this, dependsOn: dependencies }
@@ -61,7 +57,7 @@ export class IngressControllers extends pulumi.ComponentResource {
       `${appName}-${type}`,
       {
         chart: "traefik",
-        version: "37.0.0",
+        version: "30.0.0",
         repositoryOpts: { repo: "https://traefik.github.io/charts" },
         namespace: `traefik-${type}`,
         createNamespace: true,
