@@ -1,6 +1,5 @@
 import * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
-import { v4 as uuidv4 } from "uuid";
 
 export interface VolumeOptions {
   /** @default "1Gi" */
@@ -26,8 +25,14 @@ export class VolumeManager {
   >();
   private config = new pulumi.Config();
   private nfsHostname = this.config.require("nfs_hostname");
+  private appName: string;
 
-  constructor(private parent: pulumi.ComponentResource) {}
+  constructor(
+    appName: string,
+    private parent: pulumi.ComponentResource
+  ) {
+    this.appName = appName;
+  }
 
   /**
    * Creates a Longhorn PVC using dynamic provisioning
@@ -141,8 +146,7 @@ export class VolumeManager {
     options: VolumeOptions = {}
   ): k8s.types.input.core.v1.VolumeMount {
     // Generate a safe name for the volume
-    const volumeId = uuidv4().substring(0, 8);
-    const volumeName = `vol-${mountPath.replace(/[^a-z0-9]/gi, "-").toLowerCase()}-${volumeId}`;
+    const volumeName = `vol-${this.appName}${mountPath.replace(/[^a-z0-9]/gi, "-").toLowerCase()}`;
     const shortName = volumeName.substring(0, 60); // Ensure name isn't too long
 
     if (!this.storageMap.has(mountPath)) {

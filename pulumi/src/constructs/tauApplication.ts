@@ -34,6 +34,7 @@ export abstract class TauApplication extends pulumi.ComponentResource {
   public readonly applicationDomain: string;
   public readonly defaultTlsSecret: string;
   public readonly namespace: string;
+  public readonly name: string;
   protected readonly databaseResult?: DatabaseResult;
 
   constructor(
@@ -72,8 +73,9 @@ export abstract class TauApplication extends pulumi.ComponentResource {
       }
     );
 
+    this.name = name;
     this.labels = labels;
-    this.volumeManager = new VolumeManager(this);
+    this.volumeManager = new VolumeManager(name, this);
     this.domain = config.require("domain");
     this.applicationDomain = `${name}.${this.domain}`;
     this.defaultTlsSecret = DEFAULT_TLS_SECRET;
