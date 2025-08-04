@@ -53,6 +53,27 @@ export class Longhorn extends pulumi.ComponentResource {
 
     this.namespace = namespace;
 
+    // K8s snapshotter version
+    const snapshotterVersion = "v8.3.0";
+
+    // Install Kubernetes Snapshot CRDs and Controller
+    const snapshotCrds = new k8s.kustomize.v2.Directory(
+      "snapshot-crds-kustomize",
+      {
+        directory: `https://github.com/kubernetes-csi/external-snapshotter/client/config/crd?ref=${snapshotterVersion}`,
+      },
+      { parent: this }
+    );
+
+    const snapshotController = new k8s.kustomize.v2.Directory(
+      "snapshot-controller-kustomize",
+      {
+        directory: `https://github.com/kubernetes-csi/external-snapshotter/deploy/kubernetes/snapshot-controller?ref=${snapshotterVersion}`,
+        namespace: "kube-system",
+      },
+      { parent: this, dependsOn: [snapshotCrds] }
+    );
+
     // Deploy Longhorn via Helm chart
     const longhornChart = new k8s.helm.v3.Release(
       "longhorn",
@@ -175,7 +196,7 @@ export class Longhorn extends pulumi.ComponentResource {
         skipAwait: false,
         createNamespace: false,
       },
-      { parent: this, dependsOn: [longhornNamespace] }
+      { parent: this, dependsOn: [longhornNamespace, snapshotController] }
     );
 
     // Create ingress for Longhorn UI
