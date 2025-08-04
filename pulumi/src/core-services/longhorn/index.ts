@@ -2,6 +2,8 @@ import * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
 import { createIngress } from "../../utils";
 
+export const BACKUP_JOB_GROUP: string = "backups-enabled";
+
 export interface LonghornArgs {
   /** @default "longhorn-system" */
   namespace?: pulumi.Input<string>;
@@ -209,6 +211,50 @@ export class Longhorn extends pulumi.ComponentResource {
       public: false,
       parent: this,
     });
+
+    new k8s.apiextensions.CustomResource(
+      "backups-enabled",
+      {
+        apiVersion: "longhorn.io/v1beta2",
+        kind: "RecurringJob",
+        metadata: {
+          name: BACKUP_JOB_GROUP,
+          namespace: this.namespace,
+        },
+        spec: {
+          name: BACKUP_JOB_GROUP,
+          task: "backup",
+          cron: "0 3 * * *",
+          retain: 1,
+          concurrency: 2,
+          groups: [BACKUP_JOB_GROUP],
+          labels: {},
+        },
+      },
+      { dependsOn: [longhornChart], parent: this }
+    );
+
+    new k8s.apiextensions.CustomResource(
+      "snapshots-enabled",
+      {
+        apiVersion: "longhorn.io/v1beta2",
+        kind: "RecurringJob",
+        metadata: {
+          name: "snapshots-enabled",
+          namespace: this.namespace,
+        },
+        spec: {
+          name: BACKUP_JOB_GROUP,
+          task: "snapshot",
+          cron: "0 3 * * *",
+          retain: 7,
+          concurrency: 2,
+          groups: [BACKUP_JOB_GROUP],
+          labels: {},
+        },
+      },
+      { dependsOn: [longhornChart], parent: this }
+    );
 
     // Register outputs
     this.registerOutputs({

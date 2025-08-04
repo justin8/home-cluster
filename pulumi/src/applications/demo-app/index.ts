@@ -15,7 +15,6 @@ export class DemoApp extends TauApplication {
     const dataMount = this.volumeManager.createVolume("/data/demo", {
       size: "5Gi",
       backupEnabled: true,
-      backupSchedule: "0 3 * * *", // Daily backup at 3am
     });
 
     // Deploy some resources for the application

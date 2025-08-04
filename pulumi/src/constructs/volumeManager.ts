@@ -1,5 +1,6 @@
 import * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
+import { BACKUP_JOB_GROUP } from "../core-services/longhorn";
 
 export interface VolumeOptions {
   /** @default "1Gi" */
@@ -10,8 +11,6 @@ export interface VolumeOptions {
   accessModes?: pulumi.Input<string>[];
   /** @default false */
   backupEnabled?: boolean;
-  /** @default "0 3 * * *" - Cron schedule for backups (daily at 3am) */
-  backupSchedule?: string;
 }
 
 export class VolumeManager {
@@ -37,7 +36,7 @@ export class VolumeManager {
   /**
    * Creates a Longhorn PVC using dynamic provisioning
    */
-  private createLonghornStorage(name: string, mountPath: string, options: VolumeOptions) {
+  private createPVC(name: string, mountPath: string, options: VolumeOptions) {
     const storageClass = options.storageClass || "longhorn";
     const size = options.size || "1Gi";
     const accessModes = options.accessModes || ["ReadWriteOnce"];
@@ -53,8 +52,11 @@ export class VolumeManager {
           },
         },
         metadata: {
-          annotations: {
-            "tau.volume/mountPath": mountPath,
+          labels: {
+            "recurring-job.longhorn.io/source": "enabled",
+            ...(options.backupEnabled
+              ? { [`recurring-job-group.longhorn.io/${BACKUP_JOB_GROUP}`]: "enabled" }
+              : {}),
           },
         },
       },
@@ -150,18 +152,13 @@ export class VolumeManager {
     const shortName = volumeName.substring(0, 60); // Ensure name isn't too long
 
     if (!this.storageMap.has(mountPath)) {
-      const storage = this.createLonghornStorage(shortName, mountPath, options);
+      const storage = this.createPVC(shortName, mountPath, options);
       this.storageMap.set(mountPath, storage);
 
       this.volumes.push({
         name: shortName,
         persistentVolumeClaim: { claimName: storage.pvc.metadata.name },
       });
-
-      // Set up backup if enabled
-      if (options.backupEnabled) {
-        this.setupBackupForVolume(shortName, options.backupSchedule || "0 3 * * *"); // Default daily at 3am
-      }
     }
 
     return {
