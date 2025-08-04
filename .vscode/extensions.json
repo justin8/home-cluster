@@ -2,6 +2,9 @@
   "recommendations": [
     "pulumi.pulumi",
     "mkhl.direnv",
-    "@signageos/vscode-sops"
+    "signageos.signageos-vscode-sops",
+    "amazonwebservices.amazon-q-vscode",
+    "esbenp.prettier-vscode",
+    "charliermarsh.ruff"
   ]
 }
