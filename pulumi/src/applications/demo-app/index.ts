@@ -30,7 +30,7 @@ export class DemoApp extends TauApplication {
               containers: [
                 {
                   name: name,
-                  image: "nginx",
+                  image: "nginx:stable",
                   ports: [{ containerPort: 80, protocol: "TCP" }],
                   volumeMounts: [gamesMount, moviesMount, dataMount],
                 },

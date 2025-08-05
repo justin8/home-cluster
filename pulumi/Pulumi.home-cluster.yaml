@@ -15,3 +15,4 @@ config:
   home-cluster:private_ingress_ip: 192.168.4.71
   home-cluster:longhorn_nfs_backup_path:
     secure: v1:d5pcJ4pIEyJlnapg:PnqSOSYjX+lCRX+z0bN6EVFXeZTAVdYlxuGfd9yfpnRk5Tevl/VwNzY=
+  home-cluster:timezone_offset: "10"

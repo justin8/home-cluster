@@ -10,6 +10,17 @@ export function reflectorAnnotation(key: pulumi.Input<string>, value: pulumi.Inp
   };
 }
 
+/**
+ * Converts an hour (0-23) by the timezone_offset Pulumi config variable.
+ * @param hour The hour to convert (0-23)
+ * @returns The converted hour (0-23)
+ */
+export function applyTimezone(hour: number): number {
+  const config = new pulumi.Config();
+  const offset = config.getNumber("timezone_offset") || 0;
+  return (hour + offset + 24) % 24;
+}
+
 export function parseIPRange(range: string): string[] {
   const [start, end] = range.split("-");
   const startParts = start.split(".").map(Number);

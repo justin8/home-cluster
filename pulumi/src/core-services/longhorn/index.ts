@@ -1,6 +1,6 @@
 import * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
-import { createIngress } from "../../utils";
+import { applyTimezone, createIngress } from "../../utils";
 
 export const BACKUP_JOB_GROUP: string = "backups-enabled";
 export const FSTRIM_JOB_GROUP: string = "fstrim-enabled";
@@ -225,7 +225,7 @@ export class Longhorn extends pulumi.ComponentResource {
         spec: {
           name: FSTRIM_JOB_GROUP,
           task: "filesystem-trim",
-          cron: "0 2 * * *",
+          cron: `0 ${applyTimezone(2)} * * *`,
           retain: 0,
           concurrency: 1,
           groups: [FSTRIM_JOB_GROUP],
@@ -247,7 +247,7 @@ export class Longhorn extends pulumi.ComponentResource {
         spec: {
           name: BACKUP_JOB_GROUP,
           task: "backup",
-          cron: "0 3 * * *",
+          cron: `0 ${applyTimezone(3)} * * *`,
           retain: 7,
           concurrency: 2,
           groups: [BACKUP_JOB_GROUP],
@@ -269,7 +269,7 @@ export class Longhorn extends pulumi.ComponentResource {
         spec: {
           name: "system-backup",
           task: "backup",
-          cron: "0 4 * * *",
+          cron: `0 ${applyTimezone(4)} * * *`,
           retain: 1,
           concurrency: 1,
           groups: ["system-backup"],
