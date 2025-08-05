@@ -3,6 +3,7 @@ import * as pulumi from "@pulumi/pulumi";
 import { createIngress } from "../../utils";
 
 export const BACKUP_JOB_GROUP: string = "backups-enabled";
+export const FSTRIM_JOB_GROUP: string = "fstrim-enabled";
 
 export interface LonghornArgs {
   /** @default "longhorn-system" */
@@ -213,7 +214,29 @@ export class Longhorn extends pulumi.ComponentResource {
     });
 
     new k8s.apiextensions.CustomResource(
-      "backups-enabled",
+      FSTRIM_JOB_GROUP,
+      {
+        apiVersion: "longhorn.io/v1beta2",
+        kind: "RecurringJob",
+        metadata: {
+          name: FSTRIM_JOB_GROUP,
+          namespace: this.namespace,
+        },
+        spec: {
+          name: FSTRIM_JOB_GROUP,
+          task: "filesystem-trim",
+          cron: "0 2 * * *",
+          retain: 0,
+          concurrency: 1,
+          groups: [FSTRIM_JOB_GROUP],
+          labels: {},
+        },
+      },
+      { dependsOn: [longhornChart], parent: this }
+    );
+
+    new k8s.apiextensions.CustomResource(
+      BACKUP_JOB_GROUP,
       {
         apiVersion: "longhorn.io/v1beta2",
         kind: "RecurringJob",
@@ -228,6 +251,28 @@ export class Longhorn extends pulumi.ComponentResource {
           retain: 7,
           concurrency: 2,
           groups: [BACKUP_JOB_GROUP],
+          labels: {},
+        },
+      },
+      { dependsOn: [longhornChart], parent: this }
+    );
+
+    new k8s.apiextensions.CustomResource(
+      "system-backup",
+      {
+        apiVersion: "longhorn.io/v1beta2",
+        kind: "RecurringJob",
+        metadata: {
+          name: "system-backup",
+          namespace: this.namespace,
+        },
+        spec: {
+          name: "system-backup",
+          task: "backup",
+          cron: "0 4 * * *",
+          retain: 1,
+          concurrency: 1,
+          groups: ["system-backup"],
           labels: {},
         },
       },

@@ -18,8 +18,6 @@ const certManager = new CertManager("cert-manager", {
 
 const nfsCsi = new NFSCSI("nfs-csi");
 
-const longhorn = new Longhorn("longhorn");
-
 // const cnpgOperator = new CNPGOperator("cnpg-operator", { dependsOn: [longhorn] });
 
 // Ingress controllers depend on MetalLB
@@ -28,6 +26,14 @@ const ingressControllers = new IngressControllers(
   {},
   {
     dependsOn: [metallb],
+  }
+);
+
+const longhorn = new Longhorn(
+  "longhorn",
+  {},
+  {
+    dependsOn: [ingressControllers],
   }
 );
 

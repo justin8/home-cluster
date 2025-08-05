@@ -110,44 +110,12 @@ new k8s.apps.v1.Deployment("my-app", {
 
 All volume creation methods accept these options:
 
-| Option           | Description                       | Default                      |
-| ---------------- | --------------------------------- | ---------------------------- |
-| `size`           | Storage size (e.g. "1Gi", "10Gi") | "1Gi"                        |
-| `storageClass`   | Kubernetes StorageClass           | "longhorn"                   |
-| `accessModes`    | Volume access modes               | `["ReadWriteOnce"]`          |
-| `backupEnabled`  | Enable recurring backups          | `false`                      |
-| `backupSchedule` | Cron expression for backups       | "0 3 \*\* \*" (daily at 3am) |
-
-## Backup and Restore
-
-### How Backups Work
-
-When `backupEnabled` is set to `true` for a volume, a recurring backup job is created with the following default settings:
-
-- Schedule: Daily at 3am (cron: `0 3 * * *`)
-- Retention: 7 days of backups
-- Backup target: Configured in the Longhorn settings (S3 or NFS)
-
-### Restoring From Backups
-
-To restore a volume from backup when rebuilding a cluster:
-
-1. Install the Longhorn core service
-2. Configure the same backup target as the original cluster
-3. Access the Longhorn UI at `https://longhorn.<domain>`
-4. Navigate to "Backup" and select the desired backup
-5. Click "Restore" and select options
-6. Create a PVC that references the restored volume
-
-## Cluster Recovery
-
-When rebuilding a cluster, follow these steps:
-
-1. Ensure Talos Linux nodes have the required configuration
-2. Deploy the Pulumi stack which includes Longhorn
-3. Configure the backup target to point to the same location as the original cluster
-4. Restore volumes from backups using the Longhorn UI
-5. Applications will automatically connect to the restored volumes
+| Option          | Description                       | Default             |
+| --------------- | --------------------------------- | ------------------- |
+| `size`          | Storage size (e.g. "1Gi", "10Gi") | "1Gi"               |
+| `storageClass`  | Kubernetes StorageClass           | "longhorn"          |
+| `accessModes`   | Volume access modes               | `["ReadWriteOnce"]` |
+| `backupEnabled` | Enable recurring backups          | `false`             |
 
 ## Management
 
@@ -162,3 +130,27 @@ Use the Longhorn UI to monitor volume health, replica status, and backup status.
 ### Manual Backups
 
 In addition to scheduled backups, you can create manual backups through the Longhorn UI.
+
+## Backup and Restore
+
+### How Backups Work
+
+When `backupEnabled` is set to `true` for a volume, a recurring backup job is created with the following default settings:
+
+- Schedule: Daily at 3am (cron: `0 3 * * *`)
+- Retention: 7 days of backups
+- Backup target: Configured in the Longhorn settings (NFS)
+
+### Restoring From Backups
+
+As Longhorn volumes, PVs and PVCs have predictable names with this setup, you can restore a backup in the Longhorn UI (`https://longhorn.<domain>`) and use the same volume name. When bringing the service back online it will use this new volume. Note that if the PV and PVC exist, deleting the longhorn volume will delete them as well. Disabling the service and deploying via pulumi is recommended to then restore the volumes.
+
+## Cluster Recovery
+
+When rebuilding a cluster, follow these steps:
+
+1. Ensure Talos Linux nodes have the required configuration
+2. Deploy the Pulumi stack's core services only (including Longhorn), but don't deploy apps yet.
+3. Restore volumes from backups using the Longhorn UI to the same volume names.
+4. Deploy all services via Pulumi
+5. Applications will automatically connect to the restored volumes

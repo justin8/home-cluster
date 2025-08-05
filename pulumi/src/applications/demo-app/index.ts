@@ -12,7 +12,7 @@ export class DemoApp extends TauApplication {
     const moviesMount = this.volumeManager.addNFSMount("/storage/movies");
 
     // Longhorn volumes for persistent block storage
-    const dataMount = this.volumeManager.createVolume("/data/demo", {
+    const dataMount = this.volumeManager.addLonghornVolume("/data/demo", {
       size: "5Gi",
       backupEnabled: true,
     });

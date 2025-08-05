@@ -4,7 +4,7 @@
 - [x] A service with remote storage (NFS)
 - [x] Dual ingress controllers (internal/public)
 - [x] Figure out storage backups/volumes (longhorn?)
-- [ ] How to do restores
+- [x] Document how to do restores
 - [ ] Database provider
 - [ ] Auth
 - [ ] DNS resolution for ingress, locally and remote
