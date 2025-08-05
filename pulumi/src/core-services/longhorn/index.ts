@@ -268,12 +268,12 @@ export class Longhorn extends pulumi.ComponentResource {
         },
         spec: {
           name: "system-backup",
-          task: "backup",
+          task: "system-backup",
           cron: `0 ${applyTimezone(4)} * * *`,
           retain: 1,
-          concurrency: 1,
-          groups: ["system-backup"],
-          labels: {},
+          parameters: {
+            "volume-backup-policy": "if-not-present",
+          }
         },
       },
       { dependsOn: [longhornChart], parent: this }
