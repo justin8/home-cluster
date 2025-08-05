@@ -5,8 +5,6 @@ import { PostgresInstance } from "../constructs/postgresInstance";
 export interface DatabaseConfig {
   name: string;
   namespace?: string;
-  owner?: string;
-  instance?: string;
   extensions?: string[];
   storageSize?: string;
 }
@@ -27,15 +25,17 @@ export function createDatabase(
   parent?: pulumi.ComponentResource
 ): DatabaseResult {
   const namespace = config.namespace || "default";
-  const instanceName = config.instance || `postgres-${config.name}`;
+  const instanceName = `postgres-${config.name}`;
+  const storageSize = config.storageSize || "1Gi";
+  const extensions = config.extensions || [];
 
   // Create PostgreSQL instance
   const instance = new PostgresInstance(
     instanceName,
     {
       namespace: namespace,
-      storageSize: config.storageSize,
-      extensions: config.extensions,
+      storageSize: storageSize,
+      extensions: extensions,
     },
     { parent: parent }
   );
@@ -57,23 +57,4 @@ export function createDatabase(
     secret: instance.connectionSecret,
     instance: instance,
   };
-}
-
-/**
- * Creates a database for a TauApplication with automatic naming conventions
- */
-export function createDatabaseForApp(
-  appName: string,
-  namespace: string,
-  options: Omit<DatabaseConfig, "name" | "namespace"> = {},
-  parent?: pulumi.ComponentResource
-): DatabaseResult {
-  return createDatabase(
-    {
-      name: appName,
-      namespace: namespace,
-      ...options,
-    },
-    parent
-  );
 }

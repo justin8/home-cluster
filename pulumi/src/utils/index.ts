@@ -2,7 +2,7 @@ import * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
 import { DEFAULT_TLS_SECRET, PRIVATE_INGRESS_CLASS, PUBLIC_INGRESS_CLASS } from "../constants";
 
-export { createDatabase, createDatabaseForApp, DatabaseConfig, DatabaseResult } from "./database";
+export { createDatabase, DatabaseConfig, DatabaseResult } from "./database";
 
 export function reflectorAnnotation(key: pulumi.Input<string>, value: pulumi.Input<string>) {
   return {

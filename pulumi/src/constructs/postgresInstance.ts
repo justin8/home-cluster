@@ -3,17 +3,22 @@ import * as pulumi from "@pulumi/pulumi";
 import * as random from "@pulumi/random";
 
 interface PostgresInstanceArgs {
+  /** @default "default" */
   namespace?: string;
+  /** @default "1Gi" */
   storageSize?: string;
+  /** Can be a major version (17) or a specific minor (16.3) */
   version?: string;
+  /** @default [] */
   extensions?: string[];
+  resources?: k8s.types.input.core.v1.ResourceRequirements;
 }
 
 export class PostgresInstance extends pulumi.ComponentResource {
   public readonly connectionSecret: k8s.core.v1.Secret;
   public readonly serviceName: pulumi.Output<string>;
   public readonly host: pulumi.Output<string>;
-  public readonly port: pulumi.Output<number>;
+  public readonly port: pulumi.Output<string>;
   public readonly databaseName: string;
   public readonly username: string;
 
@@ -24,13 +29,17 @@ export class PostgresInstance extends pulumi.ComponentResource {
   ) {
     super("PostgresInstance", name, {}, opts);
 
-    const config = new pulumi.Config();
+    // const config = new pulumi.Config();
     const namespace = args.namespace || "default";
-    const storageSize = args.storageSize || "10Gi";
-    const version = args.version || "15";
-    const storageClass = "longhorn";
-    const backupNfsPath = config.require("postgres_backup_nfs_path");
+    const storageSize = args.storageSize || "1Gi";
+    const version = args.version || "17";
+    // const backupNfsPath = config.require("postgres_backup_nfs_path");
     const retentionDays = 7;
+
+    // The service name follows CNPG naming convention
+    this.serviceName = pulumi.output(`${name}-rw`);
+    this.host = pulumi.interpolate`${this.serviceName}.${namespace}.svc.cluster.local`;
+    this.port = pulumi.output("5432");
 
     this.databaseName = name;
     this.username = `${name}_user`;
@@ -45,7 +54,29 @@ export class PostgresInstance extends pulumi.ComponentResource {
       { parent: this }
     );
 
-    // Create the PostgreSQL cluster using CNPG CRD
+    // Create a comprehensive connection secret with all required fields
+    const connectionString = pulumi.interpolate`postgresql://${this.username}:${password.result}@${this.host}:${this.port}/${this.databaseName}`;
+
+    this.connectionSecret = new k8s.core.v1.Secret(
+      `${name}-credentials`,
+      {
+        metadata: {
+          name: `${name}-credentials`,
+          namespace: namespace,
+        },
+        type: "Opaque",
+        stringData: {
+          url: connectionString,
+          host: this.host,
+          port: this.port,
+          database: this.databaseName,
+          username: this.username,
+          password: password.result,
+        },
+      },
+      { parent: this }
+    );
+
     const cluster = new k8s.apiextensions.CustomResource(
       `${name}-cluster`,
       {
@@ -56,11 +87,11 @@ export class PostgresInstance extends pulumi.ComponentResource {
           namespace: namespace,
         },
         spec: {
-          instances: 1, // Single instance as per requirements
+          instances: 1,
+          imageName: `ghcr.io/cloudnative-pg/postgresql:${version}`,
 
           postgresql: {
             parameters: {
-              // Basic PostgreSQL configuration
               max_connections: "100",
               shared_buffers: "128MB",
               effective_cache_size: "512MB",
@@ -73,13 +104,12 @@ export class PostgresInstance extends pulumi.ComponentResource {
             },
           },
 
-          // Storage configuration using Longhorn
+          // TODO: Change to using a PVC selector and statically created longhorn volume + PV
           storage: {
             size: storageSize,
-            storageClass: storageClass,
+            storageClass: "longhorn",
           },
 
-          // Resource limits for low usage
           resources: {
             requests: {
               memory: "256Mi",
@@ -89,91 +119,26 @@ export class PostgresInstance extends pulumi.ComponentResource {
               memory: "512Mi",
               cpu: "500m",
             },
+            ...args.resources,
           },
 
-          // Backup configuration (simplified for NFS)
-          backup: {
-            retentionPolicy: `${retentionDays}d`,
-            // Note: Full NFS backup configuration would require additional setup
-            // This is a placeholder that can be enhanced based on your NFS configuration
-          },
+          // backup: {
+          //   retentionPolicy: `${retentionDays}d`,
+          //  This only supports S3-like object stores, so I need one before doing this
+          // },
 
-          // Bootstrap configuration
           bootstrap: {
             initdb: {
               database: this.databaseName,
               owner: this.username,
               secret: {
-                name: `${name}-credentials`,
+                name: this.connectionSecret.metadata.name,
               },
             },
           },
-
-          // Monitoring (disabled as per requirements)
-          monitoring: {
-            enabled: false,
-          },
         },
       },
       { parent: this }
     );
-
-    // Create the credentials secret
-    this.connectionSecret = new k8s.core.v1.Secret(
-      `${name}-credentials`,
-      {
-        metadata: {
-          name: `${name}-credentials`,
-          namespace: namespace,
-        },
-        type: "Opaque",
-        stringData: {
-          username: this.username,
-          password: password.result,
-          database: this.databaseName,
-        },
-      },
-      { parent: this }
-    );
-
-    // The service name follows CNPG naming convention
-    this.serviceName = pulumi.output(`${name}-rw`);
-    this.host = pulumi.output(`${name}-rw.${namespace}.svc.cluster.local`);
-    this.port = pulumi.output(5432);
-
-    // Create a comprehensive connection secret with all required fields
-    const connectionString = pulumi.interpolate`postgresql://${this.username}:${password.result}@${this.serviceName}.${namespace}.svc.cluster.local:5432/${this.databaseName}`;
-
-    const fullConnectionSecret = new k8s.core.v1.Secret(
-      `${name}-connection`,
-      {
-        metadata: {
-          name: `${name}-postgres-credentials`,
-          namespace: namespace,
-        },
-        type: "Opaque",
-        stringData: {
-          DATABASE_URL: connectionString,
-          DB_HOST: pulumi.interpolate`${this.serviceName}.${namespace}.svc.cluster.local`,
-          DB_PORT: "5432",
-          DB_NAME: this.databaseName,
-          DB_USER: this.username,
-          DB_PASSWORD: password.result,
-        },
-      },
-      { parent: this, dependsOn: [cluster] }
-    );
-
-    // Override the connectionSecret to use the full one
-    this.connectionSecret = fullConnectionSecret;
-
-    // Register outputs
-    this.registerOutputs({
-      cluster: cluster,
-      connectionSecret: this.connectionSecret,
-      serviceName: this.serviceName,
-      host: this.host,
-      port: this.port,
-    });
   }
 }

@@ -3,7 +3,7 @@ import * as pulumi from "@pulumi/pulumi";
 
 import { DEFAULT_TLS_SECRET } from "../constants";
 import { createIngress, createService } from "../utils";
-import { createDatabaseForApp, DatabaseResult } from "../utils/database";
+import { createDatabase, DatabaseResult } from "../utils/database";
 import { VolumeManager } from "./volumeManager";
 
 interface CreateIngressArgs {
@@ -35,7 +35,7 @@ export abstract class TauApplication extends pulumi.ComponentResource {
   public readonly defaultTlsSecret: string;
   public readonly namespace: string;
   public readonly name: string;
-  protected readonly databaseResult?: DatabaseResult;
+  protected readonly database?: DatabaseResult;
 
   constructor(
     name: string,
@@ -86,10 +86,10 @@ export abstract class TauApplication extends pulumi.ComponentResource {
 
     // Create database if enabled
     if (options.database?.enabled) {
-      this.databaseResult = createDatabaseForApp(
-        options.database.name || name,
-        this.namespace,
+      this.database = createDatabase(
         {
+          name: options.database.name || name,
+          namespace: this.namespace,
           extensions: options.database.extensions,
           storageSize: options.database.storageSize,
         },
@@ -102,15 +102,15 @@ export abstract class TauApplication extends pulumi.ComponentResource {
    * Get database environment variables for injection into containers
    */
   protected getDatabaseEnvironmentVariables(): k8s.types.input.core.v1.EnvVar[] {
-    if (!this.databaseResult) return [];
+    if (!this.database) return [];
 
     return [
       {
         name: "DATABASE_URL",
         valueFrom: {
           secretKeyRef: {
-            name: this.databaseResult.secret.metadata.name,
-            key: "DATABASE_URL",
+            name: this.database.secret.metadata.name,
+            key: "url",
           },
         },
       },
@@ -118,8 +118,8 @@ export abstract class TauApplication extends pulumi.ComponentResource {
         name: "DB_HOST",
         valueFrom: {
           secretKeyRef: {
-            name: this.databaseResult.secret.metadata.name,
-            key: "DB_HOST",
+            name: this.database.secret.metadata.name,
+            key: "host",
           },
         },
       },
@@ -127,8 +127,8 @@ export abstract class TauApplication extends pulumi.ComponentResource {
         name: "DB_PORT",
         valueFrom: {
           secretKeyRef: {
-            name: this.databaseResult.secret.metadata.name,
-            key: "DB_PORT",
+            name: this.database.secret.metadata.name,
+            key: "port",
           },
         },
       },
@@ -136,8 +136,8 @@ export abstract class TauApplication extends pulumi.ComponentResource {
         name: "DB_NAME",
         valueFrom: {
           secretKeyRef: {
-            name: this.databaseResult.secret.metadata.name,
-            key: "DB_NAME",
+            name: this.database.secret.metadata.name,
+            key: "database",
           },
         },
       },
@@ -145,8 +145,8 @@ export abstract class TauApplication extends pulumi.ComponentResource {
         name: "DB_USER",
         valueFrom: {
           secretKeyRef: {
-            name: this.databaseResult.secret.metadata.name,
-            key: "DB_USER",
+            name: this.database.secret.metadata.name,
+            key: "username",
           },
         },
       },
@@ -154,8 +154,8 @@ export abstract class TauApplication extends pulumi.ComponentResource {
         name: "DB_PASSWORD",
         valueFrom: {
           secretKeyRef: {
-            name: this.databaseResult.secret.metadata.name,
-            key: "DB_PASSWORD",
+            name: this.database.secret.metadata.name,
+            key: "password",
           },
         },
       },

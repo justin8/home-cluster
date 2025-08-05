@@ -1,6 +1,6 @@
-import { TauApplication } from "../../constructs/tauApplication";
 import * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
+import { TauApplication } from "../../constructs/tauApplication";
 
 export class PostgresExample extends TauApplication {
   constructor(name: string, opts?: pulumi.ComponentResourceOptions) {
@@ -100,13 +100,5 @@ export class PostgresExample extends TauApplication {
       },
       { parent: this }
     );
-
-    // Register outputs
-    this.registerOutputs({
-      deployment: deployment,
-      service: service,
-      databaseHost: this.databaseResult?.host,
-      databasePort: this.databaseResult?.port,
-    });
   }
 }
