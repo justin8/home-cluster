@@ -24,6 +24,8 @@ pkgs.mkShell {
     export SOPS_AGE_KEY_FILE=$PWD/.sops-age.key
     export PULUMI_CONFIG_PASSPHRASE="$(sops decrypt --extract '["passphrase"]' pulumi/.pulumi-passphrase.sops.yaml)"
 
+    git submodule update --init --recursive
+
     uv sync
     source .venv/bin/activate
     if [[ ! -e .sops-age.key ]]; then

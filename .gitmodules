@@ -1,0 +1,3 @@
+[submodule "pulumi/submodules/external-snapshotter"]
+	path = pulumi/submodules/external-snapshotter
+	url = https://github.com/kubernetes-csi/external-snapshotter.git

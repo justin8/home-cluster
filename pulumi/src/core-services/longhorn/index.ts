@@ -62,7 +62,7 @@ export class Longhorn extends pulumi.ComponentResource {
     const snapshotCrds = new k8s.kustomize.v2.Directory(
       "snapshot-crds-kustomize",
       {
-        directory: `https://github.com/kubernetes-csi/external-snapshotter/client/config/crd?ref=${snapshotterVersion}`,
+        directory: "submodules/external-snapshotter/client/config/crd",
       },
       { parent: this }
     );
@@ -70,7 +70,7 @@ export class Longhorn extends pulumi.ComponentResource {
     const snapshotController = new k8s.kustomize.v2.Directory(
       "snapshot-controller-kustomize",
       {
-        directory: `https://github.com/kubernetes-csi/external-snapshotter/deploy/kubernetes/snapshot-controller?ref=${snapshotterVersion}`,
+        directory: "submodules/external-snapshotter/deploy/kubernetes/snapshot-controller",
         namespace: "kube-system",
       },
       { parent: this, dependsOn: [snapshotCrds] }
@@ -224,28 +224,6 @@ export class Longhorn extends pulumi.ComponentResource {
         spec: {
           name: BACKUP_JOB_GROUP,
           task: "backup",
-          cron: "0 3 * * *",
-          retain: 1,
-          concurrency: 2,
-          groups: [BACKUP_JOB_GROUP],
-          labels: {},
-        },
-      },
-      { dependsOn: [longhornChart], parent: this }
-    );
-
-    new k8s.apiextensions.CustomResource(
-      "snapshots-enabled",
-      {
-        apiVersion: "longhorn.io/v1beta2",
-        kind: "RecurringJob",
-        metadata: {
-          name: "snapshots-enabled",
-          namespace: this.namespace,
-        },
-        spec: {
-          name: BACKUP_JOB_GROUP,
-          task: "snapshot",
           cron: "0 3 * * *",
           retain: 7,
           concurrency: 2,
