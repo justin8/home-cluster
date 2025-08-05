@@ -1,18 +1,7 @@
 import * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
 import * as random from "@pulumi/random";
-
-interface PostgresInstanceArgs {
-  /** @default "default" */
-  namespace?: string;
-  /** @default "1Gi" */
-  storageSize?: string;
-  /** Can be a major version (17) or a specific minor (16.3) */
-  version?: string;
-  /** @default [] */
-  extensions?: string[];
-  resources?: k8s.types.input.core.v1.ResourceRequirements;
-}
+import { DatabaseOptions } from "../utils/database";
 
 export class PostgresInstance extends pulumi.ComponentResource {
   public readonly connectionSecret: k8s.core.v1.Secret;
@@ -22,19 +11,13 @@ export class PostgresInstance extends pulumi.ComponentResource {
   public readonly databaseName: string;
   public readonly username: string;
 
-  constructor(
-    name: string,
-    args: PostgresInstanceArgs = {},
-    opts?: pulumi.ComponentResourceOptions
-  ) {
-    super("PostgresInstance", name, {}, opts);
+  constructor(args: DatabaseOptions, opts?: pulumi.ComponentResourceOptions) {
+    super("PostgresInstance", args.name, {}, opts);
 
-    // const config = new pulumi.Config();
+    const name = args.name;
     const namespace = args.namespace || "default";
     const storageSize = args.storageSize || "1Gi";
     const version = args.version || "17";
-    // const backupNfsPath = config.require("postgres_backup_nfs_path");
-    const retentionDays = 7;
 
     // The service name follows CNPG naming convention
     this.serviceName = pulumi.output(`${name}-rw`);

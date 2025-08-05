@@ -5,7 +5,8 @@
 - [x] Dual ingress controllers (internal/public)
 - [x] Figure out storage backups/volumes (longhorn?)
 - [x] Document how to do restores
-- [ ] Database provider
+- [x] Database provider
+  - [ ] Use static volumes for databases
 - [ ] Auth
 - [ ] DNS resolution for ingress, locally and remote
 - [ ] Move services over

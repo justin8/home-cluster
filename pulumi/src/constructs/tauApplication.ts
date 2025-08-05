@@ -3,7 +3,7 @@ import * as pulumi from "@pulumi/pulumi";
 
 import { DEFAULT_TLS_SECRET } from "../constants";
 import { createIngress, createService } from "../utils";
-import { createDatabase, DatabaseResult } from "../utils/database";
+import { createDatabase, DatabaseOptions, DatabaseResult } from "../utils/database";
 import { VolumeManager } from "./volumeManager";
 
 interface CreateIngressArgs {
@@ -14,13 +14,6 @@ interface CreateIngressArgs {
   public?: boolean;
   /** @default name */
   subdomain?: string;
-}
-
-interface DatabaseOptions {
-  enabled: boolean;
-  name?: string;
-  extensions?: string[];
-  storageSize?: string;
 }
 
 interface TauApplicationOptions {
@@ -84,17 +77,16 @@ export abstract class TauApplication extends pulumi.ComponentResource {
     // For now, we'll use default namespace - this can be enhanced later
     this.namespace = "default";
 
-    // Create database if enabled
-    if (options.database?.enabled) {
-      this.database = createDatabase(
-        {
-          name: options.database.name || name,
-          namespace: this.namespace,
-          extensions: options.database.extensions,
-          storageSize: options.database.storageSize,
-        },
-        this
-      );
+    // Create database if options are provided
+    if (options.database) {
+      // Use application name as database name if not specified
+      const dbOptions = {
+        ...options.database,
+        name: options.database.name || name,
+        namespace: options.database.namespace || this.namespace,
+      };
+
+      this.database = createDatabase(dbOptions, { parent: this });
     }
   }
 
