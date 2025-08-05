@@ -6,25 +6,9 @@ This guide explains how to use PostgreSQL databases in your Pulumi home cluster 
 
 ## Quick Start
 
-### 1. Configuration
+### 1. Using Database with TauApplication
 
-Add the following configuration variable to your `Pulumi.home-cluster.yaml`:
-
-```yaml
-config:
-  home-cluster:postgres_backup_nfs_path: "/mnt/backups/postgres"
-```
-
-**Default Values (built into code):**
-
-- PostgreSQL version: `15`
-- Storage class: `longhorn`
-- Default storage size: `10Gi`
-- Backup retention: `7 days`
-
-### 2. Using Database with TauApplication
-
-The easiest way to add a database to your application is through the TauApplication constructor:
+The easiest way to add a database to your application is through the TauApplication constructor. It simplifies setup and provides helper functions to get connection details as environment variables.
 
 ```typescript
 import { TauApplication } from "../constructs/tauApplication";
@@ -35,9 +19,10 @@ export class MyApp extends TauApplication {
       name,
       {
         database: {
-          enabled: true,
+          name: "my-app-db", // Required
           extensions: ["uuid-ossp", "pgcrypto"], // Optional
-          storageSize: "20Gi", // Optional, defaults to config value
+          storageSize: "20Gi", // Optional
+          version: "17", // Optional
         },
       },
       opts
@@ -68,18 +53,19 @@ export class MyApp extends TauApplication {
 }
 ```
 
-### 3. Using Database Utility Function Directly
+### 2. Using Database Utility Function Directly
 
-For more control, you can use the database utility function directly:
+For more control, you can use the database utility function directly.
 
 ```typescript
 import { createDatabase } from "../utils/database";
 
 const dbResult = createDatabase({
-  name: "my-app-db",
+  name: "my-app-db", // Required
   namespace: "my-namespace",
   extensions: ["uuid-ossp"],
   storageSize: "15Gi",
+  version: "17",
 });
 
 // Use dbResult.secret in your deployments
@@ -87,7 +73,7 @@ const dbResult = createDatabase({
 
 ## Environment Variables
 
-When using the TauApplication integration, the following environment variables are automatically injected:
+When using the TauApplication integration, the following environment variables are automatically injected via the `getAllEnvironmentVariables()` function:
 
 - `DATABASE_URL` - Full PostgreSQL connection string
 - `DB_HOST` - Database hostname
@@ -96,36 +82,38 @@ When using the TauApplication integration, the following environment variables a
 - `DB_USER` - Database username
 - `DB_PASSWORD` - Database password
 
+You can also manually access these values from the Kubernetes secret at `dbResult.secret.stringData`:
+
+- `url` - Full PostgreSQL connection string
+- `host` - Database hostname
+- `port` - Database port
+- `database` - Database name
+- `username` - Database username
+- `password` - Database password
+
 ## Database Features
 
 ### Supported PostgreSQL Extensions
 
-You can specify PostgreSQL extensions when creating a database:
+You can specify PostgreSQL extensions when creating a database (any supported by your CNPG/PostgreSQL version):
 
 ```typescript
 database: {
-  enabled: true,
   extensions: [
-    "uuid-ossp",    // UUID generation
-    "pgcrypto",     // Cryptographic functions
-    "hstore",       // Key-value store
-    "ltree",        // Tree-like structures
-    "pg_trgm"       // Trigram matching
-  ]
+    "uuid-ossp", // UUID generation
+    "pgcrypto", // Cryptographic functions
+    "hstore", // Key-value store
+    "ltree", // Tree-like structures
+    "pg_trgm", // Trigram matching
+  ];
 }
 ```
 
 ### Storage Configuration
 
 - **Storage Class**: Uses Longhorn by default for persistent storage
-- **Size**: Configurable per database (default: 10Gi)
+- **Size**: Configurable per database
 - **Persistence**: Data persists across pod restarts and node failures
-
-### Backup Configuration
-
-- **Schedule**: Daily backups (configured in CNPG)
-- **Storage**: Backups stored on NFS (path configurable)
-- **Retention**: 7 days by default (configurable)
 
 ## Examples
 
@@ -138,7 +126,7 @@ export class WebApp extends TauApplication {
       name,
       {
         database: {
-          enabled: true,
+          name: "web-db",
           extensions: ["uuid-ossp"],
         },
       },
@@ -190,7 +178,6 @@ export class ComplexApp extends TauApplication {
       name,
       {
         database: {
-          enabled: true,
           name: "main-db",
         },
       },
@@ -203,6 +190,7 @@ export class ComplexApp extends TauApplication {
         name: "analytics-db",
         namespace: this.namespace,
         storageSize: "50Gi",
+        version: "17",
       },
       this
     );
@@ -211,53 +199,6 @@ export class ComplexApp extends TauApplication {
   }
 }
 ```
-
-## Troubleshooting
-
-### Database Connection Issues
-
-1. **Check if CNPG operator is running:**
-
-   ```bash
-   kubectl get pods -n cnpg-system
-   ```
-
-2. **Check database cluster status:**
-
-   ```bash
-   kubectl get clusters.postgresql.cnpg.io
-   ```
-
-3. **Check database logs:**
-   ```bash
-   kubectl logs -l cnpg.io/cluster=your-db-name
-   ```
-
-### Storage Issues
-
-1. **Check Longhorn storage:**
-
-   ```bash
-   kubectl get pv | grep longhorn
-   ```
-
-2. **Check storage class:**
-   ```bash
-   kubectl get storageclass longhorn
-   ```
-
-### Backup Issues
-
-1. **Check backup configuration:**
-
-   ```bash
-   kubectl describe clusters.postgresql.cnpg.io your-db-name
-   ```
-
-2. **Verify NFS mount:**
-   ```bash
-   # Check if NFS path is accessible from cluster nodes
-   ```
 
 ## Best Practices
 
@@ -275,49 +216,13 @@ export class ComplexApp extends TauApplication {
 
 ### Backup and Recovery
 
-- Backups are automated but test restore procedures regularly
-- Keep backup retention period appropriate for your needs
+- Backups are not enabled by default; configure and test restore procedures if needed
 - Monitor backup storage usage on NFS
 
 ### Development Workflow
 
 1. Create your application extending TauApplication
-2. Enable database in constructor options
+2. Add a `database` property in constructor options
 3. Use `this.getAllEnvironmentVariables()` in container specs
 4. Deploy and test database connectivity
 5. Monitor resource usage and adjust as needed
-
-## Configuration Reference
-
-### Required Pulumi Configuration Variables
-
-| Variable                   | Description                 |
-| -------------------------- | --------------------------- |
-| `postgres_backup_nfs_path` | NFS path for backup storage |
-
-### Built-in Defaults
-
-| Setting              | Default Value | Description                            |
-| -------------------- | ------------- | -------------------------------------- |
-| PostgreSQL Version   | `"15"`        | PostgreSQL major version               |
-| Storage Class        | `"longhorn"`  | Storage class for PostgreSQL data      |
-| Default Storage Size | `"10Gi"`      | Default storage size for new databases |
-| Backup Retention     | `7 days`      | Backup retention period                |
-
-### Per-Database Configuration Options
-
-| Option        | Type     | Default      | Description                         |
-| ------------- | -------- | ------------ | ----------------------------------- |
-| `enabled`     | boolean  | `false`      | Enable database for the application |
-| `name`        | string   | app name     | Database name                       |
-| `extensions`  | string[] | `[]`         | PostgreSQL extensions to enable     |
-| `storageSize` | string   | config value | Storage size for the database       |
-
-## Support
-
-For issues or questions:
-
-1. Check the troubleshooting section above
-2. Review CNPG documentation: https://cloudnative-pg.io/
-3. Check Kubernetes events: `kubectl get events`
-4. Review application and database logs

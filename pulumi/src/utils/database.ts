@@ -2,11 +2,17 @@ import * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
 import { PostgresInstance } from "../constructs/postgresInstance";
 
-export interface DatabaseConfig {
+/**
+ * Unified interface for database configuration options
+ * This is used across tauApplication, database utils, and postgresInstance
+ */
+export interface DatabaseOptions {
   name: string;
   namespace?: string;
   extensions?: string[];
   storageSize?: string;
+  version?: string;
+  resources?: k8s.types.input.core.v1.ResourceRequirements;
 }
 
 export interface DatabaseResult {
@@ -21,23 +27,18 @@ export interface DatabaseResult {
 }
 
 export function createDatabase(
-  config: DatabaseConfig,
-  parent?: pulumi.ComponentResource
+  config: DatabaseOptions,
+  opts?: pulumi.ComponentResourceOptions
 ): DatabaseResult {
-  const namespace = config.namespace || "default";
   const instanceName = `postgres-${config.name}`;
-  const storageSize = config.storageSize || "1Gi";
-  const extensions = config.extensions || [];
 
-  // Create PostgreSQL instance
+  // Create PostgreSQL instance with all options passed through
   const instance = new PostgresInstance(
-    instanceName,
     {
-      namespace: namespace,
-      storageSize: storageSize,
-      extensions: extensions,
+      ...config,
+      name: instanceName,
     },
-    { parent: parent }
+    opts
   );
 
   // Extract connection details from the instance
@@ -47,10 +48,13 @@ export function createDatabase(
   const password = instance.connectionSecret.stringData.apply(data => data!["DB_PASSWORD"]);
   const username = pulumi.output(instance.username);
 
+  // Convert port to number
+  const portNumber = instance.port.apply(p => parseInt(p, 10));
+
   return {
     connectionString: connectionString,
     host: instance.host,
-    port: instance.port,
+    port: portNumber,
     database: config.name,
     username: username,
     password: password,
