@@ -6,7 +6,7 @@
 - [x] Figure out storage backups/volumes (longhorn?)
 - [x] Document how to do restores
 - [x] Database provider
-  - [ ] Use static volumes for databases
+  - [x] Use static volumes for databases to enable backups via Longhorn
 - [ ] Auth
 - [ ] DNS resolution for ingress, locally and remote
 - [ ] Move services over

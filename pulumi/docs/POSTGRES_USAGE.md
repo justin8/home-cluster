@@ -167,7 +167,7 @@ export class WebApp extends TauApplication {
 }
 ```
 
-### Multiple Databases per Application
+### Multiple Database instances per Application
 
 ```typescript
 export class ComplexApp extends TauApplication {
@@ -216,8 +216,8 @@ export class ComplexApp extends TauApplication {
 
 ### Backup and Recovery
 
-- Backups are not enabled by default; configure and test restore procedures if needed
-- Monitor backup storage usage on NFS
+- Backups are enabled by default via Longhorn volume backups (see [LONGHORN](LONGHORN.md) for more details)
+- CNPG's native backups are not being used currently
 
 ### Development Workflow
 
@@ -226,3 +226,8 @@ export class ComplexApp extends TauApplication {
 3. Use `this.getAllEnvironmentVariables()` in container specs
 4. Deploy and test database connectivity
 5. Monitor resource usage and adjust as needed
+
+## Limitations
+
+- Currently only supports a single PostgreSQL instance per application
+  - This is due to the way we provision Longhorn using static volumes - it greatly simplifies backups/restores and provides usable names in the Longhorn UI. However each CNPG cluster is created with a PVC template that maps back to a single volume

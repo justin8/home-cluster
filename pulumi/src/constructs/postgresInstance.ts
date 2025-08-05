@@ -2,6 +2,7 @@ import * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
 import * as random from "@pulumi/random";
 import { DatabaseOptions } from "../utils/database";
+import { createLonghornPersistentVolume, createLonghornVolumeResource } from "./volumeManager";
 
 export class PostgresInstance extends pulumi.ComponentResource {
   public readonly connectionSecret: k8s.core.v1.Secret;
@@ -60,6 +61,29 @@ export class PostgresInstance extends pulumi.ComponentResource {
       { parent: this }
     );
 
+    const longhornVolume = createLonghornVolumeResource(name, "data", storageSize, true, {
+      parent: this,
+    });
+    const pv = createLonghornPersistentVolume(
+      name,
+      "data",
+      storageSize,
+      ["ReadWriteOnce"],
+      "longhorn",
+      longhornVolume,
+      { parent: this, dependsOn: [longhornVolume] }
+    );
+    const pvcTemplate = {
+      accessModes: ["ReadWriteOnce"],
+      storageClassName: "longhorn",
+      volumeName: pv.metadata.name,
+      resources: {
+        requests: {
+          storage: storageSize,
+        },
+      },
+    };
+
     const cluster = new k8s.apiextensions.CustomResource(
       `${name}-cluster`,
       {
@@ -70,7 +94,7 @@ export class PostgresInstance extends pulumi.ComponentResource {
           namespace: namespace,
         },
         spec: {
-          instances: 1,
+          instances: 1, // Currently only supports a single instance, the PVC selector needs to be updated to support multiple instances
           imageName: `ghcr.io/cloudnative-pg/postgresql:${version}`,
 
           postgresql: {
@@ -87,10 +111,10 @@ export class PostgresInstance extends pulumi.ComponentResource {
             },
           },
 
-          // TODO: Change to using a PVC selector and statically created longhorn volume + PV
           storage: {
             size: storageSize,
             storageClass: "longhorn",
+            pvcTemplate,
           },
 
           resources: {
@@ -104,11 +128,6 @@ export class PostgresInstance extends pulumi.ComponentResource {
             },
             ...args.resources,
           },
-
-          // backup: {
-          //   retentionPolicy: `${retentionDays}d`,
-          //  This only supports S3-like object stores, so I need one before doing this
-          // },
 
           bootstrap: {
             initdb: {
