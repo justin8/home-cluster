@@ -203,15 +203,16 @@ export class Longhorn extends pulumi.ComponentResource {
     );
 
     // Create ingress for Longhorn UI
-    createIngress({
-      name: "longhorn-ui-ingress",
-      namespace: namespace as string,
-      host: pulumi.interpolate`longhorn.${domain}`,
-      serviceName: "longhorn-frontend",
-      servicePort: 80,
-      public: false,
-      parent: this,
-    });
+    createIngress(
+      {
+        namespace,
+        subdomain: "longhorn",
+        serviceName: "longhorn-frontend",
+        port: 80,
+        isPublic: false,
+      },
+      { parent: this, dependsOn: [longhornChart] }
+    );
 
     new k8s.apiextensions.CustomResource(
       FSTRIM_JOB_GROUP,
@@ -273,7 +274,7 @@ export class Longhorn extends pulumi.ComponentResource {
           retain: 1,
           parameters: {
             "volume-backup-policy": "if-not-present",
-          }
+          },
         },
       },
       { dependsOn: [longhornChart], parent: this }

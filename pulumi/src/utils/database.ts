@@ -1,5 +1,4 @@
 import * as k8s from "@pulumi/kubernetes";
-import * as pulumi from "@pulumi/pulumi";
 import { PostgresInstance } from "../constructs/postgresInstance";
 
 /**
@@ -15,50 +14,65 @@ export interface DatabaseOptions {
   resources?: k8s.types.input.core.v1.ResourceRequirements;
 }
 
-export interface DatabaseResult {
-  connectionString: pulumi.Output<string>;
-  host: pulumi.Output<string>;
-  port: pulumi.Output<number>;
-  database: string;
-  username: pulumi.Output<string>;
-  password: pulumi.Output<string>;
-  secret: k8s.core.v1.Secret;
-  instance: PostgresInstance;
-}
-
-export function createDatabase(
-  config: DatabaseOptions,
-  opts?: pulumi.ComponentResourceOptions
-): DatabaseResult {
-  const instanceName = `postgres-${config.name}`;
-
-  // Create PostgreSQL instance with all options passed through
-  const instance = new PostgresInstance(
+export function getEnvironmentVariablesForDB(
+  instance: PostgresInstance
+): k8s.types.input.core.v1.EnvVar[] {
+  if (!instance) return [];
+  const secretName = instance.connectionSecret.metadata.name;
+  return [
     {
-      ...config,
-      name: instanceName,
+      name: "DATABASE_URL",
+      valueFrom: {
+        secretKeyRef: {
+          name: secretName,
+          key: "url",
+        },
+      },
     },
-    opts
-  );
-
-  // Extract connection details from the instance
-  const connectionString = instance.connectionSecret.stringData.apply(
-    data => data!["DATABASE_URL"]
-  );
-  const password = instance.connectionSecret.stringData.apply(data => data!["DB_PASSWORD"]);
-  const username = pulumi.output(instance.username);
-
-  // Convert port to number
-  const portNumber = instance.port.apply(p => parseInt(p, 10));
-
-  return {
-    connectionString: connectionString,
-    host: instance.host,
-    port: portNumber,
-    database: config.name,
-    username: username,
-    password: password,
-    secret: instance.connectionSecret,
-    instance: instance,
-  };
+    {
+      name: "DB_HOST",
+      valueFrom: {
+        secretKeyRef: {
+          name: secretName,
+          key: "host",
+        },
+      },
+    },
+    {
+      name: "DB_PORT",
+      valueFrom: {
+        secretKeyRef: {
+          name: secretName,
+          key: "port",
+        },
+      },
+    },
+    {
+      name: "DB_NAME",
+      valueFrom: {
+        secretKeyRef: {
+          name: secretName,
+          key: "database",
+        },
+      },
+    },
+    {
+      name: "DB_USER",
+      valueFrom: {
+        secretKeyRef: {
+          name: secretName,
+          key: "username",
+        },
+      },
+    },
+    {
+      name: "DB_PASSWORD",
+      valueFrom: {
+        secretKeyRef: {
+          name: secretName,
+          key: "password",
+        },
+      },
+    },
+  ];
 }

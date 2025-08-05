@@ -162,7 +162,7 @@ export class WebApp extends TauApplication {
     );
 
     // Create ingress for web access
-    this.createIngress({ port: 3000 });
+    createHttpIngress({ appName: name, port: 3000 });
   }
 }
 ```

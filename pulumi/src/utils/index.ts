@@ -2,8 +2,13 @@ import * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
 import { DEFAULT_TLS_SECRET, PRIVATE_INGRESS_CLASS, PUBLIC_INGRESS_CLASS } from "../constants";
 
-export { createDatabase, DatabaseOptions, DatabaseResult } from "./database";
+export { DatabaseOptions } from "./database";
 
+const config = new pulumi.Config();
+
+/**
+ * Generates a reflector annotation for a given key and value.
+ */
 export function reflectorAnnotation(key: pulumi.Input<string>, value: pulumi.Input<string>) {
   return {
     [`reflector.v1.k8s.emberstack.com/reflection-${key}`]: value,
@@ -11,7 +16,8 @@ export function reflectorAnnotation(key: pulumi.Input<string>, value: pulumi.Inp
 }
 
 /**
- * Converts an hour (0-23) by the timezone_offset Pulumi config variable.
+ * Converts an hour (0-23) by the timezone_offset Pulumi config variable. Mostly because Talos only supports UTC.
+ * This allows us to convert the hour to the local timezone for scheduling jobs.
  * @param hour The hour to convert (0-23)
  * @returns The converted hour (0-23)
  */
@@ -21,6 +27,12 @@ export function applyTimezone(hour: number): number {
   return (hour + offset + 24) % 24;
 }
 
+/**
+ * Parses an IP range string (e.g. "192.168.1.10-192.168.1.20") into an array of IP addresses.
+ * Only supports ranges within the last octet.
+ * @param range The IP range string
+ * @returns Array of IP addresses in the range
+ */
 export function parseIPRange(range: string): string[] {
   const [start, end] = range.split("-");
   const startParts = start.split(".").map(Number);
@@ -34,35 +46,139 @@ export function parseIPRange(range: string): string[] {
   return ips;
 }
 
-export interface CreateIngressArgs {
-  name: string;
-  namespace?: pulumi.Input<string>;
-  host: pulumi.Input<string>;
-  serviceName: pulumi.Input<string>;
-  servicePort: pulumi.Input<number>;
+/**
+ * Arguments for creating an HTTP ingress and service for an application.
+ */
+export interface CreateHttpIngressOptions {
+  appName: string;
+  port: number;
+  labels?: Record<string, string>;
+  targetPort?: number;
+  public?: boolean;
+  subdomain?: string;
   path?: pulumi.Input<string>;
   pathType?: pulumi.Input<string>;
-  public?: boolean;
-  parent?: pulumi.Resource;
+  namespace?: pulumi.Input<string>;
 }
 
-export function createIngress(args: CreateIngressArgs): k8s.networking.v1.Ingress {
-  const {
-    name,
-    namespace,
-    host,
-    serviceName,
-    servicePort,
-    path = "/",
-    pathType = "Prefix",
-    public: isPublic = false,
-    parent,
-  } = args;
+/**
+ * The result of createHttpIngress, containing both the ingress and service resources.
+ */
+export interface CreateHttpIngressResult {
+  ingress: k8s.networking.v1.Ingress;
+  service: k8s.core.v1.Service;
+}
 
-  const ingressClass = isPublic ? PUBLIC_INGRESS_CLASS : PRIVATE_INGRESS_CLASS;
+/**
+ * Creates a Kubernetes Service and Ingress for HTTP traffic for an application.
+ * Returns both resources for further use.
+ * @param options Arguments for HTTP ingress and service creation
+ * @returns CreateHttpIngressResult containing the ingress and service
+ */
+export function createHttpIngress(
+  options: CreateHttpIngressOptions,
+  opts?: pulumi.ComponentResourceOptions
+): CreateHttpIngressResult {
+  const appName = options.appName;
+  const labels = options.labels ?? {};
+  const port = options.port ?? 80;
+  const targetPort = options.targetPort ?? 80;
+  const isPublic = options.public ?? false;
+  const subdomain = options.subdomain ?? options.appName;
+  const path = options.path ?? "/";
+  const pathType = options.pathType ?? "Prefix";
+  const namespace = options.namespace ?? "default";
+
+  // Create the service
+  const service = createService(
+    {
+      appName,
+      labels,
+      port,
+      targetPort,
+      namespace,
+    },
+    opts
+  );
+
+  // Create the Ingress resource
+  const ingress = createIngress(
+    {
+      port,
+      namespace,
+      isPublic,
+      subdomain,
+      path,
+      pathType,
+      serviceName: service.metadata.name,
+    },
+    opts
+  );
+
+  return { ingress: ingress, service: service };
+}
+
+export interface createServiceOptions {
+  appName: string;
+  labels?: Record<string, string>;
+  port?: number;
+  targetPort?: number;
+  namespace?: pulumi.Input<string>;
+}
+
+export function createService(
+  options: createServiceOptions,
+  opts?: pulumi.ComponentResourceOptions
+): k8s.core.v1.Service {
+  const appName = options.appName;
+  const labels = options.labels ?? {};
+  const port = options.port ?? 80;
+  const targetPort = options.targetPort ?? 80;
+  const namespace = options.namespace || "default";
+
+  return new k8s.core.v1.Service(
+    `${appName}-service`,
+    {
+      metadata: {
+        ...(namespace && { namespace }),
+      },
+      spec: {
+        type: "ClusterIP",
+        ports: [{ port, targetPort, protocol: "TCP" }],
+        selector: labels,
+      },
+    },
+    opts
+  );
+}
+
+export interface CreateIngressOptions {
+  serviceName: pulumi.Input<string>;
+  port: number;
+  subdomain?: string;
+  namespace?: pulumi.Input<string>;
+  isPublic?: boolean;
+  path?: pulumi.Input<string>;
+  pathType?: pulumi.Input<string>;
+}
+
+export function createIngress(
+  options: CreateIngressOptions,
+  opts?: pulumi.ComponentResourceOptions
+): k8s.networking.v1.Ingress {
+  const port = options.port;
+  const namespace = options.namespace || "default";
+  const isPublic = options.isPublic ?? false;
+  const subdomain = options.subdomain;
+  const path = options.path || "/";
+  const pathType = options.pathType || "Prefix";
+  const serviceName = options.serviceName;
+
+  const domain = config.require("domain");
+  const appDomain = subdomain ? `${subdomain}.${domain}` : domain;
 
   return new k8s.networking.v1.Ingress(
-    name,
+    `${appDomain}-ingress`,
     {
       metadata: {
         ...(namespace && { namespace }),
@@ -71,16 +187,16 @@ export function createIngress(args: CreateIngressArgs): k8s.networking.v1.Ingres
         },
       },
       spec: {
-        ingressClassName: ingressClass,
+        ingressClassName: isPublic ? PUBLIC_INGRESS_CLASS : PRIVATE_INGRESS_CLASS,
         tls: [
           {
-            hosts: [host],
+            hosts: [appDomain],
             secretName: DEFAULT_TLS_SECRET,
           },
         ],
         rules: [
           {
-            host,
+            host: appDomain,
             http: {
               paths: [
                 {
@@ -89,7 +205,7 @@ export function createIngress(args: CreateIngressArgs): k8s.networking.v1.Ingres
                   backend: {
                     service: {
                       name: serviceName,
-                      port: { number: servicePort },
+                      port: { number: port },
                     },
                   },
                 },
@@ -99,34 +215,6 @@ export function createIngress(args: CreateIngressArgs): k8s.networking.v1.Ingres
         ],
       },
     },
-    { ...(parent && { parent }) }
-  );
-}
-
-export interface CreateServiceArgs {
-  name: string;
-  namespace?: pulumi.Input<string>;
-  port: pulumi.Input<number>;
-  targetPort?: pulumi.Input<number>;
-  selector: Record<string, string>;
-  parent?: pulumi.Resource;
-}
-
-export function createService(args: CreateServiceArgs): k8s.core.v1.Service {
-  const { name, namespace, port, targetPort = port, selector, parent } = args;
-
-  return new k8s.core.v1.Service(
-    name,
-    {
-      metadata: {
-        ...(namespace && { namespace }),
-      },
-      spec: {
-        type: "ClusterIP",
-        ports: [{ port, targetPort, protocol: "TCP" }],
-        selector,
-      },
-    },
-    { ...(parent && { parent }) }
+    opts
   );
 }
