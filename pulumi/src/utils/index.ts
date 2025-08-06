@@ -46,6 +46,13 @@ export function parseIPRange(range: string): string[] {
   return ips;
 }
 
+export function getServiceURL(
+  serviceName: pulumi.Input<string>,
+  namespace: pulumi.Input<string> = "default"
+): pulumi.Output<string> {
+  return pulumi.interpolate`http://${serviceName}.${namespace}.svc.cluster.local`;
+}
+
 /**
  * Arguments for creating an HTTP ingress and service for an application.
  */
@@ -140,6 +147,7 @@ export function createService(
     `${appName}-service`,
     {
       metadata: {
+        name: appName,
         ...(namespace && { namespace }),
       },
       spec: {
