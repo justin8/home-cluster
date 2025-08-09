@@ -39,7 +39,7 @@ export class Longhorn extends pulumi.ComponentResource {
     const backupTargetCredentialSecret: pulumi.Input<string> | undefined = undefined; // NFS doesn't use this
 
     // Create namespace for Longhorn
-    const longhornNamespace = new k8s.core.v1.Namespace(
+    const ns = new k8s.core.v1.Namespace(
       "longhorn-system",
       {
         metadata: {
@@ -199,7 +199,7 @@ export class Longhorn extends pulumi.ComponentResource {
         skipAwait: false,
         createNamespace: false,
       },
-      { parent: this, dependsOn: [longhornNamespace, snapshotController] }
+      { parent: this, dependsOn: [ns, snapshotController] }
     );
 
     // Create ingress for Longhorn UI

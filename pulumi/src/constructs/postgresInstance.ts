@@ -1,7 +1,7 @@
 import * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
 import * as random from "@pulumi/random";
-import { DatabaseOptions } from "../utils/database";
+import { DatabaseOptions as DatabaseArgs } from "../utils/database";
 import { createLonghornPersistentVolume, createLonghornVolumeResource } from "./volumeManager";
 
 export class PostgresInstance extends pulumi.ComponentResource {
@@ -12,7 +12,7 @@ export class PostgresInstance extends pulumi.ComponentResource {
   public readonly databaseName: string;
   public readonly username: string;
 
-  constructor(args: DatabaseOptions, opts?: pulumi.ComponentResourceOptions) {
+  constructor(args: DatabaseArgs, opts?: pulumi.ComponentResourceOptions) {
     super("PostgresInstance", args.name, {}, opts);
 
     const name = args.name;

@@ -1,9 +1,13 @@
 import * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
-import { DEFAULT_TLS_SECRET, PUBLIC_INGRESS_CLASS } from "../../constants";
-import { reflectorAnnotation } from "../../utils";
+import {
+  DEFAULT_TLS_SECRET,
+  PUBLIC_INGRESS_CLASS,
+  SHARED_SECRETS_NAMESPACE,
+} from "../../constants";
+import { reflectorAnnotationsForNamespaces } from "../../utils";
+import { TauSecret } from "../shared-secrets";
 
-declare var require: any;
 export const DEFAULT_CERT_SECRET_NAME = DEFAULT_TLS_SECRET;
 
 export enum CertIssuerType {
@@ -13,10 +17,9 @@ export enum CertIssuerType {
 
 export interface CertManagerArgs {
   email: pulumi.Input<string>;
-  cloudflareEmail: pulumi.Input<string>;
-  cloudflareAPIToken: pulumi.Input<string>;
+  cloudflareSecret: TauSecret;
   domain: pulumi.Input<string>;
-  defaultCertAllowedNamespaces?: pulumi.Input<string>;
+  defaultCertAllowedNamespaces?: string[];
   defaultCertIssuer?: pulumi.Input<CertIssuerType>;
   namespace?: pulumi.Input<string>;
   ingressClass?: pulumi.Input<string>;
@@ -29,14 +32,17 @@ export class CertManager extends pulumi.ComponentResource {
     const config: pulumi.Config = new pulumi.Config(appName);
 
     const email = args.email;
-    const cloudflareEmail = args.cloudflareEmail;
-    const cloudflareAPIToken = args.cloudflareAPIToken;
     const domain = args.domain;
     const namespace = args.namespace || "cert-manager";
     const ingressClass = args.ingressClass || PUBLIC_INGRESS_CLASS;
-    const defaultCertAllowedNamespaces =
-      args.defaultCertAllowedNamespaces ||
-      "default,kube-system,cert-manager,traefik-private,traefik-public";
+    const cloudflareSecret = args.cloudflareSecret;
+    const defaultCertAllowedNamespaces = args.defaultCertAllowedNamespaces || [
+      "kube-system",
+      "shared-secrets",
+      "cert-manager",
+      "traefik-private",
+      "traefik-public",
+    ];
     const defaultCertIssuer = args.defaultCertIssuer || CertIssuerType.PROD;
 
     const ns = new k8s.core.v1.Namespace(
@@ -44,22 +50,6 @@ export class CertManager extends pulumi.ComponentResource {
       {
         metadata: {
           name: namespace,
-        },
-      },
-      { parent: this }
-    );
-
-    const reflector = new k8s.helm.v3.Release(
-      "reflector",
-      {
-        chart: "reflector",
-        version: "9.1.22",
-        repositoryOpts: {
-          repo: "https://emberstack.github.io/helm-charts",
-        },
-        namespace: ns.metadata.name,
-        values: {
-          priorityClassName: "system-cluster-critical",
         },
       },
       { parent: this }
@@ -85,44 +75,31 @@ export class CertManager extends pulumi.ComponentResource {
       { parent: this }
     );
 
-    const cloudflareSecret = new k8s.core.v1.Secret(
-      `${appName}-cloudflare-api-token`,
+    const prodClusterIssuer = ClusterIssuer(
       {
-        metadata: {
-          name: "cloudflare-api-token",
-          namespace: namespace,
-        },
-        stringData: {
-          "api-token": cloudflareAPIToken,
-        },
+        appName,
+        namespace,
+        email,
+        domain,
+        ingressClass,
+        cloudflareSecret,
+        prod: true,
       },
-      {
-        parent: this,
-        dependsOn: [certManager],
-      }
+      { parent: this, dependsOn: [certManager] }
     );
 
-    const prodClusterIssuer = ClusterIssuer({
-      appName,
-      namespace,
-      email,
-      domain,
-      ingressClass,
-      cloudflareEmail,
-      cloudflareSecret,
-      prod: true,
-    });
-
-    ClusterIssuer({
-      appName,
-      namespace,
-      email,
-      domain,
-      ingressClass,
-      cloudflareEmail,
-      cloudflareSecret,
-      prod: false,
-    });
+    ClusterIssuer(
+      {
+        appName,
+        namespace,
+        email,
+        domain,
+        ingressClass,
+        cloudflareSecret,
+        prod: false,
+      },
+      { parent: this, dependsOn: [certManager] }
+    );
 
     new k8s.apiextensions.CustomResource(
       `${appName}-default-certificate`,
@@ -131,7 +108,7 @@ export class CertManager extends pulumi.ComponentResource {
         apiVersion: "cert-manager.io/v1",
         metadata: {
           name: "default",
-          namespace: namespace,
+          namespace: SHARED_SECRETS_NAMESPACE,
         },
         spec: {
           secretName: DEFAULT_TLS_SECRET,
@@ -143,17 +120,14 @@ export class CertManager extends pulumi.ComponentResource {
           dnsNames: [`*.${domain}`],
           secretTemplate: {
             annotations: {
-              ...reflectorAnnotation("allowed", "true"),
-              ...reflectorAnnotation("allowed-namespaces", defaultCertAllowedNamespaces),
-              ...reflectorAnnotation("auto-enabled", "true"),
-              ...reflectorAnnotation("auto-namespaces", defaultCertAllowedNamespaces),
+              ...reflectorAnnotationsForNamespaces(defaultCertAllowedNamespaces),
             },
           },
         },
       },
       {
         parent: this,
-        dependsOn: [certManager, prodClusterIssuer, reflector],
+        dependsOn: [certManager, prodClusterIssuer],
       }
     );
   }
@@ -165,22 +139,15 @@ interface ClusterIssuerArgs {
   email: pulumi.Input<string>;
   domain: pulumi.Input<string>;
   ingressClass: pulumi.Input<string>;
-  cloudflareEmail: pulumi.Input<string>;
-  cloudflareSecret: k8s.core.v1.Secret;
+  cloudflareSecret: TauSecret;
   prod: boolean;
 }
 
-function ClusterIssuer(args: ClusterIssuerArgs): k8s.apiextensions.CustomResource {
-  const {
-    appName,
-    namespace,
-    email,
-    domain,
-    ingressClass,
-    cloudflareEmail,
-    cloudflareSecret,
-    prod,
-  } = args;
+function ClusterIssuer(
+  args: ClusterIssuerArgs,
+  opts?: pulumi.ComponentResourceOptions
+): k8s.apiextensions.CustomResource {
+  const { appName, namespace, email, domain, ingressClass, cloudflareSecret, prod } = args;
   let server, name, privateKeySecretName;
   if (prod) {
     server = "https://acme-v02.api.letsencrypt.org/directory";
@@ -220,9 +187,9 @@ function ClusterIssuer(args: ClusterIssuerArgs): k8s.apiextensions.CustomResourc
               },
               dns01: {
                 cloudflare: {
-                  email: cloudflareEmail,
+                  email: cloudflareSecret.data.email,
                   apiTokenSecretRef: {
-                    name: cloudflareSecret.metadata.name,
+                    name: cloudflareSecret.name,
                     key: "api-token",
                   },
                 },

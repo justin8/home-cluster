@@ -6,7 +6,7 @@ export class CNPGOperator extends pulumi.ComponentResource {
     super("CNPGOperator", name, {}, opts);
 
     // Create namespace for CNPG operator
-    const namespace = new k8s.core.v1.Namespace(
+    const ns = new k8s.core.v1.Namespace(
       "cnpg-system",
       {
         metadata: {
@@ -22,7 +22,7 @@ export class CNPGOperator extends pulumi.ComponentResource {
       {
         chart: "cloudnative-pg",
         version: "0.25.0",
-        namespace: namespace.metadata.name,
+        namespace: ns.metadata.name,
         fetchOpts: {
           repo: "https://cloudnative-pg.github.io/charts",
         },
@@ -42,13 +42,13 @@ export class CNPGOperator extends pulumi.ComponentResource {
           },
         },
       },
-      { parent: this, dependsOn: [namespace] }
+      { parent: this, dependsOn: [ns] }
     );
 
     // Export the chart for dependency management
     this.registerOutputs({
       chart: cnpgChart,
-      namespace: namespace.metadata.name,
+      namespace: ns.metadata.name,
     });
   }
 }

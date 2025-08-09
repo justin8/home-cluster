@@ -16,3 +16,5 @@ config:
   home-cluster:longhorn_nfs_backup_path:
     secure: v1:d5pcJ4pIEyJlnapg:PnqSOSYjX+lCRX+z0bN6EVFXeZTAVdYlxuGfd9yfpnRk5Tevl/VwNzY=
   home-cluster:timezone_offset: "10"
+  home-cluster:real_external_ip:
+    secure: v1:UsLKGa2iKi1xc5R5:rVgsA+QIVvPDN+HYulZVWyw7qYh1oPzD228TnO26

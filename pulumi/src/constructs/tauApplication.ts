@@ -5,7 +5,7 @@ import { DatabaseOptions, getEnvironmentVariablesForDB } from "../utils/database
 import { PostgresInstance } from "./postgresInstance";
 import { VolumeManager } from "./volumeManager";
 
-interface TauApplicationOptions {
+interface TauApplicationArgs {
   database?: DatabaseOptions;
   namespace?: string;
 }
@@ -19,11 +19,7 @@ export abstract class TauApplication extends pulumi.ComponentResource {
   public readonly name: string;
   protected readonly database?: PostgresInstance;
 
-  constructor(
-    name: string,
-    options: TauApplicationOptions = {},
-    opts?: pulumi.ComponentResourceOptions
-  ) {
+  constructor(name: string, args: TauApplicationArgs = {}, opts?: pulumi.ComponentResourceOptions) {
     const config = new pulumi.Config();
     const labels = { app: name };
     const transformation: pulumi.ResourceTransformation = args => {
@@ -60,14 +56,14 @@ export abstract class TauApplication extends pulumi.ComponentResource {
     this.volumeManager = new VolumeManager(name, this);
     this.domain = config.require("domain");
     this.applicationDomain = `${name}.${this.domain}`;
-    this.namespace = options.namespace || "default";
+    this.namespace = args.namespace || "default";
 
     // Create database if options are provided
-    if (options.database) {
+    if (args.database) {
       // Use application name as database name if not specified
       const dbOptions = {
-        ...options.database,
-        namespace: options.database.namespace || this.namespace,
+        ...args.database,
+        namespace: args.database.namespace || this.namespace,
       };
 
       this.database = new PostgresInstance(dbOptions, { parent: this });

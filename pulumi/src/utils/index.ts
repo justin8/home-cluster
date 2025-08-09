@@ -4,6 +4,8 @@ import { DEFAULT_TLS_SECRET, PRIVATE_INGRESS_CLASS, PUBLIC_INGRESS_CLASS } from 
 
 export { DatabaseOptions } from "./database";
 
+export type KubernetesSecretData = { [key: string]: string };
+
 const config = new pulumi.Config();
 
 /**
@@ -12,6 +14,18 @@ const config = new pulumi.Config();
 export function reflectorAnnotation(key: pulumi.Input<string>, value: pulumi.Input<string>) {
   return {
     [`reflector.v1.k8s.emberstack.com/reflection-${key}`]: value,
+  };
+}
+
+/**
+ * Generates all reflector annotations for a list of namespaces.
+ */
+export function reflectorAnnotationsForNamespaces(namespaces: string[]) {
+  return {
+    ...reflectorAnnotation("allowed", "true"),
+    ...reflectorAnnotation("allowed-namespaces", namespaces.join(",")),
+    ...reflectorAnnotation("auto-enabled", "true"),
+    ...reflectorAnnotation("auto-namespaces", namespaces.join(",")),
   };
 }
 
@@ -192,6 +206,9 @@ export function createIngress(
         ...(namespace && { namespace }),
         annotations: {
           "pulumi.com/skipAwait": "true",
+          ...(isPublic && {
+            "external-dns.alpha.kubernetes.io/target": config.require("real_external_ip"),
+          }),
         },
       },
       spec: {

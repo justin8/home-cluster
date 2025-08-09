@@ -7,8 +7,13 @@
 - [x] Document how to do restores
 - [x] Database provider
   - [x] Use static volumes for databases to enable backups via Longhorn
-- [ ] Auth
 - [ ] DNS resolution for ingress, locally and remote
+  - Use ExternalDNS x2 with annotation filters <https://kubernetes-sigs.github.io/external-dns/v0.18.0/docs/faq/#running-an-internal-and-external-dns-service>
+  - [x] Cluster-internal as a service
+  - [ ] Locally (LAN) as DNS name
+  - [ ] Remote (external to LAN) as DNS name
+    - [ ] Get this to report the router's IPv4 address instead of the ingress's IP
+- [ ] Auth
 - [ ] Move services over
 - [ ] Network isolation and VLANs
 - [ ] Renovate bot to auto-update containers
