@@ -1,6 +1,6 @@
 import * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
-import { DEFAULT_TLS_SECRET, PUBLIC_INGRESS_CLASS, PRIVATE_INGRESS_CLASS } from "../../constants";
+import { DEFAULT_TLS_SECRET, PRIVATE_INGRESS_CLASS, PUBLIC_INGRESS_CLASS } from "../../constants";
 import { createIpAddressPool } from "../../utils";
 
 export interface IngressControllersArgs {
@@ -112,6 +112,10 @@ export class IngressControllers extends pulumi.ComponentResource {
         metadata: {
           name: "dashboard",
           namespace: type === "public" ? PUBLIC_INGRESS_CLASS : PRIVATE_INGRESS_CLASS,
+          annotations: {
+            "external-dns.alpha.kubernetes.io/target":
+              type === "public" ? this.publicIP : this.privateIP,
+          },
         },
         spec: {
           entryPoints: ["websecure"],
@@ -153,12 +157,13 @@ export class IngressControllers extends pulumi.ComponentResource {
 
     const domain = config.require("domain");
 
+    this.publicIP = pulumi.output(publicIP);
+    this.privateIP = pulumi.output(privateIP);
+
     this.createDashboard("public", publicTraefik, domain);
     this.createDashboard("private", privateTraefik, domain);
 
     this.publicIngressClass = pulumi.output(PUBLIC_INGRESS_CLASS);
     this.privateIngressClass = pulumi.output(PRIVATE_INGRESS_CLASS);
-    this.publicIP = pulumi.output(publicIP);
-    this.privateIP = pulumi.output(privateIP);
   }
 }
