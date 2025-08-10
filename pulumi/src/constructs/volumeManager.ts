@@ -2,13 +2,13 @@ import * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
 import { BACKUP_JOB_GROUP, FSTRIM_JOB_GROUP } from "../core-services/longhorn";
 
-export interface LonghornVolumeOptions {
+export interface LonghornVolumeArgs {
   /** @default "1Gi" */
   size?: string;
   /** @default "longhorn" */
   storageClass?: string;
-  /** @default ["ReadWriteOnce"] */
-  accessModes?: pulumi.Input<string>[];
+  /** @default "ReadWriteOnce" */
+  accessMode?: "ReadWriteOnce" | "ReadOnlyMany" | "ReadWriteMany";
   /** @default false */
   backupEnabled?: boolean;
 }
@@ -25,12 +25,15 @@ export class VolumeManager {
   private config = new pulumi.Config();
   private nfsHostname = this.config.require("nfs_hostname");
   private appName: string;
+  private namespace: pulumi.Input<string>;
 
   constructor(
     appName: string,
+    namespace: pulumi.Input<string>,
     private parent: pulumi.ComponentResource
   ) {
     this.appName = appName;
+    this.namespace = namespace || "default";
   }
 
   /**
@@ -111,18 +114,18 @@ export class VolumeManager {
   /**
    * Creates a Longhorn volume with the given options
    * @param mountPath Where the volume should be mounted in the container
-   * @param options Volume configuration options
+   * @param args Volume configuration options
    * @returns A volume mount object for use in container spec
    */
   addLonghornVolume(
     mountPath: string,
-    options: LonghornVolumeOptions = {}
+    args: LonghornVolumeArgs = {}
   ): k8s.types.input.core.v1.VolumeMount {
     // Generate a safe name for the volume
     const volumeName = `lh${mountPath.replace(/[^a-z0-9]/gi, "-").toLowerCase()}`;
 
     if (!this.storageMap.has(volumeName)) {
-      const storage = this.createLonghornVolume(volumeName, options);
+      const storage = this.createLonghornVolume(volumeName, args);
       this.storageMap.set(volumeName, storage);
 
       this.volumes.push({
@@ -171,6 +174,7 @@ export class VolumeManager {
       {
         metadata: {
           name: pvcName,
+          namespace: this.namespace,
         },
         spec: {
           accessModes: ["ReadWriteMany"],
@@ -185,51 +189,69 @@ export class VolumeManager {
     return { pv, pvc };
   }
 
-  private createLonghornVolume(name: string, options: LonghornVolumeOptions) {
-    const storageClass = options.storageClass || "longhorn";
-    const size = options.size || "1Gi";
-    const accessModes = options.accessModes || ["ReadWriteOnce"];
-    const backupEnabled = options.backupEnabled || false;
+  private createLonghornVolume(name: string, args: LonghornVolumeArgs) {
+    const storageClass = args.storageClass || "longhorn";
+    const size = args.size || "1Gi";
+    const accessMode = args.accessMode || "ReadWriteOnce";
+    const backupEnabled = args.backupEnabled || false;
     const opts = { parent: this.parent };
 
-    const longhornVolume = createLonghornVolumeResource(
-      this.appName,
+    const longhornVolume = createLonghornVolumeResource({
+      identifier: this.appName,
       name,
       size,
       backupEnabled,
-      opts
-    );
-    const pv = createLonghornPersistentVolume(
-      this.appName,
+      accessMode,
+      opts,
+    });
+    const pv = createLonghornPersistentVolume({
+      identifier: this.appName,
       name,
       size,
-      accessModes,
-      storageClass,
       longhornVolume,
-      { ...opts, dependsOn: [longhornVolume] }
-    );
-    const pvc = createLonghornPersistentVolumeClaim(
-      this.appName,
+      storageClass,
+      accessMode,
+      opts: { ...opts, dependsOn: [longhornVolume] },
+      namespace: this.namespace,
+    });
+    const pvc = createLonghornPersistentVolumeClaim({
+      identifier: this.appName,
       name,
       size,
-      accessModes,
-      storageClass,
       pv,
-      { ...opts, dependsOn: [pv] }
-    );
+      storageClass,
+      accessMode,
+      opts: { ...opts, dependsOn: [pv] },
+      namespace: this.namespace,
+    });
 
     return { pv, pvc };
   }
 }
 
-export function createLonghornVolumeResource(
-  identifier: string,
-  name: string,
-  size: string,
-  backupEnabled: boolean,
-  opts?: pulumi.CustomResourceOptions
-) {
+interface LonghornResourceArgs {
+  identifier: string;
+  name: string;
+  size: string;
+  namespace?: pulumi.Input<string>;
+  backupEnabled?: boolean;
+  accessMode?: string;
+  storageClass?: string;
+  longhornVolume?: k8s.apiextensions.CustomResource;
+  pv?: k8s.core.v1.PersistentVolume;
+  opts?: pulumi.CustomResourceOptions;
+}
+
+export function createLonghornVolumeResource(args: LonghornResourceArgs) {
+  const { identifier, name, size, backupEnabled, accessMode = "ReadWriteOnce", opts } = args;
   const lhvName = `${identifier}-${name}`.substring(0, 60);
+  const accessModeMap: Record<string, string> = {
+    ReadWriteOnce: "rwo",
+    ReadWriteMany: "rwx",
+    ReadOnlyMany: "rox",
+  };
+  const longhornAccessMode = accessModeMap[accessMode];
+
   return new k8s.apiextensions.CustomResource(
     lhvName,
     {
@@ -248,50 +270,45 @@ export function createLonghornVolumeResource(
       spec: {
         size: String(parseSizeToBytes(size)),
         frontend: "blockdev",
-        // numberOfReplicas: numberOfReplicas,
-        // dataLocality: dataLocality,
-        // replicaSoftAntiAffinity: replicaSoftAntiAffinity,
-        // replicaZoneSoftAntiAffinity: replicaZoneSoftAntiAffinity,
-        // diskSelector: [], // Empty means any disk
-        // nodeSelector: [], // Empty means any node
-        // recurringJobSelector: backupEnabled ? [BACKUP_JOB_GROUP] : [],
-        // Optional: Specify backup target if needed
-        // backupCompressionMethod: "lz4",
-        // snapshotMaxCount: 10,
-        // snapshotMaxSize: "100Mi",
+        migratable: longhornAccessMode != "rwx",
+        accessMode: longhornAccessMode,
       },
     },
-    opts
+    { ...opts, ignoreChanges: ["spec.migratable"] }
   );
 }
 
-export function createLonghornPersistentVolume(
-  identifier: string,
-  name: string,
-  size: string,
-  accessModes: pulumi.Input<string>[],
-  storageClass: string,
-  longhornVolume: k8s.apiextensions.CustomResource,
-  opts?: pulumi.CustomResourceOptions
-) {
+export function createLonghornPersistentVolume(args: LonghornResourceArgs) {
+  const {
+    identifier,
+    name,
+    size,
+    longhornVolume,
+    storageClass = "longhorn",
+    accessMode = "ReadWriteOnce",
+    namespace = "default",
+    opts,
+  } = args;
   const pvName = `${identifier}-pv-${name}`.substring(0, 60);
+
   return new k8s.core.v1.PersistentVolume(
     pvName,
     {
       metadata: {
         name: pvName,
+        namespace,
       },
       spec: {
         capacity: {
           storage: size,
         },
         volumeMode: "Filesystem",
-        accessModes: accessModes,
+        accessModes: [accessMode],
         persistentVolumeReclaimPolicy: "Delete",
         storageClassName: storageClass,
         csi: {
           driver: "driver.longhorn.io",
-          volumeHandle: longhornVolume.metadata.name,
+          volumeHandle: longhornVolume!.metadata.name,
           fsType: "ext4",
         },
       },
@@ -300,26 +317,29 @@ export function createLonghornPersistentVolume(
   );
 }
 
-export function createLonghornPersistentVolumeClaim(
-  identifier: string,
-  name: string,
-  size: string,
-  accessModes: pulumi.Input<string>[],
-  storageClass: string,
-  pv: k8s.core.v1.PersistentVolume,
-  opts?: pulumi.CustomResourceOptions
-) {
+export function createLonghornPersistentVolumeClaim(args: LonghornResourceArgs) {
+  const {
+    identifier,
+    name,
+    size,
+    pv,
+    storageClass = "longhorn",
+    accessMode = "ReadWriteOnce",
+    namespace = "default",
+    opts,
+  } = args;
   const pvcName = `${identifier}-pvc-${name}`.substring(0, 60);
   return new k8s.core.v1.PersistentVolumeClaim(
     pvcName,
     {
       metadata: {
         name: pvcName,
+        namespace,
       },
       spec: {
-        accessModes: accessModes,
+        accessModes: [accessMode],
         storageClassName: storageClass,
-        volumeName: pv.metadata.name,
+        volumeName: pv!.metadata.name,
         resources: {
           requests: { storage: size },
         },

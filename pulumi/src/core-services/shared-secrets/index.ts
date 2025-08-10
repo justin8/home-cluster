@@ -48,7 +48,7 @@ export class SharedSecrets extends pulumi.ComponentResource {
         allowedNamespaces: [
           "kube-system",
           "cert-manager",
-          "external-dns",
+          "dns",
           "traefik-private",
           "traefik-public",
         ],

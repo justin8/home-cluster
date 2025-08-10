@@ -61,18 +61,25 @@ export class PostgresInstance extends pulumi.ComponentResource {
       { parent: this }
     );
 
-    const longhornVolume = createLonghornVolumeResource(name, "data", storageSize, true, {
-      parent: this,
+    const longhornVolume = createLonghornVolumeResource({
+      identifier: name,
+      name: "data",
+      size: storageSize,
+      backupEnabled: true,
+      accessMode: "ReadWriteOnce",
+      opts: {
+        parent: this,
+      },
     });
-    const pv = createLonghornPersistentVolume(
-      name,
-      "data",
-      storageSize,
-      ["ReadWriteOnce"],
-      "longhorn",
+    const pv = createLonghornPersistentVolume({
+      identifier: name,
+      name: "data",
+      size: storageSize,
       longhornVolume,
-      { parent: this, dependsOn: [longhornVolume] }
-    );
+      storageClass: "longhorn",
+      accessMode: "ReadWriteOnce",
+      opts: { parent: this, dependsOn: [longhornVolume] },
+    });
     const pvcTemplate = {
       accessModes: ["ReadWriteOnce"],
       storageClassName: "longhorn",

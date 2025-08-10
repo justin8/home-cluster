@@ -1,7 +1,6 @@
 import * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
 import { TauApplication } from "../../constructs";
-import { createHttpIngress } from "../../utils";
 
 export class DemoApp extends TauApplication {
   constructor(name: string, opts?: pulumi.ComponentResourceOptions) {
@@ -59,7 +58,7 @@ export class DemoApp extends TauApplication {
     );
 
     // Create an Ingress resource to expose the application
-    createHttpIngress(
+    this.createHttpIngress(
       { appName: name, port: 80, labels: this.labels, public: true },
       { parent: this }
     );

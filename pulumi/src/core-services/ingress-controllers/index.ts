@@ -1,6 +1,7 @@
 import * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
 import { DEFAULT_TLS_SECRET } from "../../constants";
+import { createIpAddressPool } from "../../utils";
 
 export interface IngressControllersArgs {
   publicIP?: pulumi.Input<string>;
@@ -17,41 +18,12 @@ export class IngressControllers extends pulumi.ComponentResource {
     appName: string,
     type: string,
     ip: pulumi.Input<string>,
-    dependencies: pulumi.Resource[] = []
+    dependsOn: pulumi.Resource[] = []
   ) {
-    const config = new pulumi.Config();
-    const pool = new k8s.apiextensions.CustomResource(
-      `${appName}-${type}-pool`,
-      {
-        apiVersion: "metallb.io/v1beta1",
-        kind: "IPAddressPool",
-        metadata: {
-          name: `${type}-ingress`,
-          namespace: "metallb-system",
-        },
-        spec: {
-          addresses: [pulumi.interpolate`${ip}/32`],
-          autoAssign: false,
-        },
-      },
-      { parent: this, dependsOn: dependencies }
-    );
-
-    const advertisement = new k8s.apiextensions.CustomResource(
-      `${appName}-${type}-l2-advertisement`,
-      {
-        apiVersion: "metallb.io/v1beta1",
-        kind: "L2Advertisement",
-        metadata: {
-          name: `${type}-ingress`,
-          namespace: "metallb-system",
-        },
-        spec: {
-          ipAddressPools: [`${type}-ingress`],
-        },
-      },
-      { parent: this, dependsOn: [pool] }
-    );
+    const poolName = createIpAddressPool(`${type}-ingress`, [pulumi.interpolate`${ip}/32`], {
+      parent: this,
+      dependsOn,
+    });
 
     return new k8s.helm.v3.Release(
       `${appName}-${type}`,
@@ -70,7 +42,7 @@ export class IngressControllers extends pulumi.ComponentResource {
           service: {
             type: "LoadBalancer",
             annotations: {
-              "metallb.universe.tf/address-pool": `${type}-ingress`,
+              "metallb.io/address-pool": poolName,
             },
           },
           providers: {
@@ -97,7 +69,7 @@ export class IngressControllers extends pulumi.ComponentResource {
           },
         },
       },
-      { parent: this, dependsOn: [pool, advertisement, ...dependencies] }
+      { parent: this, dependsOn: dependsOn }
     );
   }
 

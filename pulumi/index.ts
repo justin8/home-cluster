@@ -6,7 +6,7 @@ import { PRIVATE_INGRESS_CLASS, PUBLIC_INGRESS_CLASS } from "./src/constants";
 import {
   CertManager,
   CNPGOperator,
-  ExternalDNS,
+  Dns,
   IngressControllers,
   Longhorn,
   MetalLB,
@@ -54,13 +54,6 @@ function initializeCoreServices(): pulumi.Resource[] {
     }
   );
 
-  const externalDNS = new ExternalDNS("external-dns", {
-    publicIngressClass: PUBLIC_INGRESS_CLASS,
-    privateIngressClass: PRIVATE_INGRESS_CLASS,
-    cloudflareSecret: sharedSecrets.cloudflareSecret,
-    // piholeSecret: sharedSecrets.piholeSecret,
-  });
-
   const longhorn = new Longhorn(
     "longhorn",
     {},
@@ -69,10 +62,29 @@ function initializeCoreServices(): pulumi.Resource[] {
     }
   );
 
+  const dns = new Dns(
+    "dns",
+    {
+      publicIngressClass: PUBLIC_INGRESS_CLASS,
+      privateIngressClass: PRIVATE_INGRESS_CLASS,
+      cloudflareSecret: sharedSecrets.cloudflareSecret,
+    },
+    { dependsOn: [longhorn] }
+  );
+
   const cnpgOperator = new CNPGOperator("cnpg-operator", { dependsOn: [longhorn] });
 
   // Return array of all core services
-  return [metallb, sharedSecrets, certManager, nfsCsi, ingressControllers, longhorn, cnpgOperator];
+  return [
+    metallb,
+    sharedSecrets,
+    certManager,
+    nfsCsi,
+    ingressControllers,
+    longhorn,
+    cnpgOperator,
+    dns,
+  ];
 }
 
 /**

@@ -1,4 +1,4 @@
-## Pulumi
+# Pulumi TODO list
 
 - [x] Cert-manager
 - [x] A service with remote storage (NFS)
@@ -10,9 +10,10 @@
 - [ ] DNS resolution for ingress, locally and remote
   - Use ExternalDNS x2 with annotation filters <https://kubernetes-sigs.github.io/external-dns/v0.18.0/docs/faq/#running-an-internal-and-external-dns-service>
   - [x] Cluster-internal as a service
-  - [ ] Locally (LAN) as DNS name
-  - [ ] Remote (external to LAN) as DNS name
-    - [ ] Get this to report the router's IPv4 address instead of the ingress's IP
+  - [x] Locally (LAN) as DNS name
+    - [x] Create public and private ingress for public things; to allow easier dns routing
+  - [x] Remote (external to LAN) as DNS name
+    - [x] Get this to report the router's IPv4 address instead of the ingress's IP
 - [ ] Auth
 - [ ] Move services over
 - [ ] Network isolation and VLANs
