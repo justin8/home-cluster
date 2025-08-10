@@ -1,6 +1,6 @@
 import * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
-import { DEFAULT_TLS_SECRET } from "../../constants";
+import { DEFAULT_TLS_SECRET, PUBLIC_INGRESS_CLASS, PRIVATE_INGRESS_CLASS } from "../../constants";
 import { createIpAddressPool } from "../../utils";
 
 export interface IngressControllersArgs {
@@ -16,7 +16,7 @@ export class IngressControllers extends pulumi.ComponentResource {
 
   private createIngressController(
     appName: string,
-    type: string,
+    type: "public" | "private",
     ip: pulumi.Input<string>,
     dependsOn: pulumi.Resource[] = []
   ) {
@@ -37,13 +37,13 @@ export class IngressControllers extends pulumi.ComponentResource {
         chart: "traefik",
         version: "37.0.0",
         repositoryOpts: { repo: "https://traefik.github.io/charts" },
-        namespace: `traefik-${type}`,
+        namespace: type === "public" ? PUBLIC_INGRESS_CLASS : PRIVATE_INGRESS_CLASS,
         createNamespace: true,
         values: {
           ingressClass: {
             enabled: true,
             isDefaultClass: false,
-            name: `traefik-${type}`,
+            name: type === "public" ? PUBLIC_INGRESS_CLASS : PRIVATE_INGRESS_CLASS,
           },
           service: {
             type: "LoadBalancer",
@@ -52,9 +52,11 @@ export class IngressControllers extends pulumi.ComponentResource {
             },
           },
           providers: {
-            kubernetesIngress: { ingressClass: `traefik-${type}` },
+            kubernetesIngress: {
+              ingressClass: type === "public" ? PUBLIC_INGRESS_CLASS : PRIVATE_INGRESS_CLASS,
+            },
             kubernetesCRD: {
-              namespaces: [`traefik-${type}`],
+              namespaces: [type === "public" ? PUBLIC_INGRESS_CLASS : PRIVATE_INGRESS_CLASS],
             },
           },
           ports: {
@@ -79,7 +81,11 @@ export class IngressControllers extends pulumi.ComponentResource {
     );
   }
 
-  private createDashboard(type: string, traefik: k8s.helm.v3.Release, domain: string) {
+  private createDashboard(
+    type: "public" | "private",
+    traefik: k8s.helm.v3.Release,
+    domain: string
+  ) {
     const middleware = new k8s.apiextensions.CustomResource(
       `${type}-dashboard-ip-allowlist`,
       {
@@ -87,7 +93,7 @@ export class IngressControllers extends pulumi.ComponentResource {
         kind: "Middleware",
         metadata: {
           name: "local-ip-allowlist",
-          namespace: `traefik-${type}`,
+          namespace: type === "public" ? PUBLIC_INGRESS_CLASS : PRIVATE_INGRESS_CLASS,
         },
         spec: {
           ipAllowList: {
@@ -105,7 +111,7 @@ export class IngressControllers extends pulumi.ComponentResource {
         kind: "IngressRoute",
         metadata: {
           name: "dashboard",
-          namespace: `traefik-${type}`,
+          namespace: type === "public" ? PUBLIC_INGRESS_CLASS : PRIVATE_INGRESS_CLASS,
         },
         spec: {
           entryPoints: ["websecure"],
@@ -113,7 +119,12 @@ export class IngressControllers extends pulumi.ComponentResource {
             {
               match: pulumi.interpolate`Host(\`traefik-${type}.${domain}\`)`,
               kind: "Rule",
-              middlewares: [{ name: "local-ip-allowlist", namespace: `traefik-${type}` }],
+              middlewares: [
+                {
+                  name: "local-ip-allowlist",
+                  namespace: type === "public" ? PUBLIC_INGRESS_CLASS : PRIVATE_INGRESS_CLASS,
+                },
+              ],
               services: [{ name: "api@internal", kind: "TraefikService" }],
             },
           ],
@@ -145,8 +156,8 @@ export class IngressControllers extends pulumi.ComponentResource {
     this.createDashboard("public", publicTraefik, domain);
     this.createDashboard("private", privateTraefik, domain);
 
-    this.publicIngressClass = pulumi.output("traefik-public");
-    this.privateIngressClass = pulumi.output("traefik-private");
+    this.publicIngressClass = pulumi.output(PUBLIC_INGRESS_CLASS);
+    this.privateIngressClass = pulumi.output(PRIVATE_INGRESS_CLASS);
     this.publicIP = pulumi.output(publicIP);
     this.privateIP = pulumi.output(privateIP);
   }

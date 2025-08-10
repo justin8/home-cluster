@@ -1,3 +1,4 @@
+export { Auth } from "./auth";
 export { CertManager } from "./cert-manager";
 export { CNPGOperator } from "./cnpg-operator";
 export { Dns } from "./dns";

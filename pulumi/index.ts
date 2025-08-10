@@ -4,6 +4,7 @@ import * as path from "path";
 
 import { PRIVATE_INGRESS_CLASS, PUBLIC_INGRESS_CLASS } from "./src/constants";
 import {
+  Auth,
   CertManager,
   CNPGOperator,
   Dns,
@@ -74,6 +75,8 @@ function initializeCoreServices(): pulumi.Resource[] {
 
   const cnpgOperator = new CNPGOperator("cnpg-operator", { dependsOn: [longhorn] });
 
+  const auth = new Auth("auth", {}, { dependsOn: [sharedSecrets] });
+
   // Return array of all core services
   return [
     metallb,
@@ -84,6 +87,7 @@ function initializeCoreServices(): pulumi.Resource[] {
     longhorn,
     cnpgOperator,
     dns,
+    auth,
   ];
 }
 

@@ -57,9 +57,9 @@ export class DemoApp extends TauApplication {
       { parent: this }
     );
 
-    // Create an Ingress resource to expose the application
+    // Create an Ingress resource to expose the application with auth
     this.createHttpIngress(
-      { appName: name, port: 80, labels: this.labels, public: true },
+      { appName: name, port: 80, labels: this.labels, public: true, auth: true },
       { parent: this }
     );
   }

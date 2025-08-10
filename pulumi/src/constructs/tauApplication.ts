@@ -15,6 +15,7 @@ export abstract class TauApplication extends pulumi.ComponentResource {
   public readonly labels: { app: string };
   public readonly volumeManager: VolumeManager;
   public readonly domain: string;
+  public readonly subdomain: string;
   public readonly applicationDomain: string;
   public readonly namespace: string;
   public readonly name: string;
@@ -55,7 +56,8 @@ export abstract class TauApplication extends pulumi.ComponentResource {
     this.name = name;
     this.labels = labels;
     this.domain = config.require("domain");
-    this.applicationDomain = `${name}.${this.domain}`;
+    this.subdomain = name;
+    this.applicationDomain = `${this.subdomain}.${this.domain}`;
     this.namespace = args.namespace || "default";
     this.volumeManager = new VolumeManager(name, this.namespace, this);
 
@@ -75,7 +77,7 @@ export abstract class TauApplication extends pulumi.ComponentResource {
     args: CreateHttpIngressArgs,
     opts?: pulumi.ComponentResourceOptions
   ): CreateHttpIngressResult {
-    return createHttpIngress({ namespace: this.namespace, ...args });
+    return createHttpIngress({ namespace: this.namespace, subdomain: this.subdomain, ...args });
   }
 
   /**

@@ -14,6 +14,7 @@
     - [x] Create public and private ingress for public things; to allow easier dns routing
   - [x] Remote (external to LAN) as DNS name
     - [x] Get this to report the router's IPv4 address instead of the ingress's IP
+- [ ] Traefik dashboards are not included in the DNS - what's going on there? lack of ingressroute traefik resource being watched by external-dns
 - [ ] Auth
 - [ ] Move services over
 - [ ] Network isolation and VLANs

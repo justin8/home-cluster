@@ -62,6 +62,7 @@ export interface CreateHttpIngressArgs {
   path?: pulumi.Input<string>;
   pathType?: pulumi.Input<string>;
   namespace?: pulumi.Input<string>;
+  auth?: boolean;
 }
 
 /**
@@ -85,12 +86,13 @@ export function createHttpIngress(
   const appName = args.appName;
   const labels = args.labels ?? {};
   const port = args.port ?? 80;
-  const targetPort = args.targetPort ?? 80;
+  const targetPort = args.targetPort ?? port;
   const isPublic = args.public ?? false;
   const subdomain = args.subdomain ?? args.appName;
   const path = args.path ?? "/";
   const pathType = args.pathType ?? "Prefix";
   const namespace = args.namespace ?? "default";
+  const auth = args.auth ?? false;
 
   // Create the service
   const service = createService(
@@ -116,6 +118,7 @@ export function createHttpIngress(
         path,
         pathType,
         serviceName: service.metadata.name,
+        auth,
       },
       opts
     )
@@ -132,6 +135,7 @@ export function createHttpIngress(
           path,
           pathType,
           serviceName: service.metadata.name,
+          auth,
         },
         opts
       )
@@ -156,7 +160,7 @@ export function createService(
   const appName = args.appName;
   const labels = args.labels ?? {};
   const port = args.port ?? 80;
-  const targetPort = args.targetPort ?? 80;
+  const targetPort = args.targetPort || port;
   const namespace = args.namespace || "default";
 
   return new k8s.core.v1.Service(
@@ -184,6 +188,7 @@ export interface CreateIngressArgs {
   isPublic?: boolean;
   path?: pulumi.Input<string>;
   pathType?: pulumi.Input<string>;
+  auth?: boolean;
 }
 
 export function createIngress(
@@ -197,6 +202,7 @@ export function createIngress(
   const path = args.path || "/";
   const pathType = args.pathType || "Prefix";
   const serviceName = args.serviceName;
+  const auth = args.auth ?? false;
 
   const domain = config.require("domain");
   const appDomain = subdomain ? `${subdomain}.${domain}` : domain;
@@ -210,6 +216,9 @@ export function createIngress(
           "pulumi.com/skipAwait": "true",
           ...(isPublic && {
             "external-dns.alpha.kubernetes.io/target": config.require("real_external_ip"),
+          }),
+          ...(auth && {
+            "traefik.ingress.kubernetes.io/router.middlewares": `traefik-${isPublic ? "public" : "private"}-tinyauth@kubernetescrd`,
           }),
         },
       },
