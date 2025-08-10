@@ -155,10 +155,10 @@ export class VolumeManager {
           capacity: { storage: "1Gi" },
           accessModes: ["ReadWriteMany"],
           persistentVolumeReclaimPolicy: "Retain",
-          storageClassName: "", // Don't use longhorn storage class
+          storageClassName: "nfs-csi",
           csi: {
             driver: "nfs.csi.k8s.io",
-            volumeHandle: volumeHandle,
+            volumeHandle,
             volumeAttributes: {
               server: this.nfsHostname,
               share: path,
@@ -238,6 +238,7 @@ interface LonghornResourceArgs {
   accessMode?: string;
   storageClass?: string;
   longhornVolume?: k8s.apiextensions.CustomResource;
+  numberOfReplicas?: number;
   pv?: k8s.core.v1.PersistentVolume;
   opts?: pulumi.CustomResourceOptions;
 }
@@ -251,6 +252,7 @@ export function createLonghornVolumeResource(args: LonghornResourceArgs) {
     ReadOnlyMany: "rox",
   };
   const longhornAccessMode = accessModeMap[accessMode];
+  const numberOfReplicas = args.numberOfReplicas || 2;
 
   return new k8s.apiextensions.CustomResource(
     lhvName,
@@ -270,8 +272,9 @@ export function createLonghornVolumeResource(args: LonghornResourceArgs) {
       spec: {
         size: String(parseSizeToBytes(size)),
         frontend: "blockdev",
-        migratable: longhornAccessMode != "rwx",
+        migratable: longhornAccessMode == "rwx",
         accessMode: longhornAccessMode,
+        numberOfReplicas,
       },
     },
     { ...opts, ignoreChanges: ["spec.migratable"] }

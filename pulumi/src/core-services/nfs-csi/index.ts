@@ -6,9 +6,12 @@ export interface NFSCSIArgs {
 }
 
 export class NFSCSI extends pulumi.ComponentResource {
+  private config = new pulumi.Config();
+
   constructor(appName: string, args: NFSCSIArgs = {}, opts?: pulumi.ComponentResourceOptions) {
     super(appName, appName, {}, opts);
 
+    const nfsHostname = this.config.require("nfs_hostname");
     const namespace = args.namespace || "kube-system";
 
     const helm = new k8s.helm.v3.Release(
@@ -31,5 +34,19 @@ export class NFSCSI extends pulumi.ComponentResource {
       },
       { parent: this }
     );
+
+    new k8s.storage.v1.StorageClass("nfs-csi", {
+      metadata: {
+        name: "nfs-csi",
+      },
+      provisioner: "nfs.csi.k8s.io",
+      parameters: {
+        server: nfsHostname,
+        share: "/",
+      },
+      reclaimPolicy: "Retain",
+      allowVolumeExpansion: true,
+      mountOptions: ["nfsver=4.1"],
+    });
   }
 }
