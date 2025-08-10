@@ -7,7 +7,7 @@
 - [x] Document how to do restores
 - [x] Database provider
   - [x] Use static volumes for databases to enable backups via Longhorn
-- [ ] DNS resolution for ingress, locally and remote
+- [x] DNS resolution for ingress, locally and remote
   - Use ExternalDNS x2 with annotation filters <https://kubernetes-sigs.github.io/external-dns/v0.18.0/docs/faq/#running-an-internal-and-external-dns-service>
   - [x] Cluster-internal as a service
   - [x] Locally (LAN) as DNS name
@@ -17,6 +17,6 @@
 - [ ] Auth
 - [ ] Move services over
 - [ ] Network isolation and VLANs
-- [ ] Renovate bot to auto-update containers
+- [ ] Renovate bot to auto-update containers (this is mostly working; I have it for helm charts, but not container images yet)
 - [ ] Deploy from git using pulumi
 - [ ] Docker registry caching/mirroring

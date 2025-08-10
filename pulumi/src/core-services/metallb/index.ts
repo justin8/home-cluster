@@ -1,5 +1,6 @@
 import * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
+import { createIpAddressPool } from "../../utils";
 
 declare var require: any;
 
@@ -50,42 +51,14 @@ export class MetalLB extends pulumi.ComponentResource {
       { parent: this }
     );
 
-    const addressPool = new k8s.apiextensions.CustomResource(
-      `${appName}-address-pool`,
+    createIpAddressPool(
       {
-        apiVersion: "metallb.io/v1beta1",
-        kind: "IPAddressPool",
-        metadata: {
-          name: "default",
-          namespace: ns.metadata.name,
-        },
-        spec: {
-          addresses: addresses,
-        },
+        name: `${appName}-default`,
+        ipAddresses: addresses,
+        namespace: ns.metadata.name,
+        autoAssign: true,
       },
-      {
-        parent: this,
-        dependsOn: [helm],
-      }
-    );
-
-    const l2Advertisement = new k8s.apiextensions.CustomResource(
-      `${appName}-l2-advertisement`,
-      {
-        apiVersion: "metallb.io/v1beta1",
-        kind: "L2Advertisement",
-        metadata: {
-          name: "default",
-          namespace: ns.metadata.name,
-        },
-        spec: {
-          ipAddressPools: ["default"],
-        },
-      },
-      {
-        parent: this,
-        dependsOn: [addressPool],
-      }
+      { parent: this }
     );
   }
 }

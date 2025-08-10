@@ -20,10 +20,16 @@ export class IngressControllers extends pulumi.ComponentResource {
     ip: pulumi.Input<string>,
     dependsOn: pulumi.Resource[] = []
   ) {
-    const poolName = createIpAddressPool(`${type}-ingress`, [pulumi.interpolate`${ip}/32`], {
-      parent: this,
-      dependsOn,
-    });
+    const poolName = createIpAddressPool(
+      {
+        name: `${type}-ingress`,
+        ipAddresses: [pulumi.interpolate`${ip}/32`],
+      },
+      {
+        parent: this,
+        dependsOn,
+      }
+    );
 
     return new k8s.helm.v3.Release(
       `${appName}-${type}`,

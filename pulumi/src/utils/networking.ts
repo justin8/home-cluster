@@ -1,11 +1,21 @@
 import * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
 
+export interface createIpAddressPoolArgs {
+  name: string;
+  ipAddresses: pulumi.Input<pulumi.Input<string>[]>;
+  namespace?: pulumi.Input<string>;
+  autoAssign?: boolean;
+}
+
 export function createIpAddressPool(
-  name: string,
-  ipAddresses: pulumi.Input<pulumi.Input<string>[]>,
+  args: createIpAddressPoolArgs,
   opts?: pulumi.ComponentResourceOptions
 ): pulumi.Output<string> {
+  const { name, ipAddresses } = args;
+  const namespace = args.namespace || "metallb-system";
+  const autoAssign = args.autoAssign || false;
+
   const pool = new k8s.apiextensions.CustomResource(
     `${name}-pool`,
     {
@@ -13,11 +23,11 @@ export function createIpAddressPool(
       kind: "IPAddressPool",
       metadata: {
         name,
-        namespace: "metallb-system",
+        namespace,
       },
       spec: {
         addresses: ipAddresses,
-        autoAssign: false,
+        autoAssign,
       },
     },
     opts

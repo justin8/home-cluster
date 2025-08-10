@@ -83,8 +83,10 @@ export class Dns extends pulumi.ComponentResource {
 
     const piholeIP = args.dnsServerIP || config.require("dns_server_ip");
     const piholeIpAddressPoolName = createIpAddressPool(
-      name,
-      [pulumi.interpolate`${piholeIP}/32`],
+      {
+        name: name,
+        ipAddresses: [pulumi.interpolate`${piholeIP}/32`],
+      },
       {
         parent: this,
       }
