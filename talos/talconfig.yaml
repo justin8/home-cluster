@@ -95,7 +95,9 @@ nodes:
     installDiskSelector:
       size: "> 10GB"
     nameservers:
-      - 192.168.4.1
+      - 192.168.4.53
+      - 9.9.9.9
+      - 1.1.1.1
     networkInterfaces:
       - interface: eth0
         dhcp: true

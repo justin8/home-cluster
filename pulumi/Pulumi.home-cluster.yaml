@@ -19,3 +19,6 @@ config:
   home-cluster:timezone_offset: "10"
   home-cluster:real_external_ip:
     secure: v1:UsLKGa2iKi1xc5R5:rVgsA+QIVvPDN+HYulZVWyw7qYh1oPzD228TnO26
+  home-cluster:tinyauth_oauth_client_id: 5377a3eb-d72d-4fc6-92f2-cda274c89392
+  home-cluster:tinyauth_oauth_client_secret:
+    secure: v1:BSsODPoTmVkGbb0g:rC3TXRrhw7xRpHyyaQACn1+yl79N0/f26/nEokIQj+mmRCnYav8Aq1r/GVEnUgyj

@@ -15,11 +15,12 @@
   - [x] Remote (external to LAN) as DNS name
     - [x] Get this to report the router's IPv4 address instead of the ingress's IP
 - [x] Traefik dashboards are not included in the DNS - what's going on there? lack of ingressroute traefik resource being watched by external-dns
-- [ ] Auth - Authelia? Keycloak? Authentik? Something else?
-  - [ ] Tinyauth
-  - [ ] PocketID
+- [x] Auth - Authelia? Keycloak? Authentik? Something else?
+  - [x] Tinyauth
+  - [x] PocketID
+- [ ] Set up email proxy (and configure it in PocketID and any others that need it)
 - [ ] Move services over
 - [ ] Network isolation and VLANs
 - [ ] Renovate bot to auto-update containers (this is mostly working; I have it for helm charts, but not container images yet)
-- [ ] Deploy from git using pulumi
 - [ ] Docker registry caching/mirroring
+- [ ] Deploy from git using pulumi

@@ -1,5 +1,6 @@
 import * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
+import { PocketId } from "./pocketid";
 import { TinyAuth } from "./tinyauth";
 
 export interface AuthArgs {
@@ -19,12 +20,8 @@ export class Auth extends pulumi.ComponentResource {
       { parent: this }
     );
 
-    const tinyauth = new TinyAuth(
-      "tinyauth",
-      {
-        namespace,
-      },
-      { ...opts, dependsOn: [ns] }
-    );
+    const pocketid = new PocketId("pocketid", { namespace }, { ...opts, dependsOn: [ns] });
+
+    const tinyauth = new TinyAuth("tinyauth", { namespace }, { ...opts, dependsOn: [ns] });
   }
 }

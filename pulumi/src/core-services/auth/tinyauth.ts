@@ -5,6 +5,8 @@ import { PRIVATE_INGRESS_CLASS, PUBLIC_INGRESS_CLASS } from "../../constants";
 import { TauApplication, TauApplicationArgs } from "../../constructs";
 import { getServiceURL } from "../../utils";
 
+const config = new pulumi.Config();
+
 export interface TinyAuthArgs extends TauApplicationArgs {
   namespace: string;
 }
@@ -13,7 +15,29 @@ export class TinyAuth extends TauApplication {
   constructor(name: string, args: TinyAuthArgs, opts?: pulumi.ComponentResourceOptions) {
     super(name, args, opts);
 
-    const users = "justin:$2a$10$WfYZfPzxKD7GnLTsCz2u.uV/NTts.kAcGGWqKjTTtaVS3FnBOhYXC";
+    const oauth_config_data = {
+      GENERIC_CLIENT_ID: config.require("tinyauth_oauth_client_id"),
+      GENERIC_CLIENT_SECRET: config.require("tinyauth_oauth_client_secret"),
+      GENERIC_AUTH_URL: "https://pocketid.dray.id.au/authorize",
+      GENERIC_TOKEN_URL: "https://pocketid.dray.id.au/api/oidc/token",
+      GENERIC_USER_URL: "https://pocketid.dray.id.au/api/oidc/userinfo",
+      GENERIC_SCOPES: "openid email profile groups",
+      GENERIC_NAME: "Pocket ID",
+      OAUTH_AUTO_REDIRECT: "generic",
+    };
+
+    const oauth_config = new k8s.core.v1.Secret(
+      `${name}-oauth-config`,
+      {
+        metadata: {
+          name: "tinyauth-oauth-config",
+          namespace: this.namespace,
+        },
+        type: "Opaque",
+        stringData: oauth_config_data,
+      },
+      { parent: this, dependsOn: opts?.dependsOn }
+    );
 
     // Generate a random secret key
     const secretKey = new random.RandomPassword(
@@ -40,11 +64,11 @@ export class TinyAuth extends TauApplication {
       { parent: this, dependsOn: opts?.dependsOn }
     );
 
-    const deployment = new k8s.apps.v1.Deployment(
+    const statefulSet = new k8s.apps.v1.StatefulSet(
       name,
       {
         metadata: {
-          name: "tinyauth",
+          name,
           namespace: this.namespace,
         },
         spec: {
@@ -60,12 +84,13 @@ export class TinyAuth extends TauApplication {
               containers: [
                 {
                   name: "tinyauth",
-                  image: "ghcr.io/steveiliop56/tinyauth:v3",
+                  image: "ghcr.io/steveiliop56/tinyauth:v3.6.2",
                   ports: [
                     {
                       containerPort: 3000,
                     },
                   ],
+                  envFrom: [{ secretRef: { name: oauth_config.metadata.name } }],
                   env: [
                     {
                       name: "APP_URL",
@@ -79,10 +104,6 @@ export class TinyAuth extends TauApplication {
                           key: "secretKey",
                         },
                       },
-                    },
-                    {
-                      name: "USERS",
-                      value: users,
                     },
                   ],
                   livenessProbe: {
@@ -103,13 +124,13 @@ export class TinyAuth extends TauApplication {
           },
         },
       },
-      { parent: this, dependsOn: [secret] }
+      { parent: this, dependsOn: [secret, oauth_config] }
     );
 
     // Create HTTP ingress for the application
     this.createHttpIngress(
       { appName: name, port: 3000, labels: this.labels, public: true },
-      { parent: this, dependsOn: [deployment] }
+      { parent: this, dependsOn: [statefulSet] }
     );
 
     // Create Traefik middleware for forward auth in both ingress controller namespaces
@@ -120,7 +141,7 @@ export class TinyAuth extends TauApplication {
           apiVersion: "traefik.io/v1alpha1",
           kind: "Middleware",
           metadata: {
-            name: "tinyauth",
+            name,
             namespace: ingressClass,
           },
           spec: {
@@ -129,7 +150,7 @@ export class TinyAuth extends TauApplication {
             },
           },
         },
-        { parent: this, dependsOn: [deployment] }
+        { parent: this, dependsOn: [statefulSet] }
       );
     });
   }
