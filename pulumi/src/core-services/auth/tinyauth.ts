@@ -129,7 +129,7 @@ export class TinyAuth extends TauApplication {
 
     // Create HTTP ingress for the application
     this.createHttpIngress(
-      { appName: name, port: 3000, labels: this.labels, public: true },
+      { appName: name, port: 3000, labels: this.labels, public: true, auth: false },
       { parent: this, dependsOn: [statefulSet] }
     );
 

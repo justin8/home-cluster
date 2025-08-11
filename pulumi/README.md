@@ -160,26 +160,45 @@ Tinyauth is used as an auth proxy in front of most services that don't support n
 
 The infrastructure includes the following core services:
 
-1. **MetalLB** - Load balancer for bare metal Kubernetes
-   - Provides IP addresses for LoadBalancer services
-   - Used by ingress controllers
+1. **SharedSecrets** - Cluster-wide secret management
+   - Manages shared secrets across the cluster
+   - Foundation for other services requiring credentials
 
-2. **Cert-Manager** - Certificate management with Let's Encrypt
+2. **MetalLB** - Load balancer for bare metal Kubernetes
+   - Provides IP addresses for LoadBalancer services
+   - Used by ingress controllers and DNS services
+
+3. **Cert-Manager** - Certificate management with Let's Encrypt
    - Automated certificate issuance and renewal
    - Integration with Cloudflare DNS for domain validation
 
-3. **NFS-CSI** - NFS storage driver
+4. **NFS-CSI** - NFS storage driver
    - Mounts external NFS shares
-   - Used for shared file storage
+   - Used for shared file storage across nodes
 
-4. **Longhorn** - Distributed block storage
+5. **Longhorn** - Distributed block storage
    - High availability through volume replication
    - Snapshot and backup capabilities
    - Disaster recovery support
 
-5. **Ingress Controllers** - Traefik ingress controllers
+6. **IngressControllers** - Traefik ingress controllers
    - Separate public and private controllers
    - TLS termination with automatic certificate management
+
+7. **DNS** - Multi-tier DNS system
+   - **PiHole**: Internal DNS server (primary + secondary)
+   - **External DNS**: Automatic DNS record management
+     - PiHole provider for private ingress classes
+     - Cloudflare provider for public ingress classes
+
+8. **CNPG Operator** - CloudNativePG PostgreSQL operator
+   - Manages PostgreSQL database instances
+   - Automated backup and recovery
+   - High availability PostgreSQL clusters
+
+9. **Auth** - Authentication services
+   - **PocketId**: OAuth2/OIDC identity provider
+   - **TinyAuth**: Authentication proxy for services without native OAuth2 support
 
 ## Network Setup
 
@@ -294,6 +313,45 @@ Applications extend the `TauApplication` base class which provides:
 - Domain management
 - Ingress creation (public or private)
 - Volume management through VolumeManager
+
+### Ingress
+
+The `TauApplication` class provides the `createHttpIngress()` method for exposing applications via HTTP/HTTPS:
+
+```typescript
+// Basic ingress (private only, with auth)
+this.createHttpIngress({ appName: name, port: 80, labels: this.labels }, { parent: this });
+
+// Public ingress with authentication
+this.createHttpIngress(
+  { appName: name, port: 80, labels: this.labels, public: true, auth: true },
+  { parent: this }
+);
+
+// Public ingress without authentication
+this.createHttpIngress(
+  { appName: name, port: 80, labels: this.labels, public: true, auth: false },
+  { parent: this }
+);
+```
+
+**Options:**
+
+- `appName`: Application name (used for service name)
+- `port`: Service port to expose
+- `labels`: Pod selector labels
+- `public`: Create both public and private ingress (default: false)
+- `auth`: Enable TinyAuth authentication middleware (default: true)
+- `path`: URL path (default: "/")
+- `pathType`: Path matching type (default: "Prefix")
+
+**Behavior:**
+
+- Always creates a private ingress accessible internally
+- Auth is enabled by default and can be disabled with `auth: false`
+- If `public: true`, also creates a public ingress accessible from internet
+- Automatic TLS certificate provisioning via cert-manager
+- DNS records automatically managed by External DNS
 
 ## Storage Options
 

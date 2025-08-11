@@ -1,6 +1,12 @@
 import * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
-import { DEFAULT_TLS_SECRET, PRIVATE_INGRESS_CLASS, PUBLIC_INGRESS_CLASS } from "../constants";
+import {
+  DEFAULT_TLS_SECRET,
+  PRIVATE_AUTH_MIDDLEWARE,
+  PRIVATE_INGRESS_CLASS,
+  PUBLIC_AUTH_MIDDLEWARE,
+  PUBLIC_INGRESS_CLASS,
+} from "../constants";
 
 export { DatabaseOptions } from "./database";
 export { createIpAddressPool } from "./networking";
@@ -92,7 +98,7 @@ export function createHttpIngress(
   const path = args.path ?? "/";
   const pathType = args.pathType ?? "Prefix";
   const namespace = args.namespace ?? "default";
-  const auth = args.auth ?? false;
+  const auth = args.auth ?? true;
 
   // Create the service
   const service = createService(
@@ -202,7 +208,7 @@ export function createIngress(
   const path = args.path || "/";
   const pathType = args.pathType || "Prefix";
   const serviceName = args.serviceName;
-  const auth = args.auth ?? false;
+  const auth = args.auth ?? true;
 
   const domain = config.require("domain");
   const appDomain = subdomain ? `${subdomain}.${domain}` : domain;
@@ -218,7 +224,9 @@ export function createIngress(
             "external-dns.alpha.kubernetes.io/target": config.require("real_external_ip"),
           }),
           ...(auth && {
-            "traefik.ingress.kubernetes.io/router.middlewares": `traefik-${isPublic ? "public" : "private"}-tinyauth@kubernetescrd`,
+            "traefik.ingress.kubernetes.io/router.middlewares": isPublic
+              ? PUBLIC_AUTH_MIDDLEWARE
+              : PRIVATE_AUTH_MIDDLEWARE,
           }),
         },
       },

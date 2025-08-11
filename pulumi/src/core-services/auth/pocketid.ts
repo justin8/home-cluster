@@ -84,7 +84,7 @@ export class PocketId extends TauApplication {
     );
 
     this.createHttpIngress(
-      { appName: name, port, labels: this.labels, public: true },
+      { appName: name, port, labels: this.labels, public: true, auth: false },
       { parent: this, dependsOn: [deployment] }
     );
   }

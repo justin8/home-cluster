@@ -86,23 +86,7 @@ export class IngressControllers extends pulumi.ComponentResource {
     traefik: k8s.helm.v3.Release,
     domain: string
   ) {
-    const middleware = new k8s.apiextensions.CustomResource(
-      `${type}-dashboard-ip-allowlist`,
-      {
-        apiVersion: "traefik.io/v1alpha1",
-        kind: "Middleware",
-        metadata: {
-          name: "local-ip-allowlist",
-          namespace: type === "public" ? PUBLIC_INGRESS_CLASS : PRIVATE_INGRESS_CLASS,
-        },
-        spec: {
-          ipAllowList: {
-            sourceRange: ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"],
-          },
-        },
-      },
-      { parent: this, dependsOn: [traefik] }
-    );
+    const isPublic = type === "public";
 
     new k8s.apiextensions.CustomResource(
       `${type}-dashboard-ingressroute`,
@@ -111,10 +95,9 @@ export class IngressControllers extends pulumi.ComponentResource {
         kind: "IngressRoute",
         metadata: {
           name: "dashboard",
-          namespace: type === "public" ? PUBLIC_INGRESS_CLASS : PRIVATE_INGRESS_CLASS,
+          namespace: isPublic ? PUBLIC_INGRESS_CLASS : PRIVATE_INGRESS_CLASS,
           annotations: {
-            "external-dns.alpha.kubernetes.io/target":
-              type === "public" ? this.publicIP : this.privateIP,
+            "external-dns.alpha.kubernetes.io/target": isPublic ? this.publicIP : this.privateIP,
           },
         },
         spec: {
@@ -125,7 +108,7 @@ export class IngressControllers extends pulumi.ComponentResource {
               kind: "Rule",
               middlewares: [
                 {
-                  name: "local-ip-allowlist",
+                  name: "tinyauth", // The short-name of a middleware is used in IngressRoutes, while the full name is used for a regular Ingress
                   namespace: type === "public" ? PUBLIC_INGRESS_CLASS : PRIVATE_INGRESS_CLASS,
                 },
               ],
@@ -135,7 +118,7 @@ export class IngressControllers extends pulumi.ComponentResource {
           tls: { secretName: DEFAULT_TLS_SECRET },
         },
       },
-      { parent: this, dependsOn: [middleware] }
+      { parent: this, dependsOn: [traefik] }
     );
   }
 
