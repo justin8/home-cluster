@@ -1,6 +1,7 @@
 import * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
 import * as random from "@pulumi/random";
+import { getServiceURL } from "../utils";
 import { DatabaseOptions as DatabaseArgs } from "../utils/database";
 import { createLonghornPersistentVolume, createLonghornVolumeResource } from "./volumeManager";
 
@@ -22,7 +23,7 @@ export class PostgresInstance extends pulumi.ComponentResource {
 
     // The service name follows CNPG naming convention
     this.serviceName = pulumi.output(`${name}-rw`);
-    this.host = pulumi.interpolate`${this.serviceName}.${namespace}.svc.cluster.local`;
+    this.host = getServiceURL(this.serviceName, namespace);
     this.port = pulumi.output("5432");
 
     this.databaseName = name;

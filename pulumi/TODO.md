@@ -23,4 +23,5 @@
 - [ ] Network isolation and VLANs
 - [ ] Renovate bot to auto-update containers (this is mostly working; I have it for helm charts, but not container images yet)
 - [ ] Docker registry caching/mirroring
+- [ ] Multiple Tinyauth/PocketID instances
 - [ ] Deploy from git using pulumi

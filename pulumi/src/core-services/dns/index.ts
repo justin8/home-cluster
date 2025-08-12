@@ -53,7 +53,7 @@ export class Dns extends pulumi.ComponentResource {
         ingressClasses: [args.privateIngressClass],
         registry: "noop",
         extraArgs: [
-          pulumi.interpolate`--pihole-server=${getServiceURL("pihole-web", namespace)}`,
+          pulumi.interpolate`--pihole-server=http://${getServiceURL("pihole-web", namespace)}`,
           "--pihole-api-version=6", // v5 is still the deault, but being deprecated soon-ish
         ],
       },

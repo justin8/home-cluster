@@ -52,7 +52,7 @@ export function getServiceURL(
   serviceName: pulumi.Input<string>,
   namespace: pulumi.Input<string> = "default"
 ): pulumi.Output<string> {
-  return pulumi.interpolate`http://${serviceName}.${namespace}.svc.cluster.local`;
+  return pulumi.interpolate`${serviceName}.${namespace}.svc.cluster.local`;
 }
 
 /**

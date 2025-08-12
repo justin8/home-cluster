@@ -64,7 +64,7 @@ export class TinyAuth extends TauApplication {
       { parent: this, dependsOn: opts?.dependsOn }
     );
 
-    const statefulSet = new k8s.apps.v1.StatefulSet(
+    const deployment = new k8s.apps.v1.Deployment(
       name,
       {
         metadata: {
@@ -130,7 +130,7 @@ export class TinyAuth extends TauApplication {
     // Create HTTP ingress for the application
     this.createHttpIngress(
       { appName: name, port: 3000, labels: this.labels, public: true, auth: false },
-      { parent: this, dependsOn: [statefulSet] }
+      { parent: this, dependsOn: [deployment] }
     );
 
     // Create Traefik middleware for forward auth in both ingress controller namespaces
@@ -146,11 +146,11 @@ export class TinyAuth extends TauApplication {
           },
           spec: {
             forwardAuth: {
-              address: pulumi.interpolate`${getServiceURL("tinyauth", this.namespace)}:3000/api/auth/traefik`,
+              address: pulumi.interpolate`http://${getServiceURL("tinyauth", this.namespace)}:3000/api/auth/traefik`,
             },
           },
         },
-        { parent: this, dependsOn: [statefulSet] }
+        { parent: this, dependsOn: [deployment] }
       );
     });
   }

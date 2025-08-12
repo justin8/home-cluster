@@ -27,7 +27,7 @@ export class PocketId extends TauApplication {
       { ...opts, parent: this }
     );
 
-    const deployment = new k8s.apps.v1.Deployment(
+    const statefulSet = new k8s.apps.v1.StatefulSet(
       name,
       {
         metadata: {
@@ -85,7 +85,7 @@ export class PocketId extends TauApplication {
 
     this.createHttpIngress(
       { appName: name, port, labels: this.labels, public: true, auth: false },
-      { parent: this, dependsOn: [deployment] }
+      { parent: this, dependsOn: [statefulSet] }
     );
   }
 }

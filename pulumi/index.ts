@@ -10,6 +10,7 @@ import {
   Dns,
   IngressControllers,
   Longhorn,
+  MailProxy,
   MetalLB,
   NFSCSI,
   SharedSecrets,
@@ -28,6 +29,8 @@ loadApplications(coreServices);
  */
 function initializeCoreServices(): pulumi.Resource[] {
   const sharedSecrets = new SharedSecrets("secrets");
+
+  const mailProxy = new MailProxy("mail-proxy");
 
   const metallb = new MetalLB("metallb", {
     addresses: [config.require("ip_address_pool")],
@@ -79,14 +82,15 @@ function initializeCoreServices(): pulumi.Resource[] {
 
   // Return array of all core services
   return [
-    metallb,
     sharedSecrets,
+    mailProxy,
+    metallb,
     certManager,
     nfsCsi,
     ingressControllers,
     longhorn,
-    cnpgOperator,
     dns,
+    cnpgOperator,
     auth,
   ];
 }

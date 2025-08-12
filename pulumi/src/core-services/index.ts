@@ -4,6 +4,7 @@ export { CNPGOperator } from "./cnpg-operator";
 export { Dns } from "./dns";
 export { IngressControllers } from "./ingress-controllers";
 export { Longhorn } from "./longhorn";
+export { MailProxy } from "./mail-proxy";
 export { MetalLB } from "./metallb";
 export { NFSCSI } from "./nfs-csi";
 export { SharedSecrets } from "./shared-secrets";
