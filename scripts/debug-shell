@@ -1,0 +1,3 @@
+#!/bin/bash
+
+kubectl run debug --image=nicolaka/netshoot --rm -it --restart=Never -- zsh

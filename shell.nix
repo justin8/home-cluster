@@ -23,6 +23,7 @@ pkgs.mkShell {
     export KUBECONFIG=$PWD/talos/clusterconfig/kubeconfig
     export SOPS_AGE_KEY_FILE=$PWD/.sops-age.key
     export PULUMI_CONFIG_PASSPHRASE="$(sops decrypt --extract '["passphrase"]' pulumi/.pulumi-passphrase.sops.yaml)"
+    export PATH=$PWD/scripts:$PATH
 
     git submodule update --init --recursive
 
