@@ -9,6 +9,7 @@ import { VolumeManager } from "./volumeManager";
 export interface TauApplicationArgs {
   database?: DatabaseOptions;
   namespace?: string;
+  createNamespace?: boolean;
 }
 
 export abstract class TauApplication extends pulumi.ComponentResource {
@@ -60,6 +61,19 @@ export abstract class TauApplication extends pulumi.ComponentResource {
     this.applicationDomain = `${this.subdomain}.${this.domain}`;
     this.namespace = args.namespace || "default";
     this.volumeManager = new VolumeManager(name, this.namespace, this);
+
+    if (args.createNamespace && !["default", "kube-system"].includes(this.namespace)) {
+      new k8s.core.v1.Namespace(
+        this.namespace,
+        {
+          metadata: {
+            name: this.namespace,
+            labels,
+          },
+        },
+        { ...opts, parent: this }
+      );
+    }
 
     // Create database if options are provided
     if (args.database) {
