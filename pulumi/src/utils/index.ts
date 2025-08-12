@@ -37,14 +37,19 @@ export function reflectorAnnotationsForNamespaces(namespaces: string[]) {
 }
 
 /**
- * Converts an hour (0-23) by the timezone_offset Pulumi config variable. Mostly because Talos only supports UTC.
+ * Converts an hour (0-23) by the timezone Pulumi config variable. Mostly because Talos only supports UTC.
  * This allows us to convert the hour to the local timezone for scheduling jobs.
  * @param hour The hour to convert (0-23)
  * @returns The converted hour (0-23)
  */
 export function applyTimezone(hour: number): number {
   const config = new pulumi.Config();
-  const offset = config.getNumber("timezone_offset") || 0;
+  const timezone = config.get("timezone") || "UTC";
+  const now = new Date();
+  const utcHour = now.getUTCHours();
+  const localTime = new Date(now.toLocaleString("en-US", { timeZone: timezone }));
+  const localHour = localTime.getHours();
+  const offset = localHour - utcHour;
   return (hour + offset + 24) % 24;
 }
 

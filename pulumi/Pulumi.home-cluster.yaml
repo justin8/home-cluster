@@ -16,7 +16,6 @@ config:
   home-cluster:dns_server_ip: 192.168.4.53
   home-cluster:longhorn_nfs_backup_path:
     secure: v1:d5pcJ4pIEyJlnapg:PnqSOSYjX+lCRX+z0bN6EVFXeZTAVdYlxuGfd9yfpnRk5Tevl/VwNzY=
-  home-cluster:timezone_offset: "10"
   home-cluster:real_external_ip:
     secure: v1:UsLKGa2iKi1xc5R5:rVgsA+QIVvPDN+HYulZVWyw7qYh1oPzD228TnO26
   home-cluster:tinyauth_oauth_client_id: c995ee68-e855-4b0f-8733-a933c3a18704
@@ -31,3 +30,6 @@ config:
       secure: v1:Z9gWi6JxJCKBpIk1:eB8jrnFyeVAR5fuMUsoYUO3+J51V5Knb4k82x4mZEUmF9utOaqfCRDrc5qPiArGdYkUE4bgK
   home-cluster:maxmind_license_key:
     secure: v1:P28FAlbV9fOVa1R4:jFMFUeganeRPBRwP5Lp85HncEfIHDuiAXp3UIhWFS8oNlox/dhjgG9QAnOdjsum0h1kqVyukqqo=
+  home-cluster:timezone: Australia/Brisbane
+  home-cluster:shared_uid: "1000"
+  home-cluster:shared_gid: "1000"

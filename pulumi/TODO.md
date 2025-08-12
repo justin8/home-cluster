@@ -20,6 +20,7 @@
   - [x] PocketID
 - [x] Set up email proxy (and configure it in PocketID and any others that need it)
 - [ ] Move services over
+- [ ] Add resource limits to core-services and apps
 - [ ] Renovate bot to auto-update containers (this is mostly working; I have it for helm charts, but not container images yet)
 - [ ] Docker registry caching/mirroring
 - [ ] Get access by user groups working - coming in tinyauth v4 maybe; alternatively, try out oauth2proxy
