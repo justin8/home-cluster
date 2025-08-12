@@ -18,6 +18,7 @@ export class MailProxy extends TauApplication {
 
     const spoolMount = this.volumeManager.addLonghornVolume("/var/spool/postfix", {
       backupEnabled: false,
+      size: "100Mi"
     });
 
     const mailConfig = config.requireObject<{
