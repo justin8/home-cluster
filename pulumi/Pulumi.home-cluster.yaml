@@ -19,9 +19,9 @@ config:
   home-cluster:timezone_offset: "10"
   home-cluster:real_external_ip:
     secure: v1:UsLKGa2iKi1xc5R5:rVgsA+QIVvPDN+HYulZVWyw7qYh1oPzD228TnO26
-  home-cluster:tinyauth_oauth_client_id: 5377a3eb-d72d-4fc6-92f2-cda274c89392
+  home-cluster:tinyauth_oauth_client_id: c995ee68-e855-4b0f-8733-a933c3a18704
   home-cluster:tinyauth_oauth_client_secret:
-    secure: v1:BSsODPoTmVkGbb0g:rC3TXRrhw7xRpHyyaQACn1+yl79N0/f26/nEokIQj+mmRCnYav8Aq1r/GVEnUgyj
+    secure: v1:UZ1cEAY9rMRRvjTu:GYqWzGDn4K3/x9TLLYzZrikl7QVADq4w8hcP3KAMn00g43LUzD7UhEubiGZuuG8z
   home-cluster:email:
     username:
       secure: v1:Pcph4mVhVMoYFoZ6:6dYL+jGvITDnK98VseZQmK+9n2DGrZcFISTKaLiaTpeXNGDe
@@ -29,3 +29,5 @@ config:
       secure: v1:gc/aATHVanJtkunT:Jq4L5T3ww+3MqYD2fGCxGRe3ZOJquph9Ry46wciQuRIB1tcodRy4pNOBan6CUBjsl0aokDfDuNu5Z0eI
     server:
       secure: v1:Z9gWi6JxJCKBpIk1:eB8jrnFyeVAR5fuMUsoYUO3+J51V5Knb4k82x4mZEUmF9utOaqfCRDrc5qPiArGdYkUE4bgK
+  home-cluster:maxmind_license_key:
+    secure: v1:P28FAlbV9fOVa1R4:jFMFUeganeRPBRwP5Lp85HncEfIHDuiAXp3UIhWFS8oNlox/dhjgG9QAnOdjsum0h1kqVyukqqo=

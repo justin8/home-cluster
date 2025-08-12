@@ -1,6 +1,9 @@
 import * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
+import { MAIL_PROXY_ENDPOINT, MAIL_PROXY_PORT } from "../../constants";
 import { TauApplication, TauApplicationArgs } from "../../constructs";
+
+const config = new pulumi.Config();
 
 export interface PocketIdArgs extends TauApplicationArgs {
   namespace: string;
@@ -11,7 +14,7 @@ export class PocketId extends TauApplication {
     super(name, args, opts);
 
     const port = 1411;
-    const dataMount = this.volumeManager.addLonghornVolume("/app/backend/data", {
+    const dataMount = this.volumeManager.addLonghornVolume("/app/data", {
       backupEnabled: true,
     });
 
@@ -23,6 +26,28 @@ export class PocketId extends TauApplication {
           namespace: this.namespace,
         },
         automountServiceAccountToken: true,
+      },
+      { ...opts, parent: this }
+    );
+
+    const configuration = new k8s.core.v1.Secret(
+      `${name}-config`,
+      {
+        metadata: {
+          name: `${name}-config`,
+          namespace: this.namespace,
+        },
+        type: "Opaque",
+        stringData: {
+          UI_CONFIG_DISABLED: "true",
+          SESSION_DURATION: (60 * 24 * 30).toString(),
+          EMAIL_ONE_TIME_ACCESS_AS_ADMIN_ENABLED: "true",
+          APP_URL: pulumi.interpolate`https://${this.applicationDomain}`,
+          TRUST_PROXY: "true",
+          SMTP_HOST: MAIL_PROXY_ENDPOINT,
+          SMTP_PORT: MAIL_PROXY_PORT.toString(),
+          MAXMIND_LICENSE_KEY: config.require("maxmind_license_key"),
+        },
       },
       { ...opts, parent: this }
     );
@@ -51,16 +76,7 @@ export class PocketId extends TauApplication {
                   image: "ghcr.io/pocket-id/pocket-id:v1.7.0",
                   ports: [{ containerPort: port }],
                   volumeMounts: [dataMount],
-                  env: [
-                    {
-                      name: "APP_URL",
-                      value: pulumi.interpolate`https://${this.applicationDomain}`,
-                    },
-                    {
-                      name: "TRUST_PROXY",
-                      value: "true",
-                    },
-                  ],
+                  envFrom: [{ secretRef: { name: configuration.metadata.name } }],
                   livenessProbe: {
                     httpGet: {
                       path: "/health",

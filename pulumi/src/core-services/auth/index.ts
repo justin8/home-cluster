@@ -11,7 +11,6 @@ export class Auth extends pulumi.ComponentResource {
   constructor(name: string, args: AuthArgs = {}, opts?: pulumi.ComponentResourceOptions) {
     super("core-services:auth", name, {}, opts);
     const namespace = args.namespace || name;
-    console.log(`fooo:${namespace}`);
     opts = { ...opts, parent: this };
 
     const ns = new k8s.core.v1.Namespace(

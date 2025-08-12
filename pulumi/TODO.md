@@ -18,10 +18,11 @@
 - [x] Auth - Authelia? Keycloak? Authentik? Something else?
   - [x] Tinyauth
   - [x] PocketID
-- [ ] Set up email proxy (and configure it in PocketID and any others that need it)
+- [x] Set up email proxy (and configure it in PocketID and any others that need it)
+- [ ] Get access by user gorups working
 - [ ] Move services over
-- [ ] Network isolation and VLANs
 - [ ] Renovate bot to auto-update containers (this is mostly working; I have it for helm charts, but not container images yet)
 - [ ] Docker registry caching/mirroring
+- [ ] Network isolation and VLANs
 - [ ] Multiple Tinyauth/PocketID instances
 - [ ] Deploy from git using pulumi
