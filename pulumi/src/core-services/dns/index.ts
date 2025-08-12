@@ -23,7 +23,7 @@ export class Dns extends pulumi.ComponentResource {
     new k8s.core.v1.Namespace(namespace, { metadata: { name: namespace } }, { parent: this });
 
     const piholeSharedLabels = { app: "pihole" };
-    const piholeVolumeManager = new VolumeManager("pihole", namespace, this);
+    const piholeVolumeManager = new VolumeManager("pihole", namespace, { parent: this });
     new PiHole(
       "pihole-primary",
       {

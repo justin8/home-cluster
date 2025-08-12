@@ -1,6 +1,5 @@
 import * as pulumi from "@pulumi/pulumi";
-import * as fs from "fs";
-import * as path from "path";
+import { Kavita } from "./src/applications";
 
 import { PRIVATE_INGRESS_CLASS, PUBLIC_INGRESS_CLASS } from "./src/constants";
 import {
@@ -20,7 +19,9 @@ const config = new pulumi.Config();
 
 // Initialize core services and load applications
 const coreServices = initializeCoreServices();
-loadApplications(coreServices);
+const opts: pulumi.ResourceOptions = { dependsOn: coreServices };
+
+new Kavita({}, opts);
 
 /**
  * Initializes all core services required by applications
@@ -93,61 +94,4 @@ function initializeCoreServices(): pulumi.Resource[] {
     cnpgOperator,
     auth,
   ];
-}
-
-/**
- * Dynamically loads and instantiates all applications from the applications directory
- *
- * @param dependencies - Array of resources that applications depend on
- * @returns Array of instantiated application resources
- */
-function loadApplications(dependencies: pulumi.Resource[]): pulumi.Resource[] {
-  const applicationsDir = path.join(__dirname, "src", "applications");
-  const instantiatedApps: pulumi.Resource[] = [];
-
-  try {
-    // Get all directories in the applications folder
-    const applicationFolders = fs
-      .readdirSync(applicationsDir, { withFileTypes: true })
-      .filter(dirent => dirent.isDirectory() && dirent.name !== "node_modules")
-      .map(dirent => dirent.name);
-
-    // Import and instantiate each application
-    for (const appFolder of applicationFolders) {
-      try {
-        // Skip the index.ts file itself
-        if (appFolder === "index.ts") continue;
-
-        // Dynamically import the application module
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const appModule = require(`./src/applications/${appFolder}`);
-
-        // Convert folder name from kebab-case to PascalCase for the class name
-        const className = appFolder
-          .split("-")
-          .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-          .join("");
-
-        const AppClass = appModule[className];
-
-        if (AppClass) {
-          // Instantiate the application with dependencies
-          const app = new AppClass(appFolder, {
-            dependsOn: dependencies,
-          });
-
-          instantiatedApps.push(app);
-          console.log(`Successfully loaded application: ${appFolder}`);
-        } else {
-          console.warn(`Could not find class ${className} in module ${appFolder}`);
-        }
-      } catch (error) {
-        console.error(`Error loading application ${appFolder}:`, error);
-      }
-    }
-  } catch (error) {
-    console.error("Error reading applications directory:", error);
-  }
-
-  return instantiatedApps;
 }

@@ -30,7 +30,7 @@ export class VolumeManager {
   constructor(
     appName: string,
     namespace: pulumi.Input<string>,
-    private parent: pulumi.ComponentResource
+    private opts: pulumi.CustomResourceOptions
   ) {
     this.appName = appName;
     this.namespace = namespace || "default";
@@ -82,7 +82,7 @@ export class VolumeManager {
           labels: {},
         },
       },
-      { parent: this.parent }
+      this.opts
     );
   }
 
@@ -166,7 +166,7 @@ export class VolumeManager {
           },
         },
       },
-      { parent: this.parent }
+      this.opts
     );
 
     const pvc = new k8s.core.v1.PersistentVolumeClaim(
@@ -178,12 +178,12 @@ export class VolumeManager {
         },
         spec: {
           accessModes: ["ReadWriteMany"],
-          storageClassName: "", // Don't use longhorn storage class
+          storageClassName: "nfs-csi",
           resources: { requests: { storage: "1Gi" } },
           volumeName: pv.metadata.name,
         },
       },
-      { parent: this.parent }
+      this.opts
     );
 
     return { pv, pvc };
@@ -194,7 +194,6 @@ export class VolumeManager {
     const size = args.size || "1Gi";
     const accessMode = args.accessMode || "ReadWriteOnce";
     const backupEnabled = args.backupEnabled || false;
-    const opts = { parent: this.parent };
 
     const longhornVolume = createLonghornVolumeResource({
       identifier: this.appName,
@@ -202,7 +201,7 @@ export class VolumeManager {
       size,
       backupEnabled,
       accessMode,
-      opts,
+      opts: this.opts,
     });
     const pv = createLonghornPersistentVolume({
       identifier: this.appName,
@@ -211,7 +210,7 @@ export class VolumeManager {
       longhornVolume,
       storageClass,
       accessMode,
-      opts: { ...opts, dependsOn: [longhornVolume] },
+      opts: { ...this.opts, dependsOn: [longhornVolume] },
       namespace: this.namespace,
     });
     const pvc = createLonghornPersistentVolumeClaim({
@@ -221,7 +220,7 @@ export class VolumeManager {
       pv,
       storageClass,
       accessMode,
-      opts: { ...opts, dependsOn: [pv] },
+      opts: { ...this.opts, dependsOn: [pv] },
       namespace: this.namespace,
     });
 

@@ -60,7 +60,8 @@ export class SharedSecrets extends pulumi.ComponentResource {
 
 interface TauSecretArgs {
   data: { [key: string]: pulumi.Input<string> };
-  allowedNamespaces: string[];
+  namespace?: pulumi.Input<string>;
+  allowedNamespaces?: string[];
 }
 
 export class TauSecret extends pulumi.ComponentResource {
@@ -70,15 +71,20 @@ export class TauSecret extends pulumi.ComponentResource {
 
   constructor(name: string, args: TauSecretArgs, opts?: pulumi.ComponentResourceOptions) {
     super(name, name, {}, opts);
+    const namespace = args.namespace || SHARED_SECRETS_NAMESPACE;
+    const annotations = args.allowedNamespaces
+      ? reflectorAnnotationsForNamespaces(args.allowedNamespaces)
+      : {};
     this.name = name;
     this.data = args.data;
+
     this.secret = new k8s.core.v1.Secret(
       name,
       {
         metadata: {
           name,
-          namespace: SHARED_SECRETS_NAMESPACE,
-          annotations: reflectorAnnotationsForNamespaces(args.allowedNamespaces),
+          namespace,
+          annotations,
         },
         stringData: this.data,
       },

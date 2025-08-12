@@ -19,6 +19,7 @@ export abstract class TauApplication extends pulumi.ComponentResource {
   public readonly subdomain: string;
   public readonly applicationDomain: string;
   public readonly namespace: string;
+  public readonly ns: k8s.core.v1.Namespace | undefined;
   public readonly name: string;
   protected readonly database?: PostgresInstance;
 
@@ -60,13 +61,12 @@ export abstract class TauApplication extends pulumi.ComponentResource {
     this.subdomain = name;
     this.applicationDomain = `${this.subdomain}.${this.domain}`;
     this.namespace = args.namespace || "default";
-    this.volumeManager = new VolumeManager(name, this.namespace, this);
 
     // Create namespaces by default, unless it is 'default' or 'kube-system'
     const createNamespace =
       args.createNamespace ?? !["default", "kube-system"].includes(this.namespace);
     if (createNamespace) {
-      new k8s.core.v1.Namespace(
+      this.ns = new k8s.core.v1.Namespace(
         this.namespace,
         {
           metadata: {
@@ -74,9 +74,14 @@ export abstract class TauApplication extends pulumi.ComponentResource {
             labels,
           },
         },
-        { ...opts, parent: this }
+        { parent: this }
       );
     }
+
+    this.volumeManager = new VolumeManager(name, this.namespace, {
+      parent: this,
+      dependsOn: this.ns ? [this.ns] : [],
+    });
 
     // Create database if options are provided
     if (args.database) {
@@ -94,7 +99,10 @@ export abstract class TauApplication extends pulumi.ComponentResource {
     args: CreateHttpIngressArgs,
     opts?: pulumi.ComponentResourceOptions
   ): CreateHttpIngressResult {
-    return createHttpIngress({ namespace: this.namespace, subdomain: this.subdomain, ...args });
+    return createHttpIngress(
+      { namespace: this.namespace, subdomain: this.subdomain, ...args },
+      opts
+    );
   }
 
   /**
