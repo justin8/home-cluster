@@ -40,6 +40,7 @@ export class PocketId extends TauApplication {
         type: "Opaque",
         stringData: {
           UI_CONFIG_DISABLED: "true",
+          APP_NAME: `${config.require("domain")} - Pocket ID`,
           SESSION_DURATION: (60 * 24 * 30).toString(),
           EMAIL_ONE_TIME_ACCESS_AS_ADMIN_ENABLED: "true",
           APP_URL: pulumi.interpolate`https://${this.applicationDomain}`,

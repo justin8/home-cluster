@@ -28,6 +28,7 @@ export class Dns extends pulumi.ComponentResource {
       "pihole-primary",
       {
         namespace,
+        createNamespace: false,
         labels: piholeSharedLabels,
         type: "primary",
         volumeManager: piholeVolumeManager,
@@ -38,6 +39,7 @@ export class Dns extends pulumi.ComponentResource {
       "pihole-secondary",
       {
         namespace,
+        createNamespace: false,
         labels: piholeSharedLabels,
         type: "secondary",
         volumeManager: piholeVolumeManager,

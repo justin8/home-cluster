@@ -10,15 +10,9 @@ export class MailProxy extends TauApplication {
 
     const image = "boky/postfix:v4.4.0";
 
-    new k8s.core.v1.Namespace(
-      this.namespace,
-      { metadata: { name: this.namespace } },
-      { parent: this }
-    );
-
     const spoolMount = this.volumeManager.addLonghornVolume("/var/spool/postfix", {
       backupEnabled: false,
-      size: "100Mi"
+      size: "100Mi",
     });
 
     const mailConfig = config.requireObject<{

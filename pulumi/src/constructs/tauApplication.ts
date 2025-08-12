@@ -62,7 +62,10 @@ export abstract class TauApplication extends pulumi.ComponentResource {
     this.namespace = args.namespace || "default";
     this.volumeManager = new VolumeManager(name, this.namespace, this);
 
-    if (args.createNamespace && !["default", "kube-system"].includes(this.namespace)) {
+    // Create namespaces by default, unless it is 'default' or 'kube-system'
+    const createNamespace =
+      args.createNamespace ?? !["default", "kube-system"].includes(this.namespace);
+    if (createNamespace) {
       new k8s.core.v1.Namespace(
         this.namespace,
         {

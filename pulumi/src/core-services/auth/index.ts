@@ -19,8 +19,16 @@ export class Auth extends pulumi.ComponentResource {
       { parent: this }
     );
 
-    const pocketid = new PocketId("pocketid", { namespace }, { ...opts, dependsOn: [ns] });
+    const pocketid = new PocketId(
+      "pocketid",
+      { namespace, createNamespace: false },
+      { ...opts, dependsOn: [ns] }
+    );
 
-    const tinyauth = new TinyAuth("tinyauth", { namespace }, { ...opts, dependsOn: [ns] });
+    const tinyauth = new TinyAuth(
+      "tinyauth",
+      { namespace, createNamespace: false },
+      { ...opts, dependsOn: [ns] }
+    );
   }
 }

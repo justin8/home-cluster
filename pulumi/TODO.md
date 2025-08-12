@@ -19,10 +19,10 @@
   - [x] Tinyauth
   - [x] PocketID
 - [x] Set up email proxy (and configure it in PocketID and any others that need it)
-- [ ] Get access by user gorups working
 - [ ] Move services over
 - [ ] Renovate bot to auto-update containers (this is mostly working; I have it for helm charts, but not container images yet)
 - [ ] Docker registry caching/mirroring
+- [ ] Get access by user groups working - coming in tinyauth v4 maybe; alternatively, try out oauth2proxy
 - [ ] Network isolation and VLANs
 - [ ] Multiple Tinyauth/PocketID instances
 - [ ] Deploy from git using pulumi
