@@ -56,9 +56,6 @@ export class Longhorn extends pulumi.ComponentResource {
 
     this.namespace = namespace;
 
-    // K8s snapshotter version
-    const snapshotterVersion = "v8.3.0";
-
     // Install Kubernetes Snapshot CRDs and Controller
     const snapshotCrds = new k8s.kustomize.v2.Directory(
       "snapshot-crds-kustomize",
@@ -110,7 +107,7 @@ export class Longhorn extends pulumi.ComponentResource {
               "node-role.kubernetes.io/control-plane:NoSchedule;node-role.kubernetes.io/master:NoSchedule",
             disableSchedulingOnCordonedNode: "true", // Prevent scheduling on cordoned nodes
             replicaReplenishmentWaitInterval: "300", // Delay replica creation to prevent thrashing
-            storageReservedPercentageForDefaultDisk: "30", // Reserve space to prevent disk full conditions
+            storageReservedPercentageForDefaultDisk: "10", // Reserve space to prevent disk full conditions
             kubernetesClusterAutoscalerEnabled: "false", // Disable since not using cluster autoscaler
             nodeDownPodDeletionPolicy: "delete-both-statefulset-and-deployment-pod", // Ensure pods are rescheduled when a node is down
           },
