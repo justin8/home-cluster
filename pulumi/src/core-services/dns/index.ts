@@ -1,8 +1,7 @@
 import * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
-import { VolumeManager } from "../../constructs";
+import { TauSecret, VolumeManager } from "../../constructs";
 import { createIpAddressPool, getServiceURL } from "../../utils";
-import { TauSecret } from "../../constructs";
 import { ExternalDns } from "./external-dns";
 import { PiHole } from "./pihole";
 
@@ -35,17 +34,18 @@ export class Dns extends pulumi.ComponentResource {
       },
       opts
     );
-    new PiHole(
-      "pihole-secondary",
-      {
-        namespace,
-        createNamespace: false,
-        labels: piholeSharedLabels,
-        type: "secondary",
-        volumeManager: piholeVolumeManager,
-      },
-      opts
-    );
+
+    // new PiHole(
+    //   "pihole-secondary",
+    //   {
+    //     namespace,
+    //     createNamespace: false,
+    //     labels: piholeSharedLabels,
+    //     type: "secondary",
+    //     volumeManager: piholeVolumeManager,
+    //   },
+    //   opts
+    // );
 
     new ExternalDns(
       "external-dns-pihole",
