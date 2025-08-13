@@ -2,7 +2,7 @@ import * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
 import { VolumeManager } from "../../constructs";
 import { createIpAddressPool, getServiceURL } from "../../utils";
-import { TauSecret } from "../shared-secrets";
+import { TauSecret } from "../../constructs";
 import { ExternalDns } from "./external-dns";
 import { PiHole } from "./pihole";
 

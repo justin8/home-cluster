@@ -6,7 +6,7 @@ import {
   SHARED_SECRETS_NAMESPACE,
 } from "../../constants";
 import { reflectorAnnotationsForNamespaces } from "../../utils";
-import { TauSecret } from "../shared-secrets";
+import { TauSecret } from "../../constructs";
 
 export const DEFAULT_CERT_SECRET_NAME = DEFAULT_TLS_SECRET;
 

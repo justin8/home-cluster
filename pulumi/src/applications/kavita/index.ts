@@ -2,7 +2,7 @@ import * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
 
 import { TauApplication, TauApplicationArgs } from "../../constructs/tauApplication";
-import { TauSecret } from "../../core-services/shared-secrets";
+import { TauSecret } from "../../constructs";
 
 const config = new pulumi.Config();
 
