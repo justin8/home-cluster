@@ -30,7 +30,7 @@ export class TauSecret extends pulumi.ComponentResource {
         metadata: {
           name,
           namespace,
-          annotations,
+          ...(Object.keys(annotations).length > 0 && { annotations }),
         },
         stringData: this.data,
       },
