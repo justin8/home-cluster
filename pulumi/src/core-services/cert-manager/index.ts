@@ -5,8 +5,8 @@ import {
   PUBLIC_INGRESS_CLASS,
   SHARED_SECRETS_NAMESPACE,
 } from "../../constants";
-import { reflectorAnnotationsForNamespaces } from "../../utils";
 import { TauSecret } from "../../constructs";
+import { reflectorAnnotationsForNamespaces } from "../../utils";
 
 export const DEFAULT_CERT_SECRET_NAME = DEFAULT_TLS_SECRET;
 
@@ -120,7 +120,7 @@ export class CertManager extends pulumi.ComponentResource {
           dnsNames: [`*.${domain}`],
           secretTemplate: {
             annotations: {
-              ...reflectorAnnotationsForNamespaces(defaultCertAllowedNamespaces),
+              ...reflectorAnnotationsForNamespaces([]),
             },
           },
         },
