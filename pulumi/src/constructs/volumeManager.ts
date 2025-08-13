@@ -271,6 +271,7 @@ export function createLonghornVolumeResource(args: LonghornResourceArgs) {
       spec: {
         size: String(parseSizeToBytes(size)),
         frontend: "blockdev",
+        dataLocality: "best-effort",
         migratable: longhornAccessMode == "rwx",
         accessMode: longhornAccessMode,
         numberOfReplicas,
