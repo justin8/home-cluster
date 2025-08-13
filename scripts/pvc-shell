@@ -1,0 +1,145 @@
+#!/bin/bash
+
+set -euo pipefail
+
+usage() {
+    echo "Usage: $0 <namespace> <pvc1> [pvc2] [pvc3] ..."
+    echo "  namespace: Kubernetes namespace containing the PVCs"
+    echo "  pvc1, pvc2, ...: Names of PVCs to mount"
+    echo ""
+    echo "Example: $0 default my-data-pvc my-config-pvc"
+    exit 1
+}
+
+# Check arguments
+if [[ $# -lt 2 ]]; then
+    usage
+fi
+
+NAMESPACE="$1"
+shift
+PVCS=("$@")
+
+cleanup() {
+    if [[ -n "${DEPLOYMENT_NAME:-}" ]]; then
+        echo "Cleaning up deployment: $DEPLOYMENT_NAME"
+        kubectl delete deployment "$DEPLOYMENT_NAME" -n "$NAMESPACE" --ignore-not-found=true
+
+        if [[ -n "${POD_NAME:-}" ]]; then
+            echo "Waiting for pod $POD_NAME to terminate..."
+            kubectl wait --for=delete pod/"$POD_NAME" -n "$NAMESPACE" --timeout=60s 2>/dev/null || true
+        else
+            echo "Waiting for deployment to be fully deleted..."
+            kubectl wait --for=delete deployment/"$DEPLOYMENT_NAME" -n "$NAMESPACE" --timeout=60s 2>/dev/null || true
+        fi
+    fi
+}
+
+# Verify namespace exists
+if ! kubectl get namespace "$NAMESPACE" >/dev/null 2>&1; then
+    echo "Error: Namespace '$NAMESPACE' does not exist"
+    exit 1
+fi
+
+# Verify all PVCs exist in the namespace
+for pvc in "${PVCS[@]}"; do
+    if ! kubectl get pvc "$pvc" -n "$NAMESPACE" >/dev/null 2>&1; then
+        echo "Error: PVC '$pvc' does not exist in namespace '$NAMESPACE'"
+        exit 1
+    fi
+done
+
+# Generate unique deployment name
+DEPLOYMENT_NAME="pvc-shell-$(date +%s)-$$"
+POD_NAME=""
+
+# Set up cleanup trap
+trap cleanup EXIT
+
+# Check if deployment already exists (shouldn't happen with timestamp+pid)
+if kubectl get deployment "$DEPLOYMENT_NAME" -n "$NAMESPACE" >/dev/null 2>&1; then
+    echo "Error: Deployment '$DEPLOYMENT_NAME' already exists"
+    exit 1
+fi
+
+# Build volume mounts and volumes for the deployment
+VOLUME_MOUNTS=""
+VOLUMES=""
+
+for pvc in "${PVCS[@]}"; do
+    VOLUME_MOUNTS="$VOLUME_MOUNTS        - name: vol-$pvc
+          mountPath: /$pvc
+"
+    VOLUMES="$VOLUMES      - name: vol-$pvc
+        persistentVolumeClaim:
+          claimName: $pvc
+"
+done
+
+# Create deployment manifest
+DEPLOYMENT_YAML=$(cat <<EOF
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: $DEPLOYMENT_NAME
+  namespace: $NAMESPACE
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: $DEPLOYMENT_NAME
+  template:
+    metadata:
+      labels:
+        app: $DEPLOYMENT_NAME
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      containers:
+      - name: netshoot
+        image: ubuntu:24.04
+        command: ["/bin/sleep", "infinity"]
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false
+          runAsNonRoot: true
+          runAsUser: 1000
+          runAsGroup: 1000
+          capabilities:
+            drop: ["ALL"]
+          seccompProfile:
+            type: RuntimeDefault
+        volumeMounts:
+$VOLUME_MOUNTS
+      volumes:
+$VOLUMES
+EOF
+)
+
+echo "Creating deployment '$DEPLOYMENT_NAME' in namespace '$NAMESPACE'..."
+echo "$DEPLOYMENT_YAML" | kubectl apply -f -
+
+echo "Waiting for deployment to be ready..."
+kubectl wait --for=condition=available deployment/"$DEPLOYMENT_NAME" -n "$NAMESPACE" --timeout=120s
+
+# Get pod name
+POD_NAME=$(kubectl get pods -n "$NAMESPACE" -l app="$DEPLOYMENT_NAME" -o jsonpath='{.items[0].metadata.name}')
+
+echo "Pod ready: $POD_NAME"
+echo "Mounted PVCs:"
+for pvc in "${PVCS[@]}"; do
+    echo "  - $pvc -> /$pvc"
+done
+echo ""
+echo "Starting interactive shell..."
+echo "Type 'exit' to quit and cleanup the deployment."
+echo ""
+
+# Start interactive shell
+kubectl exec -it "$POD_NAME" -n "$NAMESPACE" -- bash
+
+echo "Shell session ended."
+cleanup
