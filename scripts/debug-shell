@@ -1,3 +1,4 @@
 #!/bin/bash
+namespace="$1"
 
-kubectl run debug --image=nicolaka/netshoot --rm -it --restart=Never -- zsh
+kubectl run -n "$1" debug --image=nicolaka/netshoot --rm -it --restart=Never -- zsh

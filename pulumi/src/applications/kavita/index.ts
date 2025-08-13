@@ -1,8 +1,8 @@
 import * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
 
-import { TauApplication, TauApplicationArgs } from "../../constructs/tauApplication";
 import { TauSecret } from "../../constructs";
+import { TauApplication, TauApplicationArgs } from "../../constructs/tauApplication";
 
 const config = new pulumi.Config();
 
@@ -17,7 +17,11 @@ export class Kavita extends TauApplication {
 
     const booksMount = this.volumeManager.addNFSMount("/storage/books");
     const mangaComicsMount = this.volumeManager.addNFSMount("/storage/manga-comics");
-    const volumeMounts = [booksMount, mangaComicsMount];
+    const configMount = this.volumeManager.addLonghornVolume("/config", {
+      backupEnabled: true,
+      size: "6Gi",
+    });
+    const volumeMounts = [booksMount, mangaComicsMount, configMount];
 
     const configSecret = new TauSecret(
       `${name}-config`,
