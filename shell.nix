@@ -14,6 +14,7 @@ pkgs.mkShell {
     kubernetes-helm
     pulumi
     pulumiPackages.pulumi-language-nodejs
+    skopeo
   ];
 
   shellHook = ''
