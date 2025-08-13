@@ -10,7 +10,7 @@ config:
   home-cluster:cloudflare_api_token:
     secure: v1:Xtm1KLjkWLFWfNnn:8aaFPJxMKlOCmaGMoXt2+029z5Hgdjz6YoBXyePfBHT/DwpYZUoJ4wIBTrKYZGb+pdYjqHl0lmA=
   home-cluster:nfs_hostname:
-    secure: v1:Ngaku0rDgqX7B4p+:SnLk4DkIY7aYX5NZIaJAIC2P67Js8hXsuoY9vyOvpciWiQ==
+    secure: v1:ipyNPiK2oK9VmSLI:7jXwe36JtbRQUhmDE0UlAMnqyFAJ21rFlr4AZQ==
   home-cluster:public_ingress_ip: 192.168.4.70
   home-cluster:private_ingress_ip: 192.168.4.71
   home-cluster:dns_server_ip: 192.168.4.53

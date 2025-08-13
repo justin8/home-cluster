@@ -15,14 +15,6 @@ import {
   SharedSecrets,
 } from "./src/core-services";
 
-const config = new pulumi.Config();
-
-// Initialize core services and load applications
-const coreServices = initializeCoreServices();
-const opts: pulumi.ResourceOptions = { dependsOn: coreServices };
-
-new Kavita({}, opts);
-
 /**
  * Initializes all core services required by applications
  *
@@ -95,3 +87,11 @@ function initializeCoreServices(): pulumi.Resource[] {
     auth,
   ];
 }
+
+const config = new pulumi.Config();
+
+// Initialize core services and load applications
+const coreServices = initializeCoreServices();
+const opts: pulumi.ResourceOptions = { dependsOn: coreServices };
+
+new Kavita({}, opts);
