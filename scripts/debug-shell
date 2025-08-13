@@ -1,4 +1,5 @@
 #!/bin/bash
-namespace="$1"
+namespace="${1:-default}"
+
 
 kubectl run -n "$1" debug --image=nicolaka/netshoot --rm -it --restart=Never -- zsh
