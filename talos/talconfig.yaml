@@ -56,6 +56,12 @@ patches:
     - op: replace
       path: /machine/install/wipe
       value: true
+  - |-
+    - op: add
+      path: /cluster/etcd/extraArgs
+      value:
+        heartbeat-interval: "300"
+        election-timeout: "1000"
 nodes:
   - hostname: controlplane
     ipAddress: 192.168.4.120, 192.168.4.192, 192.168.4.247
