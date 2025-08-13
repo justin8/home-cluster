@@ -33,7 +33,7 @@ export class PiHole extends TauApplication {
 
     const etcPiholeMount = volumeManager.addLonghornVolume("/etc/pihole", {
       size: "100Mi",
-      accessMode: "ReadWriteMany",
+      // accessMode: "ReadWriteMany", // Using single node pihole for now; this was only useful for multi-node as a read-only replica
     });
 
     const volumeMounts = [etcPiholeMount];
