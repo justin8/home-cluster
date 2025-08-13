@@ -6,22 +6,20 @@ import { TauApplication, TauApplicationArgs } from "../../constructs/tauApplicat
 
 const config = new pulumi.Config();
 
-export class Kavita extends TauApplication {
+export class Sabnzbd extends TauApplication {
   constructor(args: TauApplicationArgs = {}, opts?: pulumi.ComponentResourceOptions) {
-    const name = "kavita";
-    const port = 5000;
-    // When 0.8.8 is released, try out oauth integration: https://github.com/Kareadita/Kavita/discussions/2533
-    const image = "lscr.io/linuxserver/kavita:0.8.7";
+    const name = "sabnzbd";
+    const port = 8080;
+    const image = "ghcr.io/linuxserver/sabnzbd";
 
     super(name, { ...args, namespace: name }, opts);
 
-    const booksMount = this.volumeManager.addNFSMount("/storage/books");
-    const mangaComicsMount = this.volumeManager.addNFSMount("/storage/manga-comics");
+    const downloadsMount = this.volumeManager.addNFSMount("/storage/downloads");
     const configMount = this.volumeManager.addLonghornVolume("/config", {
       backupEnabled: true,
-      size: "6Gi",
+      size: "100Mi",
     });
-    const volumeMounts = [booksMount, mangaComicsMount, configMount];
+    const volumeMounts = [downloadsMount, configMount];
 
     const configSecret = new TauSecret(
       `${name}-config`,
@@ -64,6 +62,14 @@ export class Kavita extends TauApplication {
                   ],
                   envFrom: [{ secretRef: { name: configSecret.name } }],
                   volumeMounts,
+                  livenessProbe: {
+                    httpGet: {
+                      path: "/",
+                      port,
+                    },
+                    initialDelaySeconds: 30,
+                    periodSeconds: 30,
+                  },
                 },
               ],
               volumes: this.volumeManager.getVolumes(),
@@ -79,8 +85,7 @@ export class Kavita extends TauApplication {
         appName: name,
         port,
         labels: this.labels,
-        auth: false,
-        // public: true,
+        auth: true,
       },
       { dependsOn: [this.ns!] }
     );
