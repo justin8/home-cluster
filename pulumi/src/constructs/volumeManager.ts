@@ -53,10 +53,6 @@ export class VolumeManager {
     return this.volumes.filter(vol => volumeNames.includes(vol.name));
   }
 
-  getStorage(path: string) {
-    return this.storageMap.get(path);
-  }
-
   /**
    * Sets up a recurring backup schedule for a volume
    */
@@ -89,10 +85,10 @@ export class VolumeManager {
   /**
    * Creates an NFS mount using the NFS CSI driver
    * @param nfsPath The path on the NFS server to mount
-   * @param options Volume configuration options
+   * @param target Optional container mount path (defaults to nfsPath)
    * @returns A volume mount object for use in container spec
    */
-  addNFSMount(nfsPath: string): k8s.types.input.core.v1.VolumeMount {
+  addNFSMount(nfsPath: string, target?: string): k8s.types.input.core.v1.VolumeMount {
     const volumeName = `nfs${nfsPath.replace(/[^a-z0-9]/gi, "-").toLowerCase()}`;
 
     if (!this.storageMap.has(volumeName)) {
@@ -107,7 +103,7 @@ export class VolumeManager {
 
     return {
       name: volumeName,
-      mountPath: nfsPath,
+      mountPath: target || nfsPath,
     };
   }
 
