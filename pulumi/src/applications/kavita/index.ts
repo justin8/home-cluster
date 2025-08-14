@@ -10,8 +10,6 @@ export class Kavita extends TauApplication {
   constructor(args: TauApplicationArgs = {}, opts?: pulumi.ComponentResourceOptions) {
     const name = "kavita";
     const port = 5000;
-    // When 0.8.8 is released, try out oauth integration: https://github.com/Kareadita/Kavita/discussions/2533
-    const image = "lscr.io/linuxserver/kavita:0.8.7";
 
     super(name, { ...args, namespace: name }, opts);
 
@@ -56,7 +54,8 @@ export class Kavita extends TauApplication {
               containers: [
                 {
                   name: name,
-                  image,
+                  // When 0.8.8 is released, try out oauth integration: https://github.com/Kareadita/Kavita/discussions/2533
+                  image: "lscr.io/linuxserver/kavita:0.8.7",
                   ports: [
                     {
                       containerPort: port,

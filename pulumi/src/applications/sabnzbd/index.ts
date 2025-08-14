@@ -10,7 +10,6 @@ export class Sabnzbd extends TauApplication {
   constructor(args: TauApplicationArgs = {}, opts?: pulumi.ComponentResourceOptions) {
     const name = "sabnzbd";
     const port = 8080;
-    const image = "lscr.io/linuxserver/sabnzbd:4.5.2";
 
     super(name, { ...args, namespace: name }, opts);
 
@@ -54,7 +53,7 @@ export class Sabnzbd extends TauApplication {
               containers: [
                 {
                   name: name,
-                  image,
+                  image: "lscr.io/linuxserver/sabnzbd:4.5.2",
                   ports: [
                     {
                       containerPort: port,
