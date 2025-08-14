@@ -10,7 +10,7 @@ export class Sabnzbd extends TauApplication {
   constructor(args: TauApplicationArgs = {}, opts?: pulumi.ComponentResourceOptions) {
     const name = "sabnzbd";
     const port = 8080;
-    const image = "ghcr.io/linuxserver/sabnzbd";
+    const image = "lscr.io/linuxserver/sabnzbd:4.5.2";
 
     super(name, { ...args, namespace: name }, opts);
 
@@ -80,14 +80,6 @@ export class Sabnzbd extends TauApplication {
       { parent: this, dependsOn: [this.ns!, configSecret] }
     );
 
-    this.createHttpIngress(
-      {
-        appName: name,
-        port,
-        labels: this.labels,
-        auth: true,
-      },
-      { dependsOn: [this.ns!] }
-    );
+    this.createHttpIngress({ appName: name, port, labels: this.labels }, { dependsOn: [this.ns!] });
   }
 }
