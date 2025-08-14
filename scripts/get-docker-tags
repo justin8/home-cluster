@@ -1,3 +1,3 @@
 #!/bin/bash
 
-skopeo list-tags "docker://$1" | jq .Tags -r | sort
+skopeo list-tags "docker://$1" | jq -r '.Tags[]' | $PAGER
