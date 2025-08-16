@@ -29,8 +29,6 @@ pkgs.mkShell {
 
     git submodule update --init --recursive
 
-    uv sync
-    source .venv/bin/activate
     if [[ ! -e .sops-age.key ]]; then
       echo "Downloading age key..."
       aws ssm get-parameter --name "/home-cluster/sops-age.key" --with-decryption --query "Parameter.Value" --output text > .sops-age.key
@@ -40,6 +38,9 @@ pkgs.mkShell {
     echo "Installing git hooks..."
     cp git-hooks/* .git/hooks/
     chmod +x .git/hooks/*
+
+    uv sync
+    source .venv/bin/activate
 
     (
       cd talos
