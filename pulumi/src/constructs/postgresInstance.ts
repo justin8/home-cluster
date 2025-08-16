@@ -20,6 +20,8 @@ export class PostgresInstance extends pulumi.ComponentResource {
     const namespace = args.namespace || "default";
     const storageSize = args.storageSize || "1Gi";
     const version = args.version || "17";
+    const image = args.image || `ghcr.io/cloudnative-pg/postgresql:${version}`;
+    const initDbArgs = args.initDbArgs;
 
     // The service name follows CNPG naming convention
     this.serviceName = pulumi.output(`${name}-rw`);
@@ -103,8 +105,7 @@ export class PostgresInstance extends pulumi.ComponentResource {
         },
         spec: {
           instances: 1, // Currently only supports a single instance, the PVC selector needs to be updated to support multiple instances
-          imageName: `ghcr.io/cloudnative-pg/postgresql:${version}`,
-
+          imageName: image,
           postgresql: {
             parameters: {
               max_connections: "100",
@@ -144,6 +145,7 @@ export class PostgresInstance extends pulumi.ComponentResource {
               secret: {
                 name: this.connectionSecret.metadata.name,
               },
+              ...(initDbArgs && { options: [initDbArgs] }),
             },
           },
         },

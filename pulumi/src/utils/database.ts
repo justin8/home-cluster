@@ -11,6 +11,8 @@ export interface DatabaseOptions {
   extensions?: string[];
   storageSize?: string;
   version?: string;
+  image?: string;
+  initDbArgs?: string;
   resources?: k8s.types.input.core.v1.ResourceRequirements;
 }
 

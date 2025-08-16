@@ -31,5 +31,5 @@ config:
   home-cluster:maxmind_license_key:
     secure: v1:P28FAlbV9fOVa1R4:jFMFUeganeRPBRwP5Lp85HncEfIHDuiAXp3UIhWFS8oNlox/dhjgG9QAnOdjsum0h1kqVyukqqo=
   home-cluster:timezone: Australia/Brisbane
-  home-cluster:shared_uid: "1000"
-  home-cluster:shared_gid: "1000"
+  home-cluster:shared_uid: "2000"
+  home-cluster:shared_gid: "2000"

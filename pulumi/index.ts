@@ -1,5 +1,5 @@
 import * as pulumi from "@pulumi/pulumi";
-import { Kavita, Sabnzbd } from "./src/applications";
+import { Kavita, Prowlarr, Radarr, Sabnzbd, Sonarr } from "./src/applications";
 
 import { PRIVATE_INGRESS_CLASS, PUBLIC_INGRESS_CLASS } from "./src/constants";
 import {
@@ -96,3 +96,6 @@ const opts: pulumi.ResourceOptions = { dependsOn: coreServices };
 
 new Kavita({}, opts);
 new Sabnzbd({}, opts);
+new Prowlarr({}, opts);
+new Sonarr({}, opts);
+new Radarr({}, opts);

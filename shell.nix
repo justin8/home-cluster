@@ -15,6 +15,7 @@ pkgs.mkShell {
     pulumi
     pulumiPackages.pulumi-language-nodejs
     skopeo
+    k9s
   ];
 
   shellHook = ''
