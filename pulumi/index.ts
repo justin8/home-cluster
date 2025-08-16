@@ -1,5 +1,5 @@
 import * as pulumi from "@pulumi/pulumi";
-import { Downloads, Kavita } from "./src/applications";
+import { Downloads, Immich, Kavita } from "./src/applications";
 
 import { PRIVATE_INGRESS_CLASS, PUBLIC_INGRESS_CLASS } from "./src/constants";
 import {
@@ -12,6 +12,7 @@ import {
   MailProxy,
   MetalLB,
   NFSCSI,
+  Reloader,
   SharedSecrets,
 } from "./src/core-services";
 
@@ -73,6 +74,8 @@ function initializeCoreServices(): pulumi.Resource[] {
 
   const auth = new Auth("auth", {}, { dependsOn: [sharedSecrets] });
 
+  const reloader = new Reloader("reloader");
+
   // Return array of all core services
   return [
     sharedSecrets,
@@ -85,6 +88,7 @@ function initializeCoreServices(): pulumi.Resource[] {
     dns,
     cnpgOperator,
     auth,
+    reloader,
   ];
 }
 
@@ -96,4 +100,6 @@ const opts: pulumi.ResourceOptions = { dependsOn: coreServices };
 
 new Kavita({}, opts);
 
-new Downloads(opts);
+new Downloads("downloads", opts);
+
+new Immich("immich", {}, opts);

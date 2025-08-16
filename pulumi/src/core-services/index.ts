@@ -7,4 +7,5 @@ export { Longhorn } from "./longhorn";
 export { MailProxy } from "./mail-proxy";
 export { MetalLB } from "./metallb";
 export { NFSCSI } from "./nfs-csi";
+export { Reloader } from "./reloader";
 export { SharedSecrets } from "./shared-secrets";

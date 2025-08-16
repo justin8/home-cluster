@@ -2,12 +2,12 @@ import * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
 
 import { createHttpIngress, CreateHttpIngressArgs, CreateHttpIngressResult } from "../utils";
-import { DatabaseOptions, getEnvironmentVariablesForDB } from "../utils/database";
+import { DatabaseArgs, getEnvironmentVariablesForDB } from "../utils/database";
 import { PostgresInstance } from "./postgresInstance";
 import { VolumeManager } from "./volumeManager";
 
 export interface TauApplicationArgs {
-  database?: DatabaseOptions;
+  database?: DatabaseArgs;
   namespace?: string;
   createNamespace?: boolean;
 }
@@ -86,12 +86,12 @@ export abstract class TauApplication extends pulumi.ComponentResource {
     // Create database if options are provided
     if (args.database) {
       // Use application name as database name if not specified
-      const dbOptions = {
+      const dbArgs = {
         ...args.database,
         namespace: args.database.namespace || this.namespace,
       };
 
-      this.database = new PostgresInstance(dbOptions, { parent: this });
+      this.database = new PostgresInstance(dbArgs, { parent: this });
     }
   }
 

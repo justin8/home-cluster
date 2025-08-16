@@ -2,11 +2,26 @@ import * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
 import * as random from "@pulumi/random";
 import { getServiceURL } from "../utils";
-import { DatabaseOptions as DatabaseArgs } from "../utils/database";
+import { DatabaseArgs } from "../utils/database";
+import { TauSecret } from "./tauSecret";
 import { createLonghornPersistentVolume, createLonghornVolumeResource } from "./volumeManager";
 
+function deepMerge<T>(target: T, source: any): T {
+  const result = { ...target } as any;
+
+  for (const key in source) {
+    if (source[key] && typeof source[key] === "object" && !Array.isArray(source[key])) {
+      result[key] = deepMerge(result[key] || {}, source[key]);
+    } else if (source[key] !== undefined) {
+      result[key] = source[key];
+    }
+  }
+
+  return result;
+}
+
 export class PostgresInstance extends pulumi.ComponentResource {
-  public readonly connectionSecret: k8s.core.v1.Secret;
+  public readonly connectionSecret: TauSecret;
   public readonly serviceName: pulumi.Output<string>;
   public readonly host: pulumi.Output<string>;
   public readonly port: pulumi.Output<string>;
@@ -17,11 +32,11 @@ export class PostgresInstance extends pulumi.ComponentResource {
     super("PostgresInstance", args.name, {}, opts);
 
     const name = args.name;
+    const superuser = args.superUser || false;
     const namespace = args.namespace || "default";
     const storageSize = args.storageSize || "1Gi";
     const version = args.version || "17";
     const image = args.image || `ghcr.io/cloudnative-pg/postgresql:${version}`;
-    const initDbArgs = args.initDbArgs;
 
     // The service name follows CNPG naming convention
     this.serviceName = pulumi.output(`${name}-rw`);
@@ -44,15 +59,11 @@ export class PostgresInstance extends pulumi.ComponentResource {
     // Create a comprehensive connection secret with all required fields
     const connectionString = pulumi.interpolate`postgresql://${this.username}:${password.result}@${this.host}:${this.port}/${this.databaseName}`;
 
-    this.connectionSecret = new k8s.core.v1.Secret(
+    this.connectionSecret = new TauSecret(
       `${name}-credentials`,
       {
-        metadata: {
-          name: `${name}-credentials`,
-          namespace: namespace,
-        },
-        type: "Opaque",
-        stringData: {
+        namespace: namespace,
+        data: {
           url: connectionString,
           host: this.host,
           port: this.port,
@@ -94,6 +105,61 @@ export class PostgresInstance extends pulumi.ComponentResource {
       },
     };
 
+    const clusterSpec = {
+      instances: 1, // Currently only supports a single instance, the PVC selector needs to be updated to support multiple instances
+      imageName: image,
+      postgresql: {
+        parameters: {
+          max_connections: "100",
+          shared_buffers: "128MB",
+          effective_cache_size: "512MB",
+          maintenance_work_mem: "64MB",
+          checkpoint_completion_target: "0.9",
+          wal_buffers: "16MB",
+          default_statistics_target: "100",
+          random_page_cost: "1.1",
+          effective_io_concurrency: "200",
+        },
+      },
+
+      managed: {
+        roles: [
+          {
+            name: this.username,
+            login: true,
+            superuser,
+          },
+        ],
+      },
+
+      storage: {
+        size: storageSize,
+        storageClass: "longhorn",
+        pvcTemplate,
+      },
+
+      resources: {
+        requests: {
+          memory: "256Mi",
+          cpu: "100m",
+        },
+        limits: {
+          memory: "512Mi",
+          cpu: "500m",
+        },
+      },
+
+      bootstrap: {
+        initdb: {
+          database: this.databaseName,
+          owner: this.username,
+          secret: { name: this.connectionSecret.name },
+        },
+      },
+    };
+
+    const finalSpec = args.specOverride ? deepMerge(clusterSpec, args.specOverride) : clusterSpec;
+
     const cluster = new k8s.apiextensions.CustomResource(
       `${name}-cluster`,
       {
@@ -103,52 +169,7 @@ export class PostgresInstance extends pulumi.ComponentResource {
           name: name,
           namespace: namespace,
         },
-        spec: {
-          instances: 1, // Currently only supports a single instance, the PVC selector needs to be updated to support multiple instances
-          imageName: image,
-          postgresql: {
-            parameters: {
-              max_connections: "100",
-              shared_buffers: "128MB",
-              effective_cache_size: "512MB",
-              maintenance_work_mem: "64MB",
-              checkpoint_completion_target: "0.9",
-              wal_buffers: "16MB",
-              default_statistics_target: "100",
-              random_page_cost: "1.1",
-              effective_io_concurrency: "200",
-            },
-          },
-
-          storage: {
-            size: storageSize,
-            storageClass: "longhorn",
-            pvcTemplate,
-          },
-
-          resources: {
-            requests: {
-              memory: "256Mi",
-              cpu: "100m",
-            },
-            limits: {
-              memory: "512Mi",
-              cpu: "500m",
-            },
-            ...args.resources,
-          },
-
-          bootstrap: {
-            initdb: {
-              database: this.databaseName,
-              owner: this.username,
-              secret: {
-                name: this.connectionSecret.metadata.name,
-              },
-              ...(initDbArgs && { options: [initDbArgs] }),
-            },
-          },
-        },
+        spec: finalSpec,
       },
       { parent: this }
     );

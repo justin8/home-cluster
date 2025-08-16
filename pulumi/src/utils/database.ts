@@ -5,25 +5,25 @@ import { PostgresInstance } from "../constructs/postgresInstance";
  * Unified interface for database configuration options
  * This is used across tauApplication, database utils, and postgresInstance
  */
-export interface DatabaseOptions {
+export interface DatabaseArgs {
   name: string;
   namespace?: string;
   extensions?: string[];
   storageSize?: string;
   version?: string;
   image?: string;
-  initDbArgs?: string;
-  resources?: k8s.types.input.core.v1.ResourceRequirements;
+  specOverride?: any;
+  superUser?: boolean;
 }
 
 export function getEnvironmentVariablesForDB(
   instance: PostgresInstance
 ): k8s.types.input.core.v1.EnvVar[] {
   if (!instance) return [];
-  const secretName = instance.connectionSecret.metadata.name;
+  const secretName = instance.connectionSecret.name;
   return [
     {
-      name: "DATABASE_URL",
+      name: "DB_URL",
       valueFrom: {
         secretKeyRef: {
           name: secretName,

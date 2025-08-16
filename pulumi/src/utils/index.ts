@@ -8,7 +8,7 @@ import {
   PUBLIC_INGRESS_CLASS,
 } from "../constants";
 
-export { DatabaseOptions } from "./database";
+export { DatabaseArgs as DatabaseOptions } from "./database";
 export { createIpAddressPool } from "./networking";
 
 export type KubernetesSecretData = { [key: string]: string };

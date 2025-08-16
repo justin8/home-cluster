@@ -85,7 +85,7 @@ export class PostgresExample extends TauApplication {
           },
         },
       },
-      { parent: this }
+      { parent: this, dependsOn: [this.database!.connectionSecret] }
     );
 
     // Create a simple service for the example (though it doesn't serve HTTP)

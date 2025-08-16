@@ -8,17 +8,17 @@ import { Sonarr } from "./sonarr";
 import { Transmission } from "./transmission";
 
 export class Downloads extends pulumi.ComponentResource {
-  constructor(opts?: pulumi.ComponentResourceOptions) {
-    super("Downloads", "downloads", {}, opts);
+  constructor(name: string, opts?: pulumi.ComponentResourceOptions) {
+    super("Downloads", name, {}, opts);
 
-    const namespace = "downloads";
+    const namespace = name;
     const ns = new k8s.core.v1.Namespace(
       namespace,
       {
         metadata: {
-          name: "downloads",
+          name: name,
           labels: {
-            app: "downloads",
+            app: name,
             "pod-security.kubernetes.io/enforce": "privileged",
             "pod-security.kubernetes.io/audit": "privileged",
             "pod-security.kubernetes.io/warn": "privileged",
