@@ -4,3 +4,4 @@ export { Prowlarr } from "./prowlarr";
 export { Radarr } from "./radarr";
 export { Sabnzbd } from "./sabnzbd";
 export { Sonarr } from "./sonarr";
+export { Transmission } from "./transmission";

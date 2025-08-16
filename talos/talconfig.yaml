@@ -42,6 +42,11 @@ patches:
             - rw
   - |-
     - op: add
+      path: /machine/kubelet/extraArgs
+      value:
+        allowed-unsafe-sysctls: "net.ipv4.conf.all.src_valid_mark"
+  - |-
+    - op: add
       path: /machine/sysctls
       value:
         vm.nr_hugepages: "1024"
@@ -52,6 +57,7 @@ patches:
         modules:
           - name: nvme_tcp
           - name: vfio_pci
+          - name: wireguard
   - |-
     - op: replace
       path: /machine/install/wipe
