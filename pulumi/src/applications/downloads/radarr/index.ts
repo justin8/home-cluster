@@ -1,17 +1,16 @@
 import * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
 
-import { TauSecret } from "../../constructs";
-import { TauApplication, TauApplicationArgs } from "../../constructs/tauApplication";
+import { TauSecret } from "../../../constructs";
+import { TauApplication, TauApplicationArgs } from "../../../constructs/tauApplication";
 
 const config = new pulumi.Config();
 
-export class Sonarr extends TauApplication {
-  constructor(args: TauApplicationArgs = {}, opts?: pulumi.ComponentResourceOptions) {
-    const name = "sonarr";
-    const port = 8989;
+export class Radarr extends TauApplication {
+  constructor(name: string, args: TauApplicationArgs = {}, opts?: pulumi.ComponentResourceOptions) {
+    const port = 7878;
 
-    super(name, { ...args, namespace: name }, opts);
+    super(name, args, opts);
 
     const storageMount = this.volumeManager.addNFSMount("/storage");
     const configMount = this.volumeManager.addLonghornVolume("/config", {
@@ -53,7 +52,7 @@ export class Sonarr extends TauApplication {
               containers: [
                 {
                   name: name,
-                  image: "lscr.io/linuxserver/sonarr:4.0.15",
+                  image: "lscr.io/linuxserver/radarr:5.26.2",
                   ports: [
                     {
                       containerPort: port,
@@ -79,6 +78,6 @@ export class Sonarr extends TauApplication {
       { parent: this, dependsOn: [this.ns!, configSecret] }
     );
 
-    this.createHttpIngress({ appName: name, port, labels: this.labels }, { dependsOn: [this.ns!] });
+    this.createHttpIngress({ appName: name, port }, { dependsOn: [this.ns!] });
   }
 }

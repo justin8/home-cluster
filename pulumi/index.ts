@@ -1,5 +1,5 @@
 import * as pulumi from "@pulumi/pulumi";
-import { Kavita, Prowlarr, Radarr, Sabnzbd, Sonarr, Transmission } from "./src/applications";
+import { Downloads, Kavita } from "./src/applications";
 
 import { PRIVATE_INGRESS_CLASS, PUBLIC_INGRESS_CLASS } from "./src/constants";
 import {
@@ -95,8 +95,5 @@ const coreServices = initializeCoreServices();
 const opts: pulumi.ResourceOptions = { dependsOn: coreServices };
 
 new Kavita({}, opts);
-new Sabnzbd({}, opts);
-new Prowlarr({}, opts);
-new Sonarr({}, opts);
-new Radarr({}, opts);
-new Transmission({}, opts);
+
+new Downloads(opts);

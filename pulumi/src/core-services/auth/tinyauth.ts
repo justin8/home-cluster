@@ -1,6 +1,7 @@
 import * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
 import * as random from "@pulumi/random";
+
 import { PRIVATE_INGRESS_CLASS, PUBLIC_INGRESS_CLASS } from "../../constants";
 import { TauApplication, TauApplicationArgs } from "../../constructs";
 import { getServiceURL } from "../../utils";

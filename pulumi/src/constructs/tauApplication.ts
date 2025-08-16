@@ -100,8 +100,8 @@ export abstract class TauApplication extends pulumi.ComponentResource {
     opts?: pulumi.ComponentResourceOptions
   ): CreateHttpIngressResult {
     return createHttpIngress(
-      { namespace: this.namespace, subdomain: this.subdomain, ...args },
-      opts
+      { namespace: this.namespace, subdomain: this.subdomain, labels: this.labels, ...args },
+      { ...opts, parent: this }
     );
   }
 

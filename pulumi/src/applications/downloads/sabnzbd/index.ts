@@ -1,17 +1,16 @@
 import * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
 
-import { TauSecret } from "../../constructs";
-import { TauApplication, TauApplicationArgs } from "../../constructs/tauApplication";
+import { TauSecret } from "../../../constructs";
+import { TauApplication, TauApplicationArgs } from "../../../constructs/tauApplication";
 
 const config = new pulumi.Config();
 
 export class Sabnzbd extends TauApplication {
-  constructor(args: TauApplicationArgs = {}, opts?: pulumi.ComponentResourceOptions) {
-    const name = "sabnzbd";
+  constructor(name: string, args: TauApplicationArgs = {}, opts?: pulumi.ComponentResourceOptions) {
     const port = 8080;
 
-    super(name, { ...args, namespace: name }, opts);
+    super(name, args, opts);
 
     const downloadsMount = this.volumeManager.addNFSMount("/storage/downloads");
     const configMount = this.volumeManager.addLonghornVolume("/config", {

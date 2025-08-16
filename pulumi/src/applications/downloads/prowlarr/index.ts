@@ -1,24 +1,22 @@
 import * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
 
-import { TauSecret } from "../../constructs";
-import { TauApplication, TauApplicationArgs } from "../../constructs/tauApplication";
+import { TauSecret } from "../../../constructs";
+import { TauApplication, TauApplicationArgs } from "../../../constructs/tauApplication";
 
 const config = new pulumi.Config();
 
-export class Radarr extends TauApplication {
-  constructor(args: TauApplicationArgs = {}, opts?: pulumi.ComponentResourceOptions) {
-    const name = "radarr";
-    const port = 7878;
+export class Prowlarr extends TauApplication {
+  constructor(name: string, args: TauApplicationArgs = {}, opts?: pulumi.ComponentResourceOptions) {
+    const port = 9696;
 
-    super(name, { ...args, namespace: name }, opts);
+    super(name, args, opts);
 
-    const storageMount = this.volumeManager.addNFSMount("/storage");
     const configMount = this.volumeManager.addLonghornVolume("/config", {
       backupEnabled: true,
-      size: "2Gi",
+      size: "500Mi",
     });
-    const volumeMounts = [storageMount, configMount];
+    const volumeMounts = [configMount];
 
     const configSecret = new TauSecret(
       `${name}-config`,
@@ -53,7 +51,7 @@ export class Radarr extends TauApplication {
               containers: [
                 {
                   name: name,
-                  image: "lscr.io/linuxserver/radarr:5.26.2",
+                  image: "lscr.io/linuxserver/prowlarr:1.37.0",
                   ports: [
                     {
                       containerPort: port,

@@ -143,7 +143,14 @@ When `backupEnabled` is set to `true` for a volume, a recurring backup job is cr
 
 ### Restoring From Backups
 
-As Longhorn volumes, PVs and PVCs have predictable names with this setup, you can restore a backup in the Longhorn UI (`https://longhorn.<domain>`) and use the same volume name. When bringing the service back online it will use this new volume. Note that if the PV and PVC exist, deleting the longhorn volume will delete them as well. Disabling the service and deploying via pulumi is recommended to then restore the volumes.
+As Longhorn volumes, PVs and PVCs have predictable names with this setup, you can restore a backup in the Longhorn UI (`https://longhorn.<domain>`) and use the same volume name. When bringing the service back online it will use this new volume. Note that if the PV and PVC exist, deleting the longhorn volume will delete them as well, running `pulumi up --refresh` should recreate them.
+
+Step by step instructions:
+
+1. Scale down the service: `kubectl scale --replicas 0 -n $NAMESPACE deployment/$DEPLOYMENT`
+2. In the Longhorn web UI delete the volume (this will delete the PV and PVC as well), then restore a backup to the same original name
+3. Once the volume has restored, set the data locality to `best-effort`, otherwise you will get a 'Server-Side Apply field conflict detected' error
+4. Run `pulumi up --refresh` to recreate the PV, PVC and scale the deployment back again
 
 ## Cluster Recovery
 

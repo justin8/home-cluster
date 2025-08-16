@@ -1,33 +1,16 @@
 import * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
 
-import { TauSecret } from "../../constructs";
-import { TauApplication, TauApplicationArgs } from "../../constructs/tauApplication";
+import { TauSecret } from "../../../constructs";
+import { TauApplication, TauApplicationArgs } from "../../../constructs/tauApplication";
 
 const config = new pulumi.Config();
 
 export class Transmission extends TauApplication {
-  constructor(args: TauApplicationArgs = {}, opts?: pulumi.ComponentResourceOptions) {
-    const name = "transmission";
+  constructor(name: string, args: TauApplicationArgs = {}, opts?: pulumi.ComponentResourceOptions) {
     const port = 9091;
 
-    super(name, { ...args, namespace: name, createNamespace: false }, opts);
-
-    const ns = new k8s.core.v1.Namespace(
-      name,
-      {
-        metadata: {
-          name: name,
-          labels: {
-            app: name,
-            "pod-security.kubernetes.io/enforce": "privileged",
-            "pod-security.kubernetes.io/audit": "privileged",
-            "pod-security.kubernetes.io/warn": "privileged",
-          },
-        },
-      },
-      opts
-    );
+    super(name, args, opts);
 
     const storageMount = this.volumeManager.addNFSMount("/storage");
     const configMount = this.volumeManager.addLonghornVolume("/config", {
@@ -46,7 +29,7 @@ export class Transmission extends TauApplication {
             .apply(b64 => Buffer.from(b64, "base64").toString("utf8")),
         },
       },
-      { parent: this, dependsOn: [ns] }
+      { parent: this, dependsOn: [this.ns!] }
     );
 
     const configSecret = new TauSecret(
@@ -59,7 +42,7 @@ export class Transmission extends TauApplication {
           PGID: config.require("shared_gid"),
         },
       },
-      { parent: this, dependsOn: [ns] }
+      { parent: this, dependsOn: [this.ns!] }
     );
 
     const deployment = new k8s.apps.v1.Deployment(
@@ -134,9 +117,9 @@ export class Transmission extends TauApplication {
           },
         },
       },
-      { parent: this, dependsOn: [ns, configSecret, vpnSecret] }
+      { parent: this, dependsOn: [this.ns!, configSecret, vpnSecret] }
     );
 
-    this.createHttpIngress({ appName: name, port, labels: this.labels }, { dependsOn: [ns] });
+    this.createHttpIngress({ appName: name, port, labels: this.labels }, { dependsOn: [this.ns!] });
   }
 }
