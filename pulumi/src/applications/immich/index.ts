@@ -217,6 +217,7 @@ export class Immich extends TauApplication {
             spec: {
               securityContext: {
                 fsGroup: sharedGID,
+                fsGroupChangePolicy: "OnRootMismatch",
               },
               initContainers: [
                 {
