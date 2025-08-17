@@ -53,6 +53,10 @@ pkgs.mkShell {
       if [[ ! -e $HOME/.pulumi/credentials.json ]]; then
         pulumi login 's3://jdray-pulumi-state?region=us-east-1'
       fi
+
+      if [[ ! -e node_modules ]]; then
+        npm i
+      fi
     )
   '';
 }
