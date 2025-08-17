@@ -66,7 +66,6 @@ export class Immich extends TauApplication {
         data: {
           TZ: config.require("timezone"),
           IMMICH_PORT: "2283",
-          ML_PORT: "3003",
           REDIS_PORT: "6379",
           REDIS_PASSWORD: redisPassword,
           REDIS_HOSTNAME: getServiceURL(redisName, this.namespace),
@@ -102,6 +101,9 @@ export class Immich extends TauApplication {
           template: {
             metadata: { labels: { app: redisName } },
             spec: {
+              securityContext: {
+                fsGroup: sharedGID,
+              },
               containers: [
                 {
                   name: "redis",
@@ -148,11 +150,14 @@ export class Immich extends TauApplication {
           template: {
             metadata: { labels: { app: mlName } },
             spec: {
+              securityContext: {
+                fsGroup: sharedGID,
+              },
               containers: [
                 {
                   name: "immich-ml",
                   image: `ghcr.io/immich-app/immich-machine-learning:${immichVersion}`,
-                  ports: [{ containerPort: Number(configSecret.data.ML_PORT) }],
+                  ports: [{ containerPort: Number(configSecret.data.IMMICH_PORT) }],
                   envFrom: [
                     { secretRef: { name: configSecret.name } },
                     { secretRef: { name: databaseSecret.name } },
@@ -191,7 +196,7 @@ export class Immich extends TauApplication {
     createService(
       {
         appName: mlName,
-        port: Number(configSecret.data.ML_PORT),
+        port: Number(configSecret.data.IMMICH_PORT),
         namespace: this.namespace,
         labels: { app: mlName },
       },
@@ -210,6 +215,9 @@ export class Immich extends TauApplication {
           template: {
             metadata: { labels: this.labels },
             spec: {
+              securityContext: {
+                fsGroup: sharedGID,
+              },
               initContainers: [
                 {
                   name: "postgresql-isready",
@@ -260,6 +268,7 @@ export class Immich extends TauApplication {
                   },
                 },
               ],
+
               volumes: this.volumeManager.getVolumes(),
             },
           },
