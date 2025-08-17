@@ -138,16 +138,17 @@ export class PostgresInstance extends pulumi.ComponentResource {
         pvcTemplate,
       },
 
-      resources: {
-        requests: {
-          memory: "256Mi",
-          cpu: "100m",
-        },
-        limits: {
-          memory: "512Mi",
-          cpu: "500m",
-        },
-      },
+      // No limit for now; once I get vertical auto-scaling working that should take care of this
+      // resources: {
+      //   requests: {
+      //     memory: "256Mi",
+      //     cpu: "100m",
+      //   },
+      //   limits: {
+      //     memory: "512Mi",
+      //     cpu: "500m",
+      //   },
+      // },
 
       bootstrap: {
         initdb: {
