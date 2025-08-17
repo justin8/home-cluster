@@ -10,6 +10,7 @@ export interface TauApplicationArgs {
   database?: DatabaseArgs;
   namespace?: string;
   createNamespace?: boolean;
+  namespaceLabels?: Record<string, string>;
 }
 
 export abstract class TauApplication extends pulumi.ComponentResource {
@@ -71,7 +72,10 @@ export abstract class TauApplication extends pulumi.ComponentResource {
         {
           metadata: {
             name: this.namespace,
-            labels,
+            labels: {
+              ...labels,
+              ...args.namespaceLabels,
+            },
           },
         },
         { parent: this }

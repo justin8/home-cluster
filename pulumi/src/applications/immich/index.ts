@@ -38,6 +38,11 @@ export class Immich extends TauApplication {
       {
         ...args,
         namespace: name,
+        namespaceLabels: {
+          "pod-security.kubernetes.io/enforce": "privileged",
+          "pod-security.kubernetes.io/audit": "privileged",
+          "pod-security.kubernetes.io/warn": "privileged",
+        },
         database: {
           name: "immich-database",
           storageSize: "5Gi",
@@ -151,7 +156,7 @@ export class Immich extends TauApplication {
             metadata: { labels: { app: mlName } },
             spec: {
               securityContext: {
-                fsGroup: sharedGID,
+                fsGroup: 0, // This container is shit and blows up if it isn't running as root
               },
               containers: [
                 {
@@ -176,9 +181,6 @@ export class Immich extends TauApplication {
                   },
                   securityContext: {
                     allowPrivilegeEscalation: false,
-                    runAsNonRoot: true,
-                    runAsUser: sharedUID,
-                    runAsGroup: sharedGID,
                     capabilities: {
                       drop: ["ALL"],
                     },
