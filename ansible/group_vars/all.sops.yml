@@ -10,7 +10,7 @@ secret_backup_repository_password: ENC[AES256_GCM,data:RCmeoM+NC/0KREA=,iv:HGMRb
 backup_repository_port: 23
 users:
     - name: downloads
-      password: ENC[AES256_GCM,data:+maDPBS1kEWqBrA=,iv:V1DbvV2XdENwyxBudGfHzvjRFOlIqsjmQRV2YTCf9U4=,tag:ifZUdCOOmWVrD/jvl9rFkA==,type:str]
+      password: ENC[AES256_GCM,data:8tTsbtiy75Z/fuo=,iv:bnAKGJGnWagqmVNCovjuXnskuntQzUeDq92bC14LWbw=,tag:81ltxt3wLrbv0iz3ruZIOA==,type:str]
       uid: 2000
     - name: justin
       uid: 1000
@@ -46,21 +46,12 @@ dns_hosts:
     - ip: 192.168.4.20
       aliases:
         - hestia.dray.id.au
-        - auth.dray.id.au
-        - traefik.dray.id.au
-        - grafana.dray.id.au
-        - immich.dray.id.au
-        - kavita.dray.id.au
-        - livesync.dray.id.au
-        - prometheus.dray.id.au
-        - prowlarr.dray.id.au
-        - radarr.dray.id.au
-        - sabnzbd.dray.id.au
-        - sonarr.dray.id.au
-        - syncthing.dray.id.au
-        - teslamate-grafana.dray.id.au
-        - teslamate.dray.id.au
-        - transmission.dray.id.au
+    - ip: 192.168.4.71
+      aliases:
+        - plex.dray.id.au
+        - jellyfin.dray.id.au
+        - tinyauth.dray.id.au
+        - pocketid.dray.id.au
     - ip: 192.168.4.25
       aliases:
         - leto.dray.id.au
@@ -75,7 +66,7 @@ sops:
             QVlOeEhkVk9sVC81YmZLMlkvME4zTFEKhlOq1e4TESdLSZtm4YRMMtlVm3Kfirbh
             Sdwuzuh3V4Yw0RwzfXQ93bI0uuBr09DQcVTWZky3J646lpXC+5OCjw==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2025-07-24T11:20:47Z"
-    mac: ENC[AES256_GCM,data:IqsXTO/lyQz9KBo9NrnSNJ1Xs5H+5UNRuzC0UAZq+Vp4/gglennGngcoci2EtKqpw3Y/B4zzY/r28/Ymq9gvjnhqhLmp35IO8lFvvxdoXdoH1YLKYVnPEEAovCQr2nKm9GFugYhUXlrHLLtMeUNe6qS3f3leIuGbGanjqJN9fe0=,iv:GkTT46T0QBZ6ewZwXOTLEx5z84TLXZAhPaz5xFcWPIg=,tag:Pv4bsFPwVps7knt0ggxWuA==,type:str]
+    lastmodified: "2025-08-18T10:18:22Z"
+    mac: ENC[AES256_GCM,data:OVPiyvszyPMI2LsvJjK5f1KhcQPxeLuPdZR6kyCPSYCGqx93q5IbaAcPUluoAQ32dk5bs7/hbb1PN1WkSCJGJREYHe4gsd1Dp8I6pV707vuFn4sFj8m55GSwNVLEqdAvUiYujchDG0E281L4xFUh1AKJ1qGgPt0UttOXuEDNCA0=,iv:V3WHk7Dg0IEDS0x+gL7WBPQ8uyTpZ8qeVBNOp1DlAaE=,tag:urGiaKgdrFKKgkf/XrXTNQ==,type:str]
     encrypted_regex: (secret|token|key|passphrase|password|username|url)
     version: 3.10.2
