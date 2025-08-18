@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# One day I should make this start the pvc shell as well first, for now it just copies in to a started shell
+
+set -euo pipefail
+
+usage() {
+    echo "Usage: $0 <namespace> <pod name> <source> <destination>..."
+    echo "  namespace: Kubernetes namespace containing the pvc-shell"
+    echo "  pod name: The pod name of the pvc-shell"
+    echo "  source: The source directory to copy"
+    echo "  destination: The destination file or directory to copy to"
+    echo ""
+    echo "Example: $0 default pvc-shell-12345 /local/files /folder/in/container"
+    exit 1
+}
+
+# Check arguments
+if [[ $# -lt 2 ]]; then
+    usage
+fi
+
+NAMESPACE="$1"
+POD="$2"
+SOURCE="$3"
+DESTINATION="$4"
+
+if ! [[ -d $SOURCE ]]; then
+  echo "Source directory $SOURCE does not exist or is not a directory"
+  usage
+fi
+
+tar cf - -C "$(dirname "$SOURCE")" "$(basename "$SOURCE")" | kubectl exec -i -n "$NAMESPACE" pod/"$POD" -- tar xf - -C "$DESTINATION"
