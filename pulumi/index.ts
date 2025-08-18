@@ -1,5 +1,5 @@
 import * as pulumi from "@pulumi/pulumi";
-import { Downloads, Immich, Kavita } from "./src/applications";
+import { Downloads, Immich, Kavita, Syncthing } from "./src/applications";
 
 import { PRIVATE_INGRESS_CLASS, PUBLIC_INGRESS_CLASS } from "./src/constants";
 import {
@@ -98,8 +98,10 @@ const config = new pulumi.Config();
 const coreServices = initializeCoreServices();
 const opts: pulumi.ResourceOptions = { dependsOn: coreServices };
 
-new Kavita({}, opts);
+new Kavita("kavita", {}, opts);
 
 new Downloads("downloads", opts);
 
 new Immich("immich", {}, opts);
+
+new Syncthing("syncthing", {}, opts);

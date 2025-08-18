@@ -7,8 +7,7 @@ import { TauApplication, TauApplicationArgs } from "../../constructs/tauApplicat
 const config = new pulumi.Config();
 
 export class Kavita extends TauApplication {
-  constructor(args: TauApplicationArgs = {}, opts?: pulumi.ComponentResourceOptions) {
-    const name = "kavita";
+  constructor(name: string, args: TauApplicationArgs = {}, opts?: pulumi.ComponentResourceOptions) {
     const port = 5000;
 
     super(name, { ...args, namespace: name }, opts);
