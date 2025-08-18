@@ -148,6 +148,7 @@ export class TinyAuth extends TauApplication {
           spec: {
             forwardAuth: {
               address: pulumi.interpolate`http://${getServiceURL("tinyauth", this.namespace)}:3000/api/auth/traefik`,
+              authResponseHeaders: ["remote-user"],
             },
           },
         },

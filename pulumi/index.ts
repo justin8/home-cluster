@@ -1,5 +1,5 @@
 import * as pulumi from "@pulumi/pulumi";
-import { Downloads, Immich, Kavita, Syncthing } from "./src/applications";
+import { Downloads, Immich, Jellyfin, Kavita, Plex, Syncthing } from "./src/applications";
 
 import { PRIVATE_INGRESS_CLASS, PUBLIC_INGRESS_CLASS } from "./src/constants";
 import {
@@ -103,5 +103,9 @@ new Kavita("kavita", {}, opts);
 new Downloads("downloads", opts);
 
 new Immich("immich", {}, opts);
+
+new Jellyfin("jellyfin", {}, opts);
+
+new Plex("plex", {}, opts);
 
 new Syncthing("syncthing", {}, opts);
