@@ -29,9 +29,9 @@ pkgs.mkShell {
 
     git submodule update --init --recursive
 
-    if [[ ! -e .sops-age.key ]]; then
+    if [[ ! -s .sops-age.key ]]; then
       echo "Downloading age key..."
-      aws ssm get-parameter --name "/home-cluster/sops-age.key" --with-decryption --query "Parameter.Value" --output text > .sops-age.key
+      aws ssm get-parameter --name "/home-cluster/sops-age.key" --with-decryption --query "Parameter.Value" --output text > $SOPS_AGE_KEY_FILE
     fi
 
     # Install git hooks

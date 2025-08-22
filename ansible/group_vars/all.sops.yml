@@ -1,7 +1,7 @@
 secret_ssh_authorized_keys:
     - ENC[AES256_GCM,data:TC0sNuefnI1GOueT9jGs4wfzdmK+oDj4nJ4b+J6I2jfUi4MpedqlygBFin5kgFqbNHsjQy9Qpnw58KzyWPVufhRU1hVYeRw7+f6FP8mmTrUprVrDtTnZ82z34R35Rd0SP2BOesFeF2W34g2evSLEFKlfLZM0ch9WawcvlD8JI63ZoyhOWjGe2fxsOm/1jCXqxwFHeJc43slubPlkB7eG66N+bMxdMyIy2ZP8cBU=,iv:qo/rrhK7D1Nf7fRbE1OhBskhf1PFmc2OmXgCV70a7jU=,tag:EaV4Qn9WGMfPlbSD1yDytA==,type:str]
     - ENC[AES256_GCM,data:kn8uWgDMrNdvtQYcXknQNdCqbaLF/ZDpSv9P49wXne392mGaRwLgJfPtp7OSUTNWMkjHmLsDMrxz1kwm0OIH4SS70HSbT5GyEgqIqeAYaA2V/39E4RCI1nlrbPikLuwPdvj+NmVr5YMMGbc987EvRDIAh27v8QflRf39GEudb7wNrsQlrA/qN1i1s+nyB1EpvO1cH7o7+abtBOq9vKqjPk64QToe7KBAHaR58YQb,iv:7UvbNeqXyli8WkoX9PlDwtYcW8O7/dPFfSXmp0kANv0=,tag:GBpJkF+z1yorn5DhZ29uPw==,type:str]
-    - ENC[AES256_GCM,data:DsoZQchIHWP34g/1O6Rn6iESHwlA7wPyNpZVhNzzZ1MXevzf7+KhhqRrvCFD+8J8aZJvwFlMcb0ddzuc9iWyebFbhS6YUm7WjvmRdK/4PemnnzwZnjncm/uK90tZV1YBQuMxbZinx7J3i2PN8he+hO9yoapg7DznNpnECD1hucO6GuiiKovWNuK1Dg+gqvO00ApgDUOfh2qYPo0gf8YNgj3W4c8GGBRwUoMtETyuANr5dR16OaQ=,iv:KN6wWURfnrzDc9FIuA+Nfi+85+HOzT5C9KH9mc8Ia2Y=,tag:3SWLn+iQPX+zR0Slyt66Gw==,type:str]
+    - ENC[AES256_GCM,data:OVXw6o0gSXpryMc0VptIp0qhfoCx8fMTiRqWZEkIhRK6AH1AoKIBq102exaE+QA2qZw4WNFway5PLkXeFZy5BaFC5vIKD3Y9Lxdu/gthr0916A2j4NAseE3DDFBh0OpsAa8cIcaX8ugn7adR5gXOTf85nFoSCuL4kEHdLDFwBDRlRlfyzdQKxbz2KIFjKiOQ4XY16GC3GHWivBkkJa1bor6r8FhwdqAoB9V31kxWVMiRMDX+oMWrAo8JdhU=,iv:IcC0U+OYRn7/SoP+QSaHvGvkIoqf3S7d+1HqdGGX07A=,tag:amw3WV/dN2lpGOEpgUvKaQ==,type:str]
     - ENC[AES256_GCM,data:tFcHEc66VxNxbQmp3eP0ns/c3UAEqqEq9e1aydV41wXn78x9AFmqnaHknPIR5VU6DMUl/vf8RYAnO4IcHHt/+BZdK/8BtojevZdsCOLLZziK7UI5ErHRBH8Tctsi,iv:eNGjPYSvL/fSBZEY7TiH0H2gm0u70qdd8F3/3i0GCVg=,tag:vN8FqVs0whoTnaytQfKC4Q==,type:str]
 secret_backup_encryption_passphrase: ENC[AES256_GCM,data:lEiNvk7qmMN06LM=,iv:nKAuXOIombiDZBkXLeRo1qRjp0Hdb+43RQx+ss5gRQs=,tag:+vxNKPLwtud06qcUnop2Mg==,type:str]
 secret_backup_repository_host: ENC[AES256_GCM,data:Zuo/JixNBtmb2qWjlB2o6oL0,iv:oSyBv1DtxrB70DjHTRqD9yjD1Wg/L5wks2Nm2hrpiqE=,tag:L2ahpUsL2K2NaOm8G//JEw==,type:str]
@@ -48,6 +48,7 @@ dns_hosts:
         - hestia.dray.id.au
     - ip: 192.168.4.71
       aliases:
+        - immich.dray.id.au
         - plex.dray.id.au
         - jellyfin.dray.id.au
         - tinyauth.dray.id.au
@@ -66,7 +67,7 @@ sops:
             QVlOeEhkVk9sVC81YmZLMlkvME4zTFEKhlOq1e4TESdLSZtm4YRMMtlVm3Kfirbh
             Sdwuzuh3V4Yw0RwzfXQ93bI0uuBr09DQcVTWZky3J646lpXC+5OCjw==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2025-08-18T10:18:22Z"
-    mac: ENC[AES256_GCM,data:OVPiyvszyPMI2LsvJjK5f1KhcQPxeLuPdZR6kyCPSYCGqx93q5IbaAcPUluoAQ32dk5bs7/hbb1PN1WkSCJGJREYHe4gsd1Dp8I6pV707vuFn4sFj8m55GSwNVLEqdAvUiYujchDG0E281L4xFUh1AKJ1qGgPt0UttOXuEDNCA0=,iv:V3WHk7Dg0IEDS0x+gL7WBPQ8uyTpZ8qeVBNOp1DlAaE=,tag:urGiaKgdrFKKgkf/XrXTNQ==,type:str]
+    lastmodified: "2025-08-19T07:48:28Z"
+    mac: ENC[AES256_GCM,data:BtrlGrcMmjfWsfBfJNlirihK0xhTRZmxl3aKcx23evlRZlrdyyKx/Qy6qt++v+OMM0PEfvOA86QCLrZW9Doxh6ZyLC0pW4ePFJLu/xf67yiv36Si1novLQ3/E37N3+kLUyNjqhgrbAvwc084wQjw1EFnUiElEhq+VNY5iqCqnvA=,iv:KF/hMO+IO4NjMgd5KItY1LjqBqDR82YOUcFETGKFWwY=,tag:n8PxmeZnpQgXowH2aisFrw==,type:str]
     encrypted_regex: (secret|token|key|passphrase|password|username|url)
     version: 3.10.2
