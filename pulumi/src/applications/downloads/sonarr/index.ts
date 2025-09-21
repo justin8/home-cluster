@@ -12,12 +12,13 @@ export class Sonarr extends TauApplication {
 
     super(name, args, opts);
 
-    const storageMount = this.volumeManager.addNFSMount("/storage");
+    const tvMount = this.volumeManager.addNFSMount("/mnt/pool/media/tv", "/media/tv");
+    const downloadsMount = this.volumeManager.addNFSMount("/mnt/pool/downloads", "/downloads");
     const configMount = this.volumeManager.addLonghornVolume("/config", {
       backupEnabled: true,
       size: "2Gi",
     });
-    const volumeMounts = [storageMount, configMount];
+    const volumeMounts = [tvMount, downloadsMount, configMount];
 
     const configSecret = new TauSecret(
       `${name}-config`,

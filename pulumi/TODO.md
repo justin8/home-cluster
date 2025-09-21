@@ -19,8 +19,11 @@
   - [x] Tinyauth
   - [x] PocketID
 - [x] Set up email proxy (and configure it in PocketID and any others that need it)
-- [ ] Move services over
+- [x] Move services over
+- [ ] Set up storage with a dns name and ingress
+- [ ] Enable vertical pod autoscaling
 - [ ] Add resource limits to core-services and apps
+- [ ] Kavita OAuth
 - [ ] Renovate bot to auto-update containers (this is mostly working; I have it for helm charts, but not container images yet)
 - [ ] Docker registry caching/mirroring
 - [ ] Get access by user groups working - coming in tinyauth v4 maybe; alternatively, try out oauth2proxy

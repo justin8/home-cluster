@@ -42,7 +42,7 @@ export class NFSCSI extends pulumi.ComponentResource {
       provisioner: "nfs.csi.k8s.io",
       parameters: {
         server: nfsHostname,
-        share: "/",
+        share: "/mnt/pool/apps/k8s",
       },
       reclaimPolicy: "Retain",
       allowVolumeExpansion: true,

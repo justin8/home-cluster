@@ -67,12 +67,18 @@ function initializeCoreServices(): pulumi.Resource[] {
       privateIngressClass: PRIVATE_INGRESS_CLASS,
       cloudflareSecret: sharedSecrets.cloudflareSecret,
     },
-    { dependsOn: [longhorn] }
+    { dependsOn: [longhorn, metallb] }
   );
 
   const cnpgOperator = new CNPGOperator("cnpg-operator", { dependsOn: [longhorn] });
 
-  const auth = new Auth("auth", {}, { dependsOn: [sharedSecrets] });
+  const auth = new Auth(
+    "auth",
+    {},
+    {
+      dependsOn: [sharedSecrets, ingressControllers],
+    }
+  );
 
   const reloader = new Reloader("reloader");
 

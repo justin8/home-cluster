@@ -9,8 +9,6 @@ export interface IngressControllersArgs {
 }
 
 export class IngressControllers extends pulumi.ComponentResource {
-  public readonly publicIngressClass: pulumi.Output<string>;
-  public readonly privateIngressClass: pulumi.Output<string>;
   public readonly publicIP: pulumi.Output<string>;
   public readonly privateIP: pulumi.Output<string>;
 
@@ -145,8 +143,5 @@ export class IngressControllers extends pulumi.ComponentResource {
 
     this.createDashboard("public", publicTraefik, domain);
     this.createDashboard("private", privateTraefik, domain);
-
-    this.publicIngressClass = pulumi.output(PUBLIC_INGRESS_CLASS);
-    this.privateIngressClass = pulumi.output(PRIVATE_INGRESS_CLASS);
   }
 }

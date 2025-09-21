@@ -8,8 +8,8 @@ export class DemoApp extends TauApplication {
 
     // Define volumes for the application
     // NFS mounts for shared network storage
-    const gamesMount = this.volumeManager.addNFSMount("/storage/games");
-    const moviesMount = this.volumeManager.addNFSMount("/storage/movies");
+    const gamesMount = this.volumeManager.addNFSMount("/mnt/pool/shares/photos");
+    const moviesMount = this.volumeManager.addNFSMount("/mnt/pool/media/movies");
 
     // Longhorn volumes for persistent block storage
     const dataMount = this.volumeManager.addLonghornVolume("/data/demo", {

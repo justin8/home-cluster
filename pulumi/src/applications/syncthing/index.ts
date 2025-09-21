@@ -25,11 +25,13 @@ export class Syncthing extends TauApplication {
       opts
     );
 
-    const dataMount = this.volumeManager.addNFSMount("/storage/syncthing");
+    const dataMount = this.volumeManager.addNFSMount("/mnt/pool/apps/syncthing", "/data");
     const configMount = this.volumeManager.addLonghornVolume("/config", {
       size: "100Mi",
       backupEnabled: true,
     });
+
+    const volumeMounts = [dataMount, configMount];
 
     // Syncthing deployment
     const deployment = new k8s.apps.v1.Deployment(
@@ -58,7 +60,7 @@ export class Syncthing extends TauApplication {
                     { name: "PUID", value: sharedUID.toString() },
                     { name: "PGID", value: sharedGID.toString() },
                   ],
-                  volumeMounts: [dataMount, configMount],
+                  volumeMounts,
                   livenessProbe: {
                     httpGet: { port: 8384, path: "/" },
                     initialDelaySeconds: 30,

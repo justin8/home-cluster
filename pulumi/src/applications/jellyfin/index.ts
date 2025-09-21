@@ -20,11 +20,14 @@ export class Jellyfin extends TauApplication {
       opts
     );
 
-    const dataMount = this.volumeManager.addNFSMount("/storage");
+    const moviesMount = this.volumeManager.addNFSMount("/mnt/pool/media/movies", "/media/movies");
+    const tvMount = this.volumeManager.addNFSMount("/mnt/pool/media/tv", "/media/tv");
     const configMount = this.volumeManager.addLonghornVolume("/config", {
       size: "20Gi",
       backupEnabled: true,
     });
+
+    const volumeMounts = [configMount, moviesMount, tvMount];
 
     const deployment = new k8s.apps.v1.Deployment(
       name,
@@ -47,7 +50,7 @@ export class Jellyfin extends TauApplication {
                     { name: "PUID", value: sharedUID.toString() },
                     { name: "PGID", value: sharedGID.toString() },
                   ],
-                  volumeMounts: [dataMount, configMount],
+                  volumeMounts,
                   // resources: {
                   //   requests: { "gpu.intel.com/i915": "1" },
                   //   limits: { "gpu.intel.com/i915": "1" },

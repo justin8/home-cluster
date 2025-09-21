@@ -12,12 +12,12 @@ export class Transmission extends TauApplication {
 
     super(name, args, opts);
 
-    const storageMount = this.volumeManager.addNFSMount("/storage");
+    const downloadsMount = this.volumeManager.addNFSMount("/mnt/pool/downloads", "/downloads");
     const configMount = this.volumeManager.addLonghornVolume("/config", {
       backupEnabled: true,
       size: "500Mi",
     });
-    const volumeMounts = [storageMount, configMount];
+    const volumeMounts = [downloadsMount, configMount];
 
     const vpnSecret = new TauSecret(
       `${name}-vpn`,

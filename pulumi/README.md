@@ -20,7 +20,7 @@ A few components can't be configured automatically at the moment, they should al
 
 These should be set via `pulumi config set $name $value` and optionally with `--secret` to encrypt the values before storing them in the file.
 
-- `ip_address_pool` - The main IP address pool for MetalLB to use, e.g: `192.168.4.80-192.168.4.100`
+- `ip_address_pool` - The main IP address pool for MetalLB to use, e.g: `192.168.5.80-192.168.5.100`
 - `cert_manager_email` - Email used for domain validation when generating TLS certs
 - Cloudflare:
   - `cloudflare_email` - What it says on the tin
@@ -220,11 +220,11 @@ The infrastructure includes the following core services:
 │                                                                                 │
 │  ┌─────────────────────────────────────────────────────────────────────────┐    │
 │  │                        MetalLB                                          │    │
-│  │                   IP Pool: 192.168.4.80-100                             │    │
+│  │                   IP Pool: 192.168.5.80-100                             │    │
 │  │                                                                         │    │
 │  │  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐          │    │
 │  │  │   DNS Server    │  │ Public Ingress  │  │ Private Ingress │          │    │
-│  │  │  192.168.4.53   │  │  192.168.4.70   │  │  192.168.4.71   │          │    │
+│  │  │  192.168.5.53   │  │  192.168.5.2    │  │  192.168.5.3    │          │    │
 │  │  │                 │  │                 │  │                 │          │    │
 │  │  │   PiHole        │  │  Traefik        │  │  Traefik        │          │    │
 │  │  │   Primary +     │  │  (Public)       │  │  (Private)      │          │    │
@@ -300,10 +300,10 @@ The infrastructure includes the following core services:
 
 | Service         | Variable             | IP Address       | Purpose                            |
 | --------------- | -------------------- | ---------------- | ---------------------------------- |
-| MetalLB Pool    | `ip_address_pool`    | 192.168.4.80-100 | Load balancer IP pool              |
-| DNS Server      | `dns_server_ip`      | 192.168.4.53     | PiHole DNS service                 |
-| Public Ingress  | `public_ingress_ip`  | 192.168.4.70     | External-facing web traffic        |
-| Private Ingress | `private_ingress_ip` | 192.168.4.71     | Internal-only web traffic          |
+| MetalLB Pool    | `ip_address_pool`    | 192.168.5.80-100 | Load balancer IP pool              |
+| DNS Server      | `dns_server_ip`      | 192.168.5.53     | PiHole DNS service                 |
+| Public Ingress  | `public_ingress_ip`  | 192.168.5.2      | External-facing web traffic        |
+| Private Ingress | `private_ingress_ip` | 192.168.5.3      | Internal-only web traffic          |
 | External IP     | `real_external_ip`   | (encrypted)      | Router's public IP for DNS records |
 
 ## Applications
@@ -351,7 +351,7 @@ this.createHttpIngress(
 - Auth is enabled by default and can be disabled with `auth: false`
 - If `public: true`, also creates a public ingress accessible from internet
 - Automatic TLS certificate provisioning via cert-manager
-- DNS records automatically managed by External DNS
+- DNS records automatically managed by External DNS (by monitoring ingress objects)
 
 ## Storage Options
 

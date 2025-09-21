@@ -43,12 +43,14 @@ pkgs.mkShell {
     source .venv/bin/activate
 
     (
+      echo "Configuring talos..."
       cd talos
       talhelper genconfig
-      talosctl kubeconfig --talosconfig=./clusterconfig/talosconfig --force --nodes=192.168.4.8 clusterconfig/kubeconfig
+      talosctl kubeconfig --talosconfig=./clusterconfig/talosconfig --force --nodes=192.168.5.10 clusterconfig/kubeconfig
     )
 
     (
+      echo "Configuring pulumi..."
       cd pulumi
       if [[ ! -e $HOME/.pulumi/credentials.json ]]; then
         pulumi login 's3://jdray-pulumi-state?region=us-east-1'

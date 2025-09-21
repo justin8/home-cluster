@@ -1,6 +1,6 @@
 encryptionsalt: v1:q9ZxgKTkXOU=:v1:A/SJ2CWVukh3Ok56:o7Z86FNMmjbLdSojjwTUiGBm3Gpn3Q==
 config:
-  home-cluster:ip_address_pool: "192.168.4.80-192.168.4.100"
+  home-cluster:ip_address_pool: "192.168.5.80-192.168.5.100"
   home-cluster:cert_manager_email:
     secure: v1:sLBu7EvYreXVBIGa:GwKAa8qHpSCsYwelP8AUe3HJ3STDK5P36sU4y8x+
   home-cluster:cloudflare_email:
@@ -9,15 +9,14 @@ config:
     secure: v1:uxJHS9i83/jM0y9e:kNAjOeaHsCUifj8u1dPiQV0DsTScdDzTpns=
   home-cluster:cloudflare_api_token:
     secure: v1:Xtm1KLjkWLFWfNnn:8aaFPJxMKlOCmaGMoXt2+029z5Hgdjz6YoBXyePfBHT/DwpYZUoJ4wIBTrKYZGb+pdYjqHl0lmA=
-  home-cluster:nfs_hostname:
-    secure: v1:ipyNPiK2oK9VmSLI:7jXwe36JtbRQUhmDE0UlAMnqyFAJ21rFlr4AZQ==
-  home-cluster:public_ingress_ip: 192.168.4.70
-  home-cluster:private_ingress_ip: 192.168.4.71
-  home-cluster:dns_server_ip: 192.168.4.53
+  home-cluster:nfs_hostname: 192.168.5.5
+  home-cluster:public_ingress_ip: 192.168.5.2
+  home-cluster:private_ingress_ip: 192.168.5.3
+  home-cluster:dns_server_ip: 192.168.5.53
   home-cluster:longhorn_nfs_backup_path:
     secure: v1:d5pcJ4pIEyJlnapg:PnqSOSYjX+lCRX+z0bN6EVFXeZTAVdYlxuGfd9yfpnRk5Tevl/VwNzY=
   home-cluster:real_external_ip:
-    secure: v1:UsLKGa2iKi1xc5R5:rVgsA+QIVvPDN+HYulZVWyw7qYh1oPzD228TnO26
+    secure: v1:7SKd/QW9aaZ8jPSZ:GCmQj/FBnOarYgOYJp2Mv2qnvAGANdFgiAV4iu8=
   home-cluster:tinyauth_oauth_client_id: c995ee68-e855-4b0f-8733-a933c3a18704
   home-cluster:tinyauth_oauth_client_secret:
     secure: v1:UZ1cEAY9rMRRvjTu:GYqWzGDn4K3/x9TLLYzZrikl7QVADq4w8hcP3KAMn00g43LUzD7UhEubiGZuuG8z
