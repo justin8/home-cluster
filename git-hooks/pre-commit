@@ -19,32 +19,20 @@ for file in $STAGED_FILES; do
 done
 
 # Separate by file type, excluding SOPS files
-PYTHON_FILES=$(echo "$SAFE_TO_FORMAT" | tr ' ' '\n' | grep '\.py$' | grep -v '\.sops\.')
-OTHER_FILES=$(echo "$SAFE_TO_FORMAT" | tr ' ' '\n' | grep -E '\.(yaml|yml|ts|js|json|md)$' | grep -v '\.sops\.')
-
-# Format Python files with ruff
-if [ -n "$PYTHON_FILES" ]; then
-    echo "Running ruff format on Python files..."
-    echo "$PYTHON_FILES" | xargs -r uvx ruff format
-    if [ $? -ne 0 ]; then
-        echo "Ruff formatting failed. Please fix the issues and try again."
-        exit 1
-    fi
-    echo "$PYTHON_FILES" | xargs -r git add
-fi
+FILES=$(echo "$SAFE_TO_FORMAT" | tr ' ' '\n' | grep -E '\.(yaml|yml|ts|js|json|md)$' | grep -v '\.sops\.')
 
 # Format other files (YAML, TypeScript, JavaScript, JSON, Markdown) with prettier
-if [ -n "$OTHER_FILES" ]; then
+if [ -n "$FILES" ]; then
     echo "Running prettier on YAML/TypeScript/JavaScript/JSON/Markdown files..."
-    echo "$OTHER_FILES" | xargs -r npx prettier --write
+    echo "$FILES" | xargs -r npx prettier --write
     if [ $? -ne 0 ]; then
         echo "Prettier formatting failed. Please fix the issues and try again."
         exit 1
     fi
-    echo "$OTHER_FILES" | xargs -r git add
+    echo "$FILES" | xargs -r git add
 fi
 
-if [ -n "$PYTHON_FILES" ] || [ -n "$OTHER_FILES" ]; then
+if [ -n "$FILES" ]; then
     echo "Code formatting complete."
 else
     echo "No files safe to format (all staged files have unstaged changes or are SOPS files)."

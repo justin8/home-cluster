@@ -3,7 +3,6 @@
 
 pkgs.mkShell {
   buildInputs = with pkgs; [
-    (python312.withPackages (ps: with ps; [ uv ]))
     nodejs_22
     git
     sops
@@ -38,9 +37,6 @@ pkgs.mkShell {
     echo "Installing git hooks..."
     cp git-hooks/* .git/hooks/
     chmod +x .git/hooks/*
-
-    uv sync
-    source .venv/bin/activate
 
     (
       echo "Configuring talos..."

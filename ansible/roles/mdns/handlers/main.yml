@@ -1,6 +1,0 @@
----
-# handlers for mdns role
-- name: Restart systemd-resolved
-  ansible.builtin.service:
-    name: systemd-resolved
-    state: restarted

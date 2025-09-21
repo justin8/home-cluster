@@ -66,7 +66,7 @@ Generate and execute commands:
 # Generate and run Talos upgrade commands
 talhelper gencommand upgrade --extra-flags "--preserve" | bash
 
-# Generate and run Kubernetes upgrade commands  
+# Generate and run Kubernetes upgrade commands
 talhelper gencommand upgrade-k8s | bash
 
 # Generate and run bootstrap command
@@ -81,6 +81,7 @@ talhelper gencommand apply | bash
 Secrets are encrypted with SOPS and automatically decrypted when using the nix shell environment.
 
 To edit secrets:
+
 ```bash
 sops talsecret.sops.yaml
 ```

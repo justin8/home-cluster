@@ -1,4 +1,4 @@
-# Pulumi TODO list
+# TODO list
 
 - [x] Cert-manager
 - [x] A service with remote storage (NFS)
