@@ -8,49 +8,50 @@
 └─────────────────────────┬───────────────────────────────────────────────────────┘
                           │
                           │ External IP (real_external_ip)
-                          │
-┌─────────────────────────▼───────────────────────────────────────────────────────┐
+                          ▼
+┌─────────────────────────────────────────────────────────────────────────────────┐
 │                    Home Router/Firewall                                         │
 │                        192.168.5.1                                              │
-└─────────────────────────────────────┬───────────────────────────────────────────┘
-                                      │
-                                      │ 192.168.5.x Network
-                                      │
-                    ┌─────────────────┼────────────────────────────────────┐
-                    │                                                      │
-                    ▼                                                      ▼
-┌──────────────────────────────────────────────────────────┐      ┌─────────────────┐
-│              Kubernetes Cluster                          │      │  NFS Storage    │
-│                (192.168.5.10)                            │      │  192.168.5.5    │
-│                                                          │      │                 │
-│  ┌─────────────────────────────────────────────────────┐ │─────>│ • File Storage  │
-│  │                    MetalLB                          │ │      │ • NFS Shares    │
-│  │              IP Pool: 192.168.5.80-100              │ │      │ • Longhorn      │
-│  │                                                     │ │      │   Backups       │
-│  └─────────────────────────────────────────────────────┘ │      └─────────────────┘
-│                                                          │
-│  ┌────────────────────────┐  ┌────────────────────────┐  │
-│  │ Private Ingress        │  │ Public Ingress         │  │
-│  │  192.168.5.3           │  │  192.168.5.2           │  │
-│  │                        │  │                        │  │
-│  │    Traefik             │  │    Traefik             │  │
-│  │   (Private)            │  │   (Public)             │  │
-│  └────────────────────────┘  └────────────────────────┘  │
-│                                                          │
-│  ┌─────────────────────────────────────────────────────┐ │
-│  │                  DNS Server                         │ │
-│  │                 192.168.5.53                        │ │
-│  │                                                     │ │
-│  │            PiHole Primary + Secondary               │ │
-│  └─────────────────────────────────────────────────────┘ │
-│                                                          │
-│  ┌─────────────────────────────────────────────────────┐ │
-│  │                Applications & Workloads             │ │
-│  │                                                     │ │
-│  │  • Pods        • Services        • Deployments      │ │
-│  │  • ConfigMaps  • Secrets         • StatefulSets     │ │
-│  └─────────────────────────────────────────────────────┘ │
-└──────────────────────────────────────────────────────────┘
+└─────────────────────────┬───────────────────────────────────────────────────────┘
+                          │
+                          │ 192.168.5.x Network
+                          │
+          ┌───────────────┴───────────────┐
+          │                               │
+          ▼                               ▼
+┌─────────────────┐               ┌──────────────────────────────────────────────────┐
+│  NFS Storage    │               │              Kubernetes Cluster                  │
+│  192.168.5.5    │               │              (API: 192.168.5.10)                 │
+│                 │               │            (Nodes: 192.168.5.11-20)              │
+│                 │               │                                                  │
+│ • File Storage  │◄──────────────│  ┌─────────────────────────────────────────────┐ │
+│ • NFS Shares    │               │  │                    MetalLB                  │ │
+│ • Longhorn      │               │  │              IP Pool: 192.168.5.80-100      │ │
+│   Backups       │               │  │                                             │ │
+└─────────────────┘               │  └─────────────────────────────────────────────┘ │
+                                  │                                                  │
+                                  │  ┌─────────────────────┐ ┌─────────────────────┐ │
+                                  │  │ Private Ingress     │ │ Public Ingress      │ │
+                                  │  │  192.168.5.3        │ │  192.168.5.2        │ │
+                                  │  │                     │ │                     │ │
+                                  │  │    Traefik          │ │    Traefik          │ │
+                                  │  │    (Private)        │ │    (Public)         │ │
+                                  │  └─────────────────────┘ └─────────────────────┘ │
+                                  │                                                  │
+                                  │  ┌─────────────────────────────────────────────┐ │
+                                  │  │                  DNS Server                 │ │
+                                  │  │                 192.168.5.53                │ │
+                                  │  │                                             │ │
+                                  │  │            PiHole Primary + Secondary       │ │
+                                  │  └─────────────────────────────────────────────┘ │
+                                  │                                                  │
+                                  │  ┌─────────────────────────────────────────────┐ │
+                                  │  │                Applications & Workloads     │ │
+                                  │  │                                             │ │
+                                  │  │  • Pods        • Services    • Deployments  │ │
+                                  │  │  • ConfigMaps  • Secrets     • StatefulSets │ │
+                                  │  └─────────────────────────────────────────────┘ │
+                                  └──────────────────────────────────────────────────┘
 ```
 
 ## IP Address Allocation
@@ -153,28 +154,28 @@ Applications can configure ingress exposure using the `TauApplication` class:
 
 ```typescript
 // Private only (default)
-this.createHttpIngress({ 
-  appName: name, 
-  port: 80, 
-  labels: this.labels 
+this.createHttpIngress({
+  appName: name,
+  port: 80,
+  labels: this.labels,
 });
 
 // Public with authentication
-this.createHttpIngress({ 
-  appName: name, 
-  port: 80, 
-  labels: this.labels, 
-  public: true, 
-  auth: true 
+this.createHttpIngress({
+  appName: name,
+  port: 80,
+  labels: this.labels,
+  public: true,
+  auth: true,
 });
 
 // Public without authentication
-this.createHttpIngress({ 
-  appName: name, 
-  port: 80, 
-  labels: this.labels, 
-  public: true, 
-  auth: false 
+this.createHttpIngress({
+  appName: name,
+  port: 80,
+  labels: this.labels,
+  public: true,
+  auth: false,
 });
 ```
 

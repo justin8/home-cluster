@@ -202,109 +202,14 @@ The infrastructure includes the following core services:
 
 ## Network Setup
 
-```
-┌─────────────────────────────────────────────────────────────────────────────────┐
-│                                Internet                                         │
-└─────────────────────────┬───────────────────────────────────────────────────────┘
-                          │
-                          │ External IP (real_external_ip)
-                          │
-┌─────────────────────────▼───────────────────────────────────────────────────────┐
-│                    Home Router/Firewall                                         │
-└─────────────────────────┬───────────────────────────────────────────────────────┘
-                          │
-                          │ 192.168.x.x Network
-                          │
-┌─────────────────────────▼───────────────────────────────────────────────────────┐
-│                    Kubernetes Cluster                                           │
-│                                                                                 │
-│  ┌─────────────────────────────────────────────────────────────────────────┐    │
-│  │                        MetalLB                                          │    │
-│  │                   IP Pool: 192.168.5.80-100                             │    │
-│  │                                                                         │    │
-│  │  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐          │    │
-│  │  │   DNS Server    │  │ Public Ingress  │  │ Private Ingress │          │    │
-│  │  │  192.168.5.53   │  │  192.168.5.2    │  │  192.168.5.3    │          │    │
-│  │  │                 │  │                 │  │                 │          │    │
-│  │  │   PiHole        │  │  Traefik        │  │  Traefik        │          │    │
-│  │  │   Primary +     │  │  (Public)       │  │  (Private)      │          │    │
-│  │  │   Secondary     │  │                 │  │                 │          │    │
-│  │  └─────────────────┘  └─────────────────┘  └─────────────────┘          │    │
-│  └─────────────────────────────────────────────────────────────────────────┘    │
-│                                                                                 │
-│  ┌─────────────────────────────────────────────────────────────────────────┐    │
-│  │                      DNS Resolution                                     │    │
-│  │                                                                         │    │
-│  │  ┌─────────────────┐              ┌─────────────────┐                   │    │
-│  │  │  External DNS   │              │  External DNS   │                   │    │
-│  │  │  (PiHole)       │              │  (Cloudflare)   │                   │    │
-│  │  │                 │              │                 │                   │    │
-│  │  │ Manages:        │              │ Manages:        │                   │    │
-│  │  │ • Private       │              │ • Public        │                   │    │
-│  │  │   Ingress       │              │   Ingress       │                   │    │
-│  │  │ • Internal DNS  │              │ • External DNS  │                   │    │
-│  │  └─────────────────┘              └─────────────────┘                   │    │
-│  └─────────────────────────────────────────────────────────────────────────┘    │
-│                                                                                 │
-│  ┌─────────────────────────────────────────────────────────────────────────┐    │
-│  │                       Storage Layer                                     │    │
-│  │                                                                         │    │
-│  │  ┌─────────────────┐              ┌─────────────────┐                   │    │
-│  │  │   NFS Storage   │              │ Longhorn Storage│                   │    │
-│  │  │                 │              │                 │                   │    │
-│  │  │ • External NFS  │              │ • Distributed   │                   │    │
-│  │  │   Server        │              │   Block Storage │                   │    │
-│  │  │ • Shared Files  │              │ • Replication   │                   │    │
-│  │  │ • Cross-node    │              │ • Snapshots     │                   │    │
-│  │  │   Access        │              │ • Backups       │                   │    │
-│  │  └─────────────────┘              └─────────────────┘                   │    │
-│  └─────────────────────────────────────────────────────────────────────────┘    │
-│                                                                                 │
-│  ┌─────────────────────────────────────────────────────────────────────────┐    │
-│  │                      Applications                                       │    │
-│  │                                                                         │    │
-│  │  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐          │    │
-│  │  │   Demo App      │  │  PostgreSQL     │  │   Other Apps    │          │    │
-│  │  │                 │  │   Databases     │  │                 │          │    │
-│  │  │ • NFS Volumes   │  │                 │  │ • Custom Apps   │          │    │
-│  │  │ • HTTP Ingress  │  │ • CNPG Operator │  │ • Auto-loaded   │          │    │
-│  │  │ • TLS Certs     │  │ • Longhorn      │  │ • TauApplication│          │    │
-│  │  └─────────────────┘  └─────────────────┘  └─────────────────┘          │    │
-│  └─────────────────────────────────────────────────────────────────────────┘    │
-└─────────────────────────────────────────────────────────────────────────────────┘
-```
+For detailed networking and DNS architecture information, see [docs/NETWORKING_AND_DNS.md](docs/NETWORKING_AND_DNS.md).
 
-### Traffic Flow
+### Key Network Components
 
-**Public Traffic (Internet → Applications):**
-
-1. Internet → Router (`real_external_ip`)
-2. Router → Public Ingress (`public_ingress_ip`)
-3. Traefik Public → Application Pods
-4. External DNS (Cloudflare) manages public DNS records
-
-**Private Traffic (Internal Network → Applications):**
-
-1. Internal Network → Private Ingress (`private_ingress_ip`)
-2. Traefik Private → Application Pods
-3. External DNS (PiHole) manages internal DNS records
-
-**DNS Resolution:**
-
-- **Internal clients**: Use PiHole DNS (`dns_server_ip`) for both public and private domains
-- **External clients**: Use Cloudflare DNS for public domains only
-- **PiHole**: Handles both public and private ingress classes for internal resolution
-- **Cloudflare**: Handles only public ingress class for external resolution
-
-### IP Address Allocation
-
-| Service         | Variable             | IP Address       | Purpose                            |
-| --------------- | -------------------- | ---------------- | ---------------------------------- |
-| MetalLB Pool    | `ip_address_pool`    | 192.168.5.80-100 | Load balancer IP pool              |
-| DNS Server      | `dns_server_ip`      | 192.168.5.53     | PiHole DNS service                 |
-| Public Ingress  | `public_ingress_ip`  | 192.168.5.2      | External-facing web traffic        |
-| Private Ingress | `private_ingress_ip` | 192.168.5.3      | Internal-only web traffic          |
-| External IP     | `real_external_ip`   | (encrypted)      | Router's public IP for DNS records |
+- **MetalLB**: Load balancer providing IPs from `192.168.5.80-100` pool
+- **Dual Ingress**: Separate public (`192.168.5.2`) and private (`192.168.5.3`) ingress controllers
+- **DNS Services**: PiHole for internal DNS (`192.168.5.53`) + External DNS for automatic record management
+- **Storage**: NFS server at `192.168.5.5` + Longhorn distributed storage
 
 ## Applications
 
