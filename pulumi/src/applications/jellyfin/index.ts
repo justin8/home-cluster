@@ -51,10 +51,10 @@ export class Jellyfin extends TauApplication {
                     { name: "PGID", value: sharedGID.toString() },
                   ],
                   volumeMounts,
-                  // resources: {
-                  //   requests: { "gpu.intel.com/i915": "1" },
-                  //   limits: { "gpu.intel.com/i915": "1" },
-                  // },
+                  resources: {
+                    requests: { "gpu.intel.com/i915": "1" },
+                    limits: { "gpu.intel.com/i915": "1" },
+                  },
                   livenessProbe: {
                     httpGet: { port: webPort, path: "/web" },
                     initialDelaySeconds: 60,
