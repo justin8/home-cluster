@@ -33,9 +33,9 @@ export class Longhorn extends pulumi.ComponentResource {
     const config = new pulumi.Config();
     const domain = config.require("domain");
 
-    const nfsServer = config.requireSecret("nfs_hostname");
+    const nfsIp = config.requireSecret("nfs_ip");
     const backupPath = config.requireSecret("longhorn_nfs_backup_path");
-    const backupTarget: pulumi.Input<string> = pulumi.interpolate`nfs://${nfsServer}:${backupPath}`;
+    const backupTarget: pulumi.Input<string> = pulumi.interpolate`nfs://${nfsIp}:${backupPath}`;
     const backupTargetCredentialSecret: pulumi.Input<string> | undefined = undefined; // NFS doesn't use this
 
     // Create namespace for Longhorn

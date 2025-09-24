@@ -11,7 +11,7 @@ export class NFSCSI extends pulumi.ComponentResource {
   constructor(appName: string, args: NFSCSIArgs = {}, opts?: pulumi.ComponentResourceOptions) {
     super(appName, appName, {}, opts);
 
-    const nfsHostname = this.config.require("nfs_hostname");
+    const nfsIp = this.config.require("nfs_ip");
     const namespace = args.namespace || "kube-system";
 
     const helm = new k8s.helm.v3.Release(
@@ -41,7 +41,7 @@ export class NFSCSI extends pulumi.ComponentResource {
       },
       provisioner: "nfs.csi.k8s.io",
       parameters: {
-        server: nfsHostname,
+        server: nfsIp,
         share: "/mnt/pool/apps/k8s",
       },
       reclaimPolicy: "Retain",

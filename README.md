@@ -27,7 +27,7 @@ These should be set via `pulumi config set $name $value` and optionally with `--
   - `cloudflare_email` - What it says on the tin
   - `cloudflare_api_token` - An API token that can modify DNS; used for both TLS wildcard cert generation and public ingress DNS updates. Note this is an API **token** as opposed to an API **key** that is legacy.
 - `domain` - Top-level domain that all services will be generated under.
-- `nfs_hostname` - Used for all NFS mounts
+- `nfs_ip` - Used for all NFS mounts
 - `public_ingress_ip` - A static IP (or a pool) to use for the public ingress
 - `private_ingress_ip` - A static IP (or a pool) to use for the private ingress
 - `dns_server_ip` - A static IP (or a pool) to use for the DNS server

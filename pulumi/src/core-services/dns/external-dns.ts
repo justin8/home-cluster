@@ -8,6 +8,7 @@ export interface ExternalDnsArgs {
   env?: k8s.types.input.core.v1.EnvVar[];
   extraArgs?: pulumi.Input<string>[];
   registry?: string;
+  sources?: string[];
 }
 
 export class ExternalDns extends pulumi.ComponentResource {
@@ -18,6 +19,7 @@ export class ExternalDns extends pulumi.ComponentResource {
     const env = args.env || [];
     const ingressClassArgs = ingressClasses.map(cls => `--ingress-class=${cls}`);
     const registry = args.registry || "txt";
+    const sources = args.sources || ["ingress", "traefik-proxy"];
 
     new k8s.helm.v3.Release(
       name,
@@ -32,7 +34,7 @@ export class ExternalDns extends pulumi.ComponentResource {
           provider: { name: provider },
           txtOwnerId: name,
           policy: "sync",
-          sources: ["ingress", "traefik-proxy"],
+          sources,
           // logLevel: "debug",
           extraArgs: ["--traefik-disable-legacy", ...ingressClassArgs, ...(extraArgs || [])],
           registry,

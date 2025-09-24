@@ -23,7 +23,7 @@ export class VolumeManager {
     }
   >();
   private config = new pulumi.Config();
-  private nfsHostname = this.config.require("nfs_hostname");
+  private nfsIp = this.config.require("nfs_ip");
   private appName: string;
   private namespace: pulumi.Input<string>;
 
@@ -137,7 +137,7 @@ export class VolumeManager {
   }
 
   private createNFSVolume(name: string, path: string) {
-    const volumeHandle = `${this.nfsHostname}/${path}`;
+    const volumeHandle = `${this.nfsIp}/${path}`;
     const pvName = `${this.appName}-pv-${name}`.substring(0, 60);
     const pvcName = `${this.appName}-pvc-${name}`.substring(0, 60);
 
@@ -156,7 +156,7 @@ export class VolumeManager {
             driver: "nfs.csi.k8s.io",
             volumeHandle,
             volumeAttributes: {
-              server: this.nfsHostname,
+              server: this.nfsIp,
               share: path,
             },
           },
