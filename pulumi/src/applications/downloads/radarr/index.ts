@@ -79,6 +79,6 @@ export class Radarr extends TauApplication {
       { parent: this, dependsOn: [this.ns!, configSecret] }
     );
 
-    this.createHttpIngress({ appName: name, port }, { dependsOn: [this.ns!] });
+    this.createHttpIngress({ appName: name, port, labels: this.labels }, { dependsOn: [this.ns!] });
   }
 }

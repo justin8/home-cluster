@@ -77,6 +77,17 @@ export class Transmission extends TauApplication {
                   securityContext: {
                     privileged: true,
                   },
+                  lifecycle: {
+                    postStart: {
+                      exec: {
+                        command: [
+                          "sh",
+                          "-c",
+                          "sleep 30 && iptables -I OUTPUT 1 -d 10.244.0.0/16 -j ACCEPT", // Allow pods in the cluster to reach services running in the pod
+                        ],
+                      },
+                    },
+                  },
                   volumeMounts: [
                     {
                       name: "vpn-config",
