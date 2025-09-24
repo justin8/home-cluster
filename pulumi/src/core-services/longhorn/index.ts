@@ -126,11 +126,11 @@ export class Longhorn extends pulumi.ComponentResource {
             jobEnabled: false,
           },
           csi: {
-            // CSI sidecars can use a single replica to reduce resource usage
-            attacherReplicaCount: 1,
-            provisionerReplicaCount: 1,
-            resizerReplicaCount: 1,
-            snapshotterReplicaCount: 1,
+            // CSI sidecars need at least 2 replicas, otherwise it will prevent maintenance such as draining
+            attacherReplicaCount: 2,
+            provisionerReplicaCount: 2,
+            resizerReplicaCount: 2,
+            snapshotterReplicaCount: 2,
           },
           longhornUI: {
             replicas: 1, // UI can use single replica as it's non-critical

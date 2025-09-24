@@ -27,14 +27,26 @@ This automatically runs `talhelper genconfig` to regenerate all configuration fi
 ### Modifying Cluster Settings
 
 1. Edit `talconfig.yaml`
-2. Run `direnv reload` to regenerate configs
+2. Run `direnv reload` to regenerate configs (or just press enter as it should be automatic)
 3. Apply changes: `talhelper gencommand apply | bash`
 
 ### Adding New Nodes
 
 1. Add node definition to `talconfig.yaml`
-2. Run `direnv reload`
-3. Apply config to new node: `talosctl apply-config --insecure -f clusterconfig/<node-name>.yaml -n <node-ip>`
+2. Run `direnv reload` to regenerate configs (or just press enter as it should be automatic)
+3. Apply config to new node: `talosctl apply-config --insecure -f clusterconfig/home-cluster-controlplane.yaml -n <node-ip>`
+
+### Removing Nodes
+
+**WARNING:** If you are removing multiple nodes, make sure all of the Longhorn volumes are in a healthy state before each one
+
+1. Drain the node: `kubectl drain <node-name> --ignore-daemonsets --delete-emptydir-data --force`
+   - Note that Longhorn will show volumes from the node being removed as degraded; after ~30 minutes it will start to automatically re-allocate if the node doesn't come back online
+2. Remove from Kubernetes: `kubectl delete node <node-name>`
+3. Reset Talos node: `talosctl reset --nodes <node-ip> --graceful=false`
+4. Remove node definition from `talconfig.yaml`
+5. Run `direnv reload` to regenerate configs (or just press enter as it should be automatic)
+6. Apply changes: `talhelper gencommand apply | bash`
 
 ## Upgrades
 
@@ -47,7 +59,7 @@ This automatically runs `talhelper genconfig` to regenerate all configuration fi
 
 ### Talos Upgrades
 
-**⚠️ CRITICAL: Always use `--preserve` flag to avoid data loss**
+**⚠️ CRITICAL: Always use `--preserve` flag to avoid data loss such as Longhorn volume data**
 
 1. Update `talosVersion` in `talconfig.yaml`
 2. Run `direnv reload`

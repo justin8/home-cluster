@@ -81,8 +81,7 @@ patches:
   #       - https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
 nodes:
   - hostname: controlplane
-    #ipAddress: 192.168.4.120, 192.168.4.192, 192.168.4.247
-    ipAddress: 192.168.5.103
+    ipAddress: 192.168.5.170, 192.168.5.195, 192.168.5.240
     controlPlane: true
     ignoreHostname: true
     nodeLabels:

@@ -4,7 +4,6 @@
     "mkhl.direnv",
     "signageos.signageos-vscode-sops",
     "amazonwebservices.amazon-q-vscode",
-    "esbenp.prettier-vscode",
-    "charliermarsh.ruff"
+    "esbenp.prettier-vscode"
   ]
 }
