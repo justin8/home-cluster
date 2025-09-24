@@ -6,6 +6,7 @@ export { IngressControllers } from "./ingress-controllers";
 export { Longhorn } from "./longhorn";
 export { MailProxy } from "./mail-proxy";
 export { MetalLB } from "./metallb";
+export { NFD } from "./nfd";
 export { NFSCSI } from "./nfs-csi";
 export { Reloader } from "./reloader";
 export { SharedSecrets } from "./shared-secrets";

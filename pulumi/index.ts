@@ -11,6 +11,7 @@ import {
   Longhorn,
   MailProxy,
   MetalLB,
+  NFD,
   NFSCSI,
   Reloader,
   SharedSecrets,
@@ -80,7 +81,11 @@ function initializeCoreServices(): pulumi.Resource[] {
     }
   );
 
+  // Enable Reloader to auto-update deployments on secret/configmap changes
   const reloader = new Reloader("reloader");
+
+  // Enable Node Feature Discovery for hardware feature detection
+  const nfd = new NFD("nfd");
 
   // Return array of all core services
   return [
@@ -95,6 +100,7 @@ function initializeCoreServices(): pulumi.Resource[] {
     cnpgOperator,
     auth,
     reloader,
+    nfd,
   ];
 }
 
