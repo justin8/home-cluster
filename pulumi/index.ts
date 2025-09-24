@@ -8,6 +8,7 @@ import {
   CNPGOperator,
   Dns,
   IngressControllers,
+  IntelGPU,
   Longhorn,
   MailProxy,
   MetalLB,
@@ -87,6 +88,9 @@ function initializeCoreServices(): pulumi.Resource[] {
   // Enable Node Feature Discovery for hardware feature detection
   const nfd = new NFD("nfd");
 
+  // Enable Intel GPU device plugins
+  const intelGpu = new IntelGPU("intel-gpu", { dependsOn: [nfd] });
+
   // Return array of all core services
   return [
     sharedSecrets,
@@ -101,6 +105,7 @@ function initializeCoreServices(): pulumi.Resource[] {
     auth,
     reloader,
     nfd,
+    intelGpu,
   ];
 }
 

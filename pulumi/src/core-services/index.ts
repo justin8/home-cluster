@@ -3,6 +3,7 @@ export { CertManager } from "./cert-manager";
 export { CNPGOperator } from "./cnpg-operator";
 export { Dns } from "./dns";
 export { IngressControllers } from "./ingress-controllers";
+export { IntelGPU } from "./intel-gpu";
 export { Longhorn } from "./longhorn";
 export { MailProxy } from "./mail-proxy";
 export { MetalLB } from "./metallb";
