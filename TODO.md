@@ -20,7 +20,7 @@
   - [x] PocketID
 - [x] Set up email proxy (and configure it in PocketID and any others that need it)
 - [x] Move services over
-- [ ] Set up storage with a dns name and ingress
+- [x] Set up storage with a dns name and ingress
 - [ ] Enable vertical pod autoscaling
 - [ ] Add resource limits to core-services and apps
 - [ ] Kavita OAuth

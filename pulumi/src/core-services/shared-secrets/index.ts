@@ -42,7 +42,6 @@ export class SharedSecrets extends pulumi.ComponentResource {
       "cloudflare-api-token",
       {
         data: {
-          email: config.require("cloudflare_email"),
           "api-token": config.requireSecret("cloudflare_api_token"),
         },
         allowedNamespaces: [

@@ -187,7 +187,6 @@ function ClusterIssuer(
               },
               dns01: {
                 cloudflare: {
-                  email: cloudflareSecret.data.email,
                   apiTokenSecretRef: {
                     name: cloudflareSecret.name,
                     key: "api-token",
