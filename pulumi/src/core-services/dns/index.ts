@@ -132,11 +132,14 @@ export class Dns extends pulumi.ComponentResource {
     );
 
     // Create custom DNS record for storage.dray.id.au
-    const nfsIP = config.require("nfs_ip");
     this.createCustomDnsRecord("storage-nfs", {
       hostname: "storage.dray.id.au",
-      ip: nfsIP,
-      namespace: this.namespace,
+      ip: config.require("nfs_ip"),
+    });
+
+    this.createCustomDnsRecord("home-cluster", {
+      hostname: "home-cluster.dray.id.au",
+      ip: config.require("cluster_ip"),
     });
   }
 
