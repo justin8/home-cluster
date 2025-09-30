@@ -52,7 +52,7 @@ export class Radarr extends TauApplication {
               containers: [
                 {
                   name: name,
-                  image: "lscr.io/linuxserver/radarr:5.26.2",
+                  image: "lscr.io/linuxserver/radarr:5.27.5",
                   ports: [
                     {
                       containerPort: port,
