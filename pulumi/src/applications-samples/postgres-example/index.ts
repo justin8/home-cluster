@@ -28,7 +28,7 @@ export class PostgresExample extends TauApplication {
               containers: [
                 {
                   name: "app",
-                  image: "postgres:15-alpine", // Simple psql client for testing
+                  image: "postgres:18-alpine", // Simple psql client for testing
                   command: [
                     "sh",
                     "-c",
