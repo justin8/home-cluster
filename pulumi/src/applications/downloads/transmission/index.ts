@@ -97,7 +97,7 @@ export class Transmission extends TauApplication {
                 },
                 {
                   name: name,
-                  image: "lscr.io/linuxserver/transmission:4.0.6",
+                  image: "lscr.io/linuxserver/transmission:2021.11.18",
                   ports: [
                     {
                       containerPort: port,
