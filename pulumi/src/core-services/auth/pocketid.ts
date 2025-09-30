@@ -74,7 +74,7 @@ export class PocketId extends TauApplication {
               containers: [
                 {
                   name: "pocketid",
-                  image: "ghcr.io/pocket-id/pocket-id:v1.7.0",
+                  image: "ghcr.io/pocket-id/pocket-id:v1.11.2",
                   ports: [{ containerPort: port }],
                   volumeMounts: [dataMount],
                   envFrom: [{ secretRef: { name: configuration.metadata.name } }],
