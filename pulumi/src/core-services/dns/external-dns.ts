@@ -36,7 +36,7 @@ export class ExternalDns extends pulumi.ComponentResource {
           policy: "sync",
           sources,
           // logLevel: "debug",
-          extraArgs: ["--traefik-disable-legacy", ...ingressClassArgs, ...(extraArgs || [])],
+          extraArgs: [...ingressClassArgs, ...(extraArgs || [])],
           registry,
           env,
         },
