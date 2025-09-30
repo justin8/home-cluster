@@ -20,14 +20,13 @@ export class Plex extends TauApplication {
       opts
     );
 
-    const moviesMount = this.volumeManager.addNFSMount("/mnt/pool/media/movies", "/media/movies");
-    const tvMount = this.volumeManager.addNFSMount("/mnt/pool/media/tv", "/media/tv");
+    const mediaMount = this.volumeManager.addNFSMount("/mnt/pool/media");
     const configMount = this.volumeManager.addLonghornVolume("/config", {
       size: "20Gi",
       backupEnabled: true,
     });
 
-    const volumeMounts = [configMount, moviesMount, tvMount];
+    const volumeMounts = [configMount, mediaMount];
 
     const deployment = new k8s.apps.v1.Deployment(
       name,

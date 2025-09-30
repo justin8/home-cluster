@@ -12,15 +12,12 @@ export class Kavita extends TauApplication {
 
     super(name, { ...args, namespace: name }, opts);
 
-    const booksMount = this.volumeManager.addNFSMount("/mnt/pool/media/books", "/media/books");
-    const mangaMount = this.volumeManager.addNFSMount("/mnt/pool/media/manga", "/media/manga");
-    const hMangaMount = this.volumeManager.addNFSMount("/mnt/pool/media/h-manga", "/media/h-manga");
-    const comicsMount = this.volumeManager.addNFSMount("/mnt/pool/media/comics", "/media/comics");
+    const mediasMount = this.volumeManager.addNFSMount("/mnt/pool/media");
     const configMount = this.volumeManager.addLonghornVolume("/config", {
       backupEnabled: true,
       size: "6Gi",
     });
-    const volumeMounts = [booksMount, mangaMount, hMangaMount, comicsMount, configMount];
+    const volumeMounts = [mediasMount, configMount];
 
     const configSecret = new TauSecret(
       `${name}-config`,

@@ -12,13 +12,12 @@ export class Radarr extends TauApplication {
 
     super(name, args, opts);
 
-    const moviesMount = this.volumeManager.addNFSMount("/mnt/pool/media/movies", "/media/movies");
-    const downloadsMount = this.volumeManager.addNFSMount("/mnt/pool/downloads", "/downloads");
+    const mediaMount = this.volumeManager.addNFSMount("/mnt/pool/media");
     const configMount = this.volumeManager.addLonghornVolume("/config", {
       backupEnabled: true,
       size: "2Gi",
     });
-    const volumeMounts = [moviesMount, downloadsMount, configMount];
+    const volumeMounts = [mediaMount, configMount];
 
     const configSecret = new TauSecret(
       `${name}-config`,
