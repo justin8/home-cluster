@@ -25,6 +25,8 @@ export class TinyAuth extends TauApplication {
       GENERIC_SCOPES: "openid email profile groups",
       GENERIC_NAME: "Pocket ID",
       OAUTH_AUTO_REDIRECT: "generic",
+      DISABLE_CONTINUE: "true",
+      COOKIE_SECURE: "true",
     };
 
     const oauth_config = new k8s.core.v1.Secret(
