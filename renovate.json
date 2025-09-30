@@ -1,8 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:recommended"
-  ],
+  "extends": ["config:recommended"],
   "dependencyDashboard": true,
   "dependencyDashboardTitle": "Dependency Dashboard",
   "dependencyDashboardHeader": "This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.",
@@ -11,13 +9,12 @@
     {
       "customType": "regex",
       "description": "Helm charts in Pulumi TypeScript files",
-      "managerFilePatterns": [
-        "/pulumi/.*\\.ts$/"
-      ],
+      "managerFilePatterns": ["/pulumi/.*\\.ts$/"],
       "matchStrings": [
         "new k8s\\.helm\\.v3\\.Release\\([^,]+,\\s*{[^}]*chart:\\s*[\"'](?<depName>[^\"']+)[\"'][^}]*version:\\s*[\"'](?<currentValue>[^\"']+)[\"'][^}]*repositoryOpts:\\s*{[^}]*repo:\\s*[\"'](?<registryUrl>[^\"']+)[\"']"
       ],
       "datasourceTemplate": "helm"
     }
-  ]
+  ],
+  "enabledManagers": ["npm", "custom.regex"]
 }
