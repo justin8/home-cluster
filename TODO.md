@@ -24,9 +24,10 @@
 - [ ] Enable vertical pod autoscaling
 - [ ] Add resource limits to core-services and apps
 - [ ] Kavita OAuth
-- [ ] Renovate bot to auto-update containers (this is mostly working; I have it for helm charts, but not container images yet)
+- [x] Renovate bot to auto-update containers (this is mostly working; I have it for helm charts, but not container images yet)
 - [ ] Docker registry caching/mirroring
 - [ ] Get access by user groups working - coming in tinyauth v4 maybe; alternatively, try out oauth2proxy
 - [ ] Network isolation and VLANs
+- [ ] Set up metrics/alerting for cluster services (including longhorn)
 - [ ] Multiple Tinyauth/PocketID instances
 - [ ] Deploy from git using pulumi
