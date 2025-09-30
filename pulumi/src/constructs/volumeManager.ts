@@ -247,7 +247,7 @@ export function createLonghornVolumeResource(args: LonghornResourceArgs) {
     ReadOnlyMany: "rox",
   };
   const longhornAccessMode = accessModeMap[accessMode];
-  const numberOfReplicas = args.numberOfReplicas || 1;
+  const numberOfReplicas = args.numberOfReplicas || 2;
 
   return new k8s.apiextensions.CustomResource(
     lhvName,
