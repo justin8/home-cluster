@@ -12,7 +12,7 @@ config:
   home-cluster:private_ingress_ip: 192.168.5.3
   home-cluster:dns_server_ip: 192.168.5.53
   home-cluster:longhorn_nfs_backup_path:
-    secure: v1:d5pcJ4pIEyJlnapg:PnqSOSYjX+lCRX+z0bN6EVFXeZTAVdYlxuGfd9yfpnRk5Tevl/VwNzY=
+    secure: v1:LThdPjkZ85Hhjw7b:BI+/TzZo27yeWZss0uHFtVBxcPnmf97s3AEvshAebbDHO+xqiy5qj8JX
   home-cluster:real_external_ip:
     secure: v1:7SKd/QW9aaZ8jPSZ:GCmQj/FBnOarYgOYJp2Mv2qnvAGANdFgiAV4iu8=
   home-cluster:tinyauth_oauth_client_id: c995ee68-e855-4b0f-8733-a933c3a18704
