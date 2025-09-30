@@ -45,7 +45,7 @@ export class Immich extends TauApplication {
         },
         database: {
           name: "immich-database",
-          storageSize: "5Gi",
+          storageSize: "10Gi",
           image: databaseImage,
           namespace: name,
           specOverride: databaseSpecOverride,

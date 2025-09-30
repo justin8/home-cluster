@@ -27,7 +27,7 @@ export class Syncthing extends TauApplication {
 
     const dataMount = this.volumeManager.addNFSMount("/mnt/pool/apps/syncthing", "/data");
     const configMount = this.volumeManager.addLonghornVolume("/config", {
-      size: "100Mi",
+      size: "500Mi",
       backupEnabled: true,
     });
 

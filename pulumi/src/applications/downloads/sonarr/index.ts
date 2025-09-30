@@ -15,7 +15,7 @@ export class Sonarr extends TauApplication {
     const mediaMount = this.volumeManager.addNFSMount("/mnt/pool/media");
     const configMount = this.volumeManager.addLonghornVolume("/config", {
       backupEnabled: true,
-      size: "2Gi",
+      size: "5Gi",
     });
     const volumeMounts = [mediaMount, configMount];
 

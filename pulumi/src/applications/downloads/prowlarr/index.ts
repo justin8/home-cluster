@@ -14,7 +14,7 @@ export class Prowlarr extends TauApplication {
 
     const configMount = this.volumeManager.addLonghornVolume("/config", {
       backupEnabled: true,
-      size: "500Mi",
+      size: "1Gi",
     });
     const volumeMounts = [configMount];
 

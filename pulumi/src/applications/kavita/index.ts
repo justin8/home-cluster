@@ -15,7 +15,7 @@ export class Kavita extends TauApplication {
     const mediasMount = this.volumeManager.addNFSMount("/mnt/pool/media");
     const configMount = this.volumeManager.addLonghornVolume("/config", {
       backupEnabled: true,
-      size: "6Gi",
+      size: "10Gi",
     });
     const volumeMounts = [mediasMount, configMount];
 

@@ -15,7 +15,7 @@ export class Sabnzbd extends TauApplication {
     const downloadsMount = this.volumeManager.addNFSMount("/mnt/pool/media/downloads");
     const configMount = this.volumeManager.addLonghornVolume("/config", {
       backupEnabled: true,
-      size: "100Mi",
+      size: "1Gi",
     });
     const volumeMounts = [downloadsMount, configMount];
 

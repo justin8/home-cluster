@@ -15,7 +15,7 @@ export class Transmission extends TauApplication {
     const downloadsMount = this.volumeManager.addNFSMount("/mnt/pool/media/downloads");
     const configMount = this.volumeManager.addLonghornVolume("/config", {
       backupEnabled: true,
-      size: "500Mi",
+      size: "1Gi",
     });
     const volumeMounts = [downloadsMount, configMount];
 
