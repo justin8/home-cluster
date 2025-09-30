@@ -25,7 +25,7 @@ export class ExternalDns extends pulumi.ComponentResource {
       name,
       {
         chart: "external-dns",
-        version: "1.18.0",
+        version: "1.19.0",
         repositoryOpts: {
           repo: "https://kubernetes-sigs.github.io/external-dns/",
         },
