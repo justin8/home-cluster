@@ -8,8 +8,6 @@ export class MailProxy extends TauApplication {
   constructor(name: string, args = {}, opts?: pulumi.ComponentResourceOptions) {
     super(name, { ...args, namespace: "mail-proxy" }, opts);
 
-    const image = "boky/postfix:v4.4.0";
-
     const spoolMount = this.volumeManager.addLonghornVolume("/var/spool/postfix", {
       backupEnabled: false,
       size: "100Mi",
@@ -57,7 +55,7 @@ export class MailProxy extends TauApplication {
               containers: [
                 {
                   name: "mail",
-                  image: image,
+                  image: "boky/postfix:v4.4.0",
                   ports: [{ name: "smtp", containerPort: 587, protocol: "TCP" }],
                   readinessProbe: {
                     exec: { command: ["sh", "-c", "/scripts/healthcheck.sh"] },
