@@ -6,6 +6,7 @@ import { Radarr } from "./radarr";
 import { Sabnzbd } from "./sabnzbd";
 import { Sonarr } from "./sonarr";
 import { Transmission } from "./transmission";
+import { JellySeerr } from "./jellyseerr";
 
 export class Downloads extends pulumi.ComponentResource {
   constructor(name: string, opts?: pulumi.ComponentResourceOptions) {
@@ -42,6 +43,11 @@ export class Downloads extends pulumi.ComponentResource {
     );
     new Transmission(
       "transmission",
+      { namespace, createNamespace: false },
+      { parent: this, dependsOn: [ns] }
+    );
+    new JellySeerr(
+      "jellyseerr",
       { namespace, createNamespace: false },
       { parent: this, dependsOn: [ns] }
     );
