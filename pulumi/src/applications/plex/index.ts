@@ -77,7 +77,7 @@ export class Plex extends TauApplication {
         appName: name,
         port: webPort,
         auth: false,
-        public: false,
+        public: true,
       },
       { dependsOn: [this.ns!] }
     );
