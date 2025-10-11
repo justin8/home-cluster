@@ -2,6 +2,7 @@ import * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
 import { MAIL_PROXY_ENDPOINT, MAIL_PROXY_PORT } from "../../constants";
 import { TauApplication, TauApplicationArgs } from "../../constructs";
+import { createVPA } from "../../utils";
 
 const config = new pulumi.Config();
 
@@ -104,5 +105,7 @@ export class PocketId extends TauApplication {
       { appName: name, port, labels: this.labels, public: true, auth: false },
       { parent: this, dependsOn: [statefulSet] }
     );
+
+    createVPA({ workload: statefulSet }, { parent: this });
   }
 }

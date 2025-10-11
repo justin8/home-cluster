@@ -1,6 +1,7 @@
 import * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
 import { TauApplication, TauApplicationArgs, VolumeManager } from "../../constructs";
+import { createVPA } from "../../utils";
 
 const config = new pulumi.Config();
 
@@ -41,7 +42,7 @@ export class PiHole extends TauApplication {
       volumeMounts.forEach(x => (x.readOnly = true));
     }
 
-    new k8s.apps.v1.Deployment(
+    const deployment = new k8s.apps.v1.Deployment(
       name,
       {
         metadata: { namespace, labels: { ...labels } },
@@ -81,6 +82,8 @@ export class PiHole extends TauApplication {
       },
       { parent: this }
     );
+
+    createVPA({ workload: deployment }, { parent: this });
 
     if (type === "primary") {
       this.createHttpIngress(

@@ -4,7 +4,7 @@ import * as random from "@pulumi/random";
 
 import { PRIVATE_INGRESS_CLASS, PUBLIC_INGRESS_CLASS } from "../../constants";
 import { TauApplication, TauApplicationArgs } from "../../constructs";
-import { getServiceURL } from "../../utils";
+import { getServiceURL, createVPA } from "../../utils";
 
 const config = new pulumi.Config();
 
@@ -135,6 +135,8 @@ export class TinyAuth extends TauApplication {
       { appName: name, port: 3000, labels: this.labels, public: true, auth: false },
       { parent: this, dependsOn: [deployment] }
     );
+
+    createVPA({ workload: deployment }, { parent: this });
 
     // Create Traefik middleware for forward auth in both ingress controller namespaces
     [PUBLIC_INGRESS_CLASS, PRIVATE_INGRESS_CLASS].forEach(ingressClass => {
