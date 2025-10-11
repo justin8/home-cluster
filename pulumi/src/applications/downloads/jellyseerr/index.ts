@@ -79,5 +79,6 @@ export class JellySeerr extends TauApplication {
       { appName: name, port, labels: this.labels, public: true, auth: false },
       { dependsOn: [this.ns!] }
     );
+    this.createVPA({ workload: deployment });
   }
 }

@@ -11,3 +11,4 @@ export { NFD } from "./nfd";
 export { NFSCSI } from "./nfs-csi";
 export { Reloader } from "./reloader";
 export { SharedSecrets } from "./shared-secrets";
+export { VerticalPodAutoscaler } from "./vpa";

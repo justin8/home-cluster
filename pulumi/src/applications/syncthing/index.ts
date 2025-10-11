@@ -89,5 +89,7 @@ export class Syncthing extends TauApplication {
       },
       { dependsOn: [this.ns!] }
     );
+
+    this.createVPA({ workload: deployment });
   }
 }

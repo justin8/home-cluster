@@ -79,5 +79,6 @@ export class Radarr extends TauApplication {
     );
 
     this.createHttpIngress({ appName: name, port, labels: this.labels }, { dependsOn: [this.ns!] });
+    this.createVPA({ workload: deployment });
   }
 }

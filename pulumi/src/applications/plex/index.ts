@@ -81,5 +81,7 @@ export class Plex extends TauApplication {
       },
       { dependsOn: [this.ns!] }
     );
+
+    this.createVPA({ workload: deployment });
   }
 }

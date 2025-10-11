@@ -290,5 +290,9 @@ export class Immich extends TauApplication {
       },
       { dependsOn: [this.ns!] }
     );
+
+    this.createVPA({ workload: redisDeployment });
+    this.createVPA({ workload: mlDeployment });
+    this.createVPA({ workload: serverDeployment });
   }
 }

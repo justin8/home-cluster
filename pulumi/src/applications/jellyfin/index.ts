@@ -81,5 +81,7 @@ export class Jellyfin extends TauApplication {
       },
       { dependsOn: [this.ns!] }
     );
+
+    this.createVPA({ workload: deployment });
   }
 }

@@ -1,7 +1,13 @@
 import * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
 
-import { createHttpIngress, CreateHttpIngressArgs, CreateHttpIngressResult } from "../utils";
+import {
+  createHttpIngress,
+  CreateHttpIngressArgs,
+  CreateHttpIngressResult,
+  createVPA,
+  CreateVPAArgs,
+} from "../utils";
 import { DatabaseArgs, getEnvironmentVariablesForDB } from "../utils/database";
 import { PostgresInstance } from "./postgresInstance";
 import { VolumeManager } from "./volumeManager";
@@ -107,6 +113,13 @@ export abstract class TauApplication extends pulumi.ComponentResource {
       { namespace: this.namespace, subdomain: this.subdomain, labels: this.labels, ...args },
       { ...opts, parent: this }
     );
+  }
+
+  protected createVPA(
+    args: CreateVPAArgs,
+    opts?: pulumi.ComponentResourceOptions
+  ): pulumi.Output<k8s.apiextensions.CustomResource> {
+    return createVPA(args, { ...opts, parent: this });
   }
 
   /**

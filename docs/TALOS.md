@@ -34,22 +34,6 @@ All tools are automatically installed via direnv and nix when entering the proje
    talhelper gencommand bootstrap | bash
    ```
 
-### Post-Cluster Setup
-
-After the cluster is running, install additional components:
-
-#### Vertical Pod Autoscaler (VPA)
-
-Install VPA using the official installation script:
-
-```bash
-git clone https://github.com/kubernetes/autoscaler.git
-cd autoscaler/vertical-pod-autoscaler/
-./hack/vpa-up.sh
-```
-
-This installs the VPA components (recommender, updater, admission controller) which enable automatic resource recommendation and scaling for pods.
-
 ## Regenerating Configuration
 
 After making changes to `talconfig.yaml`:

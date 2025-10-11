@@ -10,6 +10,7 @@ import {
 
 export { DatabaseArgs as DatabaseOptions } from "./database";
 export { createIpAddressPool } from "./networking";
+export { createVPA, CreateVPAArgs, VPAContainerPolicy } from "./vpa";
 
 export type KubernetesSecretData = { [key: string]: string };
 
