@@ -134,6 +134,10 @@ Tinyauth is used as an auth proxy in front of most services that don't support n
 - `pulumi config set --path tinyauth_oauth_client_id $client_id`
 - `pulumi config set --secret --path tinyauth_oauth_client_secret $client_secret`
 
+## Cluster Deployment
+
+For cluster creation, initialization, and post-deployment setup instructions, see [docs/TALOS.md](docs/TALOS.md).
+
 ## Project Layout
 
 ```

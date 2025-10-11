@@ -12,6 +12,44 @@ All tools are automatically installed via direnv and nix when entering the proje
 - `talsecret.sops.yaml` - Encrypted secrets (machine tokens, certificates)
 - `clusterconfig/` - Generated Talos configuration files
 
+## Cluster Creation and Initialization
+
+### Initial Cluster Setup
+
+1. **Generate initial configuration**:
+
+   ```bash
+   direnv reload
+   ```
+
+2. **Apply configuration to new nodes** (use `--insecure` for first-time setup):
+
+   ```bash
+   talhelper gencommand apply --extra-flags="--insecure" | bash
+   ```
+
+3. **Bootstrap the cluster** (run only once on the first control plane node):
+
+   ```bash
+   talhelper gencommand bootstrap | bash
+   ```
+
+### Post-Cluster Setup
+
+After the cluster is running, install additional components:
+
+#### Vertical Pod Autoscaler (VPA)
+
+Install VPA using the official installation script:
+
+```bash
+git clone https://github.com/kubernetes/autoscaler.git
+cd autoscaler/vertical-pod-autoscaler/
+./hack/vpa-up.sh
+```
+
+This installs the VPA components (recommender, updater, admission controller) which enable automatic resource recommendation and scaling for pods.
+
 ## Regenerating Configuration
 
 After making changes to `talconfig.yaml`:
@@ -65,6 +103,7 @@ This automatically runs `talhelper genconfig` to regenerate all configuration fi
 1. Update `talosVersion` in `talconfig.yaml`
 2. Run `direnv reload`
 3. Upgrade nodes with preservation:
+
    ```bash
    talhelper gencommand upgrade --extra-flags "--preserve" | bash
    ```
