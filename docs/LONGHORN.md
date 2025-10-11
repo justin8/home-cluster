@@ -127,9 +127,15 @@ The Longhorn UI is available at `https://longhorn.<domain>` once deployed.
 
 Use the Longhorn UI to monitor volume health, replica status, and backup status.
 
-### Manual Backups
+### Resizing Volumes
 
-In addition to scheduled backups, you can create manual backups through the Longhorn UI.
+Only increasing volume sizes is supported.
+
+When increasing the size of a longhorn volume in Pulumi, it will currently have an error due to the deployment order enforced by pulumi in combination with the longhorn volumes. It will return an error like `admission webhook "validator.longhorn.io" denied the request: PVC jellyfin-pvc-lh-config size should be expanded from 21474836480 to 53687091200 first` instead. It can be resolved manually for now by doing the below steps:
+
+1. Update the volume size in the Pulumi config
+2. Run `kubectl edit persistentvolumeclaims -n <namespace> <pvc-name>` and update the two size fields before saving and exiting
+3. Run `pulumi up` - to retag the resources as managed by Pulumi and other metadata
 
 ## Backup and Restore
 
@@ -140,6 +146,8 @@ When `backupEnabled` is set to `true` for a volume, a recurring backup job is cr
 - Schedule: Daily at 3am (cron: `0 3 * * *`)
 - Retention: 7 days of backups
 - Backup target: Configured in the Longhorn settings (NFS)
+
+In addition to scheduled backups, you can create manual backups through the Longhorn UI.
 
 ### Restoring From Backups
 

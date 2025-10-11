@@ -22,7 +22,7 @@ export class Plex extends TauApplication {
 
     const mediaMount = this.volumeManager.addNFSMount("/mnt/pool/media");
     const configMount = this.volumeManager.addLonghornVolume("/config", {
-      size: "25Gi",
+      size: "50Gi",
       backupEnabled: true,
     });
 
