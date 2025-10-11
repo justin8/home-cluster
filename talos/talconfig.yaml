@@ -45,6 +45,7 @@ patches:
       path: /machine/kubelet/extraArgs
       value:
         allowed-unsafe-sysctls: "net.ipv4.conf.all.src_valid_mark"
+        rotate-server-certificates: true
   - |-
     - op: add
       path: /machine/sysctls
@@ -68,17 +69,12 @@ patches:
       value:
         heartbeat-interval: "300"
         election-timeout: "1500"
-  # - |-
-  #   - op: add
-  #     path: /machine/kubelet/extraArgs
-  #     value:
-  #       rotate-server-certificates: "true"
-  # - |-
-  #   - op: add
-  #     path: /cluster/extraManifests
-  #     value:
-  #       - https://raw.githubusercontent.com/alex1989hu/kubelet-serving-cert-approver/main/deploy/standalone-install.yaml
-  #       - https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+  - |-
+    - op: add
+      path: /cluster/extraManifests
+      value:
+        - https://raw.githubusercontent.com/alex1989hu/kubelet-serving-cert-approver/main/deploy/standalone-install.yaml
+        - https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
 nodes:
   - hostname: controlplane
     ipAddress: 192.168.5.170, 192.168.5.195, 192.168.5.240
