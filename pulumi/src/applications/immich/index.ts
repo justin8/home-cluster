@@ -272,7 +272,7 @@ export class Immich extends TauApplication {
                 },
               ],
 
-              volumes: this.volumeManager.getVolumes(),
+              volumes: this.volumeManager.getVolumes([dataMount]),
             },
           },
         },
