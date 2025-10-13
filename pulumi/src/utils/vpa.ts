@@ -21,7 +21,7 @@ export interface CreateVPAArgs {
     | k8s.apps.v1.StatefulSet
     | k8s.batch.v1.Job
     | k8s.batch.v1.CronJob;
-  updateMode?: "Off" | "Initial" | "Recreate" | "Auto";
+  updateMode?: "Off" | "Initial" | "Recreate" | "InPlaceOrRecreate" | "Auto";
   containerPolicies?: VPAContainerPolicy[];
 }
 
@@ -31,7 +31,7 @@ export function createVPA(
 ): pulumi.Output<k8s.apiextensions.CustomResource> {
   const {
     workload,
-    updateMode = "Auto",
+    updateMode = "InPlaceOrRecreate",
     containerPolicies = [
       {
         containerName: "*",

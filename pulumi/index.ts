@@ -16,7 +16,6 @@ import {
   NFSCSI,
   Reloader,
   SharedSecrets,
-  VerticalPodAutoscaler,
 } from "./src/core-services";
 
 /**
@@ -92,9 +91,6 @@ function initializeCoreServices(): pulumi.Resource[] {
   // Enable Intel GPU device plugins
   const intelGpu = new IntelGPU("intel-gpu", { dependsOn: [nfd] });
 
-  // Enable VPA for automatic resource management
-  const vpa = new VerticalPodAutoscaler("vpa", {}, {});
-
   // Return array of all core services
   return [
     sharedSecrets,
@@ -110,7 +106,6 @@ function initializeCoreServices(): pulumi.Resource[] {
     reloader,
     nfd,
     intelGpu,
-    vpa,
   ];
 }
 

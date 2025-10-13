@@ -46,6 +46,7 @@ patches:
       value:
         allowed-unsafe-sysctls: "net.ipv4.conf.all.src_valid_mark"
         rotate-server-certificates: true
+        feature-gates: InPlacePodVerticalScaling=true
   - |-
     - op: add
       path: /machine/sysctls
@@ -69,6 +70,21 @@ patches:
       value:
         heartbeat-interval: "300"
         election-timeout: "1500"
+  - |-
+    - op: add
+      path: /cluster/apiServer/extraArgs
+      value:
+        feature-gates: InPlacePodVerticalScaling=true
+  - |-
+    - op: add
+      path: /cluster/controllerManager/extraArgs
+      value:
+        feature-gates: InPlacePodVerticalScaling=true
+  - |-
+    - op: add
+      path: /cluster/scheduler/extraArgs
+      value:
+        feature-gates: InPlacePodVerticalScaling=true
   - |-
     - op: add
       path: /cluster/extraManifests
