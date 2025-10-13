@@ -9,6 +9,7 @@ import {
   Dns,
   IngressControllers,
   IntelGPU,
+  KubeImageKeeper,
   Longhorn,
   MailProxy,
   MetalLB,
@@ -43,6 +44,10 @@ function initializeCoreServices(): pulumi.Resource[] {
       dependsOn: [sharedSecrets],
     }
   );
+
+  const kubeImageKeeper = new KubeImageKeeper("kube-image-keeper", {
+    dependsOn: [certManager],
+  });
 
   const nfsCsi = new NFSCSI("nfs-csi");
 
@@ -97,6 +102,7 @@ function initializeCoreServices(): pulumi.Resource[] {
     mailProxy,
     metallb,
     certManager,
+    kubeImageKeeper,
     nfsCsi,
     ingressControllers,
     longhorn,

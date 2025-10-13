@@ -1,6 +1,7 @@
 export { Auth } from "./auth";
 export { CertManager } from "./cert-manager";
 export { CNPGOperator } from "./cnpg-operator";
+export { KubeImageKeeper } from "./kube-image-keeper";
 export { Dns } from "./dns";
 export { IngressControllers } from "./ingress-controllers";
 export { IntelGPU } from "./intel-gpu";
