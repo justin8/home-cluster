@@ -33,6 +33,7 @@ export class CNPGOperator extends pulumi.ComponentResource {
             requests: { cpu: "200m", memory: "256Mi" },
           },
           config: {
+            INHERITED_LABELS: ["app", "kube-image-keeper.enix.io/image-caching-policy"],
             monitoring: {
               enabled: false,
             },

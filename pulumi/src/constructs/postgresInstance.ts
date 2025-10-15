@@ -169,6 +169,9 @@ export class PostgresInstance extends pulumi.ComponentResource {
         metadata: {
           name: name,
           namespace: namespace,
+          labels: {
+            "kube-image-keeper.enix.io/image-caching-policy": "ignore",
+          },
         },
         spec: finalSpec,
       },
