@@ -14,7 +14,7 @@ config:
   home-cluster:longhorn_nfs_backup_path:
     secure: v1:LThdPjkZ85Hhjw7b:BI+/TzZo27yeWZss0uHFtVBxcPnmf97s3AEvshAebbDHO+xqiy5qj8JX
   home-cluster:real_external_ip:
-    secure: v1:7SKd/QW9aaZ8jPSZ:GCmQj/FBnOarYgOYJp2Mv2qnvAGANdFgiAV4iu8=
+    secure: v1:9nrNLqCWkO/oYfGK:MQ622sP9HVV7au5mPMHV//G2y+T8bGRUZmpEf1M=
   home-cluster:tinyauth_oauth_client_id: c995ee68-e855-4b0f-8733-a933c3a18704
   home-cluster:tinyauth_oauth_client_secret:
     secure: v1:UZ1cEAY9rMRRvjTu:GYqWzGDn4K3/x9TLLYzZrikl7QVADq4w8hcP3KAMn00g43LUzD7UhEubiGZuuG8z

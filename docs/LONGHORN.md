@@ -160,6 +160,8 @@ Step by step instructions:
 3. Once the volume has restored, set the data locality to `best-effort`, otherwise you will get a 'Server-Side Apply field conflict detected' error
 4. Run `pulumi up --refresh` to recreate the PV, PVC and scale the deployment back again
 
+**NOTE:** Pulumi will see Longhorn volumes with the same name as the correct resource; so you can also delete the deployments or set up the volumes before creating resources via Pulumi.
+
 ## Cluster Recovery
 
 When rebuilding a cluster, follow these steps:

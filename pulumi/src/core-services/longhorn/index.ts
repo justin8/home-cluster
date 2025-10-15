@@ -12,7 +12,7 @@ export interface LonghornArgs {
   /** @default "/var/lib/longhorn" */
   dataPath?: pulumi.Input<string>;
   /** @default 2 */
-  defaultReplicaCount?: pulumi.Input<number>;
+  defaultReplicaCount?: pulumi.Input<string>;
   backupTarget?: pulumi.Input<string>;
   backupTargetCredentialSecret?: pulumi.Input<string>;
 }
@@ -24,10 +24,10 @@ export class Longhorn extends pulumi.ComponentResource {
     super("tau:core-services:longhorn", name, {}, opts);
 
     // Set up defaults
-    const version: pulumi.Input<string> = args.version || "1.9.1";
+    const version: pulumi.Input<string> = args.version || "1.10.0";
     const namespace: pulumi.Input<string> = args.namespace || "longhorn-system";
     const dataPath: pulumi.Input<string> = args.dataPath || "/var/lib/longhorn";
-    const defaultReplicaCount: pulumi.Input<number> = args.defaultReplicaCount || 2;
+    const defaultReplicaCount: pulumi.Input<string> = args.defaultReplicaCount || "2";
     const dataLocality: string = "best-effort";
 
     const config = new pulumi.Config();
@@ -85,15 +85,18 @@ export class Longhorn extends pulumi.ComponentResource {
         },
         namespace: namespace,
         values: {
+          commonLabels: {
+            "kube-image-keeper.enix.io/image-caching-policy": "ignore",
+          },
           defaultSettings: {
             defaultReplicaCount: defaultReplicaCount,
-            storageMinimalAvailablePercentage: 10,
-            createDefaultDiskLabeledNodes: true,
+            storageMinimalAvailablePercentage: "10",
+            createDefaultDiskLabeledNodes: false,
             defaultDataPath: dataPath,
             defaultDataLocality: dataLocality,
             guaranteedEngineManagerCPU: 0.15,
             guaranteedReplicaManagerCPU: 0.15,
-            concurrentReplicaRebuildPerNodeLimit: 1,
+            concurrentReplicaRebuildPerNodeLimit: "1",
             replicaSoftAntiAffinity: "false", // REQUIRE different nodes for replicas
             replicaZoneSoftAntiAffinity: "true", // Prefer different zones if available
             replicaDiskSoftAntiAffinity: "false", // REQUIRE different disks for replicas
@@ -102,7 +105,7 @@ export class Longhorn extends pulumi.ComponentResource {
             autoSalvage: "true", // Enable auto salvage to recover from unexpected failures
 
             // Settings for Talos Linux control plane nodes
-            systemManagedComponentsNodeSelector: "false",
+            systemManagedComponentsNodeSelector: "",
             taintToleration:
               "node-role.kubernetes.io/control-plane:NoSchedule;node-role.kubernetes.io/master:NoSchedule",
             disableSchedulingOnCordonedNode: "true", // Prevent scheduling on cordoned nodes

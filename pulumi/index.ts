@@ -9,7 +9,6 @@ import {
   Dns,
   IngressControllers,
   IntelGPU,
-  KubeImageKeeper,
   Longhorn,
   MailProxy,
   MetalLB,
@@ -27,8 +26,6 @@ import {
 function initializeCoreServices(): pulumi.Resource[] {
   const sharedSecrets = new SharedSecrets("secrets");
 
-  const mailProxy = new MailProxy("mail-proxy");
-
   const metallb = new MetalLB("metallb", {
     addresses: [config.require("ip_address_pool")],
   });
@@ -44,10 +41,6 @@ function initializeCoreServices(): pulumi.Resource[] {
       dependsOn: [sharedSecrets],
     }
   );
-
-  const kubeImageKeeper = new KubeImageKeeper("kube-image-keeper", {
-    dependsOn: [certManager],
-  });
 
   const nfsCsi = new NFSCSI("nfs-csi");
 
@@ -67,6 +60,8 @@ function initializeCoreServices(): pulumi.Resource[] {
     }
   );
 
+  const mailProxy = new MailProxy("mail-proxy", {}, { dependsOn: [longhorn] });
+
   const dns = new Dns(
     "dns",
     {
@@ -83,7 +78,7 @@ function initializeCoreServices(): pulumi.Resource[] {
     "auth",
     {},
     {
-      dependsOn: [sharedSecrets, ingressControllers],
+      dependsOn: [sharedSecrets, ingressControllers, longhorn],
     }
   );
 
@@ -94,7 +89,7 @@ function initializeCoreServices(): pulumi.Resource[] {
   const nfd = new NFD("nfd");
 
   // Enable Intel GPU device plugins
-  const intelGpu = new IntelGPU("intel-gpu", { dependsOn: [nfd] });
+  const intelGpu = new IntelGPU("intel-gpu", { dependsOn: [certManager, nfd] });
 
   // Return array of all core services
   return [
@@ -102,7 +97,6 @@ function initializeCoreServices(): pulumi.Resource[] {
     mailProxy,
     metallb,
     certManager,
-    kubeImageKeeper,
     nfsCsi,
     ingressControllers,
     longhorn,

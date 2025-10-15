@@ -29,6 +29,7 @@ patches:
             auth:
               username: ${dockerhub_username}
               password: ${dockerhub_password}
+
   - |-
     - op: add
       path: /machine/kubelet/extraMounts
@@ -93,7 +94,7 @@ patches:
         - https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
 nodes:
   - hostname: controlplane
-    ipAddress: 192.168.5.170, 192.168.5.195, 192.168.5.240
+    ipAddress: 192.168.5.11, 192.168.5.12, 192.168.5.13
     controlPlane: true
     ignoreHostname: true
     nodeLabels:

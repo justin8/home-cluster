@@ -62,8 +62,11 @@ export class Immich extends TauApplication {
       size: "10Gi",
     });
 
-    const redisPassword = new random.RandomPassword(`${name}-redis-password`, { length: 32 })
-      .result;
+    const redisPassword = new random.RandomPassword(
+      `${name}-redis-password`,
+      { length: 32 },
+      { parent: this }
+    ).result;
     const configSecret = new TauSecret(
       `${name}-config-secret`,
       {

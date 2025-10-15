@@ -10,6 +10,7 @@ pkgs.mkShell {
     talosctl
     #talhelper # Need to update to the next nix release for this to be included
     kubectl
+    kubectl-cnpg
     kubernetes-helm
     pulumi
     pulumiPackages.pulumi-language-nodejs
