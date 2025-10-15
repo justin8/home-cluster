@@ -12,7 +12,7 @@ export class Immich extends TauApplication {
   constructor(name: string, args: TauApplicationArgs = {}, opts?: pulumi.ComponentResourceOptions) {
     const sharedUID = Number(config.require("shared_uid"));
     const sharedGID = Number(config.require("shared_gid"));
-    const immichVersion = "v1.142.1";
+    const immichVersion = "v2.0.1";
     const databaseImage = "ghcr.io/tensorchord/cloudnative-vectorchord:17-0.4.3";
     const redisName = "redis";
     const mlName = "ml";
