@@ -200,6 +200,7 @@ function ClusterIssuer(
     },
     {
       dependsOn: [cloudflareSecret],
+      ...opts,
     }
   );
 }

@@ -33,7 +33,7 @@ export class MetalLB extends pulumi.ComponentResource {
       { parent: this }
     );
 
-    const helm = new k8s.helm.v3.Release(
+    const metalLBRelease = new k8s.helm.v3.Release(
       "metallb",
       {
         chart: "metallb",
@@ -58,7 +58,7 @@ export class MetalLB extends pulumi.ComponentResource {
         namespace: ns.metadata.name,
         autoAssign: true,
       },
-      { parent: this }
+      { parent: this, dependsOn: [metalLBRelease] }
     );
   }
 }
