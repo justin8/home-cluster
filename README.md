@@ -226,23 +226,21 @@ Applications extend the `TauApplication` base class which provides:
 
 ### Ingress
 
-The `TauApplication` class provides the `createHttpIngress()` method for exposing applications via HTTP/HTTPS:
+The `TauApplication` class provides the `createHttpIngress()` method for exposing applications via HTTP/HTTPS. It also includes some sane defaults:
+
+- Auth is enabled by default
+- All ingresses are private by default
+- The wrapper in `TauApplication` should automatically assignes the right labels, but you can specify them manually if required
 
 ```typescript
 // Basic ingress (private only, with auth)
-this.createHttpIngress({ appName: name, port: 80, labels: this.labels }, { parent: this });
+this.createHttpIngress({ appName: name, port: 80 }, { parent: this });
 
 // Public ingress with authentication
-this.createHttpIngress(
-  { appName: name, port: 80, labels: this.labels, public: true, auth: true },
-  { parent: this }
-);
+this.createHttpIngress({ appName: name, port: 80, public: true }, { parent: this });
 
 // Public ingress without authentication
-this.createHttpIngress(
-  { appName: name, port: 80, labels: this.labels, public: true, auth: false },
-  { parent: this }
-);
+this.createHttpIngress({ appName: name, port: 80, public: true, auth: false }, { parent: this });
 ```
 
 **Options:**
