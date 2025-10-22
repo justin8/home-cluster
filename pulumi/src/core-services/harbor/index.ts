@@ -22,7 +22,7 @@ export class Harbor extends TauApplication {
       name,
       {
         chart: "harbor",
-        version: "1.10.0",
+        version: "1.18.0",
         repositoryOpts: {
           repo: "https://helm.goharbor.io",
         },
