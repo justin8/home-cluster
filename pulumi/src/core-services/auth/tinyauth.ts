@@ -17,16 +17,15 @@ export class TinyAuth extends TauApplication {
     super(name, args, opts);
 
     const oauth_config_data = {
-      GENERIC_CLIENT_ID: config.require("tinyauth_oauth_client_id"),
-      GENERIC_CLIENT_SECRET: config.require("tinyauth_oauth_client_secret"),
-      GENERIC_AUTH_URL: "https://pocketid.dray.id.au/authorize",
-      GENERIC_TOKEN_URL: "https://pocketid.dray.id.au/api/oidc/token",
-      GENERIC_USER_URL: "https://pocketid.dray.id.au/api/oidc/userinfo",
-      GENERIC_SCOPES: "openid email profile groups",
-      GENERIC_NAME: "Pocket ID",
-      OAUTH_AUTO_REDIRECT: "generic",
-      DISABLE_CONTINUE: "true",
-      COOKIE_SECURE: "true",
+      PROVIDERS_POCKETID_CLIENT_ID: config.require("tinyauth_oauth_client_id"),
+      PROVIDERS_POCKETID_CLIENT_SECRET: config.require("tinyauth_oauth_client_secret"),
+      PROVIDERS_POCKETID_AUTH_URL: "https://pocketid.dray.id.au/authorize",
+      PROVIDERS_POCKETID_TOKEN_URL: "https://pocketid.dray.id.au/api/oidc/token",
+      PROVIDERS_POCKETID_USER_INFO_URL: "https://pocketid.dray.id.au/api/oidc/userinfo",
+      PROVIDERS_POCKETID_REDIRECT_URL: "https://tinyauth.dray.id.au/api/oauth/callback/pocketid",
+      PROVIDERS_POCKETID_SCOPES: "openid email profile groups",
+      OAUTH_AUTO_REDIRECT: "Pocketid",
+      SECURE_COOKIE: "true",
     };
 
     const oauth_config = new k8s.core.v1.Secret(
@@ -67,6 +66,11 @@ export class TinyAuth extends TauApplication {
       { parent: this, dependsOn: opts?.dependsOn }
     );
 
+    const dataMount = this.volumeManager.addLonghornVolume("/data", {
+      size: "200Mi",
+      backupEnabled: true,
+    });
+
     const deployment = new k8s.apps.v1.Deployment(
       name,
       {
@@ -87,7 +91,7 @@ export class TinyAuth extends TauApplication {
               containers: [
                 {
                   name: "tinyauth",
-                  image: "ghcr.io/steveiliop56/tinyauth:v3.6.2",
+                  image: "ghcr.io/steveiliop56/tinyauth:v4.0.1",
                   ports: [
                     {
                       containerPort: 3000,
@@ -109,20 +113,22 @@ export class TinyAuth extends TauApplication {
                       },
                     },
                   ],
+                  volumeMounts: [dataMount],
                   livenessProbe: {
                     httpGet: {
-                      path: "/api/healthcheck",
+                      path: "/api/healthz",
                       port: 3000,
                     },
                   },
                   readinessProbe: {
                     httpGet: {
-                      path: "/api/healthcheck",
+                      path: "/api/healthz",
                       port: 3000,
                     },
                   },
                 },
               ],
+              volumes: this.volumeManager.getVolumes(),
             },
           },
         },
