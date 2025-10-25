@@ -53,7 +53,7 @@ export class Kavita extends TauApplication {
                 {
                   name: name,
                   // When 0.8.8 is released, try out oauth integration: https://github.com/Kareadita/Kavita/discussions/2533
-                  image: "lscr.io/linuxserver/kavita:0.8.7",
+                  image: "lscr.io/linuxserver/kavita:0.8.8",
                   ports: [
                     {
                       containerPort: port,
