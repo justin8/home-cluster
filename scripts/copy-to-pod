@@ -1,33 +1,63 @@
 #!/bin/bash
 
-# One day I should make this start the pvc shell as well first, for now it just copies in to a started shell
-
 set -euo pipefail
 
 usage() {
-    echo "Usage: $0 <namespace> <pod name> <source> <destination>..."
-    echo "  namespace: Kubernetes namespace containing the pvc-shell"
-    echo "  pod name: The pod name of the pvc-shell"
-    echo "  source: The source directory to copy"
-    echo "  destination: The destination file or directory to copy to"
+    echo "Usage: $0 <namespace> <source> <destination>"
+    echo "  namespace: Kubernetes namespace"
+    echo "  source: Local path or podname:/path"
+    echo "  destination: Local path or podname:/path"
     echo ""
-    echo "Example: $0 default pvc-shell-12345 /local/files /folder/in/container"
+    echo "Examples:"
+    echo "  $0 default /local/files pod-name:/container/path  # Copy to pod"
+    echo "  $0 default pod-name:/container/path /local/files  # Copy from pod"
     exit 1
 }
 
-# Check arguments
-if [[ $# -lt 2 ]]; then
+if [[ $# -ne 3 ]]; then
     usage
 fi
 
 NAMESPACE="$1"
-POD="$2"
-SOURCE="$3"
-DESTINATION="$4"
+SOURCE="$2"
+DESTINATION="$3"
 
-if ! [[ -d $SOURCE ]]; then
-  echo "Source directory $SOURCE does not exist or is not a directory"
-  usage
+# Parse source
+if [[ "$SOURCE" == *":"* ]]; then
+    SRC_POD="${SOURCE%%:*}"
+    SRC_PATH="${SOURCE#*:}"
+else
+    SRC_POD=""
+    SRC_PATH="$SOURCE"
 fi
 
-tar cf - -C "$(dirname "$SOURCE")" "$(basename "$SOURCE")" | kubectl exec -i -n "$NAMESPACE" pod/"$POD" -- tar xf - -C "$DESTINATION"
+# Parse destination  
+if [[ "$DESTINATION" == *":"* ]]; then
+    DST_POD="${DESTINATION%%:*}"
+    DST_PATH="${DESTINATION#*:}"
+else
+    DST_POD=""
+    DST_PATH="$DESTINATION"
+fi
+
+# Error if both are pods
+if [[ -n "$SRC_POD" && -n "$DST_POD" ]]; then
+    echo "Error: Cannot copy from pod to pod directly"
+    exit 1
+fi
+
+if [[ -n "$SRC_POD" ]]; then
+    # Copy from pod to local
+    mkdir -p "$DST_PATH"
+    kubectl exec -n "$NAMESPACE" pod/"$SRC_POD" -- tar cf - -C "$SRC_PATH" . | pv | tar xf - -C "$DST_PATH"
+elif [[ -n "$DST_POD" ]]; then
+    # Copy from local to pod
+    if ! [[ -d "$SRC_PATH" ]]; then
+        echo "Source path $SRC_PATH does not exist or is not a directory"
+        exit 1
+    fi
+    tar cf - -C "$SRC_PATH" . | pv | kubectl exec -i -n "$NAMESPACE" pod/"$DST_POD" -- tar xf - -C "$DST_PATH"
+else
+    echo "Error: At least one path must be a pod (use podname:/path syntax)"
+    exit 1
+fi

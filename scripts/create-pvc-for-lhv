@@ -1,0 +1,77 @@
+#!/bin/bash
+
+# Script to create PV and PVC for a Longhorn volume
+# Usage: ./create-longhorn-pv-pvc.sh <volume-name> [namespace]
+
+set -e
+
+# Check if volume name is provided
+if [ -z "$1" ]; then
+  echo "Error: Volume name is required"
+  echo "Usage: $0 <namespace> <volume-name>"
+  exit 1
+fi
+
+NAMESPACE="$1"
+VOLUME_NAME="$2"
+
+echo "Creating PV and PVC for Longhorn volume: $VOLUME_NAME"
+echo "Namespace: $NAMESPACE"
+
+# Get the volume size from Longhorn
+VOLUME_SIZE=$(kubectl get volume -n longhorn-system "$VOLUME_NAME" -o jsonpath='{.spec.size}')
+
+if [ -z "$VOLUME_SIZE" ]; then
+  echo "Error: Could not find Longhorn volume: $VOLUME_NAME"
+  exit 1
+fi
+
+echo "Volume Size: $VOLUME_SIZE"
+
+# Create PersistentVolume
+cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: ${VOLUME_NAME}
+spec:
+  capacity:
+    storage: ${VOLUME_SIZE}
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: longhorn
+  csi:
+    driver: driver.longhorn.io
+    fsType: ext4
+    volumeHandle: ${VOLUME_NAME}
+    volumeAttributes:
+      numberOfReplicas: "3"
+      staleReplicaTimeout: "30"
+EOF
+
+echo "PersistentVolume created: ${VOLUME_NAME}-pv"
+
+# Create PersistentVolumeClaim
+cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ${VOLUME_NAME}
+  namespace: ${NAMESPACE}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: ${VOLUME_SIZE}
+  storageClassName: longhorn
+  volumeName: ${VOLUME_NAME}-pv
+EOF
+
+echo "PersistentVolumeClaim created: ${VOLUME_NAME}-pvc in namespace ${NAMESPACE}"
+echo ""
+echo "Resources created successfully!"
+echo "PV: ${VOLUME_NAME}-pv"
+echo "PVC: ${VOLUME_NAME}-pvc (namespace: ${NAMESPACE})"

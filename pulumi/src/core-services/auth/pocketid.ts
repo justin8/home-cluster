@@ -49,6 +49,7 @@ export class PocketId extends TauApplication {
           SMTP_HOST: MAIL_PROXY_ENDPOINT,
           SMTP_PORT: MAIL_PROXY_PORT.toString(),
           MAXMIND_LICENSE_KEY: config.require("maxmind_license_key"),
+          EMAILS_VERIFIED: "true",
         },
       },
       { ...opts, parent: this }
