@@ -52,7 +52,7 @@ export class Sabnzbd extends TauApplication {
               containers: [
                 {
                   name: name,
-                  image: "lscr.io/linuxserver/sabnzbd:4.5.3",
+                  image: "lscr.io/linuxserver/sabnzbd:4.5.5",
                   ports: [
                     {
                       containerPort: port,
