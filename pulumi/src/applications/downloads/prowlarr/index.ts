@@ -51,7 +51,7 @@ export class Prowlarr extends TauApplication {
               containers: [
                 {
                   name: name,
-                  image: "lscr.io/linuxserver/prowlarr:2.0.5",
+                  image: "lscr.io/linuxserver/prowlarr:2.1.5",
                   ports: [
                     {
                       containerPort: port,
