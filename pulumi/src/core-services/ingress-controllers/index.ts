@@ -38,6 +38,9 @@ export class IngressControllers extends pulumi.ComponentResource {
         namespace: type === "public" ? PUBLIC_INGRESS_CLASS : PRIVATE_INGRESS_CLASS,
         createNamespace: true,
         values: {
+          deployment: {
+            replicas: 2,
+          },
           ingressClass: {
             enabled: true,
             isDefaultClass: false,
