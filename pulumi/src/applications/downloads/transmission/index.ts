@@ -107,11 +107,12 @@ export class Transmission extends TauApplication {
                   volumeMounts,
                   livenessProbe: {
                     httpGet: {
-                      path: "/",
+                      path: "/transmission/web/",
                       port: port,
                     },
                     initialDelaySeconds: 30,
                     periodSeconds: 30,
+                    timeoutSeconds: 5,
                   },
                 },
               ],
