@@ -121,7 +121,7 @@ new Downloads("downloads", opts);
 
 new Immich("immich", {}, opts);
 
-new Jellyfin("jellyfin", {}, opts);
+// new Jellyfin("jellyfin", {}, opts);
 
 new Plex("plex", {}, opts);
 

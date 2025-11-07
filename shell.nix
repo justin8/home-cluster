@@ -12,6 +12,7 @@ pkgs.mkShell {
     kubectl
     kubectl-cnpg
     kubernetes-helm
+    prettier
     pulumi
     pulumiPackages.pulumi-language-nodejs
     pv
