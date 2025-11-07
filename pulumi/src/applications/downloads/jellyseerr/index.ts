@@ -76,7 +76,7 @@ export class JellySeerr extends TauApplication {
     );
 
     this.createHttpIngress(
-      { appName: name, port, labels: this.labels, public: true, auth: false },
+      { appName: name, port, labels: this.labels, public: true },
       { dependsOn: [this.ns!] }
     );
     this.createVPA({ workload: deployment });

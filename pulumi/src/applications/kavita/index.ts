@@ -77,7 +77,7 @@ export class Kavita extends TauApplication {
         port,
         labels: this.labels,
         auth: false,
-        // public: true,
+        public: true,
       },
       { dependsOn: [this.ns!] }
     );
