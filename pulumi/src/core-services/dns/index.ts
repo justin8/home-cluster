@@ -1,7 +1,7 @@
 import * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
 import { TauSecret, VolumeManager } from "../../constructs";
-import { createIpAddressPool, getServiceURL } from "../../utils";
+import { createIpAddressPool, getHomeDomain, getServiceURL } from "../../utils";
 import { ExternalDns } from "./external-dns";
 import { PiHole } from "./pihole";
 
@@ -141,6 +141,9 @@ export class Dns extends pulumi.ComponentResource {
       hostname: `home-cluster.${config.require("domain")}`,
       ip: config.require("cluster_ip"),
     });
+
+    // Deploy cloudflare-ddns to update home.$domain with real external IP
+    this.createCloudflareDdns(args.cloudflareSecret);
   }
 
   /**
@@ -181,6 +184,64 @@ export class Dns extends pulumi.ComponentResource {
         },
       },
       resourceOpts
+    );
+  }
+
+  /**
+   * Creates a cloudflare-ddns deployment to update home.$domain with real external IP
+   */
+  private createCloudflareDdns(cloudflareSecret: TauSecret): void {
+    // Create deployment for cloudflare-ddns
+    new k8s.apps.v1.Deployment(
+      "cloudflare-ddns",
+      {
+        metadata: {
+          name: "cloudflare-ddns",
+          namespace: this.namespace,
+          labels: {
+            app: "cloudflare-ddns",
+          },
+        },
+        spec: {
+          replicas: 1,
+          selector: {
+            matchLabels: {
+              app: "cloudflare-ddns",
+            },
+          },
+          template: {
+            metadata: {
+              labels: {
+                app: "cloudflare-ddns",
+              },
+            },
+            spec: {
+              containers: [
+                {
+                  name: "cloudflare-ddns",
+                  image: "favonia/cloudflare-ddns:latest",
+                  env: [
+                    {
+                      name: "CLOUDFLARE_API_TOKEN",
+                      valueFrom: {
+                        secretKeyRef: {
+                          name: cloudflareSecret.name,
+                          key: "api-token",
+                        },
+                      },
+                    },
+                    {
+                      name: "DOMAINS",
+                      value: getHomeDomain(),
+                    },
+                  ],
+                },
+              ],
+            },
+          },
+        },
+      },
+      { parent: this }
     );
   }
 }

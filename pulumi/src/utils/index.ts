@@ -17,6 +17,13 @@ export type KubernetesSecretData = { [key: string]: string };
 const config = new pulumi.Config();
 
 /**
+ * Gets the home domain (home.$domain) from Pulumi config
+ */
+export function getHomeDomain(): pulumi.Output<string> {
+  return pulumi.interpolate`home.${config.require("domain")}`;
+}
+
+/**
  * Generates a reflector annotation for a given key and value.
  */
 export function reflectorAnnotation(key: pulumi.Input<string>, value: pulumi.Input<string>) {
@@ -227,7 +234,7 @@ export function createIngress(
         annotations: {
           "pulumi.com/skipAwait": "true",
           ...(isPublic && {
-            "external-dns.alpha.kubernetes.io/target": config.require("real_external_ip"),
+            "external-dns.alpha.kubernetes.io/target": getHomeDomain(),
           }),
           ...(auth && {
             "traefik.ingress.kubernetes.io/router.middlewares": isPublic
