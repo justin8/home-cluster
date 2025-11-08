@@ -24,7 +24,7 @@ export class TinyAuth extends TauApplication {
       PROVIDERS_POCKETID_USER_INFO_URL: "https://pocketid.dray.id.au/api/oidc/userinfo",
       PROVIDERS_POCKETID_REDIRECT_URL: "https://tinyauth.dray.id.au/api/oauth/callback/pocketid",
       PROVIDERS_POCKETID_SCOPES: "openid email profile groups",
-      OAUTH_AUTO_REDIRECT: "Pocketid",
+      OAUTH_AUTO_REDIRECT: "pocketid",
       SECURE_COOKIE: "true",
     };
 
