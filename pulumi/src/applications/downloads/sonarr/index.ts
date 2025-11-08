@@ -52,7 +52,7 @@ export class Sonarr extends TauApplication {
               containers: [
                 {
                   name: name,
-                  image: "lscr.io/linuxserver/sonarr:4.0.15",
+                  image: "lscr.io/linuxserver/sonarr:4.0.16",
                   ports: [
                     {
                       containerPort: port,
