@@ -50,6 +50,7 @@ export class JellySeerr extends TauApplication {
                 {
                   name: name,
                   image: "fallenbagel/jellyseerr:preview-OIDC",
+                  imagePullPolicy: "Always",
                   ports: [
                     {
                       containerPort: port,
