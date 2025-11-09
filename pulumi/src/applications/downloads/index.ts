@@ -5,8 +5,8 @@ import { Prowlarr } from "./prowlarr";
 import { Radarr } from "./radarr";
 import { Sabnzbd } from "./sabnzbd";
 import { Sonarr } from "./sonarr";
-import { Transmission } from "./transmission";
 import { JellySeerr } from "./jellyseerr";
+import { QBittorrent } from "./qbittorrent";
 
 export class Downloads extends pulumi.ComponentResource {
   constructor(name: string, opts?: pulumi.ComponentResourceOptions) {
@@ -41,8 +41,8 @@ export class Downloads extends pulumi.ComponentResource {
       { namespace, createNamespace: false },
       { parent: this, dependsOn: [ns] }
     );
-    new Transmission(
-      "transmission",
+    new QBittorrent(
+      "qbittorrent",
       { namespace, createNamespace: false },
       { parent: this, dependsOn: [ns] }
     );

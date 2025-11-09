@@ -6,9 +6,9 @@ import { TauApplication, TauApplicationArgs } from "../../../constructs/tauAppli
 
 const config = new pulumi.Config();
 
-export class Transmission extends TauApplication {
+export class QBittorrent extends TauApplication {
   constructor(name: string, args: TauApplicationArgs = {}, opts?: pulumi.ComponentResourceOptions) {
-    const port = 9091;
+    const port = 8080;
 
     super(name, args, opts);
 
@@ -40,6 +40,7 @@ export class Transmission extends TauApplication {
           TZ: config.require("timezone"),
           PUID: config.require("shared_uid"),
           PGID: config.require("shared_gid"),
+          TORRENTING_PORT: config.require("torrent_port"),
         },
       },
       { parent: this, dependsOn: [this.ns!] }
@@ -97,7 +98,7 @@ export class Transmission extends TauApplication {
                 },
                 {
                   name: name,
-                  image: "lscr.io/linuxserver/transmission:4.0.6",
+                  image: "lscr.io/linuxserver/qbittorrent:5.1.2",
                   ports: [
                     {
                       containerPort: port,
@@ -107,7 +108,7 @@ export class Transmission extends TauApplication {
                   volumeMounts,
                   livenessProbe: {
                     httpGet: {
-                      path: "/transmission/web/",
+                      path: "/",
                       port: port,
                     },
                     initialDelaySeconds: 30,
