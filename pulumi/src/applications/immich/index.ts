@@ -99,9 +99,9 @@ export class Immich extends TauApplication {
 
     // Redis deployment
     const redisDeployment = new k8s.apps.v1.Deployment(
-      redisName,
+      `${name}-${redisName}`,
       {
-        metadata: { namespace: this.namespace },
+        metadata: { name: redisName, namespace: this.namespace },
         spec: {
           replicas: 1,
           strategy: { type: "Recreate" },
@@ -148,9 +148,9 @@ export class Immich extends TauApplication {
 
     // Immich machine learning deployment
     const mlDeployment = new k8s.apps.v1.Deployment(
-      mlName,
+      `${name}-${mlName}`,
       {
-        metadata: { namespace: this.namespace },
+        metadata: { name: mlName, namespace: this.namespace },
         spec: {
           replicas: 1,
           strategy: { type: "Recreate" },
@@ -212,7 +212,7 @@ export class Immich extends TauApplication {
     const serverDeployment = new k8s.apps.v1.Deployment(
       `${name}-server`,
       {
-        metadata: { namespace: this.namespace },
+        metadata: { name, namespace: this.namespace },
         spec: {
           replicas: 1,
           strategy: { type: "Recreate" },

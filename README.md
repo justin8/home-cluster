@@ -22,7 +22,7 @@ A few components can't be configured automatically at the moment, they should al
 These should be set via `pulumi config set $name $value` and optionally with `--secret` to encrypt the values before storing them in the file.
 
 - `ip_address_pool` - The main IP address pool for MetalLB to use, e.g: `192.168.5.80-192.168.5.100`
-- `cert_manager_email` - Email used for domain validation when generating TLS certs
+- `admin_email` - Email used for domain validation when generating TLS certs and other default administrative purposes
 - Cloudflare:
   - `cloudflare_email` - What it says on the tin
   - `cloudflare_api_token` - An API token that can modify DNS; used for both TLS wildcard cert generation and public ingress DNS updates. Note this is an API **token** as opposed to an API **key** that is legacy.

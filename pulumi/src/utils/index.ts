@@ -182,8 +182,13 @@ export function createService(
   const targetPort = args.targetPort || port;
   const namespace = args.namespace || "default";
 
+  // Include namespace in the Pulumi resource name to avoid URN collisions
+  // when multiple applications create services with the same appName
+  const resourceName =
+    namespace !== "default" ? `${namespace}-${appName}-service` : `${appName}-service`;
+
   return new k8s.core.v1.Service(
-    `${appName}-service`,
+    resourceName,
     {
       metadata: {
         name: appName,

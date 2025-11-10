@@ -1,7 +1,7 @@
 encryptionsalt: v1:q9ZxgKTkXOU=:v1:A/SJ2CWVukh3Ok56:o7Z86FNMmjbLdSojjwTUiGBm3Gpn3Q==
 config:
   home-cluster:ip_address_pool: "192.168.5.80-192.168.5.100"
-  home-cluster:cert_manager_email:
+  home-cluster:admin_email:
     secure: v1:sLBu7EvYreXVBIGa:GwKAa8qHpSCsYwelP8AUe3HJ3STDK5P36sU4y8x+
   home-cluster:domain:
     secure: v1:uxJHS9i83/jM0y9e:kNAjOeaHsCUifj8u1dPiQV0DsTScdDzTpns=
@@ -32,3 +32,7 @@ config:
   home-cluster:torrent_port: "9514"
   home-cluster:wireguard-config:
     secure: v1:GW6eHTx0ORq4zPcu:SAz65r6S2XQtWuczIoYqf6S1zS8Eew+hi2gmBgOp507gUG7jq8wBtFpgkEQZOotbJWsmD38mhL14aeVr/avpWV17hbcqGDvpCk1Hcex38ntljWcLG6Fn8VAMU6A2UvOe2YZe2Y2ooUmBLxrUmXBQuGuOrMx2t4nGtHLM+c65hcZXMgm5DEGvdejX39WOSVVmMje8i3hRBNvbTv7idRyHWZcYU3RRQdjMQmB7eR4QwId62xF3cms0nCM+pwATPit15z/vei9VjzQ7d74FF1z+m2kWM4OH3FIAGaAxH2JA3hZBD0X4PRTtvp15dzwZBgQZnGHNkBGpZY+wGUV805WrwU5UGT7YuMq4ZTB3WAjA2EBDm91VjyNp1P3VGjYNPmpZQeVfAw3IbJJpZJ39YSTH49gQ2DKeMitUi4Rb0cHqWhCi0omXN8dH1+1baw3JkDVXSfyzlwSpRYZJ3TNPH/YcQYOwe6iLcEXiuOqtor+hXa/xrmEXxeFkUMKU+kFk1Pq5bHvRUMlREQCepSoRr35QFsOmVhSzS2cgpYFrAAY2DEEonGE6N7x/MqP1uOstsBTh0em+FNq+nVXBQWUX82IydToavNSNTS1JrrrpPplUU0BDjr8NkiVl0KENWcp60ilMLDobbWuxy/FoV4GFp3olpMEojRY0M9yxIya8coOdzPJqc1iAvRBOVQ23bypRTNxgLZ2Af7XisRfttmEjDveUfLicxPg8HCtSdSJlU4nFfVRtOoc7tLqU
+  grist:oidc_client_id:
+    secure: v1:uAbpANICdoJuLUGh:KdmQ6L4wlHIbnJd0T6Td2ioMN6kQmr1/EFFahPLAcy0e5N7G2HECIC2Rvi/YA9gnQSg+qA==
+  grist:oidc_client_secret:
+    secure: v1:e3Lsv8RUpu030imB:j/N6CCdfcaZ4qjHrBa7OtHNAKP5lbjZ0J+EoMTlWl8f6BpsIJIy/IIGm3Q3mzqC0

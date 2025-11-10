@@ -41,56 +41,62 @@ export function createVPA(
     ],
   } = args;
 
-  return workload.metadata.name.apply(workloadName => {
-    let kind: string;
-    let apiVersion: string;
+  return pulumi
+    .all([workload.metadata.name, workload.metadata.namespace])
+    .apply(([workloadName, namespace]) => {
+      let kind: string;
+      let apiVersion: string;
 
-    if (workload instanceof k8s.apps.v1.Deployment) {
-      kind = "Deployment";
-      apiVersion = "apps/v1";
-    } else if (workload instanceof k8s.apps.v1.ReplicaSet) {
-      kind = "ReplicaSet";
-      apiVersion = "apps/v1";
-    } else if (workload instanceof k8s.apps.v1.DaemonSet) {
-      kind = "DaemonSet";
-      apiVersion = "apps/v1";
-    } else if (workload instanceof k8s.apps.v1.StatefulSet) {
-      kind = "StatefulSet";
-      apiVersion = "apps/v1";
-    } else if (workload instanceof k8s.batch.v1.Job) {
-      kind = "Job";
-      apiVersion = "batch/v1";
-    } else if (workload instanceof k8s.batch.v1.CronJob) {
-      kind = "CronJob";
-      apiVersion = "batch/v1";
-    } else {
-      throw new Error("Unsupported workload type for VPA");
-    }
+      if (workload instanceof k8s.apps.v1.Deployment) {
+        kind = "Deployment";
+        apiVersion = "apps/v1";
+      } else if (workload instanceof k8s.apps.v1.ReplicaSet) {
+        kind = "ReplicaSet";
+        apiVersion = "apps/v1";
+      } else if (workload instanceof k8s.apps.v1.DaemonSet) {
+        kind = "DaemonSet";
+        apiVersion = "apps/v1";
+      } else if (workload instanceof k8s.apps.v1.StatefulSet) {
+        kind = "StatefulSet";
+        apiVersion = "apps/v1";
+      } else if (workload instanceof k8s.batch.v1.Job) {
+        kind = "Job";
+        apiVersion = "batch/v1";
+      } else if (workload instanceof k8s.batch.v1.CronJob) {
+        kind = "CronJob";
+        apiVersion = "batch/v1";
+      } else {
+        throw new Error("Unsupported workload type for VPA");
+      }
 
-    return new k8s.apiextensions.CustomResource(
-      `${workloadName}-vpa`,
-      {
-        apiVersion: "autoscaling.k8s.io/v1",
-        kind: "VerticalPodAutoscaler",
-        metadata: {
-          name: `${workloadName}-vpa`,
-          namespace: workload.metadata.namespace,
+      // Include namespace in Pulumi resource name to avoid URN collisions
+      const pulumiResourceName =
+        namespace !== "default" ? `${namespace}-${workloadName}-vpa` : `${workloadName}-vpa`;
+
+      return new k8s.apiextensions.CustomResource(
+        pulumiResourceName,
+        {
+          apiVersion: "autoscaling.k8s.io/v1",
+          kind: "VerticalPodAutoscaler",
+          metadata: {
+            name: `${workloadName}-vpa`,
+            namespace: workload.metadata.namespace,
+          },
+          spec: {
+            targetRef: {
+              apiVersion,
+              kind,
+              name: workload.metadata.name,
+            },
+            updatePolicy: {
+              updateMode,
+            },
+            resourcePolicy: {
+              containerPolicies,
+            },
+          },
         },
-        spec: {
-          targetRef: {
-            apiVersion,
-            kind,
-            name: workload.metadata.name,
-          },
-          updatePolicy: {
-            updateMode,
-          },
-          resourcePolicy: {
-            containerPolicies,
-          },
-        },
-      },
-      { ...opts, dependsOn: [workload] }
-    );
-  });
+        { ...opts, dependsOn: [workload] }
+      );
+    });
 }

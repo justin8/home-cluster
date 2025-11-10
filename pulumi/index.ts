@@ -1,5 +1,5 @@
 import * as pulumi from "@pulumi/pulumi";
-import { Downloads, Immich, Jellyfin, Kavita, Plex, Syncthing } from "./src/applications";
+import { Downloads, Grist, Immich, Jellyfin, Kavita, Plex, Syncthing } from "./src/applications";
 
 import { PRIVATE_INGRESS_CLASS, PUBLIC_INGRESS_CLASS } from "./src/constants";
 import {
@@ -33,7 +33,7 @@ function initializeCoreServices(): pulumi.Resource[] {
   const certManager = new CertManager(
     "cert-manager",
     {
-      email: config.require("cert_manager_email"),
+      email: config.require("admin_email"),
       cloudflareSecret: sharedSecrets.cloudflareSecret,
       domain: config.require("domain"),
     },
@@ -126,3 +126,5 @@ new Immich("immich", {}, opts);
 new Plex("plex", {}, opts);
 
 new Syncthing("syncthing", {}, opts);
+
+new Grist("grist", {}, opts);
