@@ -67,8 +67,10 @@ export class Grist extends TauApplication {
           GRIST_SESSION_SECRET: sessionSecret,
           GRIST_SANDBOX_FLAVOR: "gvisor", // This prevents network calls from functions
           GRIST_EXPERIMENTAL_PLUGINS: "1",
-          GRIST_ENABLE_REQUEST_FUNCTION: "1",
+          GRIST_ENABLE_REQUEST_FUNCTION: "1", // THis plus experimental functions enables the REQUEST function
           GRIST_ALLOW_AUTOMATIC_VERSION_CHECKING: "false",
+          GRIST_ANON_PLAYGROUND: "false",
+          GRIST_MANAGED_WORKERS: "true",
         },
       },
       { parent: this, dependsOn: [this.ns!] }
