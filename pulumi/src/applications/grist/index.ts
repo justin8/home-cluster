@@ -165,6 +165,44 @@ export class Grist extends TauApplication {
       { parent: this, dependsOn: [this.ns!, gristSecret, redisService] }
     );
 
+    // Apicache deployment
+    const apicacheName = "apicache";
+    const apicacheDeployment = new k8s.apps.v1.Deployment(
+      `${name}-${apicacheName}`,
+      {
+        metadata: { name: apicacheName, namespace: this.namespace },
+        spec: {
+          replicas: 1,
+          strategy: { type: "Recreate" },
+          selector: { matchLabels: { app: apicacheName } },
+          template: {
+            metadata: { labels: { app: apicacheName } },
+            spec: {
+              containers: [
+                {
+                  name: "apicache",
+                  image: "ghcr.io/justin8/apicache:latest",
+                  ports: [{ containerPort: 8080 }],
+                },
+              ],
+            },
+          },
+        },
+      },
+      { parent: this, dependsOn: [this.ns!] }
+    );
+
+    createService(
+      {
+        appName: apicacheName,
+        port: 80,
+        targetPort: 8080,
+        namespace: this.namespace,
+        labels: { app: apicacheName },
+      },
+      { parent: this, dependsOn: [this.ns!] }
+    );
+
     this.createHttpIngress(
       {
         appName: name,
@@ -177,5 +215,6 @@ export class Grist extends TauApplication {
 
     this.createVPA({ workload: redisDeployment });
     this.createVPA({ workload: gristDeployment });
+    this.createVPA({ workload: apicacheDeployment });
   }
 }
