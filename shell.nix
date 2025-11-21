@@ -28,7 +28,9 @@ pkgs.mkShell {
     export SOPS_AGE_KEY_FILE=$PWD/.sops-age.key
     export PATH=$PWD/scripts:$PATH
 
-    git submodule update --init --recursive
+    if [[ $GITHUB_ACTIONS != "true" ]]; then
+      git submodule update --init --recursive
+    fi
 
     if [[ ! -s .sops-age.key ]]; then
       echo "Downloading age key..."
