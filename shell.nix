@@ -26,7 +26,6 @@ pkgs.mkShell {
     export TALOSCONFIG=$PWD/talos/clusterconfig/talosconfig
     export KUBECONFIG=$PWD/talos/clusterconfig/kubeconfig
     export SOPS_AGE_KEY_FILE=$PWD/.sops-age.key
-    export PULUMI_CONFIG_PASSPHRASE="$(sops decrypt --extract '["passphrase"]' pulumi/.pulumi-passphrase.sops.yaml)"
     export PATH=$PWD/scripts:$PATH
 
     git submodule update --init --recursive
@@ -35,6 +34,8 @@ pkgs.mkShell {
       echo "Downloading age key..."
       aws --region us-east-1 ssm get-parameter --name "/home-cluster/sops-age.key" --with-decryption --query "Parameter.Value" --output text > $SOPS_AGE_KEY_FILE
     fi
+
+    export PULUMI_CONFIG_PASSPHRASE="$(sops decrypt --extract '["passphrase"]' pulumi/.pulumi-passphrase.sops.yaml)"
 
     # Install git hooks
     echo "Installing git hooks..."
