@@ -3,4 +3,4 @@
 	url = https://github.com/kubernetes-csi/external-snapshotter.git
 [submodule "autoscaler"]
 	path = autoscaler
-	url = git@github.com:kubernetes/autoscaler
+	url = https://github.com/kubernetes/autoscaler
