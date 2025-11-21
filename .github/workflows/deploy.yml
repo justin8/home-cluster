@@ -34,6 +34,16 @@ jobs:
           purge: true
           purge-prefixes: nix-${{ runner.os }}-
 
+      - name: Set up WireGuard
+        uses: egor-tensin/setup-wireguard@v1
+        with:
+          endpoint: ${{ secrets.WIREGUARD_ENDPOINT }}
+          endpoint_public_key: ${{ secrets.WIREGUARD_ENDPOINT_PUBLIC_KEY }}
+          ips: ${{ secrets.WIREGUARD_IPS }}
+          allowed_ips: ${{ secrets.WIREGUARD_ALLOWED_IPS }}
+          private_key: ${{ secrets.WIREGUARD_PRIVATE_KEY }}
+          preshared_key: ${{ secrets.WIREGUARD_PRESHARED_KEY }}
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v5
         with:
@@ -41,5 +51,5 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Deploy with Pulumi
-        run: nix-shell --run "which pulumi"
+        run: nix-shell --run "ping -c 3 192.168.5.5"
         # run: nix-shell --run "cd pulumi && pulumi up --diff"
