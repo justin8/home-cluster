@@ -8,7 +8,7 @@ pkgs.mkShell {
     sops
     age
     talosctl
-    #talhelper # Need to update to the next nix release for this to be included
+    talhelper
     kubectl
     kubectl-cnpg
     kubernetes-helm
