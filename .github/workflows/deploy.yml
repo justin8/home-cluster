@@ -47,4 +47,4 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Deploy with Pulumi
-        run: nix-shell --run "cd pulumi && pulumi up --diff"
+        run: nix-shell --run "cd pulumi && pulumi preview --diff"
