@@ -8,6 +8,7 @@ on:
 
 env:
   AWS_REGION: us-east-1
+  NIX_PATH: nixpkgs=https://github.com/NixOS/nixpkgs/archive/nixos-unstable.tar.gz
 
 permissions:
   id-token: write
@@ -19,11 +20,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - name: Install Nix
-        uses: cachix/install-nix-action@v31
-        with:
-          nix_path: nixpkgs=channel:nixos-unstable
+        uses: nixbuild/nix-quick-install-action@v34
 
       - name: Cache Nix store
         uses: nix-community/cache-nix-action@v6
@@ -47,4 +48,4 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Deploy with Pulumi
-        run: nix-shell --run "cd pulumi && pulumi preview --diff"
+        run: nix-shell --run "cd pulumi && pulumi stack select home-cluster && pulumi up --diff -y"

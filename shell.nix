@@ -28,9 +28,12 @@ pkgs.mkShell {
     export SOPS_AGE_KEY_FILE=$PWD/.sops-age.key
     export PATH=$PWD/scripts:$PATH
 
-    if [[ $GITHUB_ACTIONS != "true" ]]; then
-      git submodule update --init --recursive
-    fi
+    git submodule update --init --recursive
+
+    # Install git hooks
+    echo "Installing git hooks..."
+    cp git-hooks/* .git/hooks/
+    chmod +x .git/hooks/*
 
     if [[ ! -s .sops-age.key ]]; then
       echo "Downloading age key..."
@@ -39,10 +42,6 @@ pkgs.mkShell {
 
     export PULUMI_CONFIG_PASSPHRASE="$(sops decrypt --extract '["passphrase"]' pulumi/.pulumi-passphrase.sops.yaml)"
 
-    # Install git hooks
-    echo "Installing git hooks..."
-    cp git-hooks/* .git/hooks/
-    chmod +x .git/hooks/*
 
     (
       echo "Configuring talos..."
