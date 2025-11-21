@@ -33,7 +33,7 @@ pkgs.mkShell {
 
     if [[ ! -s .sops-age.key ]]; then
       echo "Downloading age key..."
-      aws ssm get-parameter --name "/home-cluster/sops-age.key" --with-decryption --query "Parameter.Value" --output text > $SOPS_AGE_KEY_FILE
+      aws --region us-east-1 ssm get-parameter --name "/home-cluster/sops-age.key" --with-decryption --query "Parameter.Value" --output text > $SOPS_AGE_KEY_FILE
     fi
 
     # Install git hooks
