@@ -98,7 +98,7 @@ export class QBittorrent extends TauApplication {
                 },
                 {
                   name: name,
-                  image: "lscr.io/linuxserver/qbittorrent:5.1.2",
+                  image: "lscr.io/linuxserver/qbittorrent:5.1.4",
                   ports: [
                     {
                       containerPort: port,
