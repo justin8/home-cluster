@@ -24,6 +24,7 @@ export class DemoApp extends TauApplication {
         spec: {
           selector: { matchLabels: this.labels },
           replicas: 1,
+          strategy: { type: "Recreate" },
           template: {
             metadata: { labels: this.labels },
             spec: {

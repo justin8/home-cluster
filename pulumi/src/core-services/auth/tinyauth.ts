@@ -80,6 +80,9 @@ export class TinyAuth extends TauApplication {
         },
         spec: {
           replicas: 1,
+          strategy: {
+            type: "Recreate",
+          },
           selector: {
             matchLabels: this.labels,
           },

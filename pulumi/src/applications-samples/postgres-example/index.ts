@@ -21,6 +21,7 @@ export class PostgresExample extends TauApplication {
       {
         spec: {
           replicas: 1,
+          strategy: { type: "Recreate" },
           selector: { matchLabels: this.labels },
           template: {
             metadata: { labels: this.labels },

@@ -49,6 +49,7 @@ export class PiHole extends TauApplication {
         spec: {
           selector: { matchLabels: labels },
           replicas: 1,
+          strategy: { type: "Recreate" },
           template: {
             metadata: { labels: { ...labels } },
             spec: {
