@@ -3,7 +3,6 @@
     "pulumi.pulumi",
     "mkhl.direnv",
     "signageos.signageos-vscode-sops",
-    "amazonwebservices.amazon-q-vscode",
     "esbenp.prettier-vscode"
   ]
 }
