@@ -61,7 +61,7 @@
 | `192.168.5.1`       | Router/Gateway  | Network infrastructure | Default gateway                  |
 | `192.168.5.2`       | Public Ingress  | `public_ingress_ip`    | External-facing web traffic      |
 | `192.168.5.3`       | Private Ingress | `private_ingress_ip`   | Internal-only web traffic        |
-| `192.168.5.5`       | NFS Storage     | `nfs_ip`               | Network file storage server      |
+| `192.168.5.5`       | NFS Storage     | `storage_ip`           | Network file storage server      |
 | `192.168.5.10`      | Talos VIP       | `talconfig.yaml`       | Kubernetes API server endpoint   |
 | `192.168.5.11-20`   | Talos Nodes     | `talconfig.yaml`       | Reserved for control plane nodes |
 | `192.168.5.53`      | DNS Server      | `dns_server_ip`        | PiHole DNS service               |

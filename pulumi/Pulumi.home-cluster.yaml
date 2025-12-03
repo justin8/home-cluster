@@ -7,9 +7,9 @@ config:
     secure: v1:uxJHS9i83/jM0y9e:kNAjOeaHsCUifj8u1dPiQV0DsTScdDzTpns=
   home-cluster:cloudflare_api_token:
     secure: v1:Xtm1KLjkWLFWfNnn:8aaFPJxMKlOCmaGMoXt2+029z5Hgdjz6YoBXyePfBHT/DwpYZUoJ4wIBTrKYZGb+pdYjqHl0lmA=
-  home-cluster:nfs_ip: 192.168.5.5
   home-cluster:public_ingress_ip: 192.168.5.2
   home-cluster:private_ingress_ip: 192.168.5.3
+  home-cluster:storage_ip: 192.168.5.5
   home-cluster:cluster_ip: 192.168.5.10
   home-cluster:dns_server_ip: 192.168.5.53
   home-cluster:longhorn_nfs_backup_path:

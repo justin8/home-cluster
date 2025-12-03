@@ -134,7 +134,7 @@ export class Dns extends pulumi.ComponentResource {
     // Create custom DNS record for storage subdomain
     this.createCustomDnsRecord("storage-nfs", {
       hostname: `storage.${config.require("domain")}`,
-      ip: config.require("nfs_ip"),
+      ip: config.require("storage_ip"),
     });
 
     this.createCustomDnsRecord("home-cluster", {

@@ -11,7 +11,7 @@ export class NFSCSI extends pulumi.ComponentResource {
   constructor(appName: string, args: NFSCSIArgs = {}, opts?: pulumi.ComponentResourceOptions) {
     super(appName, appName, {}, opts);
 
-    const nfsIp = this.config.require("nfs_ip");
+    const nfsIp = this.config.require("storage_ip");
     const namespace = args.namespace || "kube-system";
 
     const helm = new k8s.helm.v3.Release(

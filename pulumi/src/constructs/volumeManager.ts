@@ -23,7 +23,7 @@ export class VolumeManager {
     }
   >();
   private config = new pulumi.Config();
-  private nfsIp = this.config.require("nfs_ip");
+  private nfsIp = this.config.require("storage_ip");
   private appName: string;
   private namespace: pulumi.Input<string>;
 

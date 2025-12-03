@@ -27,9 +27,10 @@ These should be set via `pulumi config set $name $value` and optionally with `--
   - `cloudflare_email` - What it says on the tin
   - `cloudflare_api_token` - An API token that can modify DNS; used for both TLS wildcard cert generation and public ingress DNS updates. Note this is an API **token** as opposed to an API **key** that is legacy.
 - `domain` - Top-level domain that all services will be generated under.
-- `nfs_ip` - Used for all NFS mounts
+- `storage_ip` - Used for all NFS mounts
 - `public_ingress_ip` - A static IP (or a pool) to use for the public ingress
 - `private_ingress_ip` - A static IP (or a pool) to use for the private ingress
+- `cluster_ip` - The Kubernetes API server VIP
 - `dns_server_ip` - A static IP (or a pool) to use for the DNS server
 - `longhorn_nfs_backup_path` - A path on the NFS server to use for longhorn backups
 - `timezone_offset` - Used to generate cron jobs at acceptable times - Talos only supports UTC natively
@@ -212,9 +213,10 @@ For detailed networking and DNS architecture information, see [docs/NETWORKING_A
 ### Key Network Components
 
 - **MetalLB**: Load balancer providing IPs from `192.168.5.80-100` pool
-- **Dual Ingress**: Separate public (`192.168.5.2`) and private (`192.168.5.3`) ingress controllers
 - **DNS Services**: PiHole for internal DNS (`192.168.5.53`) + External DNS for automatic record management
+- **Dual Ingress**: Separate public (`192.168.5.2`) and private (`192.168.5.3`) ingress controllers
 - **Storage**: NFS server at `192.168.5.5` + Longhorn distributed storage
+- **Zigbee Co-ordinator**: `192.168.5.6`
 
 ## Applications
 
