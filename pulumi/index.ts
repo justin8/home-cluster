@@ -1,5 +1,13 @@
 import * as pulumi from "@pulumi/pulumi";
-import { Downloads, Grist, Immich, Jellyfin, Kavita, Plex, Syncthing } from "./src/applications";
+import {
+  Downloads,
+  Grist,
+  Immich,
+  Kavita,
+  Plex,
+  Syncthing,
+  HomeAutomation,
+} from "./src/applications";
 
 import { PRIVATE_INGRESS_CLASS, PUBLIC_INGRESS_CLASS } from "./src/constants";
 import {
@@ -128,3 +136,5 @@ new Plex("plex", {}, opts);
 new Syncthing("syncthing", {}, opts);
 
 new Grist("grist", {}, opts);
+
+new HomeAutomation("home-automation", {}, opts);

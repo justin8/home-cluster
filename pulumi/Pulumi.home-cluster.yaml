@@ -36,3 +36,9 @@ config:
     secure: v1:uAbpANICdoJuLUGh:KdmQ6L4wlHIbnJd0T6Td2ioMN6kQmr1/EFFahPLAcy0e5N7G2HECIC2Rvi/YA9gnQSg+qA==
   grist:oidc_client_secret:
     secure: v1:e3Lsv8RUpu030imB:j/N6CCdfcaZ4qjHrBa7OtHNAKP5lbjZ0J+EoMTlWl8f6BpsIJIy/IIGm3Q3mzqC0
+  home-cluster:z2m_network_key:
+    secure: v1:AgepgAY4LKNUvjqY:Wff+K8ZB7m9TjaEtb4kYdmljsJ4b6rxX5DG9Gm74xF2MFBI3AF7wECLenP61C+hb9zKOcyc/tgd/isLsX6g8G1popAiL4sw=
+  home-cluster:z2m_ext_pan_id:
+    secure: v1:8tnkS+yDs6UK9EB0:S/Bod1PNPfzF7K44OXQoNg+qNW60G7sTv/cLTxiIq9h0Q+Xk61KDHxUfNvk=
+  home-cluster:z2m_pan_id:
+    secure: v1:wg1Eo8MX7IoFekFd:rJMlmv2dCz8aiRCPObbYpiA9aRhq

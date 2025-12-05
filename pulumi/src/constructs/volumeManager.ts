@@ -11,6 +11,7 @@ export interface LonghornVolumeArgs {
   accessMode?: "ReadWriteOnce" | "ReadOnlyMany" | "ReadWriteMany";
   /** @default false */
   backupEnabled?: boolean;
+  prefix?: string;
 }
 
 export class VolumeManager {
@@ -118,7 +119,8 @@ export class VolumeManager {
     args: LonghornVolumeArgs = {}
   ): k8s.types.input.core.v1.VolumeMount {
     // Generate a safe name for the volume
-    const volumeName = `lh${mountPath.replace(/[^a-z0-9]/gi, "-").toLowerCase()}`;
+    const volumePrefix = args.prefix ? `lh-${args.prefix}` : "lh";
+    const volumeName = volumePrefix + mountPath.replace(/[^a-z0-9]/gi, "-").toLowerCase();
 
     if (!this.storageMap.has(volumeName)) {
       const storage = this.createLonghornVolume(volumeName, args);

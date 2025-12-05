@@ -66,7 +66,7 @@ export class Dns extends pulumi.ComponentResource {
         provider: "pihole",
         ingressClasses: [args.privateIngressClass],
         registry: "noop",
-        sources: ["ingress", "traefik-proxy", "service"], // Include services for custom DNS records on internal DNS only
+        sources: ["ingress", "traefik-proxy", "service"], // Include services for custom DNS records and things like MQTT on internal DNS only
         extraArgs: [
           pulumi.interpolate`--pihole-server=http://${getServiceURL("pihole-web", this.namespace)}`,
           "--pihole-api-version=6", // v5 is still the deault, but being deprecated soon-ish
