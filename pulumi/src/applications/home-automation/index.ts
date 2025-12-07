@@ -247,6 +247,7 @@ ${passwdCommands.join(" && ")}
           template: {
             metadata: { labels },
             spec: {
+              hostNetwork: true,
               containers: [
                 {
                   name: "home-assistant",
