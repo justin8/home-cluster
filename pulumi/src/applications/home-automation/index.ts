@@ -201,6 +201,9 @@ ${passwdCommands.join(" && ")}
       { parent: this }
     );
 
+    this.createVPA({ workload: mqttDeployment });
+
+
     new k8s.core.v1.Service(
       "mqtt",
       {
@@ -275,6 +278,8 @@ ${passwdCommands.join(" && ")}
       },
       { parent: this }
     );
+
+    this.createVPA({ workload: hassDeployment });
 
     new k8s.core.v1.Service(
       "home-assistant",
@@ -360,7 +365,7 @@ ${passwdCommands.join(" && ")}
 
     const z2mConfigSecret = this.createZigbee2MqttConfigSecret();
 
-    new k8s.apps.v1.Deployment(
+    const z2mDeployment = new k8s.apps.v1.Deployment(
       "zigbee2mqtt",
       {
         metadata: {
@@ -405,6 +410,8 @@ ${passwdCommands.join(" && ")}
       },
       { parent: this }
     );
+
+    this.createVPA({ workload: z2mDeployment });
 
     this.createHttpIngress({
       labels,
