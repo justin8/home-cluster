@@ -203,7 +203,6 @@ ${passwdCommands.join(" && ")}
 
     this.createVPA({ workload: mqttDeployment });
 
-
     new k8s.core.v1.Service(
       "mqtt",
       {
@@ -307,54 +306,6 @@ ${passwdCommands.join(" && ")}
     });
   }
 
-  private createZigbee2MqttConfigSecret() {
-    const z2mPanId = config.requireSecret("z2m_pan_id");
-    const z2mExtPanId = config.requireSecret("z2m_ext_pan_id");
-    const z2mNetworkKey = config.requireSecret("z2m_network_key");
-
-    const z2mMqttSecret = this.mqttUserSecrets.get("z2m")!;
-    const z2mUsername = z2mMqttSecret.stringData!["username"];
-    const z2mPassword = z2mMqttSecret.stringData!["password"];
-
-    const configFileContent = pulumi
-      .all([z2mPanId, z2mExtPanId, z2mNetworkKey, z2mUsername, z2mPassword])
-      .apply(([panId, extPanId, networkKey, username, password]) => {
-        const fs = require("fs");
-        const path = require("path");
-        const yaml = require("yaml");
-
-        const configPath = path.join(__dirname, "zigbee2mqtt.conf");
-        const configContent = fs.readFileSync(configPath, "utf8");
-
-        const configObj = yaml.parse(configContent);
-
-        configObj.advanced.pan_id = parseInt(panId);
-        configObj.advanced.ext_pan_id = extPanId.split(",").map((v: string) => parseInt(v));
-        configObj.advanced.network_key = networkKey.split(",").map((v: string) => parseInt(v));
-        configObj.mqtt.user = username;
-        configObj.mqtt.password = password;
-
-        return yaml.stringify(configObj, {
-          sortMapEntries: true,
-          lineWidth: 0,
-        });
-      });
-
-    return new k8s.core.v1.Secret(
-      "zigbee2mqtt-config",
-      {
-        metadata: {
-          name: "zigbee2mqtt-config",
-          namespace: this.namespace,
-        },
-        stringData: {
-          "configuration.yaml": configFileContent,
-        },
-      },
-      { parent: this }
-    );
-  }
-
   private createZigbee2Mqtt() {
     const labels = { app: "zigbee2mqtt" };
 
@@ -363,8 +314,6 @@ ${passwdCommands.join(" && ")}
       backupEnabled: true,
       prefix: "zigbee2mqtt",
     });
-
-    const z2mConfigSecret = this.createZigbee2MqttConfigSecret();
 
     const z2mDeployment = new k8s.apps.v1.Deployment(
       "zigbee2mqtt",
@@ -384,27 +333,11 @@ ${passwdCommands.join(" && ")}
                   name: "zigbee2mqtt",
                   image: "ghcr.io/koenkk/zigbee2mqtt:2.6.3",
                   ports: [{ containerPort: 8080, name: "http" }],
-                  volumeMounts: [
-                    zigbeeDataVolume,
-                    {
-                      name: "z2m-config",
-                      mountPath: "/app/data/configuration.yaml",
-                      subPath: "configuration.yaml",
-                      readOnly: true,
-                    },
-                  ],
+                  volumeMounts: [zigbeeDataVolume],
                   env: [{ name: "TZ", value: config.require("timezone") }],
                 },
               ],
-              volumes: [
-                ...this.volumeManager.getVolumes([zigbeeDataVolume]),
-                {
-                  name: "z2m-config",
-                  secret: {
-                    secretName: z2mConfigSecret.metadata.name,
-                  },
-                },
-              ],
+              volumes: [...this.volumeManager.getVolumes([zigbeeDataVolume])],
             },
           },
         },
