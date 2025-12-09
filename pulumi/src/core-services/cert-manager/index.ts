@@ -59,7 +59,7 @@ export class CertManager extends pulumi.ComponentResource {
       "certmanager",
       {
         chart: "cert-manager",
-        version: "v1.19.1",
+        version: "v1.19.2",
         repositoryOpts: {
           repo: "https://charts.jetstack.io",
         },
