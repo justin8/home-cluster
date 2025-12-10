@@ -331,7 +331,7 @@ ${passwdCommands.join(" && ")}
               containers: [
                 {
                   name: "zigbee2mqtt",
-                  image: "ghcr.io/koenkk/zigbee2mqtt:2.6.3",
+                  image: "ghcr.io/koenkk/zigbee2mqtt:2.7.1",
                   ports: [{ containerPort: 8080, name: "http" }],
                   volumeMounts: [zigbeeDataVolume],
                   env: [{ name: "TZ", value: config.require("timezone") }],
