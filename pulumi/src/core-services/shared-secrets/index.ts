@@ -26,7 +26,7 @@ export class SharedSecrets extends pulumi.ComponentResource {
       "reflector",
       {
         chart: "reflector",
-        version: "9.1.42",
+        version: "9.1.45",
         repositoryOpts: {
           repo: "https://emberstack.github.io/helm-charts",
         },
