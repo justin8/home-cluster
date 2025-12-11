@@ -39,7 +39,7 @@ export class IntelGPU extends pulumi.ComponentResource {
       "gpu-device-plugin",
       {
         chart: "intel-device-plugins-gpu",
-        version: "0.34.0",
+        version: "0.34.1",
         repositoryOpts: {
           repo: "https://intel.github.io/helm-charts/",
         },
