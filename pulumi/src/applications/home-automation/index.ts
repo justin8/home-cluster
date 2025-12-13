@@ -247,6 +247,7 @@ ${passwdCommands.join(" && ")}
             metadata: { labels },
             spec: {
               hostNetwork: true,
+              dnsPolicy: "ClusterFirstWithHostNet",
               containers: [
                 {
                   name: "home-assistant",
