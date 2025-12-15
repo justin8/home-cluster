@@ -25,7 +25,7 @@ export class Reloader extends pulumi.ComponentResource {
       "reloader",
       {
         chart: "reloader",
-        version: "2.2.6",
+        version: "2.2.7",
         repositoryOpts: {
           repo: "https://stakater.github.io/stakater-charts",
         },
