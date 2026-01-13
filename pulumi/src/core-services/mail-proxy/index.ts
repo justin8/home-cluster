@@ -55,7 +55,7 @@ export class MailProxy extends TauApplication {
               containers: [
                 {
                   name: "mail",
-                  image: "boky/postfix:5.0.1",
+                  image: "boky/postfix:5.1.0",
                   ports: [{ name: "smtp", containerPort: 587, protocol: "TCP" }],
                   readinessProbe: {
                     exec: { command: ["sh", "-c", "/scripts/healthcheck.sh"] },
