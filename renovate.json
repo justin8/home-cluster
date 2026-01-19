@@ -26,5 +26,14 @@
       "datasourceTemplate": "docker"
     }
   ],
-  "enabledManagers": ["npm", "custom.regex"]
+  "enabledManagers": ["npm", "custom.regex"],
+  "packageRules": [
+    {
+      "groupName": "all non-major NPM dependencies",
+      "groupSlug": "all-minor-patch",
+      "matchManagers": ["npm"],
+      "matchPackageNames": ["*"],
+      "matchUpdateTypes": ["minor", "patch"]
+    }
+  ]
 }
