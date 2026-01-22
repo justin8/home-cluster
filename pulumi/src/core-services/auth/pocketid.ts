@@ -1,5 +1,6 @@
 import * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
+import * as random from "@pulumi/random";
 import { MAIL_PROXY_ENDPOINT, MAIL_PROXY_PORT } from "../../constants";
 import { TauApplication, TauApplicationArgs } from "../../constructs";
 import { createVPA } from "../../utils";
@@ -31,6 +32,15 @@ export class PocketId extends TauApplication {
       { ...opts, parent: this }
     );
 
+    const encryptionKey = new random.RandomPassword(
+      `${name}-encryption-key`,
+      {
+        length: 32,
+        special: true,
+      },
+      { parent: this }
+    );
+
     const configuration = new k8s.core.v1.Secret(
       `${name}-config`,
       {
@@ -51,6 +61,7 @@ export class PocketId extends TauApplication {
           SMTP_FROM: `${this.name}@${this.domain}`,
           MAXMIND_LICENSE_KEY: config.require("maxmind_license_key"),
           EMAILS_VERIFIED: "true",
+          ENCRYPTION_KEY: encryptionKey.result, // Required for v2.0+
         },
       },
       { ...opts, parent: this }
@@ -77,7 +88,7 @@ export class PocketId extends TauApplication {
               containers: [
                 {
                   name: "pocketid",
-                  image: "ghcr.io/pocket-id/pocket-id:v1.16.0",
+                  image: "ghcr.io/pocket-id/pocket-id:v2.2.0",
                   ports: [{ containerPort: port }],
                   volumeMounts: [dataMount],
                   envFrom: [{ secretRef: { name: configuration.metadata.name } }],
