@@ -62,11 +62,12 @@ export class IngressControllers extends pulumi.ComponentResource {
           },
           ports: {
             web: {
-              redirections: {
-                entryPoint: {
-                  to: "websecure",
-                  scheme: "https",
-                  permanent: "true",
+              http: {
+                redirections: {
+                  entryPoint: {
+                    to: "websecure",
+                    scheme: "https",
+                  },
                 },
               },
             },
