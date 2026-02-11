@@ -18,7 +18,7 @@ export class NFSCSI extends pulumi.ComponentResource {
       "csi-driver-nfs",
       {
         chart: "csi-driver-nfs",
-        version: "4.12.1",
+        version: "4.13.1",
         repositoryOpts: {
           repo: "https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts",
         },
