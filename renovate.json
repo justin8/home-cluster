@@ -24,6 +24,24 @@
         ".*?[Ii]mage\\s*=\\s*[\"'](?<depName>.*?):(?<currentValue>.*?)[\"']"
       ],
       "datasourceTemplate": "docker"
+    },
+    {
+      "customType": "regex",
+      "description": "Talos version in talconfig.yaml",
+      "fileMatch": ["^talos/talconfig\\.yaml$"],
+      "matchStrings": ["talosVersion:\\s*(?<currentValue>v\\d+\\.\\d+\\.\\d+)"],
+      "depNameTemplate": "siderolabs/talos",
+      "datasourceTemplate": "github-releases",
+      "extractVersionTemplate": "^v(?<version>.*)$"
+    },
+    {
+      "customType": "regex",
+      "description": "Kubernetes version in talconfig.yaml",
+      "fileMatch": ["^talos/talconfig\\.yaml$"],
+      "matchStrings": ["kubernetesVersion:\\s*(?<currentValue>v\\d+\\.\\d+\\.\\d+)"],
+      "depNameTemplate": "kubernetes/kubernetes",
+      "datasourceTemplate": "github-releases",
+      "extractVersionTemplate": "^v(?<version>.*)$"
     }
   ],
   "enabledManagers": ["npm", "custom.regex"],
