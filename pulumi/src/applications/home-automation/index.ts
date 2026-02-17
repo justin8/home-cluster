@@ -251,7 +251,7 @@ ${passwdCommands.join(" && ")}
               containers: [
                 {
                   name: "home-assistant",
-                  image: "homeassistant/home-assistant:2026.1",
+                  image: "homeassistant/home-assistant:2026.2",
                   securityContext: {
                     privileged: true,
                   },
