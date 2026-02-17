@@ -16,80 +16,52 @@ cniConfig:
   name: flannel
 patches:
   - |-
-    - op: add
-      path: /machine/env
-      value:
+    machine:
+      env:
         GRPC_GO_LOG_SEVERITY_LEVEL: error
-  - |-
-    - op: add
-      path: /machine/registries
-      value:
+      registries:
         config:
           docker.io:
             auth:
               username: ${dockerhub_username}
               password: ${dockerhub_password}
-
-  - |-
-    - op: add
-      path: /machine/kubelet/extraMounts
-      value:
-        - destination: /var/lib/longhorn
-          type: bind
-          source: /var/lib/longhorn
-          options:
-            - bind
-            - rshared
-            - rw
-  - |-
-    - op: add
-      path: /machine/kubelet/extraArgs
-      value:
-        allowed-unsafe-sysctls: "net.ipv4.conf.all.src_valid_mark"
-        rotate-server-certificates: true
-        feature-gates: InPlacePodVerticalScaling=true
-  - |-
-    - op: add
-      path: /machine/sysctls
-      value:
+      kubelet:
+        extraMounts:
+          - destination: /var/lib/longhorn
+            type: bind
+            source: /var/lib/longhorn
+            options:
+              - bind
+              - rshared
+              - rw
+        extraArgs:
+          allowed-unsafe-sysctls: "net.ipv4.conf.all.src_valid_mark"
+          rotate-server-certificates: true
+          feature-gates: InPlacePodVerticalScaling=true
+      sysctls:
         vm.nr_hugepages: "1024"
-  - |-
-    - op: add
-      path: /machine/kernel
-      value:
+      kernel:
         modules:
           - name: nvme_tcp
           - name: vfio_pci
           - name: wireguard
-  - |-
-    - op: replace
-      path: /machine/install/wipe
-      value: true
-  - |-
-    - op: add
-      path: /cluster/etcd/extraArgs
-      value:
-        heartbeat-interval: "300"
-        election-timeout: "1500"
-  - |-
-    - op: add
-      path: /cluster/apiServer/extraArgs
-      value:
-        feature-gates: InPlacePodVerticalScaling=true
-  - |-
-    - op: add
-      path: /cluster/controllerManager/extraArgs
-      value:
-        feature-gates: InPlacePodVerticalScaling=true
-  - |-
-    - op: add
-      path: /cluster/scheduler/extraArgs
-      value:
-        feature-gates: InPlacePodVerticalScaling=true
-  - |-
-    - op: add
-      path: /cluster/extraManifests
-      value:
+      install:
+        wipe: true
+    cluster:
+      etcd:
+        extraArgs:
+          heartbeat-interval: "300"
+          election-timeout: "1500"
+      apiServer:
+        extraArgs:
+          feature-gates: InPlacePodVerticalScaling=true
+      controllerManager:
+        extraArgs:
+          feature-gates: InPlacePodVerticalScaling=true
+      scheduler:
+        extraArgs:
+          feature-gates: InPlacePodVerticalScaling=true
+      extraManifests:
         - https://raw.githubusercontent.com/alex1989hu/kubelet-serving-cert-approver/main/deploy/standalone-install.yaml
         - https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
 nodes:
