@@ -51,5 +51,8 @@ jobs:
           role-to-assume: arn:aws:iam::185873083718:role/github-home-cluster
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Update Nix
+        run: nix-channel --update
+
       - name: Deploy with Pulumi
         run: nix-shell --run "cd pulumi && pulumi stack select home-cluster && pulumi up --diff -y"
