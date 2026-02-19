@@ -32,6 +32,11 @@ runs:
       with:
         primary-key: nix-${{ runner.os }}-${{ hashFiles('shell.nix') }}
 
+    - name: Prime Nix cache
+      shell: bash
+      run: |
+        nix-shell --run 'echo'
+
     - name: Set up WireGuard
       uses: egor-tensin/setup-wireguard@v1
       with:
