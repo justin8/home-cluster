@@ -65,9 +65,9 @@ export class Grist extends TauApplication {
           APP_HOME_URL: pulumi.interpolate`https://${this.applicationDomain}`,
           REDIS_URL: pulumi.interpolate`redis://:${redisPassword}@${getServiceURL(redisName, this.namespace)}/${redisDb}`,
           GRIST_SESSION_SECRET: sessionSecret,
-          GRIST_SANDBOX_FLAVOR: "gvisor", // This prevents network calls from functions
+          GRIST_SANDBOX_FLAVOR: "unsandboxed", // This should be using gvisor, but around 2026-02 it started to refuse to work on kubernetes; possibly due to either grist or kubernetes 1.35 updates
           GRIST_EXPERIMENTAL_PLUGINS: "1",
-          GRIST_ENABLE_REQUEST_FUNCTION: "1", // THis plus experimental functions enables the REQUEST function
+          GRIST_ENABLE_REQUEST_FUNCTION: "1", // This plus experimental functions enables the REQUEST function
           GRIST_ALLOW_AUTOMATIC_VERSION_CHECKING: "false",
           GRIST_ANON_PLAYGROUND: "false",
           GRIST_MANAGED_WORKERS: "true",
@@ -146,15 +146,10 @@ export class Grist extends TauApplication {
               containers: [
                 {
                   name: "grist",
-                  image: "gristlabs/grist:latest",
+                  image: "gristlabs/grist:1.7.9",
                   ports: [{ containerPort: 8484 }],
                   envFrom: [{ secretRef: { name: gristSecret.name } }],
                   volumeMounts: [persistMount],
-                  securityContext: {
-                    capabilities: {
-                      add: ["SYS_PTRACE"],
-                    },
-                  },
                 },
               ],
               volumes: this.volumeManager.getVolumes([persistMount]),
