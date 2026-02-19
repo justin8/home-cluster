@@ -146,7 +146,7 @@ export class Grist extends TauApplication {
               containers: [
                 {
                   name: "grist",
-                  image: "gristlabs/grist:1.7.9",
+                  image: "gristlabs/grist:1.7.10",
                   ports: [{ containerPort: 8484 }],
                   envFrom: [{ secretRef: { name: gristSecret.name } }],
                   volumeMounts: [persistMount],
