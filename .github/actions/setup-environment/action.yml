@@ -1,0 +1,49 @@
+name: Setup Environment
+description: Setup Nix, WireGuard, and AWS credentials for cluster operations
+
+inputs:
+  wireguard-endpoint:
+    description: "WireGuard endpoint"
+    required: true
+  wireguard-endpoint-public-key:
+    description: "WireGuard endpoint public key"
+    required: true
+  wireguard-ips:
+    description: "WireGuard IPs"
+    required: true
+  wireguard-allowed-ips:
+    description: "WireGuard allowed IPs"
+    required: true
+  wireguard-private-key:
+    description: "WireGuard private key"
+    required: true
+  wireguard-preshared-key:
+    description: "WireGuard preshared key"
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Install Nix
+      uses: nixbuild/nix-quick-install-action@v34
+
+    - name: Cache Nix store
+      uses: nix-community/cache-nix-action@v6
+      with:
+        primary-key: nix-${{ runner.os }}-${{ hashFiles('shell.nix') }}
+
+    - name: Set up WireGuard
+      uses: egor-tensin/setup-wireguard@v1
+      with:
+        endpoint: ${{ inputs.wireguard-endpoint }}
+        endpoint_public_key: ${{ inputs.wireguard-endpoint-public-key }}
+        ips: ${{ inputs.wireguard-ips }}
+        allowed_ips: ${{ inputs.wireguard-allowed-ips }}
+        private_key: ${{ inputs.wireguard-private-key }}
+        preshared_key: ${{ inputs.wireguard-preshared-key }}
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v5
+      with:
+        role-to-assume: arn:aws:iam::185873083718:role/github-home-cluster
+        aws-region: us-east-1

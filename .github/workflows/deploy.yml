@@ -27,29 +27,71 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Install Nix
-        uses: nixbuild/nix-quick-install-action@v34
-
-      - name: Cache Nix store
-        uses: nix-community/cache-nix-action@v6
+      - name: Setup environment
+        uses: ./.github/actions/setup-environment
         with:
-          primary-key: nix-${{ runner.os }}-${{ hashFiles('shell.nix') }}
+          wireguard-endpoint: ${{ secrets.WIREGUARD_ENDPOINT }}
+          wireguard-endpoint-public-key: ${{ secrets.WIREGUARD_ENDPOINT_PUBLIC_KEY }}
+          wireguard-ips: ${{ secrets.WIREGUARD_IPS }}
+          wireguard-allowed-ips: ${{ secrets.WIREGUARD_ALLOWED_IPS }}
+          wireguard-private-key: ${{ secrets.WIREGUARD_PRIVATE_KEY }}
+          wireguard-preshared-key: ${{ secrets.WIREGUARD_PRESHARED_KEY }}
 
-      - name: Set up WireGuard
-        uses: egor-tensin/setup-wireguard@v1
-        with:
-          endpoint: ${{ secrets.WIREGUARD_ENDPOINT }}
-          endpoint_public_key: ${{ secrets.WIREGUARD_ENDPOINT_PUBLIC_KEY }}
-          ips: ${{ secrets.WIREGUARD_IPS }}
-          allowed_ips: ${{ secrets.WIREGUARD_ALLOWED_IPS }}
-          private_key: ${{ secrets.WIREGUARD_PRIVATE_KEY }}
-          preshared_key: ${{ secrets.WIREGUARD_PRESHARED_KEY }}
+      - name: Check Talos version and upgrade if needed
+        run: |
+          nix-shell --run '
+            cd talos
+            
+            # Extract target version from talconfig.yaml
+            TARGET_VERSION=$(yq -r ".talosVersion" talconfig.yaml)
+            echo "Target Talos version: $TARGET_VERSION"
+            
+            # Extract IP addresses from talconfig.yaml (comma-separated list)
+            NODE_IPS=$(yq -r ".nodes[0].ipAddress" talconfig.yaml | tr "," "\n" | xargs)
+            echo "Node IPs: $NODE_IPS"
+            
+            # Check if upgrade is needed
+            UPGRADE_NEEDED=false
+            for IP in $NODE_IPS; do
+              echo "Checking node $IP..."
+              CURRENT_VERSION=$(talosctl -n $IP version --short 2>/dev/null | grep "Tag:" | awk "{print \$2}" || echo "unknown")
+              echo "Current version on $IP: $CURRENT_VERSION"
+              
+              if [ "$CURRENT_VERSION" != "$TARGET_VERSION" ]; then
+                echo "Version mismatch detected on $IP"
+                UPGRADE_NEEDED=true
+                break
+              fi
+            done
+            
+            if [ "$UPGRADE_NEEDED" = true ]; then
+              echo "Upgrading Talos to $TARGET_VERSION..."
+              talhelper gencommand upgrade --extra-flags "--preserve" | bash
+            else
+              echo "All nodes are already running $TARGET_VERSION, no upgrade needed"
+            fi
+          '
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v5
-        with:
-          role-to-assume: arn:aws:iam::185873083718:role/github-home-cluster
-          aws-region: ${{ env.AWS_REGION }}
+      - name: Check Kubernetes version and upgrade if needed
+        run: |
+          nix-shell --run '
+            cd talos
+            
+            # Extract target version from talconfig.yaml
+            TARGET_VERSION=$(yq -r ".kubernetesVersion" talconfig.yaml)
+            echo "Target Kubernetes version: $TARGET_VERSION"
+            
+            # Get current cluster version
+            CURRENT_VERSION=$(kubectl version -o json | jq -r ".serverVersion.gitVersion")
+            echo "Current Kubernetes version: $CURRENT_VERSION"
+            
+            if [ "$CURRENT_VERSION" != "$TARGET_VERSION" ]; then
+              echo "Upgrading Kubernetes from $CURRENT_VERSION to $TARGET_VERSION..."
+              talhelper gencommand upgrade-k8s | bash
+            else
+              echo "Kubernetes is already running $TARGET_VERSION, no upgrade needed"
+            fi
+          '
 
       - name: Deploy with Pulumi
         run: nix-shell --run "cd pulumi && pulumi stack select home-cluster && pulumi up --diff -y"
