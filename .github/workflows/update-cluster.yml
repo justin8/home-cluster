@@ -1,4 +1,4 @@
-name: Deploy
+name: Update cluster
 
 on:
   push:
@@ -15,11 +15,11 @@ permissions:
   contents: read
 
 concurrency:
-  group: deploy
+  group: update-cluster
   cancel-in-progress: false
 
 jobs:
-  deploy:
+  update-cluster:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
