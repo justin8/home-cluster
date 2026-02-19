@@ -5,7 +5,6 @@ import { Prowlarr } from "./prowlarr";
 import { Radarr } from "./radarr";
 import { Sabnzbd } from "./sabnzbd";
 import { Sonarr } from "./sonarr";
-import { JellySeerr } from "./jellyseerr";
 import { Seerr } from "./seerr";
 import { QBittorrent } from "./qbittorrent";
 
@@ -44,11 +43,6 @@ export class Downloads extends pulumi.ComponentResource {
     );
     new QBittorrent(
       "qbittorrent",
-      { namespace, createNamespace: false },
-      { parent: this, dependsOn: [ns] }
-    );
-    new JellySeerr(
-      "jellyseerr",
       { namespace, createNamespace: false },
       { parent: this, dependsOn: [ns] }
     );
