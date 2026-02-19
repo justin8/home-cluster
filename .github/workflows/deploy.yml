@@ -93,5 +93,12 @@ jobs:
             fi
           '
 
+      - name: Apply Talos config
+        run: |
+          nix-shell --run '
+            cd talos
+            talhelper gencommand apply --extra-flags "--mode no-reboot" | bash
+            '
+
       - name: Deploy with Pulumi
         run: nix-shell --run "cd pulumi && pulumi stack select home-cluster && pulumi up --diff -y"
