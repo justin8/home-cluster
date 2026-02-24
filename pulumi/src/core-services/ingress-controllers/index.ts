@@ -71,6 +71,15 @@ export class IngressControllers extends pulumi.ComponentResource {
                 },
               },
             },
+            websecure: {
+              transport: {
+                respondingTimeouts: {
+                  readTimeout: "10m",
+                  writeTimeout: "10m",
+                  idleTimeout: "10m",
+                },
+              },
+            },
           },
           ingressRoute: {
             dashboard: {
