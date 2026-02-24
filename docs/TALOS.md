@@ -62,6 +62,10 @@ This automatically runs `talhelper genconfig` to regenerate all configuration fi
 
 ## Configuration Changes
 
+### Shutdown Cluster
+
+1. `talosctl shutdown --force`
+
 ### Modifying Cluster Settings
 
 1. Edit `talconfig.yaml`

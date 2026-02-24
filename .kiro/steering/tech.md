@@ -88,6 +88,9 @@ talhelper gencommand kubeconfig | bash
 
 # Target specific node
 talhelper gencommand apply -n master1 | bash
+
+# Shutdown cluster
+talosctl shutdown --force
 ```
 
 **⚠️ CRITICAL: New Node Initialization**
