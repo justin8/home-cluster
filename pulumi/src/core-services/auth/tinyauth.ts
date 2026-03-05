@@ -94,7 +94,7 @@ export class TinyAuth extends TauApplication {
               containers: [
                 {
                   name: "tinyauth",
-                  image: "ghcr.io/steveiliop56/tinyauth:v4.1.0",
+                  image: "ghcr.io/steveiliop56/tinyauth:v5.0.1",
                   ports: [
                     {
                       containerPort: 3000,
