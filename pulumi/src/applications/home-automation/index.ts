@@ -251,7 +251,7 @@ ${passwdCommands.join(" && ")}
               containers: [
                 {
                   name: "home-assistant",
-                  image: "homeassistant/home-assistant:2026.2",
+                  image: "homeassistant/home-assistant:2026.3",
                   securityContext: {
                     privileged: true,
                   },
@@ -332,7 +332,7 @@ ${passwdCommands.join(" && ")}
               containers: [
                 {
                   name: "zigbee2mqtt",
-                  image: "ghcr.io/koenkk/zigbee2mqtt:2.8.0",
+                  image: "ghcr.io/koenkk/zigbee2mqtt:2.9.1",
                   ports: [{ containerPort: 8080, name: "http" }],
                   volumeMounts: [zigbeeDataVolume],
                   env: [{ name: "TZ", value: config.require("timezone") }],
