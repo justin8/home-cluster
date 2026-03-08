@@ -17,15 +17,20 @@ export class TinyAuth extends TauApplication {
     super(name, args, opts);
 
     const oauth_config_data = {
-      PROVIDERS_POCKETID_CLIENT_ID: config.require("tinyauth_oauth_client_id"),
-      PROVIDERS_POCKETID_CLIENT_SECRET: config.require("tinyauth_oauth_client_secret"),
-      PROVIDERS_POCKETID_AUTH_URL: "https://pocketid.dray.id.au/authorize",
-      PROVIDERS_POCKETID_TOKEN_URL: "https://pocketid.dray.id.au/api/oidc/token",
-      PROVIDERS_POCKETID_USER_INFO_URL: "https://pocketid.dray.id.au/api/oidc/userinfo",
-      PROVIDERS_POCKETID_REDIRECT_URL: "https://tinyauth.dray.id.au/api/oauth/callback/pocketid",
-      PROVIDERS_POCKETID_SCOPES: "openid email profile groups",
-      OAUTH_AUTO_REDIRECT: "pocketid",
-      SECURE_COOKIE: "true",
+      TINYAUTH_OAUTH_PROVIDERS_POCKETID_CLIENTID: config.require("tinyauth_oauth_client_id"),
+      TINYAUTH_OAUTH_PROVIDERS_POCKETID_CLIENTSECRET: config.require(
+        "tinyauth_oauth_client_secret"
+      ),
+      TINYAUTH_OAUTH_PROVIDERS_POCKETID_AUTHURL: "https://pocketid.dray.id.au/authorize",
+      TINYAUTH_OAUTH_PROVIDERS_POCKETID_TOKENURL: "https://pocketid.dray.id.au/api/oidc/token",
+      TINYAUTH_OAUTH_PROVIDERS_POCKETID_USERINFOURL:
+        "https://pocketid.dray.id.au/api/oidc/userinfo",
+      TINYAUTH_OAUTH_PROVIDERS_POCKETID_REDIRECTURL:
+        "https://tinyauth.dray.id.au/api/oauth/callback/pocketid",
+      TINYAUTH_OAUTH_PROVIDERS_POCKETID_SCOPES: "openid email profile groups",
+      TINYAUTH_OAUTH_AUTOREDIRECT: "pocketid",
+      TINYAUTH_AUTH_SECURECOOKIE: "true",
+      TINYAUTH_APPURL: pulumi.interpolate`https://${this.applicationDomain}`,
     };
 
     const oauth_config = new k8s.core.v1.Secret(
@@ -94,7 +99,7 @@ export class TinyAuth extends TauApplication {
               containers: [
                 {
                   name: "tinyauth",
-                  image: "ghcr.io/steveiliop56/tinyauth:v4.1.0",
+                  image: "ghcr.io/steveiliop56/tinyauth:v5.0.2",
                   ports: [
                     {
                       containerPort: 3000,
@@ -102,10 +107,6 @@ export class TinyAuth extends TauApplication {
                   ],
                   envFrom: [{ secretRef: { name: oauth_config.metadata.name } }],
                   env: [
-                    {
-                      name: "APP_URL",
-                      value: pulumi.interpolate`https://${this.applicationDomain}`,
-                    },
                     {
                       name: "SECRET",
                       valueFrom: {
