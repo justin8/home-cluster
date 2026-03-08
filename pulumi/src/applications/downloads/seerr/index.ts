@@ -53,7 +53,7 @@ export class Seerr extends TauApplication {
               containers: [
                 {
                   name: name,
-                  image: "ghcr.io/seerr-team/seerr:v3.0.1",
+                  image: "ghcr.io/seerr-team/seerr:v3.1.0",
                   ports: [
                     {
                       containerPort: port,
