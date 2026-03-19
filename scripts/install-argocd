@@ -5,6 +5,13 @@ set -euo pipefail
 ARGOCD_VERSION="v2.12.0"
 ARGOCD_NAMESPACE="argocd"
 
+# 🔐 Check for SOPS key early
+if [[ ! -f ".sops-age.key" ]]; then
+    echo "❌ ERROR: .sops-age.key not found. This is required for secret management."
+    echo "   Ensure you are running in a nix-shell or have the key in the project root."
+    exit 1
+fi
+
 echo "🚀 Installing Argo CD ${ARGOCD_VERSION}..."
 
 # Create the namespace if it doesn't exist
@@ -18,6 +25,16 @@ kubectl wait --for=condition=available --timeout=300s deployment/argocd-server -
 kubectl wait --for=condition=available --timeout=300s deployment/argocd-repo-server -n "${ARGOCD_NAMESPACE}"
 
 echo "✅ Argo CD is installed!"
+
+echo "🔐 Bootstrapping SOPS Age key..."
+# Create namespace for external-secrets if it doesn't exist
+kubectl create namespace external-secrets --dry-run=client -o yaml | kubectl apply -f -
+# Create the secret from the local key file
+kubectl create secret generic sops-age \
+    --namespace external-secrets \
+    --from-file=age.agekey=.sops-age.key \
+    --dry-run=client -o yaml | kubectl apply -f -
+echo "✅ SOPS Age key bootstrapped!"
 
 echo "🌱 Applying Root Application (App of Apps)..."
 kubectl apply -f kubernetes/bootstrap/root.yaml

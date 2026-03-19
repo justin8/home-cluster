@@ -1,44 +1,29 @@
 # Home Kubernetes Cluster
 
-This repository contains infrastructure as code for a home Kubernetes cluster running on Talos Linux.
+This repository contains infrastructure as code for a home Kubernetes cluster running on Talos Linux. This branch is currently in the process of migrating from Pulumi-based management to a GitOps approach using ArgoCD.
 
 ## Overview
 
-The infrastructure is managed using Pulumi via TypeScript, and Talos Linux with Talhelper providing:
+The infrastructure is managed using ArgoCD and Talos Linux with Talhelper providing:
 
 - Kubernetes infrastructure management
 - Core Kubernetes services
 - Persistent storage options (NFS and Longhorn)
-- Application deployment framework
+- Application deployment framework via ArgoCD
 - Ingress management
 - Certificate management
 
 ## Initial Setup
 
-A few components can't be configured automatically at the moment, they should all be documented below:
+### Requirements
 
-### Pulumi Variables
+- Talos Linux nodes
+- Cloudflare account for DNS and TLS
+- NFS server for persistent storage
 
-These should be set via `pulumi config set $name $value` and optionally with `--secret` to encrypt the values before storing them in the file.
+### Configuration
 
-- `ip_address_pool` - The main IP address pool for MetalLB to use, e.g: `192.168.5.80-192.168.5.100`
-- `admin_email` - Email used for domain validation when generating TLS certs and other default administrative purposes
-- Cloudflare:
-  - `cloudflare_email` - What it says on the tin
-  - `cloudflare_api_token` - An API token that can modify DNS; used for both TLS wildcard cert generation and public ingress DNS updates. Note this is an API **token** as opposed to an API **key** that is legacy.
-- `domain` - Top-level domain that all services will be generated under.
-- `storage_ip` - Used for all NFS mounts
-- `public_ingress_ip` - A static IP (or a pool) to use for the public ingress
-- `private_ingress_ip` - A static IP (or a pool) to use for the private ingress
-- `cluster_ip` - The Kubernetes API server VIP
-- `dns_server_ip` - A static IP (or a pool) to use for the DNS server
-- `longhorn_nfs_backup_path` - A path on the NFS server to use for longhorn backups
-- `timezone_offset` - Used to generate cron jobs at acceptable times - Talos only supports UTC natively
-- `real_external_ip` - The external IP (e.g. router IP) that will be used for external DNS updates instead of the public ingress's IP
-
-### NFS
-
-The NFS server must be accessible to all nodes in the cluster, with any specified shares accessible.
+Configuration is managed via Helm values and Kubernetes manifests located in the `kubernetes/` directory. Secrets are managed using SOPS.
 
 ### Auth
 
@@ -130,10 +115,7 @@ The NFS server must be accessible to all nodes in the cluster, with any specifie
 
 Pocket ID is used to manage all users, and also requires manual setup of OAuth clients. On a clean cluster, navigate to `https://pocketid.${domain}/setup` to do the first-time setup and create an admin user.
 
-Tinyauth is used as an auth proxy in front of most services that don't support native OAuth2. It also needs it's own OAuth client setup in Pocket ID to be able to support this. Initial setup instructions can be found [here](https://tinyauth.app/docs/guides/pocket-id), however for our purposes the only settings that wil need to be udpated are:
-
-- `pulumi config set --path tinyauth_oauth_client_id $client_id`
-- `pulumi config set --secret --path tinyauth_oauth_client_secret $client_secret`
+Tinyauth is used as an auth proxy in front of most services that don't support native OAuth2. It also needs its own OAuth client setup in Pocket ID.
 
 ## Cluster Deployment
 
@@ -142,31 +124,21 @@ For cluster creation, initialization, and post-deployment setup instructions, se
 ## Project Layout
 
 ```
-/pulumi
-├── index.ts                     # Main Pulumi entry point
-├── src/
-│   ├── applications/            # Application definitions
-│   │   └── demo-app/            # Example application
-│   ├── constructs/              # Reusable infrastructure components
-│   │   ├── index.ts             # Exports of constructs
-│   │   ├── tauApplication.ts    # Base application class
-│   │   └── volumeManager.ts     # Volume management utilities
-│   ├── core-services/           # Core cluster services
-│   │   ├── cert-manager/        # Certificate management
-│   │   ├── ingress-controllers/ # Traefik ingress controllers
-│   │   ├── longhorn/            # Longhorn storage
-│   │   ├── metallb/             # Load balancer for bare metal
-│   │   └── nfs-csi/             # NFS storage driver
-│   ├── constants.ts             # Shared constants
-│   └── utils/                   # Utility functions
-└── Pulumi.home-cluster.yaml     # Stack configuration
+/kubernetes
+├── apps/                        # Application manifests and Helm charts
+├── bootstrap/                   # ArgoCD root application
+├── charts/                      # Local Helm charts
+└── values/                      # Global and environment-specific values
+/talos
+├── talconfig.yaml               # Talhelper configuration
+└── talsecret.sops.yaml          # Encrypted cluster secrets
 ```
 
 ## Core Services
 
 The infrastructure includes the following core services:
 
-1. **SharedSecrets** - Cluster-wide secret management
+1. **SharedSecrets** - Cluster-wide secret management using SOPS
    - Manages shared secrets across the cluster
    - Foundation for other services requiring credentials
 
@@ -218,120 +190,12 @@ For detailed networking and DNS architecture information, see [docs/NETWORKING_A
 - **Storage**: NFS server at `192.168.5.5` + Longhorn distributed storage
 - **Zigbee Co-ordinator**: `192.168.5.6`
 
-## Applications
-
-Applications extend the `TauApplication` base class which provides:
-
-- Domain management
-- Ingress creation (public or private)
-- Volume management through VolumeManager
-
-### Ingress
-
-The `TauApplication` class provides the `createHttpIngress()` method for exposing applications via HTTP/HTTPS. It also includes some sane defaults:
-
-- Auth is enabled by default
-- All ingresses are private by default
-- The wrapper in `TauApplication` should automatically assignes the right labels, but you can specify them manually if required
-
-```typescript
-// Basic ingress (private only, with auth)
-this.createHttpIngress({ appName: name, port: 80 }, { parent: this });
-
-// Public ingress with authentication
-this.createHttpIngress({ appName: name, port: 80, public: true }, { parent: this });
-
-// Public ingress without authentication
-this.createHttpIngress({ appName: name, port: 80, public: true, auth: false }, { parent: this });
-```
-
-**Options:**
-
-- `appName`: Application name (used for service name)
-- `port`: Service port to expose
-- `labels`: Pod selector labels
-- `public`: Create both public and private ingress (default: false)
-- `auth`: Enable TinyAuth authentication middleware (default: true)
-- `path`: URL path (default: "/")
-- `pathType`: Path matching type (default: "Prefix")
-
-**Behavior:**
-
-- Always creates a private ingress accessible internally
-- Auth is enabled by default and can be disabled with `auth: false`
-- If `public: true`, also creates a public ingress accessible from internet
-- Automatic TLS certificate provisioning via cert-manager
-- DNS records automatically managed by External DNS (by monitoring ingress objects)
-
 ## Storage Options
 
 The cluster uses both NFS and Longhorn for different use cases:
 
 - **NFS**: Used for shared file access across multiple nodes/pods when network file storage is appropriate
 - **Longhorn**: Used for persistent block storage with replication when data needs high availability
-
-## Usage Examples
-
-### Creating a Basic Application
-
-See [src/applications/demo-app/index.ts](src/applications/demo-app/index.ts) for a more complete example.
-
-```typescript
-export class MyApp extends TauApplication {
-  constructor(name: string, opts?: pulumi.ComponentResourceOptions) {
-    super(name, opts);
-
-    // Define volumes
-    const dataMount = this.volumeManager.createVolume("/data/my-app", {
-      size: "10Gi",
-      backupEnabled: true,
-    });
-
-    // Create deployment
-    new k8s.apps.v1.Deployment(
-      name,
-      {
-        spec: {
-          selector: { matchLabels: this.labels },
-          template: {
-            metadata: { labels: this.labels },
-            spec: {
-              containers: [
-                {
-                  name: name,
-                  image: "my-image:latest",
-                  volumeMounts: [dataMount],
-                },
-              ],
-              volumes: this.volumeManager.getVolumes([dataMount]),
-            },
-          },
-        },
-      },
-      { parent: this }
-    );
-
-    // Create ingress
-    this.createIngress({ port: 80 });
-  }
-}
-```
-
-## Common Commands
-
-```bash
-# Preview infrastructure changes
-pulumi preview
-
-# Deploy infrastructure changes
-pulumi up
-
-# Destroy infrastructure
-pulumi destroy
-
-# View stack outputs
-pulumi stack output
-```
 
 ## Running on Control Plane Only Clusters
 
