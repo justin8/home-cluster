@@ -20,6 +20,32 @@ The cluster is managed using the "App of Apps" pattern (or ApplicationSets). Arg
 2. **Argo CD Installation**: Argo CD is installed manually or via a script into the `argocd` namespace.
 3. **Root Application**: A "root" application is created that points to `kubernetes/apps/`, which in turn manages all other applications in the cluster.
 
+## New Cluster Setup
+
+To set up a new cluster with Argo CD using the "App of Apps" pattern:
+
+1.  **Prepare the Cluster**: Ensure your Kubernetes cluster is running (e.g., via Talos) and you have `kubectl` access.
+2.  **Run the Install Script**:
+    ```bash
+    ./scripts/install-argocd
+    ```
+    This script will:
+    - Install Argo CD into the `argocd` namespace.
+    - Wait for the components to be ready.
+    - Apply the **Root Application** from `kubernetes/bootstrap/root.yaml`.
+3.  **Verify the Bootstrap**:
+    - Argo CD will pick up the Root Application.
+    - The Root Application will then render the `kubernetes/apps/` Helm chart.
+    - This will create all the other `Application` resources (like MetalLB) defined in `kubernetes/apps/templates/`.
+4.  **Access the UI**:
+    ```bash
+    kubectl port-forward svc/argocd-server -n argocd 8080:443
+    ```
+    Login at `https://localhost:8080` using the username `admin`. You can get the initial password with:
+    ```bash
+    kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+    ```
+
 ## Adding a new Application
 
 To add a new application to the cluster:

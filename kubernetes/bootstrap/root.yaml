@@ -7,7 +7,7 @@ spec:
   project: default
   source:
     path: kubernetes/apps
-    repoURL: https://github.com/justin8/home-cluster.git
+    repoURL: https://github.com/justin8/home-cluster.git # We can't use variables in the initial bootstrap script, but we can everywhere else
     targetRevision: argocd
     helm:
       valueFiles:

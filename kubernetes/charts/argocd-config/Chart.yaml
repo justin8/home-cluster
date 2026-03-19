@@ -1,0 +1,5 @@
+apiVersion: v2
+name: argocd-config
+description: Internal configuration for Argo CD (RBAC, CM)
+type: application
+version: 0.1.0

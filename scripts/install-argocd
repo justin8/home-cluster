@@ -19,9 +19,6 @@ kubectl wait --for=condition=available --timeout=300s deployment/argocd-repo-ser
 
 echo "✅ Argo CD is installed!"
 
-# Initial password (if needed)
-# kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
-
 echo "🌱 Applying Root Application (App of Apps)..."
 kubectl apply -f kubernetes/bootstrap/root.yaml
 
