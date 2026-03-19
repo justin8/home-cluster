@@ -154,3 +154,4 @@ dist
 .direnv
 .ansible
 .sops-age.key
+*.iso

@@ -18,3 +18,11 @@ yarn.lock
 # Documentation that shouldn't be formatted
 POSTGRES_REQUIREMENTS.md
 POSTGRES_IMPLEMENTATION_PLAN.md
+
+# Secrets
+*.sops.yaml
+*.sops.yml
+
+# Helm/Argo CD templates (contain {{ ... }} which break standard YAML parsing)
+**/templates/**/*.yaml
+**/templates/**/*.yml

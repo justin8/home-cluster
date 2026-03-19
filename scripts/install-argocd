@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+ARGOCD_VERSION="v2.12.0"
+ARGOCD_NAMESPACE="argocd"
+
+echo "🚀 Installing Argo CD ${ARGOCD_VERSION}..."
+
+# Create the namespace if it doesn't exist
+kubectl create namespace "${ARGOCD_NAMESPACE}" --dry-run=client -o yaml | kubectl apply -f -
+
+# Install Argo CD
+kubectl apply -n "${ARGOCD_NAMESPACE}" -f "https://raw.githubusercontent.com/argoproj/argo-cd/${ARGOCD_VERSION}/manifests/install.yaml"
+
+echo "⏳ Waiting for Argo CD components to be ready..."
+kubectl wait --for=condition=available --timeout=300s deployment/argocd-server -n "${ARGOCD_NAMESPACE}"
+kubectl wait --for=condition=available --timeout=300s deployment/argocd-repo-server -n "${ARGOCD_NAMESPACE}"
+
+echo "✅ Argo CD is installed!"
+
+# Initial password (if needed)
+# kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+
+echo "🌱 Applying Root Application (App of Apps)..."
+kubectl apply -f kubernetes/bootstrap/root.yaml
+
+echo "🎉 Setup complete! You can access the Argo CD UI via port-forward:"
+echo "   kubectl port-forward svc/argocd-server -n argocd 8080:443"

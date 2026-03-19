@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: metallb
+  namespace: argocd
+spec:
+  project: default
+  source:
+    path: kubernetes/charts/metallb
+    repoURL: {{ .Values.global.repoURL }}
+    targetRevision: {{ .Values.global.targetRevision }}
+    helm:
+      valueFiles:
+        - ../../values/global.yaml
+      values: |
+        metallb:
+          speaker:
+            ignoreExcludeLB: true
+        ipPools:
+          - name: default
+            addresses:
+              - {{ .Values.global.network.metallbRange }}
+            autoAssign: true
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: metallb-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

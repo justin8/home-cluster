@@ -12,14 +12,18 @@ UNSTAGED_FILES=$(git diff --name-only)
 # Filter out files that have unstaged changes (to avoid formatting partial changes)
 SAFE_TO_FORMAT=""
 for file in $STAGED_FILES; do
+    # Skip if it's a symlink
+    if [ -L "$file" ]; then
+        continue
+    fi
     # Check if this file has unstaged changes
     if ! echo "$UNSTAGED_FILES" | grep -q "^$file$"; then
         SAFE_TO_FORMAT="$SAFE_TO_FORMAT $file"
     fi
 done
 
-# Separate by file type, excluding SOPS files
-FILES=$(echo "$SAFE_TO_FORMAT" | tr ' ' '\n' | grep -E '\.(yaml|yml|ts|js|json|md)$' | grep -v '\.sops\.')
+# Separate by file type
+FILES=$(echo "$SAFE_TO_FORMAT" | tr ' ' '\n' | grep -E '\.(yaml|yml|ts|js|json|md)$')
 
 # Format other files (YAML, TypeScript, JavaScript, JSON, Markdown) with prettier
 if [ -n "$FILES" ]; then

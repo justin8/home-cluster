@@ -1,0 +1,25 @@
+{{- range .Values.ipPools }}
+---
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: {{ .name }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  addresses:
+    {{- range .addresses }}
+    - {{ . }}
+    {{- end }}
+  autoAssign: {{ .autoAssign | default false }}
+---
+apiVersion: metallb.io/v1beta1
+kind: L2Advertisement
+metadata:
+  name: {{ .name }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  ipAddressPools:
+    - {{ .name }}
+{{- end }}
