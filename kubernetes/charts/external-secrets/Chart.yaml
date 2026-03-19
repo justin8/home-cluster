@@ -1,0 +1,10 @@
+apiVersion: v2
+name: external-secrets
+description: A wrapper Helm chart for External Secrets Operator with ClusterSecretStore
+type: application
+version: 0.1.0
+appVersion: "0.10.3"
+dependencies:
+  - name: external-secrets
+    version: 0.10.3
+    repository: https://charts.external-secrets.io
