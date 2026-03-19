@@ -28,6 +28,7 @@
 - [x] Deploy from git using pulumi
 - [ ] Try out ArgoCD to replace pulumi
 - [ ] Kavita OAuth (needs v0.8.8)
+- [ ] Look in to OAuth alternatives that can be deployed fully programatically
 - [ ] Get access by user groups working - coming in tinyauth v4 maybe; alternatively, try out oauth2proxy
 - [ ] Network isolation and VLANs
 - [ ] Set up metrics/alerting for cluster services (including longhorn)
