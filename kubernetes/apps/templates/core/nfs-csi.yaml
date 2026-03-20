@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: nfs-csi
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  project: default
+  source:
+    chart: csi-driver-nfs
+    repoURL: https://kubernetes-csi.github.io/csi-driver-nfs
+    targetRevision: 4.13.1
+    helm:
+      values: |
+        driver:
+          name: "nfs.csi.k8s.io"
+        controller:
+          replicas: 1
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kube-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

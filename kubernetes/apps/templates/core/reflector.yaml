@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: reflector
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  project: default
+  source:
+    chart: reflector
+    repoURL: https://emberstack.github.io/helm-charts
+    targetRevision: 10.0.19
+    helm:
+      values: |
+        priorityClassName: "system-cluster-critical"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: shared-secrets
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
