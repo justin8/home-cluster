@@ -11,6 +11,8 @@ spec:
     path: kubernetes/charts/cert-manager
     repoURL: {{ .Values.global.repoURL }}
     targetRevision: {{ .Values.global.targetRevision }}
+    plugin:
+      name: argocd-vault-plugin-helm
     helm:
       valueFiles:
         - ../../values/global.yaml
@@ -25,6 +27,8 @@ spec:
         email: justin@dray.be
         domain: {{ .Values.global.domain }}
         secretName: default-tls
+        # AVP Placeholder for the Cloudflare API token
+        cloudflare_api_token: <path:kubernetes/values/secrets.sops.yaml#cloudflare_api_token>
   destination:
     server: https://kubernetes.default.svc
     namespace: cert-manager

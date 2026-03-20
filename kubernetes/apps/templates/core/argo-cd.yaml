@@ -21,6 +21,54 @@ spec:
               users.anonymous.enabled: "true"
             rbac:
               policy.default: role:admin
+          repoServer:
+            volumes:
+              - name: sops-age
+                secret:
+                  secretName: sops-age
+              - name: custom-tools
+                emptyDir: {}
+              - name: cmp-config
+                configMap:
+                  name: argocd-vault-plugin-helm
+            initContainers:
+              - name: install-tools
+                image: alpine:3.18
+                command: [sh, -c]
+                args:
+                  - |
+                    wget -O /custom-tools/argocd-vault-plugin https://github.com/argoproj-labs/argocd-vault-plugin/releases/download/v1.18.1/argocd-vault-plugin_1.18.1_linux_amd64
+                    wget -O /custom-tools/sops https://github.com/getsops/sops/releases/download/v3.8.1/sops-v3.8.1.linux.amd64
+                    wget -O /tmp/helm.tar.gz https://get.helm.sh/helm-v3.12.3-linux-amd64.tar.gz
+                    tar -zxvf /tmp/helm.tar.gz -C /tmp
+                    mv /tmp/linux-amd64/helm /custom-tools/helm
+                    chmod +x /custom-tools/*
+                volumeMounts:
+                  - name: custom-tools
+                    mountPath: /custom-tools
+            extraContainers:
+              - name: argocd-vault-plugin
+                command: [/var/run/argocd/argocd-cmp-server]
+                image: alpine:3.18
+                env:
+                  - name: AVP_TYPE
+                    value: sops
+                  - name: SOPS_AGE_KEY_FILE
+                    value: /app/config/sops/age.agekey
+                  - name: PATH
+                    value: /custom-tools:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+                volumeMounts:
+                  - name: var-files
+                    mountPath: /var/run/argocd
+                  - name: plugins
+                    mountPath: /home/argocd/cmp-server/plugins
+                  - name: sops-age
+                    mountPath: /app/config/sops
+                  - name: custom-tools
+                    mountPath: /custom-tools
+                  - name: cmp-config
+                    mountPath: /home/argocd/cmp-server/config/plugin.yaml
+                    subPath: plugin.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd

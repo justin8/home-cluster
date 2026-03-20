@@ -77,26 +77,29 @@ In this repository, we use "wrapper charts" to manage external applications. Eac
   - Custom Resources (CRDs) that aren't included in the base chart (e.g., MetalLB's `IPAddressPool`).
   - Template logic that allows us to inject global values into the configuration.
 
-### Handling Dependencies (Sync Waves)
+### Core Service Sync Waves
 
-When a chart creates Custom Resources (CRs) that depend on CRDs installed by the same chart (or a dependency), we use **Sync Waves**.
+To ensure proper ordering during cluster bootstrap (e.g., ensuring `external-secrets` is ready before apps try to fetch secrets), we use **Sync Waves**.
 
-Argo CD uses annotations to determine the order of operations:
+| Wave   | Service           | Description                                                |
+| :----- | :---------------- | :--------------------------------------------------------- |
+| **-2** | `argo-cd`         | Self-managed ArgoCD updates, core RBAC, and Vault Plugin   |
+| **0**  | `metallb`         | Load balancer for bare metal IPs                           |
+| **0**  | `reflector`       | Secret and ConfigMap reflection across namespaces          |
+| **0**  | `nfs-csi`         | NFS storage driver                                         |
+| **0**  | `reloader`        | Automatically restarts pods when ConfigMaps/Secrets change |
+| **0**  | `nfd`             | Node Feature Discovery                                     |
+| **0**  | `cert-manager`    | Certificate management, CRDs, Issuers, and Certificates    |
+| **1**  | `traefik-public`  | Public-facing ingress controller                           |
+| **1**  | `traefik-private` | Internal-only ingress controller                           |
+| **1**  | `intel-gpu`       | Intel GPU device plugins                                   |
+| **1**  | `longhorn`        | Distributed block storage                                  |
+| **2**  | `mail-proxy`      | Postfix SMTP relay                                         |
+| **2**  | `dns`             | PiHole and External-DNS (Cloudflare/PiHole)                |
+| **2**  | `cnpg-operator`   | CloudNativePG operator                                     |
+| **2**  | `auth`            | PocketID and TinyAuth                                      |
 
-- **Wave 0 (Default)**: The base application and its CRDs are installed.
-- **Wave 1+**: Custom configurations (like MetalLB IP pools) are applied after the base application is ready.
-
-Example annotation:
-
-```yaml
-metadata:
-  annotations:
-    argocd.argoproj.io/sync-wave: "1"
-```
-
-This wrapper pattern allows us to cleanly separate the official application code from our cluster-specific configurations and extensions.
-
-## Glossary of Common Terms
+### Adding a new Application
 
 - **Application**: The core Argo CD resource. It links a source (Git repository/path) to a destination (Kubernetes cluster/namespace).
 - **Project**: A logical grouping of Applications, used for organizing and providing environment-level constraints (e.g., which clusters or namespaces an app can deploy to).
@@ -115,4 +118,17 @@ New configurations should be added to the `kubernetes/` directory.
 
 ### Migrated Services
 
+- [x] ArgoCD (Self-managed updates + Vault Plugin)
 - [x] MetalLB
+- [x] Reflector
+- [x] NFS-CSI
+- [x] Reloader
+- [x] Node Feature Discovery (NFD)
+- [x] Cert-Manager (Operator, Issuers, and Certificates)
+- [x] Ingress Controllers (Public + Private)
+- [x] Intel GPU
+- [x] Longhorn
+- [x] Mail Proxy
+- [x] DNS (PiHole + External-DNS)
+- [x] CloudNativePG Operator
+- [x] Auth (PocketID + TinyAuth)

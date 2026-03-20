@@ -27,11 +27,9 @@ kubectl wait --for=condition=available --timeout=300s deployment/argocd-repo-ser
 echo "✅ Argo CD is installed!"
 
 echo "🔐 Bootstrapping SOPS Age key..."
-# Create namespace for external-secrets if it doesn't exist
-kubectl create namespace external-secrets --dry-run=client -o yaml | kubectl apply -f -
-# Create the secret from the local key file
+# Create the secret from the local key file in the argocd namespace for AVP
 kubectl create secret generic sops-age \
-    --namespace external-secrets \
+    --namespace "${ARGOCD_NAMESPACE}" \
     --from-file=age.agekey=.sops-age.key \
     --dry-run=client -o yaml | kubectl apply -f -
 echo "✅ SOPS Age key bootstrapped!"
