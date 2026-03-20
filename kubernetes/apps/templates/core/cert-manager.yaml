@@ -13,22 +13,21 @@ spec:
     targetRevision: {{ .Values.global.targetRevision }}
     plugin:
       name: argocd-vault-plugin-helm
-    helm:
-      valueFiles:
-        - ../../values/global.yaml
-      values: |
-        cert-manager:
-          installCRDs: true
-          extraArgs:
-            - "--dns01-recursive-nameservers-only"
-            - "--dns01-recursive-nameservers=1.1.1.1:53,1.0.0.1:53"
-          prometheus:
-            enabled: false
-        email: justin@dray.be
-        domain: {{ .Values.global.domain }}
-        secretName: default-tls
-        # AVP Placeholder for the Cloudflare API token
-        cloudflare_api_token: <path:kubernetes/values/secrets.sops.yaml#cloudflare_api_token>
+      env:
+        - name: HELM_VALUES
+          value: |
+            cert-manager:
+              installCRDs: true
+              extraArgs:
+                - "--dns01-recursive-nameservers-only"
+                - "--dns01-recursive-nameservers=1.1.1.1:53,1.0.0.1:53"
+              prometheus:
+                enabled: false
+            email: justin@dray.be
+            domain: {{ .Values.global.domain }}
+            secretName: default-tls
+            # AVP Placeholder for the Cloudflare API token
+            cloudflare_api_token: <path:kubernetes/values/secrets.sops.yaml#cloudflare_api_token>
   destination:
     server: https://kubernetes.default.svc
     namespace: cert-manager
