@@ -19,6 +19,8 @@ pkgs.mkShell {
     skopeo
     k9s
     virt-manager
+    jq
+    yq
   ];
 
   shellHook = ''
