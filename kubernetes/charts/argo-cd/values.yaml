@@ -1,0 +1,15 @@
+argo-cd:
+  dex:
+    enabled: false
+  notifications:
+    enabled: false
+  applicationSet:
+    enabled: false
+  configs:
+    cm:
+      users.anonymous.enabled: "true"
+    rbac:
+      policy.default: role:admin
+  server:
+    extraArgs:
+      - --insecure
