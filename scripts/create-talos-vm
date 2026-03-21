@@ -15,7 +15,10 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 TALOS_DIR="$REPO_ROOT/talos"
 
 echo "Determining Talos ISO URL..."
-ISO_URL=$(cd "$TALOS_DIR"; talhelper genurl image)
+ISO_URL=$(
+  cd "$TALOS_DIR"
+  talhelper genurl image
+)
 # Extract Hash and Version from URL
 # URL format: https://factory.talos.dev/image/HASH/VERSION/metal-amd64.iso
 HASH=$(echo "$ISO_URL" | cut -d/ -f5)
@@ -26,29 +29,28 @@ LOCAL_ISO_PATH="$REPO_ROOT/$ISO_NAME"
 DEST_ISO_PATH="$LIBVIRT_IMAGE_DIR/$ISO_NAME"
 
 if [[ ! -f "$DEST_ISO_PATH" ]]; then
-    echo "Downloading ISO: $ISO_NAME"
-    curl -L -o "$LOCAL_ISO_PATH" "$ISO_URL"
+  echo "Downloading ISO: $ISO_NAME"
+  curl -L -o "$LOCAL_ISO_PATH" "$ISO_URL"
+  echo "Copying ISO to libvirt directory (requires sudo)..."
+  sudo mv "$LOCAL_ISO_PATH" "$DEST_ISO_PATH"
+  sudo chown qemu:qemu "$DEST_ISO_PATH" 2>/dev/null || true
 else
-    echo "ISO $ISO_NAME already exists."
+  echo "ISO $ISO_NAME already exists."
 fi
-
-echo "Copying ISO to libvirt directory (requires sudo)..."
-sudo mv "$LOCAL_ISO_PATH" "$DEST_ISO_PATH"
-sudo chown qemu:qemu "$DEST_ISO_PATH" 2>/dev/null || true
 
 echo "Creating VM: $VM_NAME"
 # Note: --boot cdrom,hd ensures it boots from ISO first if needed
 # --disk size=100 creates a new disk image in the default pool or specified path
 sudo virt-install \
-    --name "$VM_NAME" \
-    --ram "$RAM_MB" \
-    --vcpus "$VCPUS" \
-    --os-variant fedora-unknown \
-    --disk size="$DISK_SIZE_GB",bus=virtio \
-    --cdrom "$DEST_ISO_PATH" \
-    --network bridge="$BRIDGE_IF",model=virtio \
-    --graphics vnc \
-    --noautoconsole \
-    --boot cdrom,hd
+  --name "$VM_NAME" \
+  --ram "$RAM_MB" \
+  --vcpus "$VCPUS" \
+  --os-variant fedora-unknown \
+  --disk size="$DISK_SIZE_GB",bus=virtio \
+  --cdrom "$DEST_ISO_PATH" \
+  --network bridge="$BRIDGE_IF",model=virtio \
+  --graphics vnc \
+  --noautoconsole \
+  --boot cdrom,hd
 
 echo "VM $VM_NAME created and starting."
