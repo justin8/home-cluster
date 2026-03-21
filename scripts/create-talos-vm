@@ -3,6 +3,7 @@ set -euo pipefail
 
 # Configuration
 VM_NAME="talos-vm"
+MAC_ADDR="52:54:00:12:34:56"
 RAM_MB=14336
 VCPUS=8
 DISK_SIZE_GB=100
@@ -38,7 +39,7 @@ else
   echo "ISO $ISO_NAME already exists."
 fi
 
-echo "Creating VM: $VM_NAME"
+echo "Creating VM: $VM_NAME (MAC: $MAC_ADDR)"
 # Note: --boot cdrom,hd ensures it boots from ISO first if needed
 # --disk size=100 creates a new disk image in the default pool or specified path
 sudo virt-install \
@@ -48,9 +49,24 @@ sudo virt-install \
   --os-variant fedora-unknown \
   --disk size="$DISK_SIZE_GB",bus=virtio \
   --cdrom "$DEST_ISO_PATH" \
-  --network bridge="$BRIDGE_IF",model=virtio \
+  --network bridge="$BRIDGE_IF",model=virtio,mac="$MAC_ADDR" \
   --graphics vnc \
   --noautoconsole \
   --boot cdrom,hd
 
 echo "VM $VM_NAME created and starting."
+
+echo "Waiting for VM to acquire an IP (listening on $BRIDGE_IF for MAC $MAC_ADDR)..."
+# tcpdump -c 1: Exit after catching one packet
+# ether src: Only packets coming FROM the VM
+# and not ip src 0.0.0.0: Ignore the initial DHCP discovery phase
+# grep -oP: Extract only the IP address part (stopping before the port)
+VM_IP=$(sudo tcpdump -i "$BRIDGE_IF" -n -c 1 "ether src $MAC_ADDR and ip and not ip src 0.0.0.0" 2>/dev/null | grep -oP '(?<=IP )\d+\.\d+\.\d+\.\d+' | head -n 1)
+
+if [[ -n "$VM_IP" ]]; then
+  echo "--------------------------------------------------"
+  echo "VM IP Found: $VM_IP"
+  echo "--------------------------------------------------"
+else
+  echo "Failed to detect IP address automatically."
+fi

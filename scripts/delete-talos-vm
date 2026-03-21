@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Configuration
+VM_NAME="talos-vm"
+
+# Check if domain exists
+if ! sudo virsh dominfo "$VM_NAME" >/dev/null 2>&1; then
+  echo "Error: Domain '$VM_NAME' not found."
+  exit 0
+fi
+
+# Stop the VM if it is running
+STATE=$(sudo virsh domstate "$VM_NAME")
+if [[ "$STATE" == "running" ]]; then
+  echo "Stopping VM: $VM_NAME..."
+  sudo virsh destroy "$VM_NAME"
+fi
+
+# Delete the domain and its associated storage
+# --remove-all-storage deletes the disk images but NOT the ISO because
+# the ISO is attached as a CDROM (readonly) and virsh undefine typically
+# preserves readonly/shared storage unless explicitly targeted,
+# but we'll be safe as it's not part of the domain's 'own' writeable storage.
+echo "Deleting VM and storage: $VM_NAME..."
+sudo virsh undefine "$VM_NAME" --remove-all-storage --managed-save
+
+echo "VM '$VM_NAME' has been deleted"
