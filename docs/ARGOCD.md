@@ -73,6 +73,30 @@ spec:
       selfHeal: true
 ```
 
+### Sync Waves
+
+We use Argo CD sync waves to manage the deployment order of cluster components. This ensures that infrastructure dependencies (like MetalLB or Cert-Manager) are ready before the applications that depend on them are deployed.
+
+The intended sync waves are:
+
+| Wave   | Components                                                           | Description                                                                                     |
+| :----- | :------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------- |
+| **-4** | `argo-cd`                                                            | Argo CD manages itself first to ensure the controller is up-to-date.                            |
+| **-3** | `metallb`, `cert-manager`, `nfs-csi`, `reloader`, `nfd`, `intel-gpu` | Foundational infrastructure: Networking, Certificates, Storage Drivers, and Hardware Discovery. |
+| **-2** | `longhorn`, `ingress-controllers`                                    | Distributed storage and Ingress management.                                                     |
+| **-1** | `auth`, `mail-proxy`, `cnpg-operator`, `dns`                         | Supporting services (Identity, Mail), Database operators, and DNS.                              |
+| **0**  | All other applications                                               | Default wave for most user applications and workloads.                                          |
+
+> **Note**: Applications with no specified sync wave will automatically deploy in **wave 0**.
+
+To set a sync wave for an application, add the following annotation to its `Application` manifest in `kubernetes/root-app/templates/`:
+
+```yaml
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+```
+
 ### Pruning vs. Finalizers (Safety Pattern)
 
 We use a specific configuration to balance automation with safety:
