@@ -1,0 +1,75 @@
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: default
+  namespace: {{ .Release.Namespace }}
+spec:
+  addresses:
+    - {{ .Values.global.network.metallbRange }}
+  autoAssign: true
+---
+apiVersion: metallb.io/v1beta1
+kind: L2Advertisement
+metadata:
+  name: default
+  namespace: {{ .Release.Namespace }}
+spec:
+  ipAddressPools:
+    - default
+---
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: public-ingress
+  namespace: {{ .Release.Namespace }}
+spec:
+  addresses:
+    - {{ .Values.global.network.publicIngress }}/32
+  autoAssign: false
+---
+apiVersion: metallb.io/v1beta1
+kind: L2Advertisement
+metadata:
+  name: public-ingress
+  namespace: {{ .Release.Namespace }}
+spec:
+  ipAddressPools:
+    - public-ingress
+---
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: private-ingress
+  namespace: {{ .Release.Namespace }}
+spec:
+  addresses:
+    - {{ .Values.global.network.privateIngress }}/32
+  autoAssign: false
+---
+apiVersion: metallb.io/v1beta1
+kind: L2Advertisement
+metadata:
+  name: private-ingress
+  namespace: {{ .Release.Namespace }}
+spec:
+  ipAddressPools:
+    - private-ingress
+---
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: dns-server
+  namespace: {{ .Release.Namespace }}
+spec:
+  addresses:
+    - {{ .Values.global.network.dnsServer }}/32
+  autoAssign: false
+---
+apiVersion: metallb.io/v1beta1
+kind: L2Advertisement
+metadata:
+  name: dns-server
+  namespace: {{ .Release.Namespace }}
+spec:
+  ipAddressPools:
+    - dns-server
