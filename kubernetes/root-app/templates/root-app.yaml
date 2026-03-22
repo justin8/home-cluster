@@ -9,6 +9,9 @@ spec:
     repoURL: {{ .Values.global.repoURL }}
     path: kubernetes/root-app/
     targetRevision: {{ .Values.global.targetRevision }}
+    helm:
+      valueFiles:
+        - ../global-values.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd
