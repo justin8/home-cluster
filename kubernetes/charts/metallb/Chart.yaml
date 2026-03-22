@@ -1,0 +1,8 @@
+apiVersion: v2
+name: metallb
+type: application
+version: 1.0.0
+dependencies:
+  - name: metallb
+    version: v0.15
+    repository: https://metallb.github.io/metallb
