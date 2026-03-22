@@ -3,8 +3,6 @@ kind: Application
 metadata:
   name: root-app
   namespace: argocd
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   source:
@@ -16,5 +14,5 @@ spec:
     namespace: argocd
   syncPolicy:
     automated:
-      prune: false # Don't accidentally delete everything if this deployment is removed somehow
+      prune: true
       selfHeal: true

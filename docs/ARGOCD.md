@@ -56,6 +56,20 @@ spec:
     automated:
       prune: true
       selfHeal: true
+
+### Pruning vs. Finalizers (Safety Pattern)
+
+We use a specific configuration to balance automation with safety:
+
+1.  **`prune: true` in `root-app`**: This ensures that if you remove an application's YAML file from Git, the `Application` object is automatically removed from the Argo CD dashboard.
+2.  **`root-app` Finalizer (OMITTED)**: By omitting the finalizer on the `root-app` itself, deleting it will NOT delete the child `Application` objects it manages. This is a safety measure for the cluster entry point.
+3.  **Child App Finalizers (REQUIRED)**: All other applications should include `resources-finalizer.argocd.argoproj.io`. This ensures that when an app is removed from Git (and pruned by `root-app`), its managed resources (Pods, Services, etc.) are correctly cleaned up from the cluster.
+
+### Recovery and Adoption
+
+If the `root-app` is accidentally deleted, it can be safely re-applied using `scripts/install-argocd` or `kubectl apply -f kubernetes/root-app/templates/root-app.yaml`.
+
+Because child applications were orphaned (due to the lack of a finalizer), the new `root-app` will **automatically adopt** the existing objects based on their name and namespace. No duplicate resources will be created, and the sync state will be restored immediately.
 ```
 
 ### Extending Existing Charts (Wrapper Pattern)
