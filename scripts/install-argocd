@@ -4,7 +4,8 @@ set -euo pipefail
 
 ARGOCD_NAMESPACE="argocd"
 ARGOCD_HELM_RELEASE="argo-cd"
-ARGOCD_CHART_VERSION="7.7.16"
+# Extract version from Chart.yaml dependencies
+ARGOCD_CHART_VERSION=$(yq '.dependencies[] | select(.name == "argo-cd") | .version' kubernetes/charts/argo-cd/Chart.yaml)
 
 # Environment
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -46,7 +47,7 @@ kubectl create secret generic sops-age \
 echo "✅ SOPS Age key bootstrapped!"
 
 echo "🌱 Applying Root Application (App of Apps)..."
-kubectl apply -f kubernetes/root-app/templates/root-app.yaml
+helm template kubernetes/root-app | kubectl apply -f -
 
 echo "🎉 Setup complete! You can access the Argo CD UI via port-forward:"
 echo "   kubectl port-forward svc/argo-cd-argocd-server -n argocd 8080:443"
