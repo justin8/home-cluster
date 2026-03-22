@@ -1,8 +1,17 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: metallb-system
+  labels:
+    pod-security.kubernetes.io/enforce: privileged
+    pod-security.kubernetes.io/audit: privileged
+    pod-security.kubernetes.io/warn: privileged
+---
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: metallb
-  namespace: metallb-system
+  namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
   annotations:
@@ -18,12 +27,5 @@ spec:
     namespace: metallb-system
   syncPolicy:
     automated:
-      selfHeal: false # Don't accidentally delete everything if this deployment is removed somehow
+      selfHeal: true
       prune: true
-    syncOptions:
-      - CreateNamespace=true
-    managedNamespaceMetadata:
-      labels:
-        - pod-security.kubernetes.io/enforce: privileged
-        - pod-security.kubernetes.io/audit: privileged
-        - pod-security.kubernetes.io/warn: privileged

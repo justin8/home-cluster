@@ -24,15 +24,30 @@ The cluster is bootstrapped using the `scripts/install-argocd` script. This scri
 
 ### Adding a New Application
 
-To add a new application to the cluster:
+A "unit of deployment" consists of two parts: the deployment definition in the `root-app` and the application configuration in `kubernetes/charts/`.
 
-1.  Create a new directory in `kubernetes/charts/` (e.g., `kubernetes/charts/my-app/`).
-2.  Define the application's resources or use the wrapper pattern (see below).
-3.  Add a new `Application` manifest to `kubernetes/root-app/templates/` (e.g., `kubernetes/root-app/templates/my-app.yaml`).
+#### 1. Application Configuration (`kubernetes/charts/`)
 
-Example of a new `Application` manifest using global values:
+Create a new directory in `kubernetes/charts/` (e.g., `kubernetes/charts/my-app/`). This is where the core logic and configuration for the application resides. Use the **Wrapper Pattern** described below to consume upstream charts and add custom resources.
+
+#### 2. Deployment Definition (`kubernetes/root-app/`)
+
+Add a new manifest to `kubernetes/root-app/templates/` (e.g., `kubernetes/root-app/templates/my-app.yaml`). This file should define the high-level deployment metadata:
+
+- **`Namespace`**: Define the namespace for the application, including any necessary labels (e.g., for sidecar injection or network policies).
+- **`Application`**: The Argo CD resource that points to the chart in `kubernetes/charts/`.
+
+Example of a deployment definition in `root-app`:
 
 ```yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: my-app-ns
+  labels:
+    # Add any necessary labels here
+    pod-security.kubernetes.io/enforce: baseline
+---
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -56,6 +71,7 @@ spec:
     automated:
       prune: true
       selfHeal: true
+```
 
 ### Pruning vs. Finalizers (Safety Pattern)
 
@@ -70,7 +86,8 @@ We use a specific configuration to balance automation with safety:
 If the `root-app` is accidentally deleted, it can be safely re-applied using `scripts/install-argocd` or `kubectl apply -f kubernetes/root-app/templates/root-app.yaml`.
 
 Because child applications were orphaned (due to the lack of a finalizer), the new `root-app` will **automatically adopt** the existing objects based on their name and namespace. No duplicate resources will be created, and the sync state will be restored immediately.
-```
+
+````
 
 ### Extending Existing Charts (Wrapper Pattern)
 
@@ -90,7 +107,7 @@ dependencies:
   - name: argo-cd
     version: 5.46.8
     repository: https://argoproj.github.io/argo-helm
-```
+````
 
 **`values.yaml`**:
 Overrides for the `argo-cd` dependency are placed under the dependency name's key:
