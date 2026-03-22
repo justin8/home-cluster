@@ -1,2 +1,8 @@
 resources:
   - https://github.com/kubernetes-sigs/node-feature-discovery/deployment/overlays/default?ref=v0.18.3
+
+patches:
+  - path: namespace-patch.yaml
+    target:
+      kind: Namespace
+      name: node-feature-discovery
