@@ -16,5 +16,5 @@ spec:
     namespace: argocd
   syncPolicy:
     automated:
-      prune: true
+      prune: false # Don't accidentally delete everything if this deployment is removed somehow
       selfHeal: true
