@@ -30,11 +30,15 @@ A "unit of deployment" consists of two parts: the deployment definition in the `
 
 Create a new directory in `kubernetes/charts/` (e.g., `kubernetes/charts/my-app/`). This is where the core logic and configuration for the application resides. Use the **Wrapper Pattern** described below to consume upstream charts and add custom resources.
 
+#### 2. Deployment Definition (`kubernetes/root-app/templates/`)
+
+Add a new manifest to `kubernetes/root-app/templates/` (e.g., `kubernetes/root-app/templates/my-app.yaml`). This file should define the high-level deployment metadata.
 **Standards:**
 
-- **Global Values**: Use `{{ .Values.global.repoURL }}` and `{{ .Values.global.targetRevision }}` for the source configuration. These are defined in `kubernetes/global-values.yaml`.
+- **Global Values**: Hardcode the `repoURL` and `targetRevision` in the source configuration to ensure Argo CD can always find its source, even during initial bootstrap.
 - **Namespaces**: Do **NOT** create separate `Namespace` resources in `root-app/templates`.
 - **Managed Metadata**: Use `syncOptions: [CreateNamespace=true]` and `managedNamespaceMetadata` to manage namespace labels.
+- **Value Dependency**: Only include `global-values.yaml` in the `valueFiles` list if the application's underlying chart (in `kubernetes/charts/`) references `global` values.
 
 Example of a deployment definition in `root-app`:
 
@@ -51,10 +55,11 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: { { .Values.global.repoURL } }
+    repoURL: https://github.com/justin8/home-cluster.git
     path: kubernetes/charts/my-app
-    targetRevision: { { .Values.global.targetRevision } }
+    targetRevision: argocd2
     helm:
+      # Optional: only if charts/my-app/templates/ references .Values.global
       valueFiles:
         - ../../global-values.yaml
   destination:
@@ -68,7 +73,7 @@ spec:
       - CreateNamespace=true
     managedNamespaceMetadata:
       labels:
-        pod-security.kubernetes.io/some-label: foo
+        some-namespace-label/my-lable: foo
 ```
 
 ### Sync Waves
@@ -92,7 +97,7 @@ To set a sync wave for an application, add the following annotation to its `Appl
 ```yaml
 metadata:
   annotations:
-    argocd.argoproj.io/sync-wave: "1"
+    argocd.argoproj.io/sync-wave: "99"
 ```
 
 ### Pruning vs. Finalizers (Safety Pattern)

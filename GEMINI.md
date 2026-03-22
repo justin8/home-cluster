@@ -7,7 +7,7 @@
 
 ## ArgoCD Standards
 
-- **Application Manifests:** Must use `{{ .Values.global.repoURL }}` and `{{ .Values.global.targetRevision }}` for source configuration in `kubernetes/root-app/templates/`.
+- **Application Manifests:** Must hardcode `repoURL` and `targetRevision` in `kubernetes/root-app/templates/` to ensure reliability during bootstrap.
 - **Namespaces:** Never define `Namespace` resources in `root-app/templates`. Use `managedNamespaceMetadata` within the `Application` resource's `syncPolicy` to manage namespace-level labels and annotations. Use `syncOptions: [CreateNamespace=true]` for automatic namespace creation.
 
 ## Project Steering

@@ -1,6 +1,4 @@
 global:
-  repoURL: https://github.com/justin8/home-cluster.git
-  targetRevision: argocd2
   domain: dray.id.au
   clusterName: home-cluster
   timezone: America/Los_Angeles

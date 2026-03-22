@@ -6,9 +6,9 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: {{ .Values.global.repoURL }}
+    repoURL: https://github.com/justin8/home-cluster.git
     path: kubernetes/root-app/
-    targetRevision: {{ .Values.global.targetRevision }}
+    targetRevision: argocd2
     helm:
       valueFiles:
         - ../global-values.yaml
