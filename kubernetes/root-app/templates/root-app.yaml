@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/justin8/home-cluster.git # Must be hardcoded for initial bootstrap
-    path: kubernetes/charts/root-app/
+    path: kubernetes/root-app/
     targetRevision: argocd2 # Must be hardcoded for initial bootstrap
   destination:
     server: https://kubernetes.default.svc

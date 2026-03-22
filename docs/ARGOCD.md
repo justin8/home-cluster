@@ -1,0 +1,127 @@
+# Argo CD & GitOps
+
+This document describes the Argo CD setup and the GitOps workflow for the `home-cluster`.
+
+## Architecture
+
+We use the **App of Apps** pattern to manage our cluster resources. Argo CD is configured to manage itself and other applications through a "root" application.
+
+### Key Components
+
+- **Argo CD**: The GitOps controller that synchronizes Kubernetes resources from this repository to the cluster.
+- **Root Application**: Located at `kubernetes/root-app/`, this is the entry point that manages all other applications in the cluster.
+- **Application Wrapper Charts**: Located in `kubernetes/charts/`, these are Helm charts that wrap existing upstream charts (as dependencies) to allow for cluster-specific overrides and extensions.
+
+## Initial Bootstrap
+
+The cluster is bootstrapped using the `scripts/install-argocd` script. This script:
+
+1.  Installs the Argo CD Helm chart into the `argocd` namespace.
+2.  Configures the SOPS age key as a Kubernetes secret for encrypted secrets.
+3.  Applies the initial root application.
+
+## Managing Applications
+
+### Adding a New Application
+
+To add a new application to the cluster:
+
+1.  Create a new directory in `kubernetes/charts/` (e.g., `kubernetes/charts/my-app/`).
+2.  Define the application's resources or use the wrapper pattern (see below).
+3.  Add a new `Application` manifest to `kubernetes/root-app/templates/` (e.g., `kubernetes/root-app/templates/my-app.yaml`).
+
+Example of a new `Application` manifest using global values:
+
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: my-app
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/justin8/home-cluster.git
+    path: kubernetes/charts/my-app
+    targetRevision: argocd2
+    helm:
+      valueFiles:
+        - ../../global-values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: my-app-ns
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+```
+
+### Extending Existing Charts (Wrapper Pattern)
+
+We follow a "wrapper chart" pattern to manage applications. Instead of deploying raw upstream charts, we create a local chart that includes the upstream chart as a dependency in `Chart.yaml`. This allows us to:
+
+1.  **Configure values**: Override defaults in the upstream chart in `values.yaml`.
+2.  **Add extra resources**: Add custom Kubernetes templates (e.g., `NetworkPolicy`, `Ingress`, `ServiceAccount`) in the `templates/` directory.
+
+#### Example: Argo CD Wrapper
+
+The `kubernetes/charts/argo-cd` directory is a perfect example:
+
+**`Chart.yaml`**:
+
+```yaml
+dependencies:
+  - name: argo-cd
+    version: 5.46.8
+    repository: https://argoproj.github.io/argo-helm
+```
+
+**`values.yaml`**:
+Overrides for the `argo-cd` dependency are placed under the dependency name's key:
+
+```yaml
+argo-cd:
+  dex:
+    enabled: false
+  # ... other overrides
+```
+
+> **Note**: While Argo CD automatically handles fetching dependencies during deployment (via `helm dependency build`), you may want to run `helm dependency update` locally if you need to validate templates or run local dry-runs. The fetched charts are ignored by git via `kubernetes/.gitignore` to keep the repository clean.
+
+#### Adding Extra Resources
+
+To add extra resources that are not part of the upstream chart, simply create a `templates/` directory within the wrapper chart and add your YAML manifests there. These resources will be rendered and deployed along with the chart's dependencies.
+
+```bash
+kubernetes/charts/my-app/
+├── Chart.yaml       # Defines dependency
+├── values.yaml      # Configuration overrides
+└── templates/
+    └── extra-res.yaml # Custom Kubernetes resource
+```
+
+## Global Configuration
+
+Cluster-wide constants and shared values are maintained in `kubernetes/global-values.yaml`.
+
+To use these values in your application:
+
+1.  **In Helm Templates**: Reference them via `.Values.global` (e.g., `{{ .Values.global.domain }}`).
+2.  **In Argo CD Application**: Include the global values file in the `valueFiles` list of the application source:
+
+```yaml
+helm:
+  # Files are merged in order.
+  # The chart's own values.yaml is always loaded first by default.
+  valueFiles:
+    - ../../global-values.yaml
+    # You can add more override files here if needed
+```
+
+### Typical Workflow
+
+1.  **`kubernetes/charts/my-app/values.yaml`**: Contains app-specific configuration (e.g., image tags, replica counts).
+2.  **`kubernetes/global-values.yaml`**: Contains cluster-wide settings (e.g., `domain: dray.id.au`).
+3.  **Result**: Your templates can access both `{{ .Values.image.tag }}` and `{{ .Values.global.domain }}` seamlessly.

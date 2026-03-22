@@ -46,7 +46,7 @@ kubectl create secret generic sops-age \
 echo "✅ SOPS Age key bootstrapped!"
 
 echo "🌱 Applying Root Application (App of Apps)..."
-kubectl apply -f kubernetes/bootstrap/root.yaml
+kubectl apply -f kubernetes/root-app/templates/root-app.yaml
 
 echo "🎉 Setup complete! You can access the Argo CD UI via port-forward:"
 echo "   kubectl port-forward svc/argo-cd-argocd-server -n argocd 8080:443"
