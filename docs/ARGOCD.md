@@ -30,24 +30,15 @@ A "unit of deployment" consists of two parts: the deployment definition in the `
 
 Create a new directory in `kubernetes/charts/` (e.g., `kubernetes/charts/my-app/`). This is where the core logic and configuration for the application resides. Use the **Wrapper Pattern** described below to consume upstream charts and add custom resources.
 
-#### 2. Deployment Definition (`kubernetes/root-app/`)
+**Standards:**
 
-Add a new manifest to `kubernetes/root-app/templates/` (e.g., `kubernetes/root-app/templates/my-app.yaml`). This file should define the high-level deployment metadata:
-
-- **`Namespace`**: Define the namespace for the application, including any necessary labels (e.g., for sidecar injection or network policies).
-- **`Application`**: The Argo CD resource that points to the chart in `kubernetes/charts/`.
+- **Global Values**: Use `{{ .Values.global.repoURL }}` and `{{ .Values.global.targetRevision }}` for the source configuration. These are defined in `kubernetes/global-values.yaml`.
+- **Namespaces**: Do **NOT** create separate `Namespace` resources in `root-app/templates`.
+- **Managed Metadata**: Use `syncOptions: [CreateNamespace=true]` and `managedNamespaceMetadata` to manage namespace labels.
 
 Example of a deployment definition in `root-app`:
 
 ```yaml
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: my-app-ns
-  labels:
-    # Add any necessary labels here
-    pod-security.kubernetes.io/enforce: baseline
----
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -55,12 +46,14 @@ metadata:
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
+  annotations:
+    argocd.argoproj.io/sync-wave: "99"
 spec:
   project: default
   source:
-    repoURL: https://github.com/justin8/home-cluster.git
+    repoURL: { { .Values.global.repoURL } }
     path: kubernetes/charts/my-app
-    targetRevision: argocd2
+    targetRevision: { { .Values.global.targetRevision } }
     helm:
       valueFiles:
         - ../../global-values.yaml
@@ -71,6 +64,11 @@ spec:
     automated:
       prune: true
       selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    managedNamespaceMetadata:
+      labels:
+        pod-security.kubernetes.io/some-label: foo
 ```
 
 ### Sync Waves
@@ -79,13 +77,13 @@ We use Argo CD sync waves to manage the deployment order of cluster components. 
 
 The intended sync waves are:
 
-| Wave   | Components                                                           | Description                                                                                     |
-| :----- | :------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------- |
-| **-4** | `argo-cd`                                                            | Argo CD manages itself first to ensure the controller is up-to-date.                            |
-| **-3** | `metallb`, `cert-manager`, `nfs-csi`, `reloader`, `nfd`, `intel-gpu` | Foundational infrastructure: Networking, Certificates, Storage Drivers, and Hardware Discovery. |
-| **-2** | `longhorn`, `ingress-controllers`                                    | Distributed storage and Ingress management.                                                     |
-| **-1** | `auth`, `mail-proxy`, `cnpg-operator`, `dns`                         | Supporting services (Identity, Mail), Database operators, and DNS.                              |
-| **0**  | All other applications                                               | Default wave for most user applications and workloads.                                          |
+| Wave   | Components                                                                             | Description                                                                                              |
+| :----- | :------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------- |
+| **-4** | `argo-cd`                                                                              | Argo CD manages itself first to ensure the controller is up-to-date.                                     |
+| **-3** | `shared-secrets`, `metallb`, `cert-manager`, `nfs-csi`, `reloader`, `nfd`, `intel-gpu` | Foundational infrastructure: Secrets, Networking, Certificates, Storage Drivers, and Hardware Discovery. |
+| **-2** | `longhorn`, `ingress-controllers`                                                      | Distributed storage and Ingress management.                                                              |
+| **-1** | `auth`, `mail-proxy`, `cnpg-operator`, `dns`                                           | Supporting services (Identity, Mail), Database operators, and DNS.                                       |
+| **0**  | All other applications                                                                 | Default wave for most user applications and workloads.                                                   |
 
 > **Note**: Applications with no specified sync wave will automatically deploy in **wave 0**.
 
@@ -111,8 +109,6 @@ If the `root-app` is accidentally deleted, it can be safely re-applied using `sc
 
 Because child applications were orphaned (due to the lack of a finalizer), the new `root-app` will **automatically adopt** the existing objects based on their name and namespace. No duplicate resources will be created, and the sync state will be restored immediately.
 
-````
-
 ### Extending Existing Charts (Wrapper Pattern)
 
 We follow a "wrapper chart" pattern to manage applications. Instead of deploying raw upstream charts, we create a local chart that includes the upstream chart as a dependency in `Chart.yaml`. This allows us to:
@@ -131,7 +127,7 @@ dependencies:
   - name: argo-cd
     version: 5.46.8
     repository: https://argoproj.github.io/argo-helm
-````
+```
 
 **`values.yaml`**:
 Overrides for the `argo-cd` dependency are placed under the dependency name's key:

@@ -10,9 +10,9 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/justin8/home-cluster.git
+    repoURL: {{ .Values.global.repoURL }}
     path: kubernetes/charts/metallb
-    targetRevision: argocd2
+    targetRevision: {{ .Values.global.targetRevision }}
     helm:
       valueFiles:
         - ../../global-values.yaml

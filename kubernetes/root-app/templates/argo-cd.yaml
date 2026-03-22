@@ -10,13 +10,13 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/justin8/home-cluster.git
+    repoURL: {{ .Values.global.repoURL }}
     path: kubernetes/charts/argo-cd
-    targetRevision: argocd2
+    targetRevision: {{ .Values.global.targetRevision }}
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd
   syncPolicy:
     automated:
-      selfHeal: false # Don't accidentally delete everything if this deployment is removed somehow
+      selfHeal: true
       prune: true

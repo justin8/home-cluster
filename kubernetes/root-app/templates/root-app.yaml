@@ -6,9 +6,9 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/justin8/home-cluster.git # Must be hardcoded for initial bootstrap
+    repoURL: {{ .Values.global.repoURL }}
     path: kubernetes/root-app/
-    targetRevision: argocd2 # Must be hardcoded for initial bootstrap
+    targetRevision: {{ .Values.global.targetRevision }}
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd
