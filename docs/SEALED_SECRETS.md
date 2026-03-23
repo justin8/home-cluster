@@ -11,6 +11,35 @@ In this cluster, automatic key renewal is **disabled** and the key validity is s
 - `keyrenewperiod: "0"` (Disabled)
 - `keyttl: "876000h00m00s"` (100 Years)
 
+## Creating a New Sealed Secret
+
+If you have access to the cluster, you can create a `SealedSecret` with:
+
+```bash
+# 1. Create a temporary local secret (dry-run)
+kubectl create secret generic my-secret \
+  --from-literal=username=admin \
+  --from-literal=password=password123 \
+  --namespace my-namespace \
+  --dry-run=client -o yaml > my-secret.yaml
+
+# 2. Seal it using the cluster's controller
+kubeseal --controller-name=sealed-secrets-controller --controller-namespace=kube-system < my-secret.yaml > my-sealed-secret.yaml
+
+# 3. Clean up the cleartext secret
+rm my-secret.yaml
+```
+
+### Scopes and Metadata
+
+By default, `kubeseal` uses **strict** scope. This means the `SealedSecret` **must** have the same name and namespace as the original secret.
+
+- **Strict (Default):** Tied to name and namespace.
+- **Namespace-wide:** Tied only to the namespace. Use `--scope namespace-wide`.
+- **Cluster-wide:** Can be unsealed in any namespace. Use `--scope cluster-wide`.
+
+**Warning:** If you change the namespace or name of a `SealedSecret` in Git without re-sealing it with the correct scope, the controller will fail to decrypt it.
+
 ## Backup Sealing Key
 
 The sealing keys are stored as standard Kubernetes Secrets in the `kube-system` namespace. It is critical to backup these keys to decrypt your `SealedSecrets` if the cluster is destroyed.
