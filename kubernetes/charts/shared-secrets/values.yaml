@@ -5,3 +5,8 @@ sealed-secrets:
   fullnameOverride: "sealed-secrets-controller"
   keyrenewperiod: "0"
   keyttl: "876000h00m00s"
+
+reloader:
+  reloader:
+    watchGlobally: true
+    autoReloadAll: true
