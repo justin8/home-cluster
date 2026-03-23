@@ -16,9 +16,9 @@ We use the **App of Apps** pattern to manage our cluster resources. Argo CD is c
 
 The cluster is bootstrapped using the `scripts/install-argocd` script. This script:
 
-1.  Installs the Argo CD Helm chart into the `argocd` namespace.
-2.  Configures the SOPS age key as a Kubernetes secret for encrypted secrets.
-3.  Applies the initial root application.
+1. Installs the Argo CD Helm chart into the `argocd` namespace.
+2. Configures the SOPS age key as a Kubernetes secret for encrypted secrets.
+3. Applies the initial root application.
 
 ## Managing Applications
 
@@ -105,9 +105,9 @@ metadata:
 
 We use a specific configuration to balance automation with safety:
 
-1.  **`prune: true` in `root-app`**: This ensures that if you remove an application's YAML file from Git, the `Application` object is automatically removed from the Argo CD dashboard.
-2.  **`root-app` Finalizer (OMITTED)**: By omitting the finalizer on the `root-app` itself, deleting it will NOT delete the child `Application` objects it manages. This is a safety measure for the cluster entry point.
-3.  **Child App Finalizers (REQUIRED)**: All other applications should include `resources-finalizer.argocd.argoproj.io`. This ensures that when an app is removed from Git (and pruned by `root-app`), its managed resources (Pods, Services, etc.) are correctly cleaned up from the cluster.
+1. **`prune: true` in `root-app`**: This ensures that if you remove an application's YAML file from Git, the `Application` object is automatically removed from the Argo CD dashboard.
+2. **`root-app` Finalizer (OMITTED)**: By omitting the finalizer on the `root-app` itself, deleting it will NOT delete the child `Application` objects it manages. This is a safety measure for the cluster entry point.
+3. **Child App Finalizers (REQUIRED)**: All other applications should include `resources-finalizer.argocd.argoproj.io`. This ensures that when an app is removed from Git (and pruned by `root-app`), its managed resources (Pods, Services, etc.) are correctly cleaned up from the cluster.
 
 ### Recovery and Adoption
 
@@ -119,8 +119,8 @@ Because child applications were orphaned (due to the lack of a finalizer), the n
 
 We follow a "wrapper chart" pattern to manage applications. Instead of deploying raw upstream charts, we create a local chart that includes the upstream chart as a dependency in `Chart.yaml`. This allows us to:
 
-1.  **Configure values**: Override defaults in the upstream chart in `values.yaml`.
-2.  **Add extra resources**: Add custom Kubernetes templates (e.g., `NetworkPolicy`, `Ingress`, `ServiceAccount`) in the `templates/` directory.
+1. **Configure values**: Override defaults in the upstream chart in `values.yaml`.
+2. **Add extra resources**: Add custom Kubernetes templates (e.g., `NetworkPolicy`, `Ingress`, `ServiceAccount`) in the `templates/` directory.
 
 #### Example: Argo CD Wrapper
 
@@ -165,8 +165,8 @@ Cluster-wide constants and shared values are maintained in `kubernetes/global-va
 
 To use these values in your application:
 
-1.  **In Helm Templates**: Reference them via `.Values.global` (e.g., `{{ .Values.global.domain }}`).
-2.  **In Argo CD Application**: Include the global values file in the `valueFiles` list of the application source:
+1. **In Helm Templates**: Reference them via `.Values.global` (e.g., `{{ .Values.global.domain }}`).
+2. **In Argo CD Application**: Include the global values file in the `valueFiles` list of the application source:
 
 ```yaml
 helm:
@@ -179,6 +179,6 @@ helm:
 
 ### Typical Workflow
 
-1.  **`kubernetes/charts/my-app/values.yaml`**: Contains app-specific configuration (e.g., image tags, replica counts).
-2.  **`kubernetes/global-values.yaml`**: Contains cluster-wide settings (e.g., `domain: dray.id.au`).
-3.  **Result**: Your templates can access both `{{ .Values.image.tag }}` and `{{ .Values.global.domain }}` seamlessly.
+1. **`kubernetes/charts/my-app/values.yaml`**: Contains app-specific configuration (e.g., image tags, replica counts).
+2. **`kubernetes/global-values.yaml`**: Contains cluster-wide settings (e.g., `domain: dray.id.au`).
+3. **Result**: Your templates can access both `{{ .Values.image.tag }}` and `{{ .Values.global.domain }}` seamlessly.
