@@ -1,0 +1,29 @@
+{{- $ingressClass := .Values.traefik.ingressClass.name }}
+{{- $type := trimPrefix "traefik-" $ingressClass }}
+{{- $ip := index .Values.global.network (printf "%sIngress" $type) }}
+---
+# Exposes the Traefik dashboard via an IngressRoute, protected by tinyauth middleware.
+# The dashboard uses api@internal (a built-in TraefikService) so no backend pod is needed.
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: dashboard
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    # Tells external-dns which IP to point the DNS record at
+    external-dns.alpha.kubernetes.io/target: {{ $ip }}
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`traefik-{{ $type }}.{{ .Values.global.domain }}`)
+      kind: Rule
+      middlewares:
+        # tinyauth middleware must exist in the same namespace as this IngressRoute
+        - name: tinyauth
+          namespace: {{ .Release.Namespace }}
+      services:
+        - name: api@internal
+          kind: TraefikService
+  tls:
+    secretName: default-tls
