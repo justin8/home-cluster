@@ -1,0 +1,12 @@
+apiVersion: v2
+name: shared-secrets
+description: A Helm chart for shared secrets across the cluster
+version: 0.1.0
+appVersion: "1.0.0"
+dependencies:
+  - name: reflector
+    version: 10.0.19
+    repository: https://emberstack.github.io/helm-charts
+  - name: sealed-secrets
+    version: 2.18.4
+    repository: https://bitnami-labs.github.io/sealed-secrets

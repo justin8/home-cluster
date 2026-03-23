@@ -1,5 +1,6 @@
-# Default values for sealed-secrets.
-# This is a wrapper chart.
+reflector:
+  priorityClassName: "system-cluster-critical"
+
 sealed-secrets:
   fullnameOverride: "sealed-secrets-controller"
   keyrenewperiod: "0"

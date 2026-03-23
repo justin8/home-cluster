@@ -1,5 +1,6 @@
 global:
   domain: dray.id.au
+  admin_email: admin@dray.id.au
   clusterName: home-cluster
   timezone: America/Los_Angeles
   shared_uid: "2000"
