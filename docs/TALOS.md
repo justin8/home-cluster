@@ -134,7 +134,7 @@ talhelper gencommand apply | bash
 
 ## Secrets Management
 
-Secrets are encrypted with SOPS and automatically decrypted when using the nix shell environment.
+Secrets for Talos are encrypted with SOPS and automatically decrypted when using the nix shell environment.
 
 To edit secrets:
 
