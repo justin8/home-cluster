@@ -1,0 +1,49 @@
+---
+# Daily filesystem trim at 2am local time (19:00 UTC for America/Los_Angeles)
+# Applies to all volumes in the "fstrim-enabled" group
+apiVersion: longhorn.io/v1beta2
+kind: RecurringJob
+metadata:
+  name: fstrim-enabled
+  namespace: {{ .Release.Namespace }}
+spec:
+  name: fstrim-enabled
+  task: filesystem-trim
+  cron: "0 19 * * *"
+  retain: 0
+  concurrency: 1
+  groups:
+    - fstrim-enabled
+  labels: {}
+---
+# Daily backup at 3am local time (20:00 UTC for America/Los_Angeles)
+# Applies to all volumes in the "backups-enabled" group
+apiVersion: longhorn.io/v1beta2
+kind: RecurringJob
+metadata:
+  name: backups-enabled
+  namespace: {{ .Release.Namespace }}
+spec:
+  name: backups-enabled
+  task: backup
+  cron: "0 20 * * *"
+  retain: 7
+  concurrency: 2
+  groups:
+    - backups-enabled
+  labels: {}
+---
+# Daily system backup at 4am local time (21:00 UTC for America/Los_Angeles)
+# Skips volumes that were already backed up today
+apiVersion: longhorn.io/v1beta2
+kind: RecurringJob
+metadata:
+  name: system-backup
+  namespace: {{ .Release.Namespace }}
+spec:
+  name: system-backup
+  task: system-backup
+  cron: "0 21 * * *"
+  retain: 1
+  parameters:
+    volume-backup-policy: if-not-present

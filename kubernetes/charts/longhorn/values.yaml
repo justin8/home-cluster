@@ -1,0 +1,62 @@
+longhorn:
+  defaultSettings:
+    defaultReplicaCount: 1 # TODO: change to 2
+    storageMinimalAvailablePercentage: "10"
+    createDefaultDiskLabeledNodes: false
+    defaultDataPath: /var/lib/longhorn
+    defaultDataLocality: best-effort
+    guaranteedEngineManagerCPU: 0.15
+    guaranteedReplicaManagerCPU: 0.15
+    concurrentReplicaRebuildPerNodeLimit: "1"
+    replicaSoftAntiAffinity: "false" # REQUIRE different nodes for replicas
+    replicaZoneSoftAntiAffinity: "true" # Prefer different zones if available
+    replicaDiskSoftAntiAffinity: "false" # REQUIRE different disks for replicas
+    upgradeChecker: "false"
+    autoSalvage: "true"
+    # Talos Linux control-plane node settings
+    taintToleration: "node-role.kubernetes.io/control-plane:NoSchedule;node-role.kubernetes.io/master:NoSchedule"
+    disableSchedulingOnCordonedNode: "true"
+    replicaReplenishmentWaitInterval: "300"
+    storageReservedPercentageForDefaultDisk: "10"
+    kubernetesClusterAutoscalerEnabled: "false"
+    nodeDownPodDeletionPolicy: delete-both-statefulset-and-deployment-pod
+    # NFS backup target - nfs://<storage-ip>:<export-path>
+    # TODO: set to actual NFS export path on 192.168.5.5
+    backupTarget: "nfs://192.168.5.5:/longhorn-backups"
+
+  persistence:
+    defaultClass: true
+    defaultClassReplicaCount: 1 # TODO: change to 2
+    defaultDataLocality: best-effort
+    reclaimPolicy: Retain
+    defaultFsType: ext4
+
+  preUpgradeChecker:
+    jobEnabled: false
+
+  csi:
+    # At least 2 replicas to allow node draining without disruption
+    attacherReplicaCount: 1 # TODO: change to 2
+    provisionerReplicaCount: 1 # TODO: change to 2
+    resizerReplicaCount: 1 # TODO: change to 2
+    snapshotterReplicaCount: 1 # TODO: change to 2
+
+  # All Longhorn components need tolerations to run on control-plane-only clusters
+  longhornUI:
+    replicas: 1
+    tolerations: &controlPlaneTolerations
+      - key: node-role.kubernetes.io/control-plane
+        operator: Exists
+        effect: NoSchedule
+      - key: node-role.kubernetes.io/master
+        operator: Exists
+        effect: NoSchedule
+
+  longhornManager:
+    tolerations: *controlPlaneTolerations
+
+  longhornDriverDeployer:
+    tolerations: *controlPlaneTolerations
+
+  longhornDriver:
+    tolerations: *controlPlaneTolerations
