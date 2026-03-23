@@ -27,6 +27,10 @@
 - [x] Docker registry caching/mirroring
 - [x] Deploy from git using pulumi
 - [ ] Try out ArgoCD to replace pulumi
+  - [ ] Migrate other apps
+  - [ ] Re-enable ingress auth
+  - [ ] Update to 2 replicas for lonnghorn
+  - [ ] Change to references to the pub/priv ingress classes
 - [ ] Kavita OAuth (needs v0.8.8)
 - [ ] Look in to OAuth alternatives that can be deployed fully programatically
 - [ ] Get access by user groups working - coming in tinyauth v4 maybe; alternatively, try out oauth2proxy
