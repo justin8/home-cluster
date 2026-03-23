@@ -1,2 +1,4 @@
 # Default values for sealed-secrets.
 # This is a wrapper chart.
+sealed-secrets:
+  fullnameOverride: "sealed-secrets-controller"
