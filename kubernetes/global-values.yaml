@@ -1,5 +1,5 @@
 global:
-  domain: dray.id.au
+  domain: staging.dray.id.au
   admin_email: admin@dray.id.au
   clusterName: home-cluster
   timezone: America/Los_Angeles
