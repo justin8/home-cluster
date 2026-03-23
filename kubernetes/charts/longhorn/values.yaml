@@ -20,9 +20,9 @@ longhorn:
     storageReservedPercentageForDefaultDisk: "10"
     kubernetesClusterAutoscalerEnabled: "false"
     nodeDownPodDeletionPolicy: delete-both-statefulset-and-deployment-pod
-    # NFS backup target - nfs://<storage-ip>:<export-path>
-    # TODO: set to actual NFS export path on 192.168.5.5
-    backupTarget: "nfs://192.168.5.5:/longhorn-backups"
+
+  defaultBackupStore:
+    backupTarget: "nfs://192.168.5.5:/mnt/pool/backups/longhorn"
 
   persistence:
     defaultClass: true
