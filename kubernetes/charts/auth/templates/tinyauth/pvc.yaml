@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: tinyauth-data
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    recurring-job-group.longhorn.io/backups-enabled: enabled
+    recurring-job-group.longhorn.io/fstrim-enabled: enabled
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: longhorn
+  resources:
+    requests:
+      storage: 200Mi

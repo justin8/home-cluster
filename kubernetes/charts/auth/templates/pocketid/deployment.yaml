@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: pocketid
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: pocketid
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pocketid
+  template:
+    metadata:
+      labels:
+        app: pocketid
+    spec:
+      serviceAccountName: pocketid
+      containers:
+        - name: pocketid
+          image: ghcr.io/pocket-id/pocket-id:v2.4.0
+          ports:
+            - containerPort: 1411
+          envFrom:
+            - configMapRef:
+                name: pocketid-config
+            - secretRef:
+                name: pocketid-secrets
+          volumeMounts:
+            - name: data
+              mountPath: /app/data
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 1411
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 1411
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: pocketid-data
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: pocketid
+  namespace: {{ .Release.Namespace }}
+automountServiceAccountToken: true

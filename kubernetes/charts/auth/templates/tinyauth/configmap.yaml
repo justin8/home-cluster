@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tinyauth-config
+  namespace: {{ .Release.Namespace }}
+data:
+  TINYAUTH_OAUTH_PROVIDERS_POCKETID_AUTHURL: "https://pocketid.{{ .Values.global.domain }}/authorize"
+  TINYAUTH_OAUTH_PROVIDERS_POCKETID_TOKENURL: "https://pocketid.{{ .Values.global.domain }}/api/oidc/token"
+  TINYAUTH_OAUTH_PROVIDERS_POCKETID_USERINFOURL: "https://pocketid.{{ .Values.global.domain }}/api/oidc/userinfo"
+  TINYAUTH_OAUTH_PROVIDERS_POCKETID_REDIRECTURL: "https://tinyauth.{{ .Values.global.domain }}/api/oauth/callback"
+  TINYAUTH_OAUTH_PROVIDERS_POCKETID_SCOPES: "openid profile email"
+  TINYAUTH_OAUTH_AUTOREDIRECT: "true"
+  TINYAUTH_AUTH_SECURECOOKIE: "true"
+  TINYAUTH_APPURL: "https://tinyauth.{{ .Values.global.domain }}"

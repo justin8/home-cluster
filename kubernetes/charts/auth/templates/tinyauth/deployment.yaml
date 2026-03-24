@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tinyauth
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: tinyauth
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tinyauth
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: tinyauth
+    spec:
+      containers:
+        - name: tinyauth
+          image: ghcr.io/steveiliop56/tinyauth:v5.0.4
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: tinyauth-config
+          env:
+            - name: TINYAUTH_OAUTH_PROVIDERS_POCKETID_CLIENTID
+              valueFrom:
+                secretKeyRef:
+                  name: tinyauth-credentials
+                  key: clientId
+            - name: TINYAUTH_OAUTH_PROVIDERS_POCKETID_CLIENTSECRET
+              valueFrom:
+                secretKeyRef:
+                  name: tinyauth-credentials
+                  key: clientSecret
+            - name: SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: tinyauth-credentials
+                  key: secretKey
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          livenessProbe:
+            httpGet:
+              path: /api/healthz
+              port: 3000
+          readinessProbe:
+            httpGet:
+              path: /api/healthz
+              port: 3000
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: tinyauth-data
