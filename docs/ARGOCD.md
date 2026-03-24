@@ -159,6 +159,24 @@ kubernetes/charts/my-app/
     └── extra-res.yaml # Custom Kubernetes resource
 ```
 
+#### Splitting Templates into Subdirectories
+
+For charts with multiple resources, templates can be organized into subdirectories by resource type or logical component. Helm renders all YAML files recursively under `templates/`, so no additional configuration is needed.
+
+```bash
+kubernetes/charts/my-app/
+├── Chart.yaml
+├── values.yaml
+└── templates/
+    └── my-component/
+        ├── deployment.yaml
+        ├── service.yaml
+        ├── ingress.yaml
+        └── pvc.yaml
+```
+
+This pattern is used in charts like `dns` (pihole subdirectory) and `auth` (pocketid and tinyauth subdirectories).
+
 ## Global Configuration
 
 Cluster-wide constants and shared values are maintained in `kubernetes/global-values.yaml`.
