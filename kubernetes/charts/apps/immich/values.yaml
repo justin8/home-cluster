@@ -1,2 +1,2 @@
-mlVolumeSizeGi: 1 # TODO: 10
-databaseVolumeSizeGi: 1 # TODO: 10
+mlVolumeSizeGi: 10
+databaseVolumeSizeGi: 10

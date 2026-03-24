@@ -1,6 +1,6 @@
-radarrVolumeSizeGi: 1 # TODO: 5
-sonarrVolumeSizeGi: 1 # TODO: 5
+radarrVolumeSizeGi: 5
+sonarrVolumeSizeGi: 5
 prowlarrVolumeSizeGi: 1
 sabnzbdVolumeSizeGi: 1
 qbittorrentVolumeSizeGi: 1
-seerrVolumeSizeGi: 1 # TODO: 5
+seerrVolumeSizeGi: 5
