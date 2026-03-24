@@ -18,6 +18,26 @@
 - **Scopes:** Prefer **strict** scope (default) for secrets tied to a specific application and namespace. Use **cluster-wide** scope only for shared secrets.
 - **Procedures:** Refer to `docs/SEALED_SECRETS.md` for detailed instructions on creating, backing up, and restoring sealed secrets.
 
+## Volume Pattern
+
+Always use the explicit three-resource pattern for Longhorn volumes. Never use dynamic provisioning (PVC-only with storageClassName).
+
+Every volume requires:
+
+1. `longhorn.io/v1beta2 Volume` in `longhorn-system` — with recurring job group labels
+2. `PersistentVolume` (cluster-scoped) — CSI binding to the Longhorn volume
+3. `PersistentVolumeClaim` in the app namespace — references PV by `volumeName`
+
+Recurring job groups go as **labels on the Longhorn Volume**, not annotations on the PVC:
+
+```yaml
+labels:
+  recurring-job-group.longhorn.io/backups-enabled: enabled
+  recurring-job-group.longhorn.io/fstrim-enabled: enabled
+```
+
+See `kubernetes/charts/mail-proxy/templates/volume.yaml` as the reference implementation. Always name the file `volume.yaml`.
+
 ## Project Steering
 
 - **Directory:** Key project guidance and steering documents are located in `.kiro/steering/`.

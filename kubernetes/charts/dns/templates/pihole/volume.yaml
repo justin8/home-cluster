@@ -1,0 +1,47 @@
+apiVersion: longhorn.io/v1beta2
+kind: Volume
+metadata:
+  name: pihole-etc-pihole-v2
+  namespace: longhorn-system
+  labels:
+    recurring-job-group.longhorn.io/backups-enabled: enabled
+    recurring-job-group.longhorn.io/fstrim-enabled: enabled
+spec:
+  size: "104857600"  # 100Mi
+  numberOfReplicas: 1
+  dataLocality: best-effort
+  accessMode: rwo
+  frontend: blockdev
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pihole-etc-pihole-v2
+spec:
+  capacity:
+    storage: 100Mi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: longhorn
+  csi:
+    driver: driver.longhorn.io
+    fsType: ext4
+    volumeHandle: pihole-etc-pihole-v2
+    volumeAttributes:
+      numberOfReplicas: "1"
+      dataLocality: best-effort
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pihole-etc-pihole-v2
+  namespace: {{ .Release.Namespace }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: longhorn
+  volumeName: pihole-etc-pihole-v2
+  resources:
+    requests:
+      storage: 100Mi

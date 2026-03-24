@@ -172,3 +172,67 @@ export class MyApp extends TauApplication {
 - Longhorn volumes support automatic backup scheduling
 - PostgreSQL databases backed up via Longhorn volume snapshots
 - NFS data relies on external NFS server backup policies
+
+## Volume Pattern
+
+All Longhorn volumes must be defined explicitly using three resources in order:
+
+1. `longhorn.io/v1beta2 Volume` in `longhorn-system` namespace — defines the actual volume with size, replicas, and recurring job group labels
+2. `PersistentVolume` (cluster-scoped) — binds to the Longhorn volume via CSI `volumeHandle`
+3. `PersistentVolumeClaim` in the app namespace — references the PV by `volumeName`
+
+Do NOT use dynamic provisioning (i.e. do not create a PVC with just a `storageClassName` and no `volumeName`). Always create all three resources explicitly in a file named `volume.yaml`.
+
+Recurring job groups (backups, fstrim) are set as labels on the Longhorn `Volume` resource, not as annotations on the PVC.
+
+Example:
+
+```yaml
+apiVersion: longhorn.io/v1beta2
+kind: Volume
+metadata:
+  name: my-app-data
+  namespace: longhorn-system
+  labels:
+    recurring-job-group.longhorn.io/backups-enabled: enabled
+    recurring-job-group.longhorn.io/fstrim-enabled: enabled
+spec:
+  size: "1073741824" # 1Gi
+  numberOfReplicas: 1
+  dataLocality: best-effort
+  accessMode: rwo
+  frontend: blockdev
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: my-app-data
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: longhorn
+  csi:
+    driver: driver.longhorn.io
+    fsType: ext4
+    volumeHandle: my-app-data
+    volumeAttributes:
+      numberOfReplicas: "1"
+      dataLocality: best-effort
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: my-app-data
+  namespace: { { .Release.Namespace } }
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: longhorn
+  volumeName: my-app-data
+  resources:
+    requests:
+      storage: 1Gi
+```

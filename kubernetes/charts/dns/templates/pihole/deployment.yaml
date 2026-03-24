@@ -51,4 +51,4 @@ spec:
       volumes:
         - name: etc-pihole
           persistentVolumeClaim:
-            claimName: pihole-etc-pihole
+            claimName: pihole-etc-pihole-v2
