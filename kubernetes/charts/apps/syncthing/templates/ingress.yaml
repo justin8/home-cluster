@@ -8,7 +8,7 @@ metadata:
 spec:
   ingressClassName: traefik-private
   rules:
-    - host: syncthing.{{ .Values.global.domain }}
+    - host: syncthing.{{ .Values.domain }}
       http:
         paths:
           - path: /
@@ -20,5 +20,5 @@ spec:
                   number: 8384
   tls:
     - hosts:
-        - syncthing.{{ .Values.global.domain }}
+        - syncthing.{{ .Values.domain }}
       secretName: default-tls

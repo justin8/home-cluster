@@ -6,7 +6,7 @@ metadata:
 spec:
   ingressClassName: traefik-public
   rules:
-    - host: kavita.{{ .Values.global.domain }}
+    - host: kavita.{{ .Values.domain }}
       http:
         paths:
           - path: /
@@ -18,5 +18,5 @@ spec:
                   number: 5000
   tls:
     - hosts:
-        - kavita.{{ .Values.global.domain }}
+        - kavita.{{ .Values.domain }}
       secretName: default-tls

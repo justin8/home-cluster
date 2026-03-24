@@ -8,7 +8,7 @@ metadata:
 spec:
   ingressClassName: traefik-private
   rules:
-    - host: pihole.{{ .Values.global.domain }}
+    - host: pihole.{{ .Values.domain }}
       http:
         paths:
           - path: /
@@ -20,5 +20,5 @@ spec:
                   number: 80
   tls:
     - hosts:
-        - pihole.{{ .Values.global.domain }}
+        - pihole.{{ .Values.domain }}
       secretName: default-tls

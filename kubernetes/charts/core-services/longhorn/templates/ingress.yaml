@@ -11,7 +11,7 @@ metadata:
 spec:
   ingressClassName: traefik-private
   rules:
-    - host: longhorn.{{ .Values.global.domain }}
+    - host: longhorn.{{ .Values.domain }}
       http:
         paths:
           - path: /
@@ -23,5 +23,5 @@ spec:
                   number: 80
   tls:
     - hosts:
-        - longhorn.{{ .Values.global.domain }}
+        - longhorn.{{ .Values.domain }}
       secretName: default-tls

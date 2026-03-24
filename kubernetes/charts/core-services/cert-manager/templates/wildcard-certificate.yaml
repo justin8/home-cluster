@@ -8,9 +8,9 @@ spec:
   issuerRef:
     name: letsencrypt-staging
     kind: ClusterIssuer
-  commonName: "*.{{ .Values.global.domain }}"
+  commonName: "*.{{ .Values.domain }}"
   dnsNames:
-    - "*.{{ .Values.global.domain }}"
+    - "*.{{ .Values.domain }}"
   secretTemplate:
     annotations:
       reflector.v1.k8s.emberstack.com/reflection-allowed: "true"

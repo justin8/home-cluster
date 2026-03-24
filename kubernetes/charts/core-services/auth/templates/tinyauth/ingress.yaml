@@ -6,7 +6,7 @@ metadata:
 spec:
   ingressClassName: traefik-public
   rules:
-    - host: tinyauth.{{ .Values.global.domain }}
+    - host: tinyauth.{{ .Values.domain }}
       http:
         paths:
           - path: /
@@ -18,5 +18,5 @@ spec:
                   number: 3000
   tls:
     - hosts:
-        - tinyauth.{{ .Values.global.domain }}
+        - tinyauth.{{ .Values.domain }}
       secretName: default-tls

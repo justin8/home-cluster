@@ -6,7 +6,7 @@ metadata:
 spec:
   ingressClassName: traefik-public
   rules:
-    - host: plex.{{ .Values.global.domain }}
+    - host: plex.{{ .Values.domain }}
       http:
         paths:
           - path: /
@@ -18,5 +18,5 @@ spec:
                   number: 32400
   tls:
     - hosts:
-        - plex.{{ .Values.global.domain }}
+        - plex.{{ .Values.domain }}
       secretName: default-tls

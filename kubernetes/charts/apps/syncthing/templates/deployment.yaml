@@ -16,7 +16,7 @@ spec:
         app: syncthing
     spec:
       securityContext:
-        fsGroup: {{ .Values.global.sharedGid }}
+        fsGroup: {{ .Values.PGID }}
         fsGroupChangePolicy: OnRootMismatch
       containers:
         - name: syncthing
@@ -38,11 +38,11 @@ spec:
               name: discovery
           env:
             - name: TZ
-              value: {{ .Values.global.timezone }}
+              value: {{ .Values.TZ }}
             - name: PUID
-              value: {{ .Values.global.sharedUid | quote }}
+              value: {{ .Values.PUID | quote }}
             - name: PGID
-              value: {{ .Values.global.sharedGid | quote }}
+              value: {{ .Values.PGID | quote }}
           livenessProbe:
             httpGet:
               port: 8384
@@ -64,5 +64,5 @@ spec:
             claimName: syncthing-config
         - name: data
           nfs:
-            server: {{ .Values.global.network.storage }}
-            path: {{ .Values.global.appStoragePath }}/syncthing
+            server: {{ .Values.network.storage }}
+            path: {{ .Values.appStoragePath }}/syncthing

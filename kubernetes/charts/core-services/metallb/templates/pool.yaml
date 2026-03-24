@@ -5,7 +5,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
 spec:
   addresses:
-    - {{ .Values.global.network.metallbRange }}
+    - {{ .Values.network.metallbRange }}
   autoAssign: true
 ---
 apiVersion: metallb.io/v1beta1
@@ -24,7 +24,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
 spec:
   addresses:
-    - {{ .Values.global.network.publicIngress }}/32
+    - {{ .Values.network.publicIngress }}/32
   autoAssign: false
 ---
 apiVersion: metallb.io/v1beta1
@@ -43,7 +43,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
 spec:
   addresses:
-    - {{ .Values.global.network.privateIngress }}/32
+    - {{ .Values.network.privateIngress }}/32
   autoAssign: false
 ---
 apiVersion: metallb.io/v1beta1
@@ -62,7 +62,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
 spec:
   addresses:
-    - {{ .Values.global.network.dnsServer }}/32
+    - {{ .Values.network.dnsServer }}/32
   autoAssign: false
 ---
 apiVersion: metallb.io/v1beta1

@@ -5,8 +5,8 @@ metadata:
   name: storage-dns-record
   namespace: {{ .Release.Namespace }}
   annotations:
-    external-dns.alpha.kubernetes.io/hostname: storage.{{ .Values.global.domain }}
-    external-dns.alpha.kubernetes.io/target: {{ .Values.global.network.storage }}
+    external-dns.alpha.kubernetes.io/hostname: storage.{{ .Values.domain }}
+    external-dns.alpha.kubernetes.io/target: {{ .Values.network.storage }}
 spec:
   type: ClusterIP
   clusterIP: None
@@ -22,8 +22,8 @@ metadata:
   name: home-cluster-dns-record
   namespace: {{ .Release.Namespace }}
   annotations:
-    external-dns.alpha.kubernetes.io/hostname: home-cluster.{{ .Values.global.domain }}
-    external-dns.alpha.kubernetes.io/target: {{ .Values.global.network.cluster }}
+    external-dns.alpha.kubernetes.io/hostname: home-cluster.{{ .Values.domain }}
+    external-dns.alpha.kubernetes.io/target: {{ .Values.network.cluster }}
 spec:
   type: ClusterIP
   clusterIP: None

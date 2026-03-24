@@ -23,11 +23,11 @@ spec:
               name: web
           env:
             - name: TZ
-              value: {{ .Values.global.timezone }}
+              value: {{ .Values.TZ }}
             - name: PUID
-              value: {{ .Values.global.sharedUid | quote }}
+              value: {{ .Values.PUID | quote }}
             - name: PGID
-              value: {{ .Values.global.sharedGid | quote }}
+              value: {{ .Values.PGID | quote }}
           resources:
             requests:
               gpu.intel.com/i915: "1"
@@ -54,5 +54,5 @@ spec:
             claimName: plex-config
         - name: media
           nfs:
-            server: {{ .Values.global.network.storage }}
+            server: {{ .Values.network.storage }}
             path: /mnt/pool/media

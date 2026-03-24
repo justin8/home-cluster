@@ -8,7 +8,7 @@ metadata:
 spec:
   ingressClassName: traefik-public
   rules:
-    - host: grist.{{ .Values.global.domain }}
+    - host: grist.{{ .Values.domain }}
       http:
         paths:
           - path: /
@@ -20,5 +20,5 @@ spec:
                   number: 8484
   tls:
     - hosts:
-        - grist.{{ .Values.global.domain }}
+        - grist.{{ .Values.domain }}
       secretName: default-tls

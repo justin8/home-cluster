@@ -6,7 +6,7 @@ metadata:
 data:
   UI_CONFIG_DISABLED: "false"
   APP_NAME: "Home Cluster"
-  APP_URL: "https://pocketid.{{ .Values.global.domain }}"
+  APP_URL: "https://pocketid.{{ .Values.domain }}"
   TRUST_PROXY: "true"
   SMTP_HOST: "email-smtp.us-west-2.amazonaws.com"
   SMTP_PORT: "587"

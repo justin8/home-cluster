@@ -6,7 +6,7 @@ metadata:
 spec:
   ingressClassName: traefik-public
   rules:
-    - host: pocketid.{{ .Values.global.domain }}
+    - host: pocketid.{{ .Values.domain }}
       http:
         paths:
           - path: /
@@ -18,5 +18,5 @@ spec:
                   number: 1411
   tls:
     - hosts:
-        - pocketid.{{ .Values.global.domain }}
+        - pocketid.{{ .Values.domain }}
       secretName: default-tls
