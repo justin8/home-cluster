@@ -27,8 +27,6 @@ spec:
                 name: immich-config
             - secretRef:
                 name: immich-secrets
-            - secretRef:
-                name: immich-database-app
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:

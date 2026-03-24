@@ -8,7 +8,3 @@ data:
   IMMICH_PORT: "2283"
   REDIS_PORT: "6379"
   REDIS_HOSTNAME: redis.{{ .Release.Namespace }}.svc.cluster.local
-  DB_PORT: "5432"
-  DB_HOSTNAME: immich-database-rw.{{ .Release.Namespace }}.svc.cluster.local
-  DB_DATABASE_NAME: immich-database
-  DB_USERNAME: immich-database_user
