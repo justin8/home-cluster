@@ -1,7 +1,7 @@
 apiVersion: longhorn.io/v1beta2
 kind: Volume
 metadata:
-  name: mail-proxy-spool
+  name: mail-proxy-spool-v2
   namespace: longhorn-system
 spec:
   size: "104857600"  # 100Mi
@@ -13,7 +13,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: mail-proxy-spool
+  name: mail-proxy-spool-v2
 spec:
   capacity:
     storage: 100Mi
@@ -24,7 +24,7 @@ spec:
   csi:
     driver: driver.longhorn.io
     fsType: ext4
-    volumeHandle: mail-proxy-spool
+    volumeHandle: mail-proxy-spool-v2
     volumeAttributes:
       numberOfReplicas: "1"
       dataLocality: best-effort
@@ -32,13 +32,13 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: mail-proxy-spool
+  name: mail-proxy-spool-v2
   namespace: {{ .Release.Namespace }}
 spec:
   accessModes:
     - ReadWriteOnce
   storageClassName: longhorn
-  volumeName: mail-proxy-spool
+  volumeName: mail-proxy-spool-v2
   resources:
     requests:
       storage: 100Mi

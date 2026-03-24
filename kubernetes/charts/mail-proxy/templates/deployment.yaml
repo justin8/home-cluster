@@ -43,6 +43,8 @@ spec:
                 - -c
                 - "ps axf | fgrep -v grep | egrep -q '\\{supervisord\\}|/usr/bin/supervisord' && ps axf | fgrep -v grep | fgrep -q 'postfix-script' && ps axf | fgrep -v grep | fgrep -q 'opendkim'"
             initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 30
           lifecycle:
             preStop:
               exec:
@@ -59,4 +61,4 @@ spec:
       volumes:
         - name: spool
           persistentVolumeClaim:
-            claimName: mail-proxy-spool
+            claimName: mail-proxy-spool-v2
