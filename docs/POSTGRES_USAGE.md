@@ -219,6 +219,16 @@ export class ComplexApp extends TauApplication {
 - Backups are enabled by default via Longhorn volume backups (see [LONGHORN](LONGHORN.md) for more details)
 - CNPG's native backups are not being used currently
 
+#### Restoring a Database Volume
+
+CNPG manages its own PVC via `pvcTemplate`, so the standard Longhorn volume restore process (renaming the volume in `volume.yaml`) does not apply directly. The correct procedure is:
+
+1. **Scale down the app** — delete or suspend the ArgoCD application (or scale the deployment to 0) so nothing is writing to the database
+2. **Delete the CNPG Cluster** — this releases the PVC so the volume can be replaced. The PV/Longhorn volume are retained due to `persistentVolumeReclaimPolicy: Retain`
+3. **Restore the backup in Longhorn UI** — restore to a **new name** (e.g. `immich-database-data-restored`)
+4. **Update `volume.yaml`** — change the Longhorn `Volume` CR name, PV name, `csi.volumeHandle`, and the `volumeName` in the CNPG cluster's `pvcTemplate` to the new name
+5. **Commit and push** — ArgoCD will recreate the CNPG Cluster pointing at the restored volume
+
 ### Development Workflow
 
 1. Create your application extending TauApplication
