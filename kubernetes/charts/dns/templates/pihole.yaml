@@ -1,0 +1,223 @@
+---
+# PiHole deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pihole
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: pihole
+    pihole/type: primary
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pihole
+      pihole/type: primary
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: pihole
+        pihole/type: primary
+    spec:
+      containers:
+        - name: pihole
+          image: pihole/pihole
+          ports:
+            - name: dns-tcp
+              containerPort: 53
+              protocol: TCP
+            - name: dns-udp
+              containerPort: 53
+              protocol: UDP
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 20m
+              memory: 256Mi
+            limits:
+              cpu: 200m
+              memory: 512Mi
+          env:
+            - name: FTLCONF_webserver_api_password
+              value: ""
+            - name: FTL_CMD
+              value: "no-daemon -- --interface=eth0"
+          volumeMounts:
+            - name: etc-pihole
+              mountPath: /etc/pihole
+      volumes:
+        - name: etc-pihole
+          persistentVolumeClaim:
+            claimName: pihole-etc-pihole
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pihole-etc-pihole
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    recurring-job-group.longhorn.io/backups-enabled: enabled
+    recurring-job-group.longhorn.io/fstrim-enabled: enabled
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: longhorn
+  resources:
+    requests:
+      storage: 100Mi
+---
+# Internal web service for external-dns to reach pihole API
+apiVersion: v1
+kind: Service
+metadata:
+  name: pihole-web
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: pihole
+spec:
+  selector:
+    app: pihole
+    pihole/type: primary
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+---
+# LoadBalancer service for DNS traffic
+apiVersion: v1
+kind: Service
+metadata:
+  name: dns
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: pihole
+  annotations:
+    metallb.io/address-pool: dns
+spec:
+  type: LoadBalancer
+  selector:
+    app: pihole
+    pihole/type: primary
+  ports:
+    - name: dns-udp
+      port: 53
+      targetPort: 53
+      protocol: UDP
+    - name: dns-tcp
+      port: 53
+      targetPort: 53
+      protocol: TCP
+---
+# MetalLB IP pool for the DNS service
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: dns
+  namespace: metallb-system
+spec:
+  addresses:
+    - {{ .Values.global.network.dnsServer }}/32
+---
+apiVersion: metallb.io/v1beta1
+kind: L2Advertisement
+metadata:
+  name: dns
+  namespace: metallb-system
+spec:
+  ipAddressPools:
+    - dns
+---
+# PiHole UI ingress (private only)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: pihole-ui
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    traefik.ingress.kubernetes.io/router.middlewares: traefik-private-tinyauth@kubernetescrd
+spec:
+  ingressClassName: traefik-private
+  rules:
+    - host: pihole.{{ .Values.global.domain }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: pihole-web
+                port:
+                  number: 80
+  tls:
+    - hosts:
+        - pihole.{{ .Values.global.domain }}
+      secretName: default-tls
+---
+# Custom DNS record: storage.domain -> NFS IP
+apiVersion: v1
+kind: Service
+metadata:
+  name: storage-dns-record
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: storage.{{ .Values.global.domain }}
+    external-dns.alpha.kubernetes.io/target: {{ .Values.global.network.storage }}
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+---
+# Custom DNS record: home-cluster.domain -> cluster IP
+apiVersion: v1
+kind: Service
+metadata:
+  name: home-cluster-dns-record
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: home-cluster.{{ .Values.global.domain }}
+    external-dns.alpha.kubernetes.io/target: {{ .Values.global.network.cluster }}
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+---
+# Cloudflare DDNS - keeps home.domain pointed at current external IP
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloudflare-ddns
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: cloudflare-ddns
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cloudflare-ddns
+  template:
+    metadata:
+      labels:
+        app: cloudflare-ddns
+    spec:
+      containers:
+        - name: cloudflare-ddns
+          image: favonia/cloudflare-ddns:latest
+          env:
+            - name: CLOUDFLARE_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: cloudflare-api-token
+                  key: api-token
+            - name: DOMAINS
+              value: home.{{ .Values.global.domain }}

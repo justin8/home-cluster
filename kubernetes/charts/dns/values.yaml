@@ -1,0 +1,31 @@
+external-dns-pihole:
+  txtOwnerId: external-dns-pihole
+  policy: sync
+  registry: noop
+  sources:
+    - ingress
+    - traefik-proxy
+    - service
+  provider:
+    name: pihole
+  extraArgs:
+    - --ingress-class=traefik-private
+    - --pihole-server=http://pihole-web.dns.svc.cluster.local
+    - --pihole-api-version=6
+
+external-dns-cloudflare:
+  txtOwnerId: external-dns-cloudflare
+  policy: sync
+  sources:
+    - ingress
+    - traefik-proxy
+  provider:
+    name: cloudflare
+  extraArgs:
+    - --ingress-class=traefik-public
+  env:
+    - name: CF_API_TOKEN
+      valueFrom:
+        secretKeyRef:
+          name: cloudflare-api-token
+          key: api-token

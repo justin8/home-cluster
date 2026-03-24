@@ -1,0 +1,13 @@
+apiVersion: v2
+name: dns
+description: DNS services - PiHole + External DNS + Cloudflare DDNS
+version: 0.1.0
+dependencies:
+  - name: external-dns
+    version: 1.20.0
+    repository: https://kubernetes-sigs.github.io/external-dns/
+    alias: external-dns-pihole
+  - name: external-dns
+    version: 1.20.0
+    repository: https://kubernetes-sigs.github.io/external-dns/
+    alias: external-dns-cloudflare
