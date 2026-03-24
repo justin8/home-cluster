@@ -4,7 +4,7 @@ metadata:
   name: mail-proxy-spool-v2
   namespace: longhorn-system
 spec:
-  size: "104857600"  # 100Mi
+  size: {{ mul .Values.spoolVolumeSizeMi 1024 | mul 1024 | quote }}
   numberOfReplicas: 1
   dataLocality: best-effort
   accessMode: rwo
@@ -16,7 +16,7 @@ metadata:
   name: mail-proxy-spool-v2
 spec:
   capacity:
-    storage: 100Mi
+    storage: {{ .Values.spoolVolumeSizeMi }}Mi
   accessModes:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
@@ -41,4 +41,4 @@ spec:
   volumeName: mail-proxy-spool-v2
   resources:
     requests:
-      storage: 100Mi
+      storage: {{ .Values.spoolVolumeSizeMi }}Mi
