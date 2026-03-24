@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mail-proxy
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: mail-proxy
+  template:
+    metadata:
+      labels:
+        app: mail-proxy
+    spec:
+      terminationGracePeriodSeconds: 120
+      containers:
+        - name: mail
+          image: boky/postfix:5.1.0
+          ports:
+            - name: smtp
+              containerPort: 587
+              protocol: TCP
+          readinessProbe:
+            exec:
+              command: ["sh", "-c", "/scripts/healthcheck.sh"]
+            initialDelaySeconds: 10
+            periodSeconds: 60
+            timeoutSeconds: 8
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - "ps axf | fgrep -v grep | egrep -q '\\{supervisord\\}|/usr/bin/supervisord' && ps axf | fgrep -v grep | egrep -q '(/usr/lib/postfix/sbin/|/usr/libexec/postfix/)master'"
+            initialDelaySeconds: 5
+          startupProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - "ps axf | fgrep -v grep | egrep -q '\\{supervisord\\}|/usr/bin/supervisord' && ps axf | fgrep -v grep | fgrep -q 'postfix-script' && ps axf | fgrep -v grep | fgrep -q 'opendkim'"
+            initialDelaySeconds: 5
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                  - bash
+                  - -c
+                  - 'touch /tmp/container_is_terminating && while ! [[ "`mailq`" == *empty* ]]; do echo "Flushing queue..." && postfix flush; sleep 1; done; killall5 -15 supervisord'
+          envFrom:
+            - secretRef:
+                name: mail-proxy-secrets
+          volumeMounts:
+            - name: spool
+              mountPath: /var/spool/postfix
+      volumes:
+        - name: spool
+          persistentVolumeClaim:
+            claimName: mail-proxy-spool
