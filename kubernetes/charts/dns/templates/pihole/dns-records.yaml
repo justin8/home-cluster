@@ -1,0 +1,33 @@
+# Custom DNS record: storage.domain -> NFS IP
+apiVersion: v1
+kind: Service
+metadata:
+  name: storage-dns-record
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: storage.{{ .Values.global.domain }}
+    external-dns.alpha.kubernetes.io/target: {{ .Values.global.network.storage }}
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+---
+# Custom DNS record: home-cluster.domain -> cluster IP
+apiVersion: v1
+kind: Service
+metadata:
+  name: home-cluster-dns-record
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: home-cluster.{{ .Values.global.domain }}
+    external-dns.alpha.kubernetes.io/target: {{ .Values.global.network.cluster }}
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80

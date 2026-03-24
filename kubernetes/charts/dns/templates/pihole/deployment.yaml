@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pihole
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: pihole
+    pihole/type: primary
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pihole
+      pihole/type: primary
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: pihole
+        pihole/type: primary
+    spec:
+      containers:
+        - name: pihole
+          image: pihole/pihole
+          ports:
+            - name: dns-tcp
+              containerPort: 53
+              protocol: TCP
+            - name: dns-udp
+              containerPort: 53
+              protocol: UDP
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 20m
+              memory: 256Mi
+            limits:
+              cpu: 200m
+              memory: 512Mi
+          env:
+            - name: FTLCONF_webserver_api_password
+              value: ""
+            - name: FTL_CMD
+              value: "no-daemon -- --interface=eth0"
+          volumeMounts:
+            - name: etc-pihole
+              mountPath: /etc/pihole
+      volumes:
+        - name: etc-pihole
+          persistentVolumeClaim:
+            claimName: pihole-etc-pihole

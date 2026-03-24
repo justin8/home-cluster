@@ -12,9 +12,9 @@
         "namespace": "kube-system",
         "annotations": {
           "reflector.v1.k8s.emberstack.com/reflection-allowed": "true",
-          "reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces": "cert-manager",
+          "reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces": "cert-manager,dns",
           "reflector.v1.k8s.emberstack.com/reflection-auto-enabled": "true",
-          "reflector.v1.k8s.emberstack.com/reflection-auto-namespaces": "cert-manager"
+          "reflector.v1.k8s.emberstack.com/reflection-auto-namespaces": "cert-manager,dns"
         }
       },
       "type": "Opaque"

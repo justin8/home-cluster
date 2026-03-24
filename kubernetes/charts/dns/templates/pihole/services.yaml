@@ -1,0 +1,41 @@
+# Internal web service for external-dns to reach pihole API
+apiVersion: v1
+kind: Service
+metadata:
+  name: pihole-web
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: pihole
+spec:
+  selector:
+    app: pihole
+    pihole/type: primary
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+---
+# LoadBalancer service for DNS traffic
+apiVersion: v1
+kind: Service
+metadata:
+  name: dns
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: pihole
+  annotations:
+    metallb.io/address-pool: dns-server
+spec:
+  type: LoadBalancer
+  selector:
+    app: pihole
+    pihole/type: primary
+  ports:
+    - name: dns-udp
+      port: 53
+      targetPort: 53
+      protocol: UDP
+    - name: dns-tcp
+      port: 53
+      targetPort: 53
+      protocol: TCP
