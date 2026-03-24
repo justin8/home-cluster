@@ -150,3 +150,18 @@ git add . && git commit -m "message" && git push
 - **Pulumi State**: S3 backend (`s3://jdray-pulumi-state?region=us-east-1`)
 - **Secrets**: SOPS with age encryption
 - **Credentials**: AWS SSM Parameter Store for age key
+
+## Cluster Write Safety
+
+**NEVER run write/mutating commands against the Kubernetes cluster without explicit user instruction.**
+
+This includes (but is not limited to):
+
+- `kubectl apply`, `kubectl create`, `kubectl delete`, `kubectl patch`, `kubectl edit`
+- `kubectl rollout restart`
+- Any `helm install`, `helm upgrade`, `helm uninstall`
+- Any `talosctl` commands that modify node state
+
+Read-only commands (`kubectl get`, `kubectl describe`, `kubectl logs`, `kubectl diff`) are fine.
+
+Always show the user the command and explain what it will do — let them run it.

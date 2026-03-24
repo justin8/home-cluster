@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qbittorrent
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: qbittorrent
+  template:
+    metadata:
+      labels:
+        app: qbittorrent
+    spec:
+      securityContext:
+        sysctls:
+          - name: net.ipv4.conf.all.src_valid_mark
+            value: "1"
+      containers:
+        - name: vpn
+          image: jordanpotter/wireguard:latest
+          securityContext:
+            privileged: true
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                  - sh
+                  - -c
+                  - sleep 30 && iptables -I OUTPUT 1 -d 10.244.0.0/16 -j ACCEPT
+          volumeMounts:
+            - name: vpn-config
+              mountPath: /etc/wireguard
+        - name: qbittorrent
+          image: lscr.io/linuxserver/qbittorrent:5.1.4
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: qbittorrent-config
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 5
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: downloads
+              mountPath: /mnt/pool/media/downloads
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: qbittorrent-config
+        - name: downloads
+          nfs:
+            server: {{ .Values.network.storage }}
+            path: /mnt/pool/media/downloads
+        - name: vpn-config
+          secret:
+            secretName: qbittorrent-vpn

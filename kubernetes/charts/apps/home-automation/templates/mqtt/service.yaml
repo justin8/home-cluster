@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mqtt
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: mqtt
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: mqtt.{{ .Values.domain }}
+spec:
+  type: LoadBalancer
+  selector:
+    app: mqtt
+  ports:
+    - port: 1883
+      targetPort: 1883
+      name: mqtt
+      protocol: TCP

@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      securityContext:
+        fsGroup: {{ .Values.PGID }}
+      containers:
+        - name: redis
+          image: docker.io/valkey/valkey:8-bookworm
+          command: ["/bin/sh", "-c", 'valkey-server --requirepass "$REDIS_PASSWORD"']
+          ports:
+            - containerPort: 6379
+          envFrom:
+            - secretRef:
+                name: immich-secrets
+          livenessProbe:
+            exec:
+              command: ["/bin/sh", "-c", 'valkey-cli -a "$REDIS_PASSWORD" ping']
+            initialDelaySeconds: 30
+          readinessProbe:
+            exec:
+              command: ["/bin/sh", "-c", 'valkey-cli -a "$REDIS_PASSWORD" ping']
+            initialDelaySeconds: 30

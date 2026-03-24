@@ -1,0 +1,47 @@
+apiVersion: longhorn.io/v1beta2
+kind: Volume
+metadata:
+  name: home-assistant-config
+  namespace: longhorn-system
+  labels:
+    recurring-job-group.longhorn.io/backups-enabled: enabled
+    recurring-job-group.longhorn.io/fstrim-enabled: enabled
+spec:
+  size: {{ mul .Values.homeAssistantVolumeSizeGi 1024 | mul 1024 | mul 1024 | quote }}
+  numberOfReplicas: 1
+  dataLocality: best-effort
+  accessMode: rwo
+  frontend: blockdev
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: home-assistant-config
+spec:
+  capacity:
+    storage: {{ .Values.homeAssistantVolumeSizeGi }}Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: longhorn
+  csi:
+    driver: driver.longhorn.io
+    fsType: ext4
+    volumeHandle: home-assistant-config
+    volumeAttributes:
+      numberOfReplicas: "1"
+      dataLocality: best-effort
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: home-assistant-config
+  namespace: {{ .Release.Namespace }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: longhorn
+  volumeName: home-assistant-config
+  resources:
+    requests:
+      storage: {{ .Values.homeAssistantVolumeSizeGi }}Gi

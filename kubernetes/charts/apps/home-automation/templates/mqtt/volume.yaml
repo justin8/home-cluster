@@ -1,0 +1,47 @@
+apiVersion: longhorn.io/v1beta2
+kind: Volume
+metadata:
+  name: mqtt-data
+  namespace: longhorn-system
+  labels:
+    recurring-job-group.longhorn.io/backups-enabled: enabled
+    recurring-job-group.longhorn.io/fstrim-enabled: enabled
+spec:
+  size: {{ mul .Values.mqttVolumeSizeGi 1024 | mul 1024 | mul 1024 | quote }}
+  numberOfReplicas: 1
+  dataLocality: best-effort
+  accessMode: rwo
+  frontend: blockdev
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mqtt-data
+spec:
+  capacity:
+    storage: {{ .Values.mqttVolumeSizeGi }}Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: longhorn
+  csi:
+    driver: driver.longhorn.io
+    fsType: ext4
+    volumeHandle: mqtt-data
+    volumeAttributes:
+      numberOfReplicas: "1"
+      dataLocality: best-effort
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mqtt-data
+  namespace: {{ .Release.Namespace }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: longhorn
+  volumeName: mqtt-data
+  resources:
+    requests:
+      storage: {{ .Values.mqttVolumeSizeGi }}Gi

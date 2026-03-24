@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: radarr
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: radarr
+  template:
+    metadata:
+      labels:
+        app: radarr
+    spec:
+      containers:
+        - name: radarr
+          image: lscr.io/linuxserver/radarr:6.0.4
+          ports:
+            - containerPort: 7878
+          envFrom:
+            - configMapRef:
+                name: downloads-config
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 7878
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: media
+              mountPath: /mnt/pool/media
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: radarr-config
+        - name: media
+          nfs:
+            server: {{ .Values.network.storage }}
+            path: /mnt/pool/media

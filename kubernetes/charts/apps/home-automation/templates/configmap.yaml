@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: home-automation-config
+  namespace: {{ .Release.Namespace }}
+data:
+  TZ: {{ .Values.TZ }}
+  PUID: {{ .Values.PUID | quote }}
+  PGID: {{ .Values.PGID | quote }}

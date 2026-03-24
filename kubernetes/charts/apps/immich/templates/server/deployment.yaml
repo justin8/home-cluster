@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: immich
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: immich
+  template:
+    metadata:
+      labels:
+        app: immich
+    spec:
+      securityContext:
+        fsGroup: {{ .Values.PGID }}
+        fsGroupChangePolicy: OnRootMismatch
+      initContainers:
+        - name: postgresql-isready
+          image: ghcr.io/tensorchord/cloudnative-vectorchord:17-0.4.3
+          envFrom:
+            - configMapRef:
+                name: immich-config
+            - secretRef:
+                name: immich-database-app
+          command:
+            - /bin/sh
+            - -cu
+            - 'until pg_isready "--user=${DB_USERNAME}" "--dbname=${DB_DATABASE_NAME}" "--host=${DB_HOSTNAME}" "--port=${DB_PORT}" ; do sleep 2 ; done'
+      containers:
+        - name: immich-server
+          image: ghcr.io/immich-app/immich-server:v2.0.1
+          ports:
+            - containerPort: 2283
+          envFrom:
+            - configMapRef:
+                name: immich-config
+            - secretRef:
+                name: immich-secrets
+            - secretRef:
+                name: immich-database-app
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: {{ .Values.PUID }}
+            runAsGroup: {{ .Values.PGID }}
+            capabilities:
+              drop: ["ALL"]
+          livenessProbe:
+            httpGet:
+              port: 2283
+              path: /
+            initialDelaySeconds: 600
+            periodSeconds: 60
+          readinessProbe:
+            httpGet:
+              port: 2283
+              path: /
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: data
+          nfs:
+            server: {{ .Values.network.storage }}
+            path: {{ .Values.appStoragePath }}/immich

@@ -1,0 +1,4 @@
+apiVersion: v2
+name: downloads
+description: Download stack - Radarr, Sonarr, Prowlarr, SABnzbd, qBittorrent, Seerr
+version: 0.1.0

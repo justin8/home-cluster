@@ -66,3 +66,18 @@ See `kubernetes/charts/mail-proxy/templates/volume.yaml` as the reference implem
 
 - **Directory:** Key project guidance and steering documents are located in `.kiro/steering/`.
 - **Loading:** Always refer to the files in `.kiro/steering/` (e.g., `product.md`, `structure.md`, `tech.md`) to understand the high-level goals, technical constraints, and organizational structure of this cluster.
+
+## Cluster Write Safety
+
+**NEVER run write/mutating commands against the Kubernetes cluster without explicit user instruction.**
+
+This includes (but is not limited to):
+
+- `kubectl apply`, `kubectl create`, `kubectl delete`, `kubectl patch`, `kubectl edit`
+- `kubectl rollout restart`
+- Any `helm install`, `helm upgrade`, `helm uninstall`
+- Any `talosctl` commands that modify node state
+
+Read-only commands (`kubectl get`, `kubectl describe`, `kubectl logs`, `kubectl diff`) are fine.
+
+Always show the user the command and explain what it will do — let them run it.

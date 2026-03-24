@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: seerr-config
+  namespace: {{ .Release.Namespace }}
+data:
+  TZ: {{ .Values.TZ }}

@@ -1,0 +1,37 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: homeassistant
+  namespace: {{ .Release.Namespace }}
+spec:
+  instances: 1
+  postgresql:
+    parameters:
+      max_connections: "100"
+      shared_buffers: 128MB
+      effective_cache_size: 512MB
+      maintenance_work_mem: 64MB
+      checkpoint_completion_target: "0.9"
+      wal_buffers: 16MB
+      default_statistics_target: "100"
+      random_page_cost: "1.1"
+      effective_io_concurrency: "200"
+  managed:
+    roles:
+      - name: homeassistant_user
+        login: true
+  bootstrap:
+    initdb:
+      database: homeassistant
+      owner: homeassistant_user
+  storage:
+    size: {{ .Values.databaseVolumeSizeGi }}Gi
+    storageClass: longhorn
+    pvcTemplate:
+      accessModes:
+        - ReadWriteOnce
+      storageClassName: longhorn
+      volumeName: homeassistant-database-data
+      resources:
+        requests:
+          storage: {{ .Values.databaseVolumeSizeGi }}Gi

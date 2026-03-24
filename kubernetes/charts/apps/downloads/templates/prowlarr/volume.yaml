@@ -1,0 +1,47 @@
+apiVersion: longhorn.io/v1beta2
+kind: Volume
+metadata:
+  name: prowlarr-config
+  namespace: longhorn-system
+  labels:
+    recurring-job-group.longhorn.io/backups-enabled: enabled
+    recurring-job-group.longhorn.io/fstrim-enabled: enabled
+spec:
+  size: {{ mul .Values.prowlarrVolumeSizeGi 1024 | mul 1024 | mul 1024 | quote }}
+  numberOfReplicas: 1
+  dataLocality: best-effort
+  accessMode: rwo
+  frontend: blockdev
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: prowlarr-config
+spec:
+  capacity:
+    storage: {{ .Values.prowlarrVolumeSizeGi }}Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: longhorn
+  csi:
+    driver: driver.longhorn.io
+    fsType: ext4
+    volumeHandle: prowlarr-config
+    volumeAttributes:
+      numberOfReplicas: "1"
+      dataLocality: best-effort
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: prowlarr-config
+  namespace: {{ .Release.Namespace }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: longhorn
+  volumeName: prowlarr-config
+  resources:
+    requests:
+      storage: {{ .Values.prowlarrVolumeSizeGi }}Gi

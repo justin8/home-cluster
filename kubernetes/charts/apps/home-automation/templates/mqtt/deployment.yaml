@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mqtt
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: mqtt
+  template:
+    metadata:
+      labels:
+        app: mqtt
+    spec:
+      initContainers:
+        - name: mqtt-init
+          image: eclipse-mosquitto:2.0.22
+          command:
+            - sh
+            - -c
+            - |
+              mkdir -p /mosquitto/config /mosquitto/log /mosquitto/data
+              touch /mosquitto/config/passwd
+              chmod 0700 /mosquitto/config/passwd
+              mosquitto_passwd -b /mosquitto/config/passwd homeassistant $(cat /run/secrets/mqtt-homeassistant/password) && mosquitto_passwd -b /mosquitto/config/passwd z2m $(cat /run/secrets/mqtt-z2m/password) && mosquitto_passwd -b /mosquitto/config/passwd test $(cat /run/secrets/mqtt-test/password)
+          volumeMounts:
+            - name: mosquitto-data
+              mountPath: /mosquitto
+            - name: mqtt-config
+              mountPath: /mosquitto/config/mosquitto.conf
+              subPath: mosquitto.conf
+              readOnly: true
+            - name: mqtt-homeassistant-secret
+              mountPath: /run/secrets/mqtt-homeassistant
+              readOnly: true
+            - name: mqtt-z2m-secret
+              mountPath: /run/secrets/mqtt-z2m
+              readOnly: true
+            - name: mqtt-test-secret
+              mountPath: /run/secrets/mqtt-test
+              readOnly: true
+      containers:
+        - name: mosquitto
+          image: eclipse-mosquitto:2.0.22
+          ports:
+            - containerPort: 1883
+              name: mqtt
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - mosquitto_pub -u test -P $(cat /run/secrets/mqtt-test/password) -t test_topic -m test-message
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          volumeMounts:
+            - name: mosquitto-data
+              mountPath: /mosquitto
+            - name: mqtt-config
+              mountPath: /mosquitto/config/mosquitto.conf
+              subPath: mosquitto.conf
+              readOnly: true
+            - name: mqtt-homeassistant-secret
+              mountPath: /run/secrets/mqtt-homeassistant
+              readOnly: true
+            - name: mqtt-z2m-secret
+              mountPath: /run/secrets/mqtt-z2m
+              readOnly: true
+            - name: mqtt-test-secret
+              mountPath: /run/secrets/mqtt-test
+              readOnly: true
+      volumes:
+        - name: mosquitto-data
+          persistentVolumeClaim:
+            claimName: mqtt-data
+        - name: mqtt-config
+          configMap:
+            name: mqtt-config
+        - name: mqtt-homeassistant-secret
+          secret:
+            secretName: mqtt-homeassistant-credentials
+        - name: mqtt-z2m-secret
+          secret:
+            secretName: mqtt-z2m-credentials
+        - name: mqtt-test-secret
+          secret:
+            secretName: mqtt-test-credentials
