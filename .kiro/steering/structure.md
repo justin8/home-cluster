@@ -198,7 +198,7 @@ metadata:
     recurring-job-group.longhorn.io/backups-enabled: enabled
     recurring-job-group.longhorn.io/fstrim-enabled: enabled
 spec:
-  size: "1073741824" # 1Gi
+  size: {{ mul .Values.volumeSizeMi 1024 | mul 1024 | quote }}
   numberOfReplicas: 1
   dataLocality: best-effort
   accessMode: rwo
@@ -210,7 +210,7 @@ metadata:
   name: my-app-data
 spec:
   capacity:
-    storage: 1Gi
+    storage: {{ .Values.volumeSizeMi }}Mi
   accessModes:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
@@ -227,7 +227,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: my-app-data
-  namespace: { { .Release.Namespace } }
+  namespace: {{ .Release.Namespace }}
 spec:
   accessModes:
     - ReadWriteOnce
@@ -235,5 +235,7 @@ spec:
   volumeName: my-app-data
   resources:
     requests:
-      storage: 1Gi
+      storage: {{ .Values.volumeSizeMi }}Mi
 ```
+
+Volume size is configured in `values.yaml` as either Mi or Gi depending on the application's needs. Use Mi for volumes under 1Gi, Gi otherwise. The Longhorn `Volume` spec requires bytes, so the template converts using `mul .Values.volumeSizeMi 1024 | mul 1024` (for Mi) or `mul .Values.volumeSizeGi 1024 | mul 1024 | mul 1024` (for Gi). The PV and PVC use the value directly with the appropriate suffix.

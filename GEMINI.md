@@ -37,6 +37,29 @@ labels:
   recurring-job-group.longhorn.io/fstrim-enabled: enabled
 ```
 
+Volume size is configured in `values.yaml` as Mi or Gi depending on the application's needs. Use Mi for volumes under 1Gi, Gi otherwise. The Longhorn `Volume` spec requires bytes — convert using `mul .Values.volumeSizeMi 1024 | mul 1024` (Mi) or `mul .Values.volumeSizeGi 1024 | mul 1024 | mul 1024` (Gi). The PV and PVC use the value directly with the appropriate suffix:
+
+```yaml
+# values.yaml (Mi example — for volumes under 1Gi)
+volumeSizeMi: 100
+```
+
+```yaml
+# values.yaml (Gi example — for volumes 1Gi and above)
+volumeSizeGi: 5
+```
+
+```yaml
+# volume.yaml (Longhorn Volume spec)
+spec:
+  size: {{ mul .Values.volumeSizeMi 1024 | mul 1024 | quote }}   # Mi
+  # or
+  size: {{ mul .Values.volumeSizeGi 1024 | mul 1024 | mul 1024 | quote }}  # Gi
+
+# PV and PVC
+  storage: {{ .Values.volumeSizeMi }}Mi   # or {{ .Values.volumeSizeGi }}Gi
+```
+
 See `kubernetes/charts/mail-proxy/templates/volume.yaml` as the reference implementation. Always name the file `volume.yaml`.
 
 ## Project Steering

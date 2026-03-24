@@ -7,7 +7,7 @@ metadata:
     recurring-job-group.longhorn.io/backups-enabled: enabled
     recurring-job-group.longhorn.io/fstrim-enabled: enabled
 spec:
-  size: "524288000"  # 500Mi
+  size: {{ mul .Values.volumeSizeMi 1024 | mul 1024 | quote }}
   numberOfReplicas: 1
   dataLocality: best-effort
   accessMode: rwo
@@ -19,7 +19,7 @@ metadata:
   name: syncthing-config
 spec:
   capacity:
-    storage: 500Mi
+    storage: {{ .Values.volumeSizeMi }}Mi
   accessModes:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
@@ -44,4 +44,4 @@ spec:
   volumeName: syncthing-config
   resources:
     requests:
-      storage: 500Mi
+      storage: {{ .Values.volumeSizeMi }}Mi

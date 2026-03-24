@@ -7,7 +7,7 @@ metadata:
     recurring-job-group.longhorn.io/backups-enabled: enabled
     recurring-job-group.longhorn.io/fstrim-enabled: enabled
 spec:
-  size: "21474836480"  # 20Gi
+  size: {{ mul .Values.persistVolumeSizeGi 1024 | mul 1024 | mul 1024 | quote }}
   numberOfReplicas: 1
   dataLocality: best-effort
   accessMode: rwo
@@ -19,7 +19,7 @@ metadata:
   name: grist-persist
 spec:
   capacity:
-    storage: 20Gi
+    storage: {{ .Values.persistVolumeSizeGi }}Gi
   accessModes:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
@@ -44,7 +44,7 @@ spec:
   volumeName: grist-persist
   resources:
     requests:
-      storage: 20Gi
+      storage: {{ .Values.persistVolumeSizeGi }}Gi
 ---
 apiVersion: longhorn.io/v1beta2
 kind: Volume
@@ -55,7 +55,7 @@ metadata:
     recurring-job-group.longhorn.io/backups-enabled: enabled
     recurring-job-group.longhorn.io/fstrim-enabled: enabled
 spec:
-  size: "2147483648"  # 2Gi
+  size: {{ mul .Values.redisVolumeSizeGi 1024 | mul 1024 | mul 1024 | quote }}
   numberOfReplicas: 1
   dataLocality: best-effort
   accessMode: rwo
@@ -67,7 +67,7 @@ metadata:
   name: grist-redis-data
 spec:
   capacity:
-    storage: 2Gi
+    storage: {{ .Values.redisVolumeSizeGi }}Gi
   accessModes:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
@@ -92,4 +92,4 @@ spec:
   volumeName: grist-redis-data
   resources:
     requests:
-      storage: 2Gi
+      storage: {{ .Values.redisVolumeSizeGi }}Gi

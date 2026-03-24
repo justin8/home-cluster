@@ -49,6 +49,31 @@ Use the Longhorn UI to monitor volume health, replica status, and backup status.
 
 Only increasing volume sizes is supported. Update the size in the app's `volume.yaml` and sync via ArgoCD.
 
+## Volume Sizing in Helm Charts
+
+Volume size is defined in `values.yaml` as Mi or Gi. Use Mi for volumes under 1Gi, Gi otherwise:
+
+```yaml
+# values.yaml (Mi — for volumes under 1Gi)
+volumeSizeMi: 100
+
+# values.yaml (Gi — for volumes 1Gi and above)
+volumeSizeGi: 5
+```
+
+```yaml
+# volume.yaml
+apiVersion: longhorn.io/v1beta2
+kind: Volume
+spec:
+  size: {{ mul .Values.volumeSizeMi 1024 | mul 1024 | quote }}           # Mi → bytes
+  # or
+  size: {{ mul .Values.volumeSizeGi 1024 | mul 1024 | mul 1024 | quote }} # Gi → bytes
+---
+# PV and PVC use the value directly with the appropriate suffix
+  storage: {{ .Values.volumeSizeMi }}Mi   # or {{ .Values.volumeSizeGi }}Gi
+```
+
 ## Backup and Restore
 
 ### How Backups Work
