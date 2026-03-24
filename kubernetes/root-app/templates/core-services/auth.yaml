@@ -11,11 +11,11 @@ spec:
   project: default
   source:
     repoURL: https://github.com/justin8/home-cluster.git
-    path: kubernetes/charts/auth
+    path: kubernetes/charts/core-services/auth
     targetRevision: argocd2
     helm:
       valueFiles:
-        - ../../global-values.yaml
+        - ../../../global-values.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: auth

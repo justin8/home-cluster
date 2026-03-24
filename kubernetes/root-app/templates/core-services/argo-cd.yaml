@@ -11,7 +11,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/justin8/home-cluster.git
-    path: kubernetes/charts/argo-cd
+    path: kubernetes/charts/core-services/argo-cd
     targetRevision: argocd2
   destination:
     server: https://kubernetes.default.svc

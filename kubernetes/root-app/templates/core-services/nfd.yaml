@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: shared-secrets
+  name: nfd
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
@@ -11,14 +11,11 @@ spec:
   project: default
   source:
     repoURL: https://github.com/justin8/home-cluster.git
-    path: kubernetes/charts/shared-secrets
+    path: kubernetes/charts/core-services/nfd
     targetRevision: argocd2
-    helm:
-      valueFiles:
-        - ../../global-values.yaml
   destination:
     server: https://kubernetes.default.svc
-    namespace: kube-system
+    namespace: node-feature-discovery
   syncPolicy:
     automated:
       selfHeal: true

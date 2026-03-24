@@ -1,25 +1,27 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: nfs-csi
+  name: dns
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
   annotations:
-    argocd.argoproj.io/sync-wave: "-4"
+    argocd.argoproj.io/sync-wave: "-1"
 spec:
   project: default
   source:
     repoURL: https://github.com/justin8/home-cluster.git
-    path: kubernetes/charts/nfs-csi
+    path: kubernetes/charts/core-services/dns
     targetRevision: argocd2
     helm:
       valueFiles:
-        - ../../global-values.yaml
+        - ../../../global-values.yaml
   destination:
     server: https://kubernetes.default.svc
-    namespace: kube-system
+    namespace: dns
   syncPolicy:
     automated:
       selfHeal: true
       prune: true
+    syncOptions:
+      - CreateNamespace=true
