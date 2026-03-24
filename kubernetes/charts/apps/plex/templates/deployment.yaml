@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: plex
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: plex
+  template:
+    metadata:
+      labels:
+        app: plex
+    spec:
+      containers:
+        - name: plex
+          image: ghcr.io/linuxserver/plex:latest
+          ports:
+            - containerPort: 32400
+              name: web
+          env:
+            - name: TZ
+              value: {{ .Values.global.timezone }}
+            - name: PUID
+              value: {{ .Values.global.shared_uid | quote }}
+            - name: PGID
+              value: {{ .Values.global.shared_gid | quote }}
+          resources:
+            requests:
+              gpu.intel.com/i915: "1"
+            limits:
+              gpu.intel.com/i915: "1"
+          livenessProbe:
+            httpGet:
+              port: 32400
+              path: /web
+            initialDelaySeconds: 60
+          readinessProbe:
+            httpGet:
+              port: 32400
+              path: /web
+            initialDelaySeconds: 30
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: media
+              mountPath: /mnt/pool/media
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: plex-config
+        - name: media
+          nfs:
+            server: {{ .Values.global.network.storage }}
+            path: /mnt/pool/media

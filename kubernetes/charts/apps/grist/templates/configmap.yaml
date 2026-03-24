@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grist-config
+  namespace: {{ .Release.Namespace }}
+data:
+  GRIST_DEFAULT_EMAIL: {{ .Values.global.admin_email }}
+  GRIST_OIDC_IDP_ISSUER: https://pocketid.{{ .Values.global.domain }}
+  APP_HOME_URL: https://grist.{{ .Values.global.domain }}
+  GRIST_SANDBOX_FLAVOR: unsandboxed
+  GRIST_EXPERIMENTAL_PLUGINS: "1"
+  GRIST_ENABLE_REQUEST_FUNCTION: "1"
+  GRIST_ALLOW_AUTOMATIC_VERSION_CHECKING: "false"
+  GRIST_ANON_PLAYGROUND: "false"
+  GRIST_MANAGED_WORKERS: "true"

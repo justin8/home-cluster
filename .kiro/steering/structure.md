@@ -162,7 +162,8 @@ export class MyApp extends TauApplication {
 
 ### Security Considerations
 
-- All secrets managed through Kubernetes secrets
+- All secrets managed through Kubernetes SealedSecrets
+- Only genuinely secret values (passwords, tokens, private keys) go in SealedSecrets. Non-sensitive config (URLs, feature flags, email addresses) goes in plain ConfigMaps
 - TLS certificates automatically provisioned and renewed
 - Database credentials auto-generated with secure passwords
 - Network isolation between public and private services

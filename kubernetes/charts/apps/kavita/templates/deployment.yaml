@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kavita
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: kavita
+  template:
+    metadata:
+      labels:
+        app: kavita
+    spec:
+      containers:
+        - name: kavita
+          image: lscr.io/linuxserver/kavita:0.8.9
+          ports:
+            - containerPort: 5000
+          env:
+            - name: TZ
+              value: {{ .Values.global.timezone }}
+            - name: PUID
+              value: {{ .Values.global.shared_uid | quote }}
+            - name: PGID
+              value: {{ .Values.global.shared_gid | quote }}
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: media
+              mountPath: /mnt/pool/media
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: kavita-config
+        - name: media
+          nfs:
+            server: {{ .Values.global.network.storage }}
+            path: /mnt/pool/media

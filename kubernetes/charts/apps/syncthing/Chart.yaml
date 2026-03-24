@@ -1,0 +1,4 @@
+apiVersion: v2
+name: syncthing
+description: Syncthing file synchronization
+version: 0.1.0

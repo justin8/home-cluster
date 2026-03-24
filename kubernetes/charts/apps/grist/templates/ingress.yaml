@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: grist
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    # traefik.ingress.kubernetes.io/router.middlewares: traefik-public-tinyauth@kubernetescrd
+spec:
+  ingressClassName: traefik-public
+  rules:
+    - host: grist.{{ .Values.global.domain }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: grist
+                port:
+                  number: 8484
+  tls:
+    - hosts:
+        - grist.{{ .Values.global.domain }}
+      secretName: default-tls

@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: syncthing
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: syncthing
+  template:
+    metadata:
+      labels:
+        app: syncthing
+    spec:
+      securityContext:
+        fsGroup: {{ .Values.global.shared_gid }}
+        fsGroupChangePolicy: OnRootMismatch
+      containers:
+        - name: syncthing
+          image: ghcr.io/linuxserver/syncthing:latest
+          ports:
+            - containerPort: 8384
+              hostPort: 8384
+              name: web
+            - containerPort: 22000
+              hostPort: 22000
+              name: sync-tcp
+            - containerPort: 22000
+              hostPort: 22000
+              protocol: UDP
+              name: sync-udp
+            - containerPort: 21027
+              hostPort: 21027
+              protocol: UDP
+              name: discovery
+          env:
+            - name: TZ
+              value: {{ .Values.global.timezone }}
+            - name: PUID
+              value: {{ .Values.global.shared_uid | quote }}
+            - name: PGID
+              value: {{ .Values.global.shared_gid | quote }}
+          livenessProbe:
+            httpGet:
+              port: 8384
+              path: /
+            initialDelaySeconds: 30
+          readinessProbe:
+            httpGet:
+              port: 8384
+              path: /
+            initialDelaySeconds: 10
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: syncthing-config
+        - name: data
+          nfs:
+            server: {{ .Values.global.network.storage }}
+            path: /mnt/pool/apps/syncthing

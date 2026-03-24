@@ -1,0 +1,105 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grist
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: grist
+  template:
+    metadata:
+      labels:
+        app: grist
+    spec:
+      containers:
+        - name: grist
+          image: gristlabs/grist:1.7.11
+          ports:
+            - containerPort: 8484
+          envFrom:
+            - configMapRef:
+                name: grist-config
+            - secretRef:
+                name: grist-secrets
+          volumeMounts:
+            - name: persist
+              mountPath: /persist
+      volumes:
+        - name: persist
+          persistentVolumeClaim:
+            claimName: grist-persist
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+        - name: redis
+          image: docker.io/valkey/valkey:8-bookworm
+          command:
+            - /bin/sh
+            - -c
+            - 'valkey-server --requirepass "$REDIS_PASSWORD" --dir /data --save 60 1000'
+          ports:
+            - containerPort: 6379
+          env:
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: grist-secrets
+                  key: REDIS_PASSWORD
+          livenessProbe:
+            exec:
+              command: ["/bin/sh", "-c", 'valkey-cli -a "$REDIS_PASSWORD" ping']
+            initialDelaySeconds: 30
+          readinessProbe:
+            exec:
+              command: ["/bin/sh", "-c", 'valkey-cli -a "$REDIS_PASSWORD" ping']
+            initialDelaySeconds: 30
+          volumeMounts:
+            - name: redis-data
+              mountPath: /data
+      volumes:
+        - name: redis-data
+          persistentVolumeClaim:
+            claimName: grist-redis-data
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: apicache
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: apicache
+  template:
+    metadata:
+      labels:
+        app: apicache
+    spec:
+      containers:
+        - name: apicache
+          image: ghcr.io/justin8/apicache:latest
+          ports:
+            - containerPort: 8080

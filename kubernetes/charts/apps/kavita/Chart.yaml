@@ -1,0 +1,4 @@
+apiVersion: v2
+name: kavita
+description: Kavita manga/book server
+version: 0.1.0

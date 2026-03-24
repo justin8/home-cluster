@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: plex
+  namespace: {{ .Release.Namespace }}
+spec:
+  ingressClassName: traefik-public
+  rules:
+    - host: plex.{{ .Values.global.domain }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: plex
+                port:
+                  number: 32400
+  tls:
+    - hosts:
+        - plex.{{ .Values.global.domain }}
+      secretName: default-tls
