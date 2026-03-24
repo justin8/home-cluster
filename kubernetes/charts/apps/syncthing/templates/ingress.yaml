@@ -4,7 +4,7 @@ metadata:
   name: syncthing
   namespace: {{ .Release.Namespace }}
   annotations:
-    # traefik.ingress.kubernetes.io/router.middlewares: traefik-private-tinyauth@kubernetescrd
+    traefik.ingress.kubernetes.io/router.middlewares: traefik-private-tinyauth@kubernetescrd
 spec:
   ingressClassName: traefik-private
   rules:

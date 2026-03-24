@@ -4,7 +4,7 @@ metadata:
   name: grist
   namespace: {{ .Release.Namespace }}
   annotations:
-    # traefik.ingress.kubernetes.io/router.middlewares: traefik-public-tinyauth@kubernetescrd
+    traefik.ingress.kubernetes.io/router.middlewares: traefik-public-tinyauth@kubernetescrd
 spec:
   ingressClassName: traefik-public
   rules:

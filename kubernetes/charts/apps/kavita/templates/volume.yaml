@@ -7,7 +7,7 @@ metadata:
     recurring-job-group.longhorn.io/backups-enabled: enabled
     recurring-job-group.longhorn.io/fstrim-enabled: enabled
 spec:
-  size: "52428800"  # TODO: 10Gi
+  size: "10737418240"  # 10Gi
   numberOfReplicas: 1
   dataLocality: best-effort
   accessMode: rwo
@@ -19,7 +19,7 @@ metadata:
   name: kavita-config
 spec:
   capacity:
-    storage: 50Mi
+    storage: 10Gi
   accessModes:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
@@ -44,4 +44,4 @@ spec:
   volumeName: kavita-config
   resources:
     requests:
-      storage: 50Mi
+      storage: 10Gi
