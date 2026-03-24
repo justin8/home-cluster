@@ -24,9 +24,9 @@ spec:
             - name: TZ
               value: {{ .Values.global.timezone }}
             - name: PUID
-              value: {{ .Values.global.shared_uid | quote }}
+              value: {{ .Values.global.sharedUid | quote }}
             - name: PGID
-              value: {{ .Values.global.shared_gid | quote }}
+              value: {{ .Values.global.sharedGid | quote }}
           volumeMounts:
             - name: config
               mountPath: /config

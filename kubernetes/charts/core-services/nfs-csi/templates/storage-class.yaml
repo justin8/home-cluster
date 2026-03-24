@@ -5,7 +5,7 @@ metadata:
 provisioner: nfs.csi.k8s.io
 parameters:
   server: {{ .Values.global.network.storage }}
-  share: "/mnt/pool/apps/k8s"
+  share: "{{ .Values.global.appStoragePath }}/k8s"
 reclaimPolicy: Retain
 allowVolumeExpansion: true
 mountOptions:

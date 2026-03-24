@@ -4,7 +4,7 @@ metadata:
   name: grist-config
   namespace: {{ .Release.Namespace }}
 data:
-  GRIST_DEFAULT_EMAIL: {{ .Values.global.admin_email }}
+  GRIST_DEFAULT_EMAIL: {{ .Values.global.adminEmail }}
   GRIST_OIDC_IDP_ISSUER: https://pocketid.{{ .Values.global.domain }}
   APP_HOME_URL: https://grist.{{ .Values.global.domain }}
   GRIST_SANDBOX_FLAVOR: unsandboxed
