@@ -29,6 +29,7 @@
 - [x] Try out ArgoCD to replace pulumi
   - [x] Migrate other apps
   - [x] Re-enable ingress auth
+  - [ ] Set up pre-rendered deployments
 - [ ] Replace Pulumi setup
   - [ ] Set up replacement cluster
   - [ ] Migrate services:
