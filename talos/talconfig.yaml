@@ -2,7 +2,7 @@
 clusterName: home-cluster
 talosVersion: v1.12.4
 kubernetesVersion: v1.35.1
-endpoint: https://192.168.5.144:6443
+endpoint: https://192.168.5.20:6443
 domain: cluster.local
 allowSchedulingOnMasters: true
 additionalApiServerCertSans:
@@ -73,7 +73,6 @@ nodes:
       node.kubernetes.io/exclude-from-external-load-balancers: "false"
     certSans:
       - 192.168.5.20
-      - 192.168.5.144
       - home-cluster.local
       - home-cluster.dray.id.au
     machineSpec:
