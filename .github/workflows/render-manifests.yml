@@ -40,13 +40,19 @@ jobs:
               --values kubernetes/global-values.yaml \
               --include-crds \
               > "$chart/manifest.yaml"
+            # Remove chart source so ArgoCD treats the dir as plain manifests
+            find "$chart" -mindepth 1 ! -name "manifest.yaml" -delete
           done
 
-          # Rewrite targetRevision in root-app templates to point to deploy branch
           find kubernetes/root-app/templates -name "*.yaml" \
             -exec sed -i 's/targetRevision: ${{ github.ref_name }}/targetRevision: deploy/' {} +
 
           git add -A
-          git diff --cached --quiet && echo "No changes to commit" && exit 0
-          git commit -m "chore: render manifests from ${{ github.sha }}"
-          git push origin deploy
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore: render manifests from ${{ github.sha }}"
+          fi
+
+      - name: Push to deploy branch
+        run: git push origin deploy
