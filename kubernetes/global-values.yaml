@@ -12,4 +12,4 @@ network:
   privateIngress: "192.168.5.23" # change to .3
   storage: "192.168.5.5"
   cluster: "192.168.5.20"
-  dnsServer: "192.168.5.253" # change to .53
+  dnsServer: "192.168.5.254" # change to .53
