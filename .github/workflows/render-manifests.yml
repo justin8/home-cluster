@@ -42,6 +42,10 @@ jobs:
               > "$chart/manifest.yaml"
           done
 
+          # Rewrite targetRevision in root-app templates to point to deploy branch
+          find kubernetes/root-app/templates -name "*.yaml" \
+            -exec sed -i 's/targetRevision: ${{ github.ref_name }}/targetRevision: deploy/' {} +
+
           git add -A
           git diff --cached --quiet && echo "No changes to commit" && exit 0
           git commit -m "chore: render manifests from ${{ github.sha }}"
