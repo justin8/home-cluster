@@ -1,4 +1,4 @@
-domain: staging.dray.id.au
+domain: dray.id.au
 adminEmail: admin@dray.id.au
 clusterName: home-cluster
 TZ: America/Los_Angeles
