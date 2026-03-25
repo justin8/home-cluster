@@ -13,10 +13,3 @@ argo-cd:
   server:
     extraArgs:
       - --insecure
-  controller:
-    clusterRoleRules:
-      enabled: true
-      rules:
-        - apiGroups: ["rbac.authorization.k8s.io"]
-          resources: ["rolebindings", "roles"]
-          verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
