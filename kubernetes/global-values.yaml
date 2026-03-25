@@ -7,7 +7,7 @@ PGID: "2000"
 appStoragePath: /mnt/pool/apps
 # Shared IP addresses
 network:
-  metallbRange: "192.168.5.60-192.168.5.79" # change to 80-100 later
+  metallbRange: "192.168.5.220-192.168.5.239" # change to 80-100 later
   publicIngress: "192.168.5.22" # change to .2
   privateIngress: "192.168.5.23" # change to .3
   storage: "192.168.5.5"
