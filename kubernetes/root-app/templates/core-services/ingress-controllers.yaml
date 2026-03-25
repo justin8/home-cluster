@@ -12,7 +12,7 @@ spec:
   source:
     repoURL: https://github.com/justin8/home-cluster.git
     path: kubernetes/charts/core-services/ingress-controller
-    targetRevision: deploy
+    targetRevision: main
     helm:
       valueFiles:
         - ../../../global-values.yaml
@@ -53,7 +53,7 @@ spec:
   source:
     repoURL: https://github.com/justin8/home-cluster.git
     path: kubernetes/charts/core-services/ingress-controller
-    targetRevision: deploy
+    targetRevision: main
     helm:
       valueFiles:
         - ../../../global-values.yaml

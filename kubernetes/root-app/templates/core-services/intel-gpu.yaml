@@ -12,7 +12,7 @@ spec:
   source:
     repoURL: https://github.com/justin8/home-cluster.git
     path: kubernetes/charts/core-services/intel-gpu
-    targetRevision: deploy
+    targetRevision: main
   destination:
     server: https://kubernetes.default.svc
     namespace: intel-gpu
