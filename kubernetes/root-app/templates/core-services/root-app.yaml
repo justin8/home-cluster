@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: https://github.com/justin8/home-cluster.git
     path: kubernetes/root-app/
-    targetRevision: main
+    targetRevision: deploy
     helm:
       valueFiles:
         - ../global-values.yaml
