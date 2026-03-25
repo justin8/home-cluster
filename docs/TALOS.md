@@ -36,19 +36,11 @@ All tools are automatically installed via direnv and nix when entering the proje
 
 ### Post-Cluster Setup
 
-After the cluster is running, install additional components:
-
-#### Vertical Pod Autoscaler (VPA)
-
-Install VPA using the official installation script. Other methods do not currently (2025-10) support in-place autoscaling. Note that `./autoscaler` is a git submodule to allow tracking of the latest version being used.
+After the cluster is running, install ArgoCD to handle everything else:
 
 ```bash
-git submodule update --init
-cd autoscaler/vertical-pod-autoscaler/
-./hack/vpa-up.sh
+install-argocd
 ```
-
-This installs the VPA components (recommender, updater, admission controller) which enable automatic resource recommendation and scaling for pods.
 
 ## Regenerating Configuration
 
