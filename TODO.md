@@ -26,11 +26,24 @@
 - [x] Renovate bot to auto-update containers (this is mostly working; I have it for helm charts, but not container images yet)
 - [x] Docker registry caching/mirroring
 - [x] Deploy from git using pulumi
-- [ ] Try out ArgoCD to replace pulumi
-  - [ ] Migrate other apps
-  - [ ] Re-enable ingress auth
-  - [ ] Update to 2 replicas for lonnghorn
-  - [ ] Change to references to the pub/priv ingress classes
+- [x] Try out ArgoCD to replace pulumi
+  - [x] Migrate other apps
+  - [x] Re-enable ingress auth
+- [ ] Replace Pulumi setup
+  - [ ] Set up replacement cluster
+  - [ ] Migrate services:
+    - [ ] Auth
+    - [ ] Grist
+    - [ ] Home-automation
+    - [ ] Immich
+    - [ ] Kavita
+    - [ ] Plex
+    - [ ] Syncthing
+  - [ ] Shutdown old cluster
+  - [ ] Replace MetalLB IP addresses
+  - [ ] Re-add nodes to new cluster
+  - [ ] Update to 2 replicas for longhorn services
+  - [ ] Update to 2 replicas for longhorn volumes
 - [ ] Kavita OAuth (needs v0.8.8)
 - [ ] Look in to OAuth alternatives that can be deployed fully programatically
 - [ ] Get access by user groups working - coming in tinyauth v4 maybe; alternatively, try out oauth2proxy
