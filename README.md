@@ -151,7 +151,15 @@ talhelper gencommand bootstrap | bash
 talhelper gencommand kubeconfig | bash
 ```
 
-### 5. Install ArgoCD and Bootstrap GitOps
+### 5. Restore Sealed Secrets Key
+
+Before installing ArgoCD, restore the sealed-secrets encryption key so existing SealedSecrets in the repo can be decrypted. Without this, all sealed secrets will fail to decrypt.
+
+```bash
+sops -d sealed-secrets-key.sops.yaml | kubectl apply -f -
+```
+
+### 6. Install ArgoCD and Bootstrap GitOps
 
 This installs ArgoCD via Helm and applies the root App of Apps, which then reconciles all cluster services automatically:
 
@@ -165,7 +173,42 @@ ArgoCD will sync all core services and applications in dependency order via sync
 kubectl port-forward svc/argo-cd-argocd-server -n argocd 8080:443
 ```
 
-### 6. Post-Deployment: Auth Setup
+### 7. Restore Longhorn Volumes from Backup
+
+If restoring from a previous cluster, restore Longhorn volumes before enabling apps. Apps with Longhorn volumes that need restoring:
+
+**Core services:**
+
+- `pocketid-data` (auth)
+- `tinyauth-data` (auth)
+- `pihole-etc-pihole` (dns)
+- `mail-proxy-spool` (mail-proxy) — low priority, can start fresh
+
+**Apps:**
+
+- `grist-persist`, `grist-redis-data` (grist)
+- `homeassistant-database-data`, `home-assistant-config`, `mqtt-data`, `zigbee2mqtt-data` (home-automation)
+- `immich-database-data` (immich)
+- `prowlarr-config`, `qbittorrent-config`, `radarr-config`, `sabnzbd-config`, `seerr-config`, `sonarr-config` (downloads)
+- `kavita-config` (kavita)
+- `plex-config` (plex)
+- `syncthing-config` (syncthing)
+
+**Steps:**
+
+1. Disable all apps that have volumes by moving their ArgoCD Application manifests to `kubernetes/disabled-apps/` and pushing to git. Wait for ArgoCD to prune them.
+
+2. For each volume to restore, in the Longhorn UI (`https://longhorn.<domain>`):
+   - Go to **Backup**, find the volume backup
+   - Click **Restore** and give it a **new name** (e.g. `grist-persist-v2`)
+
+3. Update the volume references in the app's `volume.yaml` — change `metadata.name`, `csi.volumeHandle`, and the PVC's `volumeName` to the new name. Commit and push.
+
+4. Re-enable apps by moving their manifests back from `kubernetes/disabled-apps/` to `kubernetes/root-app/templates/`. ArgoCD will sync and pick up the restored volumes.
+
+See [docs/LONGHORN.md](docs/LONGHORN.md) for full details on the restore process.
+
+### 8. Post-Deployment: Auth Setup
 
 Once PocketID is running, complete first-time setup at `https://pocketid.${domain}/setup` to create an admin user and configure OAuth clients for Tinyauth and any other services.
 

@@ -1,5 +1,8 @@
 ---
 creation_rules:
+  - path_regex: .*sealed-secrets-key.*\.ya?ml
+    encrypted_regex: ^(tls\.key)$
+    age: age1me7as6xhtzy8eqsqlxgf0v6eq692nstv69eg3hjfrksksm4cm9wspmspwz
   - path_regex: .*secrets.*\.ya?ml
     encrypted_regex: .
     age: age1me7as6xhtzy8eqsqlxgf0v6eq692nstv69eg3hjfrksksm4cm9wspmspwz
