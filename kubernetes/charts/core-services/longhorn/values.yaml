@@ -1,6 +1,6 @@
 longhorn:
   defaultSettings:
-    defaultReplicaCount: "1" # TODO: change to 2
+    defaultReplicaCount: "2"
     storageMinimalAvailablePercentage: "10"
     createDefaultDiskLabeledNodes: false
     defaultDataPath: /var/lib/longhorn
@@ -26,7 +26,7 @@ longhorn:
 
   persistence:
     defaultClass: true
-    defaultClassReplicaCount: "1" # TODO: change to 2
+    defaultClassReplicaCount: "2"
     defaultDataLocality: best-effort
     reclaimPolicy: Retain
     defaultFsType: ext4
@@ -36,10 +36,10 @@ longhorn:
 
   csi:
     # At least 2 replicas to allow node draining without disruption
-    attacherReplicaCount: "1" # TODO: change to 2
-    provisionerReplicaCount: "1" # TODO: change to 2
-    resizerReplicaCount: "1" # TODO: change to 2
-    snapshotterReplicaCount: "1" # TODO: change to 2
+    attacherReplicaCount: "2"
+    provisionerReplicaCount: "2"
+    resizerReplicaCount: "2"
+    snapshotterReplicaCount: "2"
 
   # All Longhorn components need tolerations to run on control-plane-only clusters
   longhornUI:
