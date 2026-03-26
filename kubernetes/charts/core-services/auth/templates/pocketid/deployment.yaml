@@ -40,7 +40,7 @@ spec:
       volumes:
         - name: data
           persistentVolumeClaim:
-            claimName: pocketid-data-v2
+            claimName: pocketid-data
 ---
 apiVersion: v1
 kind: ServiceAccount

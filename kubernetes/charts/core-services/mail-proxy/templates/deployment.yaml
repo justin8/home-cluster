@@ -61,4 +61,4 @@ spec:
       volumes:
         - name: spool
           persistentVolumeClaim:
-            claimName: mail-proxy-spool-v2
+            claimName: mail-proxy-spool

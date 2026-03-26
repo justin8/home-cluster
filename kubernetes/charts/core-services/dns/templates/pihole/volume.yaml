@@ -1,7 +1,7 @@
 apiVersion: longhorn.io/v1beta2
 kind: Volume
 metadata:
-  name: pihole-etc-pihole-v2
+  name: pihole-etc-pihole
   namespace: longhorn-system
   labels:
     recurring-job-group.longhorn.io/backups-enabled: enabled
@@ -16,7 +16,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: pihole-etc-pihole-v2
+  name: pihole-etc-pihole
 spec:
   capacity:
     storage: 100Mi
@@ -27,7 +27,7 @@ spec:
   csi:
     driver: driver.longhorn.io
     fsType: ext4
-    volumeHandle: pihole-etc-pihole-v2
+    volumeHandle: pihole-etc-pihole
     volumeAttributes:
       numberOfReplicas: "1"
       dataLocality: best-effort
@@ -35,13 +35,13 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: pihole-etc-pihole-v2
+  name: pihole-etc-pihole
   namespace: {{ .Release.Namespace }}
 spec:
   accessModes:
     - ReadWriteOnce
   storageClassName: longhorn
-  volumeName: pihole-etc-pihole-v2
+  volumeName: pihole-etc-pihole
   resources:
     requests:
       storage: 100Mi
