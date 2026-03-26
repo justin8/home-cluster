@@ -38,13 +38,14 @@
     - [ ] Home-automation
     - [ ] Immich
     - [ ] Kavita
-    - [ ] Plex
     - [ ] Syncthing
-  - [ ] Shutdown old cluster
+    - [ ] Plex
   - [ ] Replace MetalLB IP addresses
+  - [ ] Shutdown old cluster
   - [ ] Re-add nodes to new cluster
   - [ ] Update to 2 replicas for longhorn services
   - [ ] Update to 2 replicas for longhorn volumes
+  - [ ] Remove temporary instances
 - [ ] Kavita OAuth (needs v0.8.8)
 - [ ] Look in to OAuth alternatives that can be deployed fully programatically
 - [ ] Get access by user groups working - coming in tinyauth v4 maybe; alternatively, try out oauth2proxy

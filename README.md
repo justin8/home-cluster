@@ -119,7 +119,57 @@ Tinyauth is used as an auth proxy in front of most services that don't support n
 
 ## Cluster Deployment
 
-For cluster creation, initialization, and post-deployment setup instructions, see [docs/TALOS.md](docs/TALOS.md).
+### 1. Generate Talos Configuration
+
+All tools are managed automatically via direnv/nix. From the repo root:
+
+```bash
+direnv reload
+```
+
+This generates all Talos node configs from `talos/talconfig.yaml`.
+
+### 2. Apply Configuration to Nodes
+
+For new nodes that don't have certificates yet, use `--insecure`:
+
+```bash
+talhelper gencommand apply --extra-flags="--insecure" | bash
+```
+
+### 3. Bootstrap the Cluster
+
+Run once on the first control plane node after all nodes have the config applied:
+
+```bash
+talhelper gencommand bootstrap | bash
+```
+
+### 4. Generate kubeconfig
+
+```bash
+talhelper gencommand kubeconfig | bash
+```
+
+### 5. Install ArgoCD and Bootstrap GitOps
+
+This installs ArgoCD via Helm and applies the root App of Apps, which then reconciles all cluster services automatically:
+
+```bash
+install-argocd
+```
+
+ArgoCD will sync all core services and applications in dependency order via sync waves. You can monitor progress via port-forward:
+
+```bash
+kubectl port-forward svc/argo-cd-argocd-server -n argocd 8080:443
+```
+
+### 6. Post-Deployment: Auth Setup
+
+Once PocketID is running, complete first-time setup at `https://pocketid.${domain}/setup` to create an admin user and configure OAuth clients for Tinyauth and any other services.
+
+For full details on Talos operations (upgrades, adding/removing nodes, etc.) see [docs/TALOS.md](docs/TALOS.md). For ArgoCD and GitOps workflow details see [docs/ARGOCD.md](docs/ARGOCD.md).
 
 ## Project Layout
 
