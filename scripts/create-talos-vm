@@ -40,8 +40,7 @@ else
 fi
 
 echo "Creating VM: $VM_NAME (MAC: $MAC_ADDR)"
-# Note: --boot cdrom,hd ensures it boots from ISO first if needed
-# --disk size=100 creates a new disk image in the default pool or specified path
+sudo virsh undefine "$VM_NAME" || :
 sudo virt-install \
   --name "$VM_NAME" \
   --ram "$RAM_MB" \
