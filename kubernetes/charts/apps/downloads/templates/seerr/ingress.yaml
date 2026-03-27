@@ -20,3 +20,26 @@ spec:
     - hosts:
         - seerr.{{ .Values.domain }}
       secretName: default-tls
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: seerr-private
+  namespace: {{ .Release.Namespace }}
+spec:
+  ingressClassName: traefik-private
+  rules:
+    - host: seerr.{{ .Values.domain }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: seerr
+                port:
+                  number: 5055
+  tls:
+    - hosts:
+        - seerr.{{ .Values.domain }}
+      secretName: default-tls

@@ -22,3 +22,26 @@ spec:
     - hosts:
         - grist.{{ .Values.domain }}
       secretName: default-tls
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: grist-private
+  namespace: {{ .Release.Namespace }}
+spec:
+  ingressClassName: traefik-private
+  rules:
+    - host: grist.{{ .Values.domain }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: grist
+                port:
+                  number: 8484
+  tls:
+    - hosts:
+        - grist.{{ .Values.domain }}
+      secretName: default-tls

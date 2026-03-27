@@ -20,3 +20,26 @@ spec:
     - hosts:
         - plex.{{ .Values.domain }}
       secretName: default-tls
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: plex-private
+  namespace: {{ .Release.Namespace }}
+spec:
+  ingressClassName: traefik-private
+  rules:
+    - host: plex.{{ .Values.domain }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: plex
+                port:
+                  number: 32400
+  tls:
+    - hosts:
+        - plex.{{ .Values.domain }}
+      secretName: default-tls
