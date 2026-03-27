@@ -37,16 +37,16 @@
     - [x] Auth
     - [x] Grist
     - [x] Home-automation
-    - [ ] Immich
+    - [x] Immich
     - [x] Kavita
     - [x] Syncthing
     - [x] Downloads
-    - [ ] Plex
-  - [ ] Replace MetalLB IP addresses
+    - [x] Plex
+  - [x] Replace MetalLB IP addresses
   - [x] Shutdown old cluster
   - [x] Re-add nodes to new cluster
   - [x] Update to 2 replicas for longhorn services
-  - [ ] Update to 2 replicas for longhorn volumes
+  - [x] Update to 2 replicas for longhorn volumes
   - [ ] Remove temporary instances
 - [ ] Change pocketid to use the mail proxy
 - [ ] Kavita OAuth (needs v0.8.8)
