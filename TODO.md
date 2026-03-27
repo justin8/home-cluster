@@ -31,9 +31,10 @@
   - [x] Re-enable ingress auth
   - [x] Set up pre-rendered deployments
 - [ ] Replace Pulumi setup
-  - [ ] Set up replacement cluster
+  - [x] Set up replacement cluster
   - [ ] Migrate services:
-    - [ ] Auth
+    - [x] External DNS
+    - [x] Auth
     - [ ] Grist
     - [ ] Home-automation
     - [ ] Immich
