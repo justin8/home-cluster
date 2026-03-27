@@ -1,14 +1,17 @@
+{{- range list "traefik-public" "traefik-private" }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: grist
-  namespace: {{ .Release.Namespace }}
+  name: grist{{ if eq . "traefik-private" }}-private{{ end }}
+  namespace: {{ $.Release.Namespace }}
+  {{- if eq . "traefik-public" }}
   annotations:
     traefik.ingress.kubernetes.io/router.middlewares: traefik-public-tinyauth@kubernetescrd
+  {{- end }}
 spec:
-  ingressClassName: traefik-public
+  ingressClassName: {{ . }}
   rules:
-    - host: grist.{{ .Values.domain }}
+    - host: grist.{{ $.Values.domain }}
       http:
         paths:
           - path: /
@@ -20,28 +23,7 @@ spec:
                   number: 8484
   tls:
     - hosts:
-        - grist.{{ .Values.domain }}
+        - grist.{{ $.Values.domain }}
       secretName: default-tls
 ---
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: grist-private
-  namespace: {{ .Release.Namespace }}
-spec:
-  ingressClassName: traefik-private
-  rules:
-    - host: grist.{{ .Values.domain }}
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: grist
-                port:
-                  number: 8484
-  tls:
-    - hosts:
-        - grist.{{ .Values.domain }}
-      secretName: default-tls
+{{- end }}

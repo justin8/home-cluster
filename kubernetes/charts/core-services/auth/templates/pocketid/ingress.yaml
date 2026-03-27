@@ -1,12 +1,13 @@
+{{- range list "traefik-public" "traefik-private" }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: pocketid
-  namespace: {{ .Release.Namespace }}
+  name: pocketid{{ if eq . "traefik-private" }}-private{{ end }}
+  namespace: {{ $.Release.Namespace }}
 spec:
-  ingressClassName: traefik-public
+  ingressClassName: {{ . }}
   rules:
-    - host: pocketid.{{ .Values.domain }}
+    - host: pocketid.{{ $.Values.domain }}
       http:
         paths:
           - path: /
@@ -18,28 +19,7 @@ spec:
                   number: 1411
   tls:
     - hosts:
-        - pocketid.{{ .Values.domain }}
+        - pocketid.{{ $.Values.domain }}
       secretName: default-tls
 ---
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: pocketid-private
-  namespace: {{ .Release.Namespace }}
-spec:
-  ingressClassName: traefik-private
-  rules:
-    - host: pocketid.{{ .Values.domain }}
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: pocketid
-                port:
-                  number: 1411
-  tls:
-    - hosts:
-        - pocketid.{{ .Values.domain }}
-      secretName: default-tls
+{{- end }}

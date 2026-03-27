@@ -1,12 +1,13 @@
+{{- range list "traefik-public" "traefik-private" }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: immich
-  namespace: {{ .Release.Namespace }}
+  name: immich{{ if eq . "traefik-private" }}-private{{ end }}
+  namespace: {{ $.Release.Namespace }}
 spec:
-  ingressClassName: traefik-public
+  ingressClassName: {{ . }}
   rules:
-    - host: immich.{{ .Values.domain }}
+    - host: immich.{{ $.Values.domain }}
       http:
         paths:
           - path: /
@@ -18,28 +19,7 @@ spec:
                   number: 2283
   tls:
     - hosts:
-        - immich.{{ .Values.domain }}
+        - immich.{{ $.Values.domain }}
       secretName: default-tls
 ---
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: immich-private
-  namespace: {{ .Release.Namespace }}
-spec:
-  ingressClassName: traefik-private
-  rules:
-    - host: immich.{{ .Values.domain }}
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: immich
-                port:
-                  number: 2283
-  tls:
-    - hosts:
-        - immich.{{ .Values.domain }}
-      secretName: default-tls
+{{- end }}
