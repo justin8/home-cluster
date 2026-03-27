@@ -46,6 +46,7 @@
   - [ ] Update to 2 replicas for longhorn services
   - [ ] Update to 2 replicas for longhorn volumes
   - [ ] Remove temporary instances
+- [ ] Change pocketid to use the mail proxy
 - [ ] Kavita OAuth (needs v0.8.8)
 - [ ] Look in to OAuth alternatives that can be deployed fully programatically
 - [ ] Get access by user groups working - coming in tinyauth v4 maybe; alternatively, try out oauth2proxy
