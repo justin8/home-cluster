@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: apicache
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: apicache
+  template:
+    metadata:
+      labels:
+        app: apicache
+    spec:
+      containers:
+        - name: apicache
+          image: ghcr.io/justin8/apicache:latest
+          ports:
+            - containerPort: 8080

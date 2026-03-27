@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: apicache
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: apicache
+spec:
+  selector:
+    app: apicache
+  ports:
+    - port: 80
+      targetPort: 8080
