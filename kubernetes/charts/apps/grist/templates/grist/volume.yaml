@@ -8,8 +8,8 @@ metadata:
     recurring-job-group.longhorn.io/fstrim-enabled: enabled
 spec:
   size: {{ mul .Values.persistVolumeSizeGi 1024 | mul 1024 | mul 1024 | quote }}
-  numberOfReplicas: 1
   dataLocality: best-effort
+  numberOfReplicas: 2
   accessMode: rwo
   frontend: blockdev
 ---
@@ -28,9 +28,6 @@ spec:
     driver: driver.longhorn.io
     fsType: ext4
     volumeHandle: grist-persist
-    volumeAttributes:
-      numberOfReplicas: "1"
-      dataLocality: best-effort
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
