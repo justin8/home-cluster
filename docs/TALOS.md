@@ -77,8 +77,8 @@ This automatically runs `talhelper genconfig` to regenerate all configuration fi
 1. Drain the node: `kubectl drain <node-name> --ignore-daemonsets --delete-emptydir-data --force`
    - Note that Longhorn will show volumes from the node being removed as degraded; after ~30 minutes it will start to automatically re-allocate if the node doesn't come back online
 2. Remove from Kubernetes: `kubectl delete node <node-name>`
-3. Reset Talos node: `talosctl reset --nodes <node-ip> --graceful=false`
-4. Find the matching etcd member ID with `talosctl etc members` and then remove it from other nodes with `talosctl etcd remove-member $ID` (note that the members list will have an entry for each node pair, but you only need to perform the delete once for the deleted node. Also this command may hang even if it has completed)
+3. Find the matching etcd member ID with `talosctl etc status` and then remove it from other nodes with `talosctl etcd remove-member $ID` (note that the members list will have an entry for each node pair, but you only need to perform the delete once for the deleted node. Also this command may hang even if it has completed)
+4. Reset Talos node: `talosctl reset --nodes <node-ip> --graceful=false`
 5. Remove node definition from `talconfig.yaml`
 6. Run `direnv reload` to regenerate configs (or just press enter as it should be automatic)
 7. Apply changes: `talhelper gencommand apply | bash`

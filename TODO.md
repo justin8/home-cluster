@@ -30,9 +30,9 @@
   - [x] Migrate other apps
   - [x] Re-enable ingress auth
   - [x] Set up pre-rendered deployments
-- [ ] Replace Pulumi setup
+- [x] Replace Pulumi setup
   - [x] Set up replacement cluster
-  - [ ] Migrate services:
+  - [x] Migrate services:
     - [x] External DNS
     - [x] Auth
     - [x] Grist
@@ -47,7 +47,7 @@
   - [x] Re-add nodes to new cluster
   - [x] Update to 2 replicas for longhorn services
   - [x] Update to 2 replicas for longhorn volumes
-  - [ ] Remove temporary instances
+  - [x] Remove temporary instances
 - [ ] Change pocketid to use the mail proxy
 - [ ] Kavita OAuth (needs v0.8.8)
 - [ ] Look in to OAuth alternatives that can be deployed fully programatically
