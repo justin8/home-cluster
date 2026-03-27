@@ -28,11 +28,3 @@ spec:
   storage:
     size: {{ .Values.databaseVolumeSizeGi }}Gi
     storageClass: longhorn
-    pvcTemplate:
-      accessModes:
-        - ReadWriteOnce
-      storageClassName: longhorn
-      volumeName: homeassistant-database-data
-      resources:
-        requests:
-          storage: {{ .Values.databaseVolumeSizeGi }}Gi
