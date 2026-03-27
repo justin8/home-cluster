@@ -40,7 +40,7 @@
     - [ ] Immich
     - [x] Kavita
     - [x] Syncthing
-    - [ ] Downloads
+    - [x] Downloads
     - [ ] Plex
   - [ ] Replace MetalLB IP addresses
   - [ ] Shutdown old cluster
