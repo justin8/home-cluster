@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: argocd
+  namespace: argocd
+  annotations:
+    traefik.ingress.kubernetes.io/router.middlewares: traefik-private-tinyauth@kubernetescrd
+spec:
+  ingressClassName: traefik-private
+  rules:
+    - host: argocd.{{ .Values.domain }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: argo-cd-argocd-server
+                port:
+                  number: 80
+  tls:
+    - hosts:
+        - argocd.{{ .Values.domain }}
+      secretName: default-tls
