@@ -8,7 +8,6 @@ metadata:
     recurring-job-group.longhorn.io/fstrim-enabled: enabled
 spec:
   size: {{ mul .Values.prowlarrVolumeSizeGi 1024 | mul 1024 | mul 1024 | quote }}
-  numberOfReplicas: 1
   dataLocality: best-effort
   accessMode: rwo
   frontend: blockdev
