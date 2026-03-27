@@ -62,18 +62,24 @@ The sealing keys are stored as standard Kubernetes Secrets in the `kube-system` 
    kubectl get secret -n kube-system -l sealedsecrets.bitnami.com/sealed-secrets-key -o yaml > sealed-secrets-key.yaml
    ```
 
-2. **Secure the Backup:**
-   Store `sealed-secrets-key.yaml` in a secure location (e.g., a password manager or encrypted vault). This file contains the **private keys** required to decrypt your secrets.
+2. **Encrypt and Store the Backup:**
+   Encrypt the key file with sops before storing it:
+
+   ```bash
+   sops --encrypt sealed-secrets-key.yaml > sealed-secrets-key.sops.yaml
+   ```
+
+   Store `sealed-secrets-key.sops.yaml` in a secure location (e.g., a password manager or encrypted vault). This file contains the **private keys** required to decrypt your secrets.
 
 ## Restore Sealing Key
 
 To restore the keys during a new cluster creation or after a disaster:
 
-1. **Apply the Backup:**
-   Apply the saved keys to the cluster _before_ the controller starts, or replace the existing ones if the controller is already running:
+1. **Decrypt and Apply the Backup:**
+   Decrypt the key file with sops, then apply it to the cluster _before_ the controller starts, or replace the existing ones if the controller is already running:
 
    ```bash
-   kubectl apply -f sealed-secrets-key.yaml
+   sops --decrypt sealed-secrets-key.sops.yaml | kubectl apply -f -
    ```
 
 2. **Restart the Controller:**

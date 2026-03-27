@@ -156,7 +156,7 @@ talhelper gencommand kubeconfig | bash
 Before installing ArgoCD, restore the sealed-secrets encryption key so existing SealedSecrets in the repo can be decrypted. Without this, all sealed secrets will fail to decrypt.
 
 ```bash
-sops -d sealed-secrets-key.sops.yaml | kubectl apply -f -
+sops --decrypt sealed-secrets-key.sops.yaml | kubectl apply -f -
 ```
 
 ### 6. Install ArgoCD and Bootstrap GitOps
