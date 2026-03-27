@@ -4,10 +4,8 @@ kind: Ingress
 metadata:
   name: grist{{ if eq . "traefik-public" }}-public{{ end }}
   namespace: {{ $.Release.Namespace }}
-  {{- if eq . "traefik-public" }}
   annotations:
-    traefik.ingress.kubernetes.io/router.middlewares: traefik-public-tinyauth@kubernetescrd
-  {{- end }}
+    traefik.ingress.kubernetes.io/router.middlewares: traefik-{{ . }}-tinyauth@kubernetescrd
 spec:
   ingressClassName: {{ . }}
   rules:

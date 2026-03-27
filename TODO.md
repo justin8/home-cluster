@@ -38,8 +38,9 @@
     - [ ] Grist
     - [ ] Home-automation
     - [ ] Immich
-    - [ ] Kavita
-    - [ ] Syncthing
+    - [x] Kavita
+    - [x] Syncthing
+    - [ ] Downloads
     - [ ] Plex
   - [ ] Replace MetalLB IP addresses
   - [ ] Shutdown old cluster
