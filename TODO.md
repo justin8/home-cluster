@@ -36,15 +36,15 @@
     - [x] External DNS
     - [x] Auth
     - [x] Grist
-    - [ ] Home-automation
+    - [x] Home-automation
     - [ ] Immich
     - [x] Kavita
     - [x] Syncthing
     - [x] Downloads
     - [ ] Plex
   - [ ] Replace MetalLB IP addresses
-  - [ ] Shutdown old cluster
-  - [ ] Re-add nodes to new cluster
+  - [x] Shutdown old cluster
+  - [x] Re-add nodes to new cluster
   - [ ] Update to 2 replicas for longhorn services
   - [ ] Update to 2 replicas for longhorn volumes
   - [ ] Remove temporary instances
