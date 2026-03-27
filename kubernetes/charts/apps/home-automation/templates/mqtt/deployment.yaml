@@ -25,7 +25,9 @@ spec:
               mkdir -p /mosquitto/config /mosquitto/log /mosquitto/data
               touch /mosquitto/config/passwd
               chmod 0700 /mosquitto/config/passwd
-              mosquitto_passwd -b /mosquitto/config/passwd homeassistant $(cat /run/secrets/mqtt-homeassistant/password) && mosquitto_passwd -b /mosquitto/config/passwd z2m $(cat /run/secrets/mqtt-z2m/password) && mosquitto_passwd -b /mosquitto/config/passwd test $(cat /run/secrets/mqtt-test/password)
+              mosquitto_passwd -b /mosquitto/config/passwd homeassistant $(cat /run/secrets/mqtt-homeassistant/password)
+              mosquitto_passwd -b /mosquitto/config/passwd z2m $(cat /run/secrets/mqtt-z2m/password)
+              mosquitto_passwd -b /mosquitto/config/passwd test $(cat /run/secrets/mqtt-test/password)
           volumeMounts:
             - name: mosquitto-data
               mountPath: /mosquitto
