@@ -35,7 +35,7 @@
   - [ ] Migrate services:
     - [x] External DNS
     - [x] Auth
-    - [ ] Grist
+    - [x] Grist
     - [ ] Home-automation
     - [ ] Immich
     - [x] Kavita
