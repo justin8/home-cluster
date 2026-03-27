@@ -2,7 +2,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: tinyauth{{ if eq . "traefik-private" }}-private{{ end }}
+  name: tinyauth{{ if eq . "traefik-public" }}-public{{ end }}
   namespace: {{ $.Release.Namespace }}
 spec:
   ingressClassName: {{ . }}

@@ -2,7 +2,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: grist{{ if eq . "traefik-private" }}-private{{ end }}
+  name: grist{{ if eq . "traefik-public" }}-public{{ end }}
   namespace: {{ $.Release.Namespace }}
   {{- if eq . "traefik-public" }}
   annotations:
