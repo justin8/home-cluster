@@ -20,3 +20,26 @@ spec:
     - hosts:
         - pocketid.{{ .Values.domain }}
       secretName: default-tls
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: pocketid-private
+  namespace: {{ .Release.Namespace }}
+spec:
+  ingressClassName: traefik-private
+  rules:
+    - host: pocketid.{{ .Values.domain }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: pocketid
+                port:
+                  number: 1411
+  tls:
+    - hosts:
+        - pocketid.{{ .Values.domain }}
+      secretName: default-tls

@@ -114,6 +114,8 @@ Dual ingress classes:
 - **Public**: Exposed to internet via Cloudflare DNS
 - **Private**: Internal-only access via PiHole DNS
 
+**Rule**: Every service with a public ingress (`traefik-public`) **must also have a private ingress** (`traefik-private`) for the same host/port. This ensures internal clients always route directly without going via the public internet.
+
 ## Development Guidelines
 
 ### Adding New Applications

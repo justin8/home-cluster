@@ -20,3 +20,26 @@ spec:
     - hosts:
         - tinyauth.{{ .Values.domain }}
       secretName: default-tls
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: tinyauth-private
+  namespace: {{ .Release.Namespace }}
+spec:
+  ingressClassName: traefik-private
+  rules:
+    - host: tinyauth.{{ .Values.domain }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: tinyauth
+                port:
+                  number: 3000
+  tls:
+    - hosts:
+        - tinyauth.{{ .Values.domain }}
+      secretName: default-tls
