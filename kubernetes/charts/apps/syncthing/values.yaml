@@ -1,1 +1,7 @@
 volumeSizeMi: 500
+
+images:
+  app:
+    repository: ghcr.io/linuxserver/syncthing
+    tag: 2.0.15
+    pullPolicy: IfNotPresent

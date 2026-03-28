@@ -17,7 +17,8 @@ spec:
     spec:
       containers:
         - name: zigbee2mqtt
-          image: ghcr.io/koenkk/zigbee2mqtt:2.9.1
+          image: "{{ .Values.images.zigbee2mqtt.repository }}:{{ .Values.images.zigbee2mqtt.tag }}"
+          imagePullPolicy: {{ .Values.images.zigbee2mqtt.pullPolicy }}
           ports:
             - containerPort: 8080
               name: http

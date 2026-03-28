@@ -17,6 +17,7 @@ spec:
     spec:
       containers:
         - name: apicache
-          image: ghcr.io/justin8/apicache:latest
+          image: "{{ .Values.images.apicache.repository }}:{{ .Values.images.apicache.tag }}"
+          imagePullPolicy: {{ .Values.images.apicache.pullPolicy }}
           ports:
             - containerPort: 8080

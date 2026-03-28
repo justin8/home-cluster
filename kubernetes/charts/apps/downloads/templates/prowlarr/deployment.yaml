@@ -17,7 +17,8 @@ spec:
     spec:
       containers:
         - name: prowlarr
-          image: lscr.io/linuxserver/prowlarr:2.3.0
+          image: "{{ .Values.images.prowlarr.repository }}:{{ .Values.images.prowlarr.tag }}"
+          imagePullPolicy: {{ .Values.images.prowlarr.pullPolicy }}
           ports:
             - containerPort: 9696
           envFrom:

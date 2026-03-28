@@ -1,1 +1,7 @@
 volumeSizeGi: 50
+
+images:
+  app:
+    repository: ghcr.io/linuxserver/plex
+    tag: 1.43.0
+    pullPolicy: IfNotPresent

@@ -19,7 +19,8 @@ spec:
         fsGroup: 0
       containers:
         - name: immich-ml
-          image: ghcr.io/immich-app/immich-machine-learning:v2.0.1
+          image: "{{ .Values.images.machineLearning.repository }}:{{ .Values.images.machineLearning.tag }}"
+          imagePullPolicy: {{ .Values.images.machineLearning.pullPolicy }}
           ports:
             - containerPort: 2283
           envFrom:

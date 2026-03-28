@@ -20,7 +20,8 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
       containers:
         - name: seerr
-          image: ghcr.io/seerr-team/seerr:v3.1.0
+          image: "{{ .Values.images.seerr.repository }}:{{ .Values.images.seerr.tag }}"
+          imagePullPolicy: {{ .Values.images.seerr.pullPolicy }}
           ports:
             - containerPort: 5055
           envFrom:

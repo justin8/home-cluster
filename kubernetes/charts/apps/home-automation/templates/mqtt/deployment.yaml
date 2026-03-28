@@ -17,7 +17,8 @@ spec:
     spec:
       initContainers:
         - name: mqtt-init
-          image: eclipse-mosquitto:2.0.22
+          image: "{{ .Values.images.mqtt.repository }}:{{ .Values.images.mqtt.tag }}"
+          imagePullPolicy: {{ .Values.images.mqtt.pullPolicy }}
           command:
             - sh
             - -c
@@ -46,7 +47,8 @@ spec:
               readOnly: true
       containers:
         - name: mosquitto
-          image: eclipse-mosquitto:2.0.22
+          image: "{{ .Values.images.mqtt.repository }}:{{ .Values.images.mqtt.tag }}"
+          imagePullPolicy: {{ .Values.images.mqtt.pullPolicy }}
           ports:
             - containerPort: 1883
               name: mqtt

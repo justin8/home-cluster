@@ -2,3 +2,17 @@ homeAssistantVolumeSizeGi: 5
 databaseVolumeSizeGi: 10
 mqttVolumeSizeGi: 1
 zigbee2mqttVolumeSizeGi: 1
+
+images:
+  homeAssistant:
+    repository: homeassistant/home-assistant
+    tag: "2026.3"
+    pullPolicy: IfNotPresent
+  mqtt:
+    repository: eclipse-mosquitto
+    tag: 2.0.22
+    pullPolicy: IfNotPresent
+  zigbee2mqtt:
+    repository: ghcr.io/koenkk/zigbee2mqtt
+    tag: 2.9.1
+    pullPolicy: IfNotPresent

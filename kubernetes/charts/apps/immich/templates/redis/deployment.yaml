@@ -19,7 +19,8 @@ spec:
         fsGroup: {{ .Values.PGID }}
       containers:
         - name: redis
-          image: docker.io/valkey/valkey:8-bookworm
+          image: "{{ .Values.images.redis.repository }}:{{ .Values.images.redis.tag }}"
+          imagePullPolicy: {{ .Values.images.redis.pullPolicy }}
           command: ["/bin/sh", "-c", 'valkey-server --requirepass "$REDIS_PASSWORD"']
           ports:
             - containerPort: 6379

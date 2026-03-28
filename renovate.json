@@ -5,26 +5,8 @@
   "dependencyDashboardTitle": "Dependency Dashboard",
   "dependencyDashboardHeader": "This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.",
   "dependencyDashboardFooter": "- [ ] <!-- rebase-check -->Check this box to trigger a request for Renovate to run again on this repository",
+  "enabledManagers": ["helm-values", "helmv3", "custom.regex"],
   "customManagers": [
-    {
-      "customType": "regex",
-      "description": "Helm charts in Pulumi TypeScript files",
-      "managerFilePatterns": ["/pulumi/.*\\.ts$/"],
-      "matchStrings": [
-        "new k8s\\.helm\\.v3\\.Release\\([^,]+,\\s*{[^}]*chart:\\s*[\"'](?<depName>[^\"']+)[\"'][^}]*version:\\s*[\"'](?<currentValue>[^\"']+)[\"'][^}]*repositoryOpts:\\s*{[^}]*repo:\\s*[\"'](?<registryUrl>[^\"']+)[\"']"
-      ],
-      "datasourceTemplate": "helm"
-    },
-    {
-      "customType": "regex",
-      "description": "Docker images in Pulumi TypeScript files",
-      "managerFilePatterns": ["/pulumi/.*\\.ts$/"],
-      "matchStrings": [
-        "image:\\s*[\"'](?<depName>.*?):(?<currentValue>.*?)[\"']",
-        ".*?[Ii]mage\\s*=\\s*[\"'](?<depName>.*?):(?<currentValue>.*?)[\"']"
-      ],
-      "datasourceTemplate": "docker"
-    },
     {
       "customType": "regex",
       "description": "Talos version in talconfig.yaml",
@@ -44,14 +26,17 @@
       "extractVersionTemplate": "^v(?<version>.*)$"
     }
   ],
-  "enabledManagers": ["npm", "custom.regex"],
   "packageRules": [
     {
-      "groupName": "all non-major NPM dependencies",
-      "groupSlug": "all-minor-patch",
-      "matchManagers": ["npm"],
-      "matchPackageNames": ["*"],
-      "matchUpdateTypes": ["minor", "patch"]
+      "matchUpdateTypes": ["minor", "patch"],
+      "matchCurrentVersion": "!/^0/",
+      "automerge": true
     }
-  ]
+  ],
+  "helm-values": {
+    "fileMatch": ["(^|/)global-values\\.yaml$", "(^|/)values\\.yaml$"]
+  },
+  "helmv3": {
+    "fileMatch": ["(^|/)Chart\\.yaml$"]
+  }
 }

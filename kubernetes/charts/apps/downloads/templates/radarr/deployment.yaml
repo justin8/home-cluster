@@ -17,7 +17,8 @@ spec:
     spec:
       containers:
         - name: radarr
-          image: lscr.io/linuxserver/radarr:6.0.4
+          image: "{{ .Values.images.radarr.repository }}:{{ .Values.images.radarr.tag }}"
+          imagePullPolicy: {{ .Values.images.radarr.pullPolicy }}
           ports:
             - containerPort: 7878
           envFrom:

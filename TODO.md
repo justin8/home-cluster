@@ -49,7 +49,8 @@
   - [x] Update to 2 replicas for longhorn volumes
   - [x] Remove temporary instances
 - [x] Remove old pulumi setup
-- [ ] Configure renovate for argocd
+- [x] Configure renovate for argocd
+- [ ] Move github actions things out to scripts dir
 - [ ] Change pocketid to use the mail proxy
 - [ ] Kavita OAuth (needs v0.8.8)
 - [ ] Look in to OAuth alternatives that can be deployed fully programatically

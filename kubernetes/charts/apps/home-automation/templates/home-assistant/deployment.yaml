@@ -19,7 +19,8 @@ spec:
       dnsPolicy: ClusterFirstWithHostNet
       containers:
         - name: home-assistant
-          image: homeassistant/home-assistant:2026.3
+          image: "{{ .Values.images.homeAssistant.repository }}:{{ .Values.images.homeAssistant.tag }}"
+          imagePullPolicy: {{ .Values.images.homeAssistant.pullPolicy }}
           securityContext:
             privileged: true
           ports:

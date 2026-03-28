@@ -5,7 +5,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
 spec:
   instances: 1
-  imageName: ghcr.io/tensorchord/cloudnative-vectorchord:17-0.4.3
+  imageName: "{{ .Values.images.database.repository }}:{{ .Values.images.database.tag }}"
   postgresql:
     shared_preload_libraries:
       - vchord.so

@@ -21,7 +21,8 @@ spec:
             value: "1"
       containers:
         - name: vpn
-          image: jordanpotter/wireguard:latest
+          image: "{{ .Values.images.wireguard.repository }}:{{ .Values.images.wireguard.tag }}"
+          imagePullPolicy: {{ .Values.images.wireguard.pullPolicy }}
           securityContext:
             privileged: true
           lifecycle:
@@ -35,7 +36,8 @@ spec:
             - name: vpn-config
               mountPath: /etc/wireguard
         - name: qbittorrent
-          image: lscr.io/linuxserver/qbittorrent:5.1.4
+          image: "{{ .Values.images.qbittorrent.repository }}:{{ .Values.images.qbittorrent.tag }}"
+          imagePullPolicy: {{ .Values.images.qbittorrent.pullPolicy }}
           ports:
             - containerPort: 8080
           envFrom:

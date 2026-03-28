@@ -1,2 +1,20 @@
 mlVolumeSizeGi: 10
 databaseVolumeSizeGi: 10
+
+images:
+  server:
+    repository: ghcr.io/immich-app/immich-server
+    tag: v2.0.1
+    pullPolicy: IfNotPresent
+  machineLearning:
+    repository: ghcr.io/immich-app/immich-machine-learning
+    tag: v2.0.1
+    pullPolicy: IfNotPresent
+  redis:
+    repository: docker.io/valkey/valkey
+    tag: 8-bookworm
+    pullPolicy: IfNotPresent
+  database:
+    repository: ghcr.io/tensorchord/cloudnative-vectorchord
+    tag: 17-0.4.3
+    pullPolicy: IfNotPresent

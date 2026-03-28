@@ -1,2 +1,16 @@
 persistVolumeSizeGi: 20
 redisVolumeSizeGi: 2
+
+images:
+  grist:
+    repository: gristlabs/grist
+    tag: 1.7.11
+    pullPolicy: IfNotPresent
+  redis:
+    repository: docker.io/valkey/valkey
+    tag: 8-bookworm
+    pullPolicy: IfNotPresent
+  apicache:
+    repository: ghcr.io/justin8/apicache
+    tag: latest
+    pullPolicy: IfNotPresent
