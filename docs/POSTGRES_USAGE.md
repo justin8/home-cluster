@@ -2,203 +2,103 @@
 
 ## Overview
 
-This guide explains how to use PostgreSQL databases in your Pulumi home cluster setup using CloudNativePG (CNPG).
+This guide explains how to use PostgreSQL databases in your home cluster setup using CloudNativePG (CNPG).
 
 ## Quick Start
 
-### 1. Using Database with TauApplication
+### 1. Adding a Database to a Helm Chart
 
-The easiest way to add a database to your application is through the TauApplication constructor. It simplifies setup and provides helper functions to get connection details as environment variables.
+The easiest way to add a database to your application is to include a CNPG `Cluster` resource in your application's Helm chart.
 
-```typescript
-import { TauApplication } from "../constructs/tauApplication";
-
-export class MyApp extends TauApplication {
-  constructor(name: string, opts?: pulumi.ComponentResourceOptions) {
-    super(
-      name,
-      {
-        database: {
-          name: "my-app-db", // Required
-          extensions: ["uuid-ossp", "pgcrypto"], // Optional
-          storageSize: "20Gi", // Optional
-          version: "17", // Optional
-        },
-      },
-      opts
-    );
-
-    // Your application deployment
-    const deployment = new k8s.apps.v1.Deployment(
-      `${name}-deployment`,
-      {
-        spec: {
-          template: {
-            spec: {
-              containers: [
-                {
-                  name: "app",
-                  image: "your-app:latest",
-                  env: this.getAllEnvironmentVariables(), // Includes database env vars
-                  // ... rest of container spec
-                },
-              ],
-            },
-          },
-        },
-      },
-      { parent: this }
-    );
-  }
-}
+```yaml
+# templates/database/cluster.yaml
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: {{ .Release.Name }}-database
+  namespace: {{ .Release.Namespace }}
+spec:
+  instances: 1
+  imageName: ghcr.io/tensorchord/cloudnative-vectorchord:17-0.4.3
+  managed:
+    roles:
+      - name: {{ .Release.Name }}-user
+        login: true
+        superuser: true
+  bootstrap:
+    initdb:
+      database: {{ .Release.Name }}-db
+      owner: {{ .Release.Name }}-user
+  storage:
+    size: {{ .Values.databaseVolumeSizeGi }}Gi
+    storageClass: longhorn
+    pvcTemplate:
+      accessModes:
+        - ReadWriteOnce
+      storageClassName: longhorn
+      volumeName: {{ .Release.Name }}-database-data
+      resources:
+        requests:
+          storage: {{ .Values.databaseVolumeSizeGi }}Gi
 ```
 
-### 2. Using Database Utility Function Directly
+### 2. Accessing the Database
 
-For more control, you can use the database utility function directly.
+CNPG automatically creates a secret with the database credentials. You can mount these credentials as environment variables in your application deployment.
 
-```typescript
-import { createDatabase } from "../utils/database";
-
-const dbResult = createDatabase({
-  name: "my-app-db", // Required
-  namespace: "my-namespace",
-  extensions: ["uuid-ossp"],
-  storageSize: "15Gi",
-  version: "17",
-});
-
-// Use dbResult.secret in your deployments
+```yaml
+# templates/deployment.yaml
+env:
+  - name: DB_HOST
+    value: {{ .Release.Name }}-database-rw
+  - name: DB_PORT
+    value: "5432"
+  - name: DB_NAME
+    value: {{ .Release.Name }}-db
+  - name: DB_USER
+    valueFrom:
+      secretKeyRef:
+        name: {{ .Release.Name }}-database-app
+        key: user
+  - name: DB_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: {{ .Release.Name }}-database-app
+        key: password
 ```
 
 ## Environment Variables
 
-When using the TauApplication integration, the following environment variables are automatically injected via the `getAllEnvironmentVariables()` function:
+CNPG creates a secret named `<cluster-name>-app` containing:
 
-- `DATABASE_URL` - Full PostgreSQL connection string
-- `DB_HOST` - Database hostname
-- `DB_PORT` - Database port (5432)
-- `DB_NAME` - Database name
-- `DB_USER` - Database username
-- `DB_PASSWORD` - Database password
-
-You can also manually access these values from the Kubernetes secret at `dbResult.secret.stringData`:
-
-- `url` - Full PostgreSQL connection string
-- `host` - Database hostname
-- `port` - Database port
-- `database` - Database name
-- `username` - Database username
+- `user` - Database username
 - `password` - Database password
+- `dbname` - Database name
+- `host` - Database hostname
+- `port` - Database port (5432)
+- `uri` - Full PostgreSQL connection string
 
 ## Database Features
 
 ### Supported PostgreSQL Extensions
 
-You can specify PostgreSQL extensions when creating a database (any supported by your CNPG/PostgreSQL version):
+You can specify PostgreSQL extensions in the `initdb` section:
 
-```typescript
-database: {
-  extensions: [
-    "uuid-ossp", // UUID generation
-    "pgcrypto", // Cryptographic functions
-    "hstore", // Key-value store
-    "ltree", // Tree-like structures
-    "pg_trgm", // Trigram matching
-  ];
-}
+```yaml
+bootstrap:
+  initdb:
+    database: my-db
+    owner: my-user
+    postInitSQL:
+      - CREATE EXTENSION IF NOT EXISTS "uuid-ossp" CASCADE
+      - CREATE EXTENSION IF NOT EXISTS "pgcrypto" CASCADE
 ```
 
 ### Storage Configuration
 
 - **Storage Class**: Uses Longhorn by default for persistent storage
-- **Size**: Configurable per database
-- **Persistence**: Data persists across pod restarts and node failures
-
-## Examples
-
-### Basic Web Application with Database
-
-```typescript
-export class WebApp extends TauApplication {
-  constructor(name: string, opts?: pulumi.ComponentResourceOptions) {
-    super(
-      name,
-      {
-        database: {
-          name: "web-db",
-          extensions: ["uuid-ossp"],
-        },
-      },
-      opts
-    );
-
-    const deployment = new k8s.apps.v1.Deployment(
-      `${name}-deployment`,
-      {
-        spec: {
-          replicas: 1,
-          selector: { matchLabels: this.labels },
-          template: {
-            metadata: { labels: this.labels },
-            spec: {
-              containers: [
-                {
-                  name: "web",
-                  image: "node:18-alpine",
-                  env: this.getAllEnvironmentVariables([{ name: "NODE_ENV", value: "production" }]),
-                  ports: [{ containerPort: 3000 }],
-                  resources: {
-                    requests: { cpu: "100m", memory: "128Mi" },
-                    limits: { cpu: "500m", memory: "512Mi" },
-                  },
-                },
-              ],
-            },
-          },
-        },
-      },
-      { parent: this }
-    );
-
-    // Create ingress for web access
-    createHttpIngress({ appName: name, port: 3000 });
-  }
-}
-```
-
-### Multiple Database instances per Application
-
-```typescript
-export class ComplexApp extends TauApplication {
-  private readonly analyticsDb: DatabaseResult;
-
-  constructor(name: string, opts?: pulumi.ComponentResourceOptions) {
-    super(
-      name,
-      {
-        database: {
-          name: "main-db",
-        },
-      },
-      opts
-    );
-
-    // Create additional database for analytics
-    this.analyticsDb = createDatabase(
-      {
-        name: "analytics-db",
-        namespace: this.namespace,
-        storageSize: "50Gi",
-        version: "17",
-      },
-      this
-    );
-
-    // Your deployment would use both databases
-  }
-}
-```
+- **Size**: Configurable per database via `values.yaml`
+- **Persistence**: Data persists across pod restarts and node failures using static volume bindings
 
 ## Best Practices
 
@@ -228,14 +128,6 @@ CNPG manages its own PVC via `pvcTemplate`, so the standard Longhorn volume rest
 3. **Restore the backup in Longhorn UI** — restore to a **new name** (e.g. `immich-database-data-restored`)
 4. **Update `volume.yaml`** — change the Longhorn `Volume` CR name, PV name, `csi.volumeHandle`, and the `volumeName` in the CNPG cluster's `pvcTemplate` to the new name
 5. **Commit and push** — ArgoCD will recreate the CNPG Cluster pointing at the restored volume
-
-### Development Workflow
-
-1. Create your application extending TauApplication
-2. Add a `database` property in constructor options
-3. Use `this.getAllEnvironmentVariables()` in container specs
-4. Deploy and test database connectivity
-5. Monitor resource usage and adjust as needed
 
 ## Limitations
 

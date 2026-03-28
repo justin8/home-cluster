@@ -11,17 +11,6 @@ In this cluster, automatic key renewal is **disabled** and the key validity is s
 - `keyrenewperiod: "0"` (Disabled)
 - `keyttl: "876000h00m00s"` (100 Years)
 
-## Migrating Secrets from Pulumi
-
-Existing secret values stored in the Pulumi stack can be retrieved in plaintext with:
-
-```bash
-cd pulumi
-pulumi config --show-secrets
-```
-
-Use these values as inputs when creating new `SealedSecret` resources for the ArgoCD-managed cluster.
-
 ## Creating a New Sealed Secret
 
 If you have access to the cluster, you can create a `SealedSecret` with:

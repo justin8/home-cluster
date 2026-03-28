@@ -14,8 +14,6 @@ pkgs.mkShell {
     kubernetes-helm
     kubeseal
     prettier
-    pulumi
-    pulumiPackages.pulumi-language-nodejs
     pv
     skopeo
     k9s
@@ -47,24 +45,11 @@ pkgs.mkShell {
       aws --region us-east-1 ssm get-parameter --name "/home-cluster/sops-age.key" --with-decryption --query "Parameter.Value" --output text > $SOPS_AGE_KEY_FILE
     fi
 
-    export PULUMI_CONFIG_PASSPHRASE="$(sops decrypt --extract '["passphrase"]' pulumi/.pulumi-passphrase.sops.yaml)"
-
-
     (
       echo "Configuring talos..."
       cd talos
       talhelper genconfig
       talosctl kubeconfig --talosconfig=./clusterconfig/talosconfig --force --nodes=192.168.5.20 clusterconfig/kubeconfig
-    )
-
-    (
-      echo "Configuring pulumi..."
-      cd pulumi
-      if [[ ! -e $HOME/.pulumi/credentials.json ]]; then
-        pulumi login 's3://jdray-pulumi-state?region=us-east-1'
-      fi
-
-      npm i
     )
   '';
 }

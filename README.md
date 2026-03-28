@@ -1,6 +1,6 @@
 # Home Kubernetes Cluster
 
-This repository contains infrastructure as code for a home Kubernetes cluster running on Talos Linux. This branch is currently in the process of migrating from Pulumi-based management to a GitOps approach using ArgoCD.
+This repository contains infrastructure as code for a home Kubernetes cluster running on Talos Linux managed using a GitOps approach with ArgoCD.
 
 ## Overview
 

@@ -21,7 +21,7 @@
           ▼                               ▼
 ┌─────────────────┐               ┌──────────────────────────────────────────────────┐
 │  NFS Storage    │               │              Kubernetes Cluster                  │
-│  192.168.5.5    │               │              (API: 192.168.5.10)                 │
+│  192.168.5.5    │               │              (API: 192.168.5.20)                 │
 │                 │               │            (Nodes: 192.168.5.11-20)              │
 │                 │               │                                                  │
 │ • File Storage  │◄──────────────│  ┌─────────────────────────────────────────────┐ │
@@ -64,7 +64,7 @@
 | `192.168.5.4`       | Wifi AP                    |                        | Network infrastructure           |     |
 | `192.168.5.5`       | NFS Storage                | `storage_ip`           | Network file storage server      |
 | `192.168.5.6`       | Zigbee/thread co-ordinator |                        | Network Infrastructure           |
-| `192.168.5.10`      | Talos VIP                  | `talconfig.yaml`       | Kubernetes API server endpoint   |
+| `192.168.5.20`      | Talos VIP                  | `talconfig.yaml`       | Kubernetes API server endpoint   |
 | `192.168.5.11-20`   | Talos Nodes                | `talconfig.yaml`       | Reserved for control plane nodes |
 | `192.168.5.53`      | DNS Server                 | `dns_server_ip`        | PiHole DNS service               |
 | `192.168.5.80-100`  | MetalLB Pool               | `ip_address_pool`      | Load balancer IP allocation      |
@@ -95,7 +95,7 @@
 
 ### Multi-tier DNS System
 
-The cluster uses a sophisticated DNS setup with multiple providers. Note that the Pulumi construct for an ingress will by default only create a private ingress, but when `public: true` is set, it will create both a public and private ingress. All local LAN access happens via the private ingress.
+The cluster uses a sophisticated DNS setup with multiple providers. The ingress controller configuration determines if an ingress is public or private based on the `ingressClassName`.
 
 #### PiHole (Internal DNS)
 
@@ -137,6 +137,7 @@ The cluster uses a sophisticated DNS setup with multiple providers. Note that th
 #### Public Ingress
 
 - **IP**: `192.168.5.2`
+- **ingressClassName**: `traefik-public`
 - **Purpose**: Internet-accessible services
 - **DNS**: Managed by Cloudflare External DNS
 - **TLS**: Automatic Let's Encrypt certificates via cert-manager
@@ -145,6 +146,7 @@ The cluster uses a sophisticated DNS setup with multiple providers. Note that th
 #### Private Ingress
 
 - **IP**: `192.168.5.3`
+- **ingressClassName**: `traefik-private`
 - **Purpose**: Internal-only services
 - **DNS**: Managed by PiHole External DNS
 - **TLS**: Automatic Let's Encrypt certificates via cert-manager
@@ -152,33 +154,59 @@ The cluster uses a sophisticated DNS setup with multiple providers. Note that th
 
 ### Ingress Configuration
 
-Applications can configure ingress exposure using the `TauApplication` class:
+Applications can configure ingress exposure in their Helm templates:
 
-```typescript
-// Private only (default)
-this.createHttpIngress({
-  appName: name,
-  port: 80,
-  labels: this.labels,
-});
+```yaml
+# Private only (default)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Release.Name }}-private
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-production
+spec:
+  ingressClassName: traefik-private
+  rules:
+  - host: my-app.{{ .Values.domain }}
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ .Release.Name }}
+            port:
+              number: 80
+  tls:
+  - hosts:
+    - my-app.{{ .Values.domain }}
+    secretName: my-app-private-tls
 
-// Public with authentication
-this.createHttpIngress({
-  appName: name,
-  port: 80,
-  labels: this.labels,
-  public: true,
-  auth: true,
-});
-
-// Public without authentication
-this.createHttpIngress({
-  appName: name,
-  port: 80,
-  labels: this.labels,
-  public: true,
-  auth: false,
-});
+# Public with authentication
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Release.Name }}-public
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-production
+    traefik.ingress.kubernetes.io/router.middlewares: auth-tinyauth@kubernetescrd
+spec:
+  ingressClassName: traefik-public
+  rules:
+  - host: my-app.{{ .Values.domain }}
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ .Release.Name }}
+            port:
+              number: 80
+  tls:
+  - hosts:
+    - my-app.{{ .Values.domain }}
+    secretName: my-app-public-tls
 ```
 
 ## MetalLB Configuration
