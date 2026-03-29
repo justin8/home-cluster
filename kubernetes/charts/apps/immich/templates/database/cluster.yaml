@@ -4,7 +4,7 @@ metadata:
   name: immich-database
   namespace: {{ .Release.Namespace }}
 spec:
-  instances: 2
+  instances: 0
   imageName: "{{ .Values.images.database.repository }}:{{ .Values.images.database.tag }}"
   postgresql:
     shared_preload_libraries:
