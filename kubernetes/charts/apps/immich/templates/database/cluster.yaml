@@ -3,8 +3,6 @@ kind: Cluster
 metadata:
   name: immich-database
   namespace: {{ .Release.Namespace }}
-  annotations:
-    cnpg.io/hibernation: "on"
 spec:
   instances: 2
   nodeMaintenanceWindow:
