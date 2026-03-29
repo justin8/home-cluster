@@ -42,4 +42,4 @@ spec:
         - name: books
           nfs:
             server: {{ .Values.network.storage }}
-            path: /mnt/pool/media/books
+            path: /mnt/pool/media/downloads/complete/Books

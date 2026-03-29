@@ -3,12 +3,11 @@
 
 pkgs.mkShell {
   buildInputs = with pkgs; [
-    nodejs_22
-    git
-    sops
     age
-    talosctl
-    talhelper
+    argocd
+    git
+    jq
+    k9s
     kubectl
     kubectl-cnpg
     kubernetes-helm
@@ -16,9 +15,10 @@ pkgs.mkShell {
     prettier
     pv
     skopeo
-    k9s
+    sops
+    talhelper
+    talosctl
     virt-manager
-    jq
     yq
   ];
 
