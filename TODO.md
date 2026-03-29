@@ -50,12 +50,13 @@
   - [x] Remove temporary instances
 - [x] Remove old pulumi setup
 - [x] Configure renovate for argocd
-- [ ] Move github actions things out to scripts dir
+- [x] Move github actions things out to scripts dir
+- [x] Setup shelfmark
+- [x] Kavita OAuth (needs v0.8.8)
+- [x] Fix LH volume resizing issues (fixed via pulumi->argocd migration)
 - [ ] Change pocketid to use the mail proxy
-- [ ] Kavita OAuth (needs v0.8.8)
 - [ ] Look in to OAuth alternatives that can be deployed fully programatically
 - [ ] Get access by user groups working - coming in tinyauth v4 maybe; alternatively, try out oauth2proxy
 - [ ] Network isolation and VLANs
 - [ ] Set up metrics/alerting for cluster services (including longhorn)
-- [ ] Fix LH volume resizing issues
 - [ ] Multiple Tinyauth/PocketID instances
