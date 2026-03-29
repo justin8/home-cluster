@@ -1,48 +1,48 @@
-# apiVersion: postgresql.cnpg.io/v1
-# kind: Cluster
-# metadata:
-#   name: immich-database
-#   namespace: {{ .Release.Namespace }}
-#   annotations:
-#     cnpg.io/hibernation: "on"
-# spec:
-#   instances: 2
-#   nodeMaintenanceWindow:
-#     reusePVC: true
-#   imageName: "{{ .Values.images.database.repository }}:{{ .Values.images.database.tag }}"
-#   postgresql:
-#     shared_preload_libraries:
-#       - vchord.so
-#     parameters:
-#       max_connections: "100"
-#       shared_buffers: 128MB
-#       effective_cache_size: 512MB
-#       maintenance_work_mem: 64MB
-#       checkpoint_completion_target: "0.9"
-#       wal_buffers: 16MB
-#       default_statistics_target: "100"
-#       random_page_cost: "1.1"
-#       effective_io_concurrency: "200"
-#   managed:
-#     roles:
-#       - name: immich-database_user
-#         login: true
-#         superuser: true
-#   bootstrap:
-#     initdb:
-#       database: immich-database
-#       owner: immich-database_user
-#       postInitSQL:
-#         - CREATE EXTENSION vchord CASCADE
-#         - CREATE EXTENSION IF NOT EXISTS "cube" CASCADE
-#         - CREATE EXTENSION IF NOT EXISTS "earthdistance" CASCADE
-#   storage:
-#     size: {{ .Values.databaseVolumeSizeGi }}Gi
-#     storageClass: longhorn
-#     pvcTemplate:
-#       accessModes:
-#         - ReadWriteOnce
-#       storageClassName: longhorn
-#       resources:
-#         requests:
-#           storage: {{ .Values.databaseVolumeSizeGi }}Gi
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: immich-database
+  namespace: {{ .Release.Namespace }}
+  # annotations:
+  #   cnpg.io/hibernation: "on"
+spec:
+  instances: 2
+  nodeMaintenanceWindow:
+    reusePVC: true
+  imageName: "{{ .Values.images.database.repository }}:{{ .Values.images.database.tag }}"
+  postgresql:
+    shared_preload_libraries:
+      - vchord.so
+    parameters:
+      max_connections: "100"
+      shared_buffers: 128MB
+      effective_cache_size: 512MB
+      maintenance_work_mem: 64MB
+      checkpoint_completion_target: "0.9"
+      wal_buffers: 16MB
+      default_statistics_target: "100"
+      random_page_cost: "1.1"
+      effective_io_concurrency: "200"
+  managed:
+    roles:
+      - name: immich-database_user
+        login: true
+        superuser: true
+  bootstrap:
+    initdb:
+      database: immich-database
+      owner: immich-database_user
+      postInitSQL:
+        - CREATE EXTENSION vchord CASCADE
+        - CREATE EXTENSION IF NOT EXISTS "cube" CASCADE
+        - CREATE EXTENSION IF NOT EXISTS "earthdistance" CASCADE
+  storage:
+    size: {{ .Values.databaseVolumeSizeGi }}Gi
+    storageClass: longhorn
+    pvcTemplate:
+      accessModes:
+        - ReadWriteOnce
+      storageClassName: longhorn
+      resources:
+        requests:
+          storage: {{ .Values.databaseVolumeSizeGi }}Gi
