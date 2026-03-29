@@ -4,7 +4,7 @@ metadata:
   name: immich-database
   namespace: {{ .Release.Namespace }}
 spec:
-  instances: 1
+  instances: 2
   imageName: "{{ .Values.images.database.repository }}:{{ .Values.images.database.tag }}"
   postgresql:
     shared_preload_libraries:
@@ -39,7 +39,6 @@ spec:
       accessModes:
         - ReadWriteOnce
       storageClassName: longhorn
-      volumeName: immich-database-data
       resources:
         requests:
           storage: {{ .Values.databaseVolumeSizeGi }}Gi
