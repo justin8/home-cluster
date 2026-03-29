@@ -21,6 +21,8 @@ spec:
     roles:
       - name: homeassistant_user
         login: true
+        passwordSecret:
+          name: homeassistant-db-password
   bootstrap:
     initdb:
       database: homeassistant-db

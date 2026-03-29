@@ -13,7 +13,7 @@ In this cluster, automatic key renewal is **disabled** and the key validity is s
 
 ## Creating a New Sealed Secret
 
-If you have access to the cluster, you can create a `SealedSecret` with:
+You can create a `SealedSecret` using `kubeseal` directly. It is already configured to use the cluster's public key.
 
 ```bash
 # 1. Create a temporary local secret (dry-run)
@@ -23,7 +23,7 @@ kubectl create secret generic my-secret \
   --namespace my-namespace \
   --dry-run=client -o yaml > my-secret.yaml
 
-# 2. Seal it using the cluster's controller
+# 2. Seal it
 kubeseal --controller-name=sealed-secrets-controller --controller-namespace=kube-system < my-secret.yaml > my-sealed-secret.yaml
 
 # 3. Clean up the cleartext secret
