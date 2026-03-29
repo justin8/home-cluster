@@ -10,6 +10,8 @@ argo-cd:
       users.anonymous.enabled: "true"
     rbac:
       policy.default: role:admin
+    secret:
+      githubSecret: "$argocd-webhook-secret:webhook.github.secret"
   server:
     extraArgs:
       - --insecure
