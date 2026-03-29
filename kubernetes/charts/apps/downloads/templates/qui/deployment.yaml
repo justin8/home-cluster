@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qui
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: qui
+  template:
+    metadata:
+      labels:
+        app: qui
+    spec:
+      containers:
+        - name: qui
+          image: "{{ .Values.images.qui.repository }}:{{ .Values.images.qui.tag }}"
+          imagePullPolicy: {{ .Values.images.qui.pullPolicy }}
+          ports:
+            - containerPort: 7476
+          env:
+            - name: QUI__AUTH_DISABLED
+              value: "true"
+            - name: QUI__I_ACKNOWLEDGE_THIS_IS_A_BAD_IDEA
+              value: "true"
+            - name: QUI__AUTH_DISABLED_ALLOWED_CIDRS
+              value: "127.0.0.1/32,10.244.0.0/16"
+          envFrom:
+            - configMapRef:
+                name: downloads-config
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 7476
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          volumeMounts:
+            - name: config
+              mountPath: /config
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: qui-config

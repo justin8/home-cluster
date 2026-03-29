@@ -86,4 +86,5 @@ Always show the user the command and explain what it will do — let them run it
 
 ## CLI Tool Usage
 
-- **Token Efficiency:** Always run project-specific CLI tools (e.g., `kubectl`, `helm`, `talosctl`, `kubeseal`) prefixed with `rtk` (e.g., `rtk kubectl get pods`). This wrapper reduces token usage by optimizing output for the AI.
+- **Token Efficiency:** For project-specific CLI tools like `talosctl` and `kubeseal`, always prefix the command with `rtk` (e.g., `rtk talosctl get members`). This wrapper reduces token usage by optimizing output for the AI.
+- **Exceptions:** Do **NOT** use `rtk` with `kubectl` or `helm` commands. Use them directly (e.g., `kubectl get pods`).

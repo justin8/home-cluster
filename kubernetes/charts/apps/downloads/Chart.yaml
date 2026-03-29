@@ -1,6 +1,6 @@
 apiVersion: v2
 name: downloads
-description: Download stack - Radarr, Sonarr, Prowlarr, SABnzbd, qBittorrent, Seerr
+description: Download stack - Radarr, Sonarr, Prowlarr, SABnzbd, qBittorrent, Seerr, Qui
 version: 0.1.0
 dependencies:
   - name: common

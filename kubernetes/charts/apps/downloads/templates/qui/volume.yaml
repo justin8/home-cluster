@@ -1,0 +1,44 @@
+apiVersion: longhorn.io/v1beta2
+kind: Volume
+metadata:
+  name: qui-config
+  namespace: longhorn-system
+  labels:
+    recurring-job-group.longhorn.io/backups-enabled: enabled
+    recurring-job-group.longhorn.io/fstrim-enabled: enabled
+spec:
+  size: {{ mul .Values.quiVolumeSizeGi 1024 | mul 1024 | mul 1024 | quote }}
+  dataLocality: best-effort
+  numberOfReplicas: 2
+  accessMode: rwo
+  frontend: blockdev
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: qui-config
+spec:
+  capacity:
+    storage: {{ .Values.quiVolumeSizeGi }}Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: longhorn
+  csi:
+    driver: driver.longhorn.io
+    fsType: ext4
+    volumeHandle: qui-config
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: qui-config
+  namespace: {{ .Release.Namespace }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: longhorn
+  volumeName: qui-config
+  resources:
+    requests:
+      storage: {{ .Values.quiVolumeSizeGi }}Gi
