@@ -19,11 +19,15 @@ external-dns-cloudflare:
   sources:
     - ingress
     - traefik-proxy
-  provider:
-    name: cloudflare
+  provider: cloudflare
   extraArgs:
     - --ingress-class=traefik-public
   env:
+    - name: CF_API_TOKEN
+      valueFrom:
+        secretKeyRef:
+          name: cloudflare-api-token
+          key: api-token
 
 piholeVolumeSizeGi: 1
 
