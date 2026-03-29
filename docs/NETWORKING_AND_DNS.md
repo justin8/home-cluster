@@ -7,7 +7,7 @@
 │                                Internet                                         │
 └─────────────────────────┬───────────────────────────────────────────────────────┘
                           │
-                          │ External IP (real_external_ip)
+                          │ External IP (Dynamic DNS: home.dray.id.au)
                           ▼
 ┌─────────────────────────────────────────────────────────────────────────────────┐
 │                    Home Router/Firewall                                         │
@@ -56,19 +56,19 @@
 
 ## IP Address Allocation
 
-| IP Range            | Purpose                    | Configuration          | Notes                            |
-| ------------------- | -------------------------- | ---------------------- | -------------------------------- | --- |
-| `192.168.5.1`       | Router/Gateway             | Network infrastructure | Default gateway                  |
-| `192.168.5.2`       | Public Ingress             | `public_ingress_ip`    | External-facing web traffic      |
-| `192.168.5.3`       | Private Ingress            | `private_ingress_ip`   | Internal-only web traffic        |
-| `192.168.5.4`       | Wifi AP                    |                        | Network infrastructure           |     |
-| `192.168.5.5`       | NFS Storage                | `storage_ip`           | Network file storage server      |
-| `192.168.5.6`       | Zigbee/thread co-ordinator |                        | Network Infrastructure           |
-| `192.168.5.20`      | Talos VIP                  | `talconfig.yaml`       | Kubernetes API server endpoint   |
-| `192.168.5.11-20`   | Talos Nodes                | `talconfig.yaml`       | Reserved for control plane nodes |
-| `192.168.5.53`      | DNS Server                 | `dns_server_ip`        | PiHole DNS service               |
-| `192.168.5.80-100`  | MetalLB Pool               | `ip_address_pool`      | Load balancer IP allocation      |
-| `192.168.5.100-254` | DHCP Pool                  | Router configuration   | Dynamic client allocation        |
+| IP Range            | Purpose                    | Configuration            | Notes                            |
+| ------------------- | -------------------------- | ------------------------ | -------------------------------- |
+| `192.168.5.1`       | Router/Gateway             | Network infrastructure   | Default gateway                  |
+| `192.168.5.2`       | Public Ingress             | `network.publicIngress`  | External-facing web traffic      |
+| `192.168.5.3`       | Private Ingress            | `network.privateIngress` | Internal-only web traffic        |
+| `192.168.5.4`       | Wifi AP                    |                          | Network infrastructure           |
+| `192.168.5.5`       | NFS Storage                | `network.storage`        | Network file storage server      |
+| `192.168.5.6`       | Zigbee/thread co-ordinator |                          | Network Infrastructure           |
+| `192.168.5.20`      | Talos VIP                  | `network.cluster`        | Kubernetes API server endpoint   |
+| `192.168.5.11-20`   | Talos Nodes                | `talconfig.yaml`         | Reserved for control plane nodes |
+| `192.168.5.53`      | DNS Server                 | `network.dnsServer`      | PiHole DNS service               |
+| `192.168.5.80-100`  | MetalLB Pool               | `network.metallbRange`   | Load balancer IP allocation      |
+| `192.168.5.100-254` | DHCP Pool                  | Router configuration     | Dynamic client allocation        |
 
 ### Static Reservations
 
@@ -80,39 +80,40 @@
 
 ### Public Traffic (Internet → Applications)
 
-1. **Internet** → Router (`real_external_ip`)
+1. **Internet** → Router (WAN IP)
 2. **Router** → Public Ingress (`192.168.5.2`)
 3. **Traefik Public** → Application Pods
-4. **External DNS (Cloudflare)** manages public DNS records
+4. **Cloudflare DDNS** updates `home.dray.id.au` with the current WAN IP.
+5. **External DNS (Cloudflare)** manages application CNAME records pointing to `home.dray.id.au`.
 
 ### Private Traffic (Internal Network → Applications)
 
 1. **Internal Network** → Private Ingress (`192.168.5.3`)
 2. **Traefik Private** → Application Pods
-3. **External DNS (PiHole)** manages internal DNS records
+3. **External DNS (PiHole)** manages internal DNS records pointing directly to the private ingress IP.
 
 ## DNS Architecture
 
 ### Multi-tier DNS System
 
-The cluster uses a sophisticated DNS setup with multiple providers. The ingress controller configuration determines if an ingress is public or private based on the `ingressClassName`.
+The cluster uses a split-horizon DNS setup. The ingress controller configuration determines if an ingress is public or private based on the `ingressClassName`.
 
 #### PiHole (Internal DNS)
 
 - **IP**: `192.168.5.53`
 - **Purpose**: Primary DNS for internal clients
-- **Manages**: Only private ingress classes for internal resolution
+- **Manages**: Internal resolution for all cluster services
 - **Features**: Ad blocking, custom DNS records, internal domain resolution
 
 #### External DNS (Cloudflare)
 
-- **Purpose**: External DNS record management
-- **Manages**: Only public ingress class for external resolution
-- **Features**: Automatic DNS record creation/updates based on ingress resources
+- **Purpose**: External DNS record management (Cloudflare)
+- **Manages**: Public ingress classes for external resolution
+- **Targeting**: Public ingresses use the annotation `external-dns.alpha.kubernetes.io/target: home.dray.id.au` to ensure correct external routing.
 
-#### External DNS (PiHole Provider)
+#### External DNS (PiHole)
 
-- **Purpose**: Internal DNS record management
+- **Purpose**: Internal DNS record management (PiHole)
 - **Manages**: Private ingress classes and internal services
 - **Features**: Automatic internal DNS record management
 
@@ -120,15 +121,15 @@ The cluster uses a sophisticated DNS setup with multiple providers. The ingress 
 
 **Internal Clients:**
 
-- Use PiHole DNS (`192.168.5.53`) for both public and private domains
-- Get responses for both internal and external services
-- Benefit from ad blocking and custom internal records
+- Use PiHole DNS (`192.168.5.53`) for both public and private domains.
+- Private services resolve to `192.168.5.3`.
+- Public services resolve to `192.168.5.2` (via internal PiHole records) or the WAN IP (if falling back to upstream).
 
 **External Clients:**
 
-- Use Cloudflare DNS for public domains only
-- Cannot access private ingress services
-- Standard internet DNS resolution
+- Use Cloudflare DNS.
+- Only public services are resolvable.
+- Resolve to the current WAN IP via a CNAME to `home.dray.id.au`.
 
 ## Ingress Strategy
 
@@ -139,8 +140,8 @@ The cluster uses a sophisticated DNS setup with multiple providers. The ingress 
 - **IP**: `192.168.5.2`
 - **ingressClassName**: `traefik-public`
 - **Purpose**: Internet-accessible services
-- **DNS**: Managed by Cloudflare External DNS
-- **TLS**: Automatic Let's Encrypt certificates via cert-manager
+- **DNS**: Managed by Cloudflare External DNS (CNAME to `home.dray.id.au`)
+- **TLS**: Wildcard certificate (`default-tls` secret)
 - **Access**: Available from both internal and external networks
 
 #### Private Ingress
@@ -149,153 +150,123 @@ The cluster uses a sophisticated DNS setup with multiple providers. The ingress 
 - **ingressClassName**: `traefik-private`
 - **Purpose**: Internal-only services
 - **DNS**: Managed by PiHole External DNS
-- **TLS**: Automatic Let's Encrypt certificates via cert-manager
+- **TLS**: Wildcard certificate (`default-tls` secret)
 - **Access**: Only available from internal network
 
 ### Ingress Configuration
 
-Applications can configure ingress exposure in their Helm templates:
+Applications typically configure both public and private ingresses in their Helm templates:
 
 ```yaml
-# Private only (default)
+# Example pattern for dual ingress
+{{- range list "traefik-public" "traefik-private" }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ .Release.Name }}-private
+  name: my-app{{ if eq . "traefik-public" }}-public{{ end }}
+  namespace: {{ $.Release.Namespace }}
   annotations:
-    cert-manager.io/cluster-issuer: letsencrypt-production
+    # Public ingress MUST point to the home DDNS record for external DNS to work
+    {{- if eq . "traefik-public" }}
+    external-dns.alpha.kubernetes.io/target: home.{{ $.Values.domain }}
+    {{- end }}
+    # Authentication middleware
+    traefik.ingress.kubernetes.io/router.middlewares: {{ . }}-tinyauth@kubernetescrd
 spec:
-  ingressClassName: traefik-private
+  ingressClassName: {{ . }}
   rules:
-  - host: my-app.{{ .Values.domain }}
+  - host: my-app.{{ $.Values.domain }}
     http:
       paths:
       - path: /
         pathType: Prefix
         backend:
           service:
-            name: {{ .Release.Name }}
+            name: my-app
             port:
               number: 80
   tls:
   - hosts:
-    - my-app.{{ .Values.domain }}
-    secretName: my-app-private-tls
-
-# Public with authentication
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: {{ .Release.Name }}-public
-  annotations:
-    cert-manager.io/cluster-issuer: letsencrypt-production
-    traefik.ingress.kubernetes.io/router.middlewares: auth-tinyauth@kubernetescrd
-spec:
-  ingressClassName: traefik-public
-  rules:
-  - host: my-app.{{ .Values.domain }}
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: {{ .Release.Name }}
-            port:
-              number: 80
-  tls:
-  - hosts:
-    - my-app.{{ .Values.domain }}
-    secretName: my-app-public-tls
+    - my-app.{{ $.Values.domain }}
+    secretName: default-tls
+---
+{{- end }}
 ```
 
 ## MetalLB Configuration
 
 MetalLB provides LoadBalancer services for the bare metal cluster:
 
-- **IP Pool**: `192.168.5.80-192.168.5.100`
+- **IP Pool**: `192.168.5.80-192.168.5.100` (Pool name: `default`)
 - **Mode**: Layer 2 (ARP-based)
-- **Auto-assignment**: Enabled for the default pool
-- **Speaker**: Configured to ignore exclude-from-external-load-balancers labels
-
-### Reserved IPs within MetalLB Pool
-
-While the pool is `192.168.5.80-100`, specific services have static assignments:
-
-- Most services use dynamic allocation from the pool
-- Critical services may have static IP assignments outside the pool
+- **Ingress IPs**:
+  - `public-ingress` pool -> `192.168.5.2`
+  - `private-ingress` pool -> `192.168.5.3`
 
 ## Certificate Management
 
 ### Automatic TLS with cert-manager
 
 - **Provider**: Let's Encrypt
+- **Issuer**: `letsencrypt-prod` (ClusterIssuer)
 - **DNS Challenge**: Cloudflare DNS-01 challenge
-- **Wildcard Certificates**: Supported for `*.domain`
-- **Automatic Renewal**: Handled by cert-manager
-- **Integration**: Automatic certificate provisioning for all ingress resources
-
-### Certificate Issuers
-
-- **Production**: Let's Encrypt production environment
-- **Staging**: Let's Encrypt staging for testing
-- **DNS Validation**: Uses Cloudflare API for domain validation
+- **Wildcard Certificate**: Managed as a `Certificate` resource in the `cert-manager` namespace.
+- **Secret Reflection**: The `default-tls` secret is automatically reflected to other namespaces (like `traefik-public`, `traefik-private`, `argocd`, etc.) using Emberstack Reflector.
 
 ## Network Security
 
 ### Firewall Rules
 
-The router/firewall should be configured to:
+The router/firewall is configured to:
 
-- Allow inbound traffic to `192.168.5.2` (public ingress)
-- Block direct access to other cluster IPs from external networks
-- Allow internal network access to all cluster services
+- Allow inbound traffic on ports 80/443 to `192.168.5.2` (public ingress).
+- Block direct access to other cluster IPs from external networks.
+- Cloudflare DDNS ensures the WAN IP is always correct in DNS.
 
 ### Network Policies
 
 Kubernetes NetworkPolicies can be used to:
 
-- Isolate application traffic
-- Control inter-pod communication
-- Restrict access to sensitive services
+- Isolate application traffic.
+- Control inter-pod communication.
+- Restrict access to sensitive services.
 
 ## Troubleshooting
 
 ### Common Network Issues
 
 1. **DNS Resolution Problems**
-   - Check PiHole service status
-   - Verify External DNS controller logs
-   - Confirm Cloudflare API token permissions
+   - Check PiHole service status and logs.
+   - Verify `external-dns-pihole` and `external-dns-cloudflare` logs.
+   - Confirm Cloudflare API token permissions in the `cloudflare-api-token` secret.
 
 2. **Ingress Not Accessible**
-   - Verify MetalLB speaker pods are running
-   - Check Traefik controller status
-   - Confirm ingress resource configuration
+   - Verify MetalLB speaker pods are running in `metallb-system`.
+   - Check Traefik controller status in `traefik-public` and `traefik-private` namespaces.
+   - Confirm ingress resource annotations and `ingressClassName`.
 
 3. **Certificate Issues**
-   - Check cert-manager logs
-   - Verify Cloudflare DNS API access
-   - Confirm domain ownership
+   - Check `cert-manager` logs.
+   - Verify `wildcard-cert` status: `kubectl get certificate -n cert-manager`.
+   - Confirm Reflector is mirroring the `default-tls` secret to the target namespace.
 
 ### Diagnostic Commands
 
 ```bash
 # Check MetalLB status
-kubectl get pods -n metallb-system
+rtk kubectl get pods -n metallb-system
 
 # Check ingress controllers
-kubectl get pods -n traefik-public
-kubectl get pods -n traefik-private
+rtk kubectl get pods -n traefik-public
+rtk kubectl get pods -n traefik-private
 
 # Check DNS services
-kubectl get pods -n pihole
+rtk kubectl get pods -n dns
 
 # Check certificates
-kubectl get certificates -A
-kubectl describe certificate <cert-name>
+rtk kubectl get certificates -A
+rtk kubectl describe certificate wildcard-cert -n cert-manager
 
 # Check External DNS
-kubectl logs -n external-dns deployment/external-dns-cloudflare
-kubectl logs -n external-dns deployment/external-dns-pihole
+rtk kubectl logs -n dns -l app.kubernetes.io/name=external-dns
 ```
