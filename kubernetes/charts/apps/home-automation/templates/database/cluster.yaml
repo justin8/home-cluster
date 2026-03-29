@@ -17,16 +17,12 @@ spec:
       default_statistics_target: "100"
       random_page_cost: "1.1"
       effective_io_concurrency: "200"
-  managed:
-    roles:
-      - name: homeassistant_user
-        login: true
-        passwordSecret:
-          name: homeassistant-db-password
   bootstrap:
     initdb:
-      database: homeassistant-db
+      database: homeassistant
       owner: homeassistant_user
+      secret:
+        name: homeassistant-db-password
   storage:
     size: {{ .Values.databaseVolumeSizeGi }}Gi
     storageClass: longhorn
