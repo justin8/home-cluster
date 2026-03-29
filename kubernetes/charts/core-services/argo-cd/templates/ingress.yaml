@@ -30,7 +30,6 @@ metadata:
   name: argocd-webhook
   namespace: {{ .Release.Namespace }}
   annotations:
-    # Point to the home domain (WAN IP) for external DNS
     external-dns.alpha.kubernetes.io/target: home.{{ .Values.domain }}
 spec:
   ingressClassName: traefik-public
