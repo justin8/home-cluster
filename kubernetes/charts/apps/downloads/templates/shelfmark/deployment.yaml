@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shelfmark
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: shelfmark
+  template:
+    metadata:
+      labels:
+        app: shelfmark
+    spec:
+      containers:
+        - name: shelfmark
+          image: "{{ .Values.images.shelfmark.repository }}:{{ .Values.images.shelfmark.tag }}"
+          imagePullPolicy: {{ .Values.images.shelfmark.pullPolicy }}
+          ports:
+            - containerPort: 8084
+          envFrom:
+            - configMapRef:
+                name: downloads-config
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8084
+            initialDelaySeconds: 60
+            periodSeconds: 30
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: books
+              mountPath: /books
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: shelfmark-config
+        - name: books
+          nfs:
+            server: {{ .Values.network.storage }}
+            path: /mnt/pool/media/books
