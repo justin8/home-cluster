@@ -31,38 +31,44 @@ Every manual volume requires:
 2. `PersistentVolume` (cluster-scoped) — CSI binding to the Longhorn volume
 3. `PersistentVolumeClaim` in the app namespace — references PV by `volumeName`
 
-Recurring job groups go as **labels on the Longhorn Volume**, not annotations on the PVC:
+The common template `common.longhornVolume` (in `kubernetes/charts/common/templates/_longhornvolume.tpl`) should be used to define these resources. It accepts `ctx`, `name`, `sizeGi`, and `backupsEnabled` parameters.
 
 ```yaml
-labels:
-  recurring-job-group.longhorn.io/backups-enabled: enabled
-  recurring-job-group.longhorn.io/fstrim-enabled: enabled
+{
+  {
+    - include "common.longhornVolume" (dict "ctx" . "name" "my-app-data" "sizeGi" .Values.volumeSizeGi) -,
+  },
+}
 ```
 
-Volume size is configured in `values.yaml` as Mi or Gi depending on the application's needs. Use Mi for volumes under 1Gi, Gi otherwise. The Longhorn `Volume` spec requires bytes — convert using `mul .Values.volumeSizeMi 1024 | mul 1024` (Mi) or `mul .Values.volumeSizeGi 1024 | mul 1024 | mul 1024` (Gi). The PV and PVC use the value directly with the appropriate suffix:
+Volume size is typically configured in `values.yaml` as `volumeSizeGi`.
+
+See `kubernetes/charts/core-services/mail-proxy/templates/volume.yaml` as the reference implementation. Always name the file `volume.yaml`.
+
+## Ingress Pattern
+
+For consistency, use the `common.ingress` template (in `kubernetes/charts/common/templates/_ingress.tpl`) to define ingress resources.
+
+It supports:
+
+- `ctx`: The helm context (`.`)
+- `type`: `traefik-private` (default) or `traefik-public`
+- `name`: Service name (defaults to `Chart.Name`)
+- `subdomain`: DNS subdomain (defaults to `name`)
+- `port`: Service port (defaults to 80)
+- `auth`: Boolean, enables TinyAuth middleware (defaults to `false`)
+- `annotations`: Optional dictionary of extra annotations
 
 ```yaml
-# values.yaml (Mi example — for volumes under 1Gi)
-volumeSizeMi: 100
+{ { - include "common.ingress" (dict "ctx" . "subdomain" "my-app" "auth" true) - } }
 ```
+
+For public services, also include the public ingress:
 
 ```yaml
-# values.yaml (Gi example — for volumes 1Gi and above)
-volumeSizeGi: 5
+{{- include "common.ingress" (dict "ctx" . "subdomain" "my-app") -}}
+{{- include "common.ingress" (dict "ctx" . "subdomain" "my-app" "type" "traefik-public") -}}
 ```
-
-```yaml
-# volume.yaml (Longhorn Volume spec)
-spec:
-  size: {{ mul .Values.volumeSizeMi 1024 | mul 1024 | quote }}   # Mi
-  # or
-  size: {{ mul .Values.volumeSizeGi 1024 | mul 1024 | mul 1024 | quote }}  # Gi
-
-# PV and PVC
-  storage: {{ .Values.volumeSizeMi }}Mi   # or {{ .Values.volumeSizeGi }}Gi
-```
-
-See `kubernetes/charts/mail-proxy/templates/volume.yaml` as the reference implementation. Always name the file `volume.yaml`.
 
 ## Project Steering
 

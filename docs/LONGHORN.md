@@ -55,13 +55,21 @@ Only increasing volume sizes is supported. Update the size in the app's `volume.
 
 For applications that support only a **single instance**, use the explicit three-resource pattern. This provides stable, human-readable volume names in the Longhorn UI and simplifies manual backups/restores.
 
-This pattern requires three resources in your Helm templates:
+This pattern is implemented via the `common.longhornVolume` template in `kubernetes/charts/common/templates/_longhornvolume.tpl`. Use it in your app chart (typically `templates/volume.yaml`):
+
+```yaml
+{
+  {
+    - include "common.longhornVolume" (dict "ctx" . "name" "my-app-data" "sizeGi" .Values.volumeSizeGi) -,
+  },
+}
+```
+
+It manages:
 
 1. `longhorn.io/v1beta2 Volume`: Define the volume in `longhorn-system` with recurring job group labels.
 2. `PersistentVolume`: A cluster-scoped PV using CSI binding to the Longhorn volume.
 3. `PersistentVolumeClaim`: Reference the PV by `volumeName` in the application namespace.
-
-Refer to the "Volume Sizing in Helm Charts" section below for example implementation.
 
 ### Dynamic Provisioning
 
@@ -85,27 +93,22 @@ spec:
 
 ## Volume Sizing in Helm Charts
 
-Volume size is defined in `values.yaml` as Mi or Gi. Use Mi for volumes under 1Gi, Gi otherwise:
+Volume size is defined in `values.yaml` as `volumeSizeGi`. All manual volumes should use Gi for consistency.
 
 ```yaml
-# values.yaml (Mi — for volumes under 1Gi)
-volumeSizeMi: 100
-
-# values.yaml (Gi — for volumes 1Gi and above)
+# values.yaml
 volumeSizeGi: 5
 ```
 
+The `common.longhornVolume` template automatically converts this to bytes for the Longhorn `Volume` spec and uses `Gi` for the PV and PVC requests.
+
 ```yaml
 # volume.yaml
-apiVersion: longhorn.io/v1beta2
-kind: Volume
-spec:
-  size: {{ mul .Values.volumeSizeMi 1024 | mul 1024 | quote }}           # Mi → bytes
-  # or
-  size: {{ mul .Values.volumeSizeGi 1024 | mul 1024 | mul 1024 | quote }} # Gi → bytes
----
-# PV and PVC use the value directly with the appropriate suffix
-  storage: {{ .Values.volumeSizeMi }}Mi   # or {{ .Values.volumeSizeGi }}Gi
+{
+  {
+    - include "common.longhornVolume" (dict "ctx" . "name" "my-app-data" "sizeGi" .Values.volumeSizeGi) -,
+  },
+}
 ```
 
 ## Backup and Restore

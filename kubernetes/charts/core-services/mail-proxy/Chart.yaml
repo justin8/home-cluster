@@ -3,3 +3,7 @@ name: mail-proxy
 description: Postfix mail relay proxy
 version: 0.1.0
 appVersion: "5.1.0"
+dependencies:
+  - name: common
+    version: 0.1.0
+    repository: "file://../../common"
