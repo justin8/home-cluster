@@ -10,7 +10,7 @@ shelfmarkVolumeSizeGi: 1
 images:
   shelfmark:
     repository: ghcr.io/calibrain/shelfmark
-    tag: latest
+    tag: 1.2.1
     pullPolicy: IfNotPresent
   seerr:
     repository: ghcr.io/seerr-team/seerr
@@ -38,5 +38,5 @@ images:
     pullPolicy: IfNotPresent
   wireguard:
     repository: jordanpotter/wireguard
-    tag: latest
+    tag: 2026-03-24
     pullPolicy: IfNotPresent
