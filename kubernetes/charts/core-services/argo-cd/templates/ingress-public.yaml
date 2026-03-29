@@ -1,20 +1,25 @@
-apiVersion: traefik.io/v1alpha1
-kind: IngressRoute
+apiVersion: networking.k8s.io/v1
+kind: Ingress
 metadata:
   name: argocd-webhook
-  namespace: traefik-public
+  namespace: {{ .Release.Namespace }}
   annotations:
-    # Tells external-dns which IP to point the DNS record at
-    external-dns.alpha.kubernetes.io/target: {{ .Values.network.publicIngress }}
+    # Point to the home domain (WAN IP) for external DNS
+    external-dns.alpha.kubernetes.io/target: home.{{ .Values.domain }}
 spec:
-  entryPoints:
-    - websecure
-  routes:
-    - match: Host(`argocd.{{ .Values.domain }}`) && PathPrefix(`/api/webhook`)
-      kind: Rule
-      services:
-        - name: argo-cd-argocd-server
-          namespace: {{ .Release.Namespace }}
-          port: 80
+  ingressClassName: traefik-public
+  rules:
+    - host: argocd.{{ .Values.domain }}
+      http:
+        paths:
+          - path: /api/webhook
+            pathType: Prefix
+            backend:
+              service:
+                name: argo-cd-argocd-server
+                port:
+                  number: 80
   tls:
-    secretName: default-tls
+    - hosts:
+        - argocd.{{ .Values.domain }}
+      secretName: default-tls

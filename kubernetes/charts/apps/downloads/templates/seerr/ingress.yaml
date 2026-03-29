@@ -3,6 +3,10 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: seerr{{ if eq . "traefik-public" }}-public{{ end }}
+  {{- if eq . "traefik-public" }}
+  annotations:
+    external-dns.alpha.kubernetes.io/target: home.{{ $.Values.domain }}
+  {{- end }}
   namespace: {{ $.Release.Namespace }}
   annotations:
     traefik.ingress.kubernetes.io/router.middlewares: {{ . }}-tinyauth@kubernetescrd

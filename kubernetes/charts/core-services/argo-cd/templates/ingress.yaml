@@ -5,6 +5,7 @@ metadata:
   namespace: argocd
   annotations:
     traefik.ingress.kubernetes.io/router.middlewares: traefik-private-tinyauth@kubernetescrd
+    traefik.ingress.kubernetes.io/router.priority: "10"
 spec:
   ingressClassName: traefik-private
   rules:
