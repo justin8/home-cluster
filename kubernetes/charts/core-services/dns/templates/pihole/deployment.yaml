@@ -22,7 +22,8 @@ spec:
     spec:
       containers:
         - name: pihole
-          image: pihole/pihole
+          image: "{{ .Values.images.pihole.repository }}:{{ .Values.images.pihole.tag }}"
+          imagePullPolicy: {{ .Values.images.pihole.pullPolicy }}
           ports:
             - name: dns-tcp
               containerPort: 53

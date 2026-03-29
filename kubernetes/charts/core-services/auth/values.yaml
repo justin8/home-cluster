@@ -1,0 +1,12 @@
+pocketidVolumeSizeGi: 1
+tinyauthVolumeSizeGi: 1
+
+images:
+  pocketid:
+    repository: ghcr.io/pocket-id/pocket-id
+    tag: v2.4.0
+    pullPolicy: IfNotPresent
+  tinyauth:
+    repository: ghcr.io/steveiliop56/tinyauth
+    tag: v5.0.4
+    pullPolicy: IfNotPresent

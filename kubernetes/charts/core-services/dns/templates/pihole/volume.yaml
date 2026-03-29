@@ -1,1 +1,1 @@
-{{- include "common.longhornVolume" (dict "ctx" . "name" "pihole-etc-pihole" "sizeGi" 1) -}}
+{{- include "common.longhornVolume" (dict "ctx" . "name" "pihole-etc-pihole" "sizeGi" .Values.piholeVolumeSizeGi) -}}

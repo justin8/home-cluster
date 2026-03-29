@@ -19,7 +19,8 @@ spec:
     spec:
       containers:
         - name: tinyauth
-          image: ghcr.io/steveiliop56/tinyauth:v5.0.4
+          image: "{{ .Values.images.tinyauth.repository }}:{{ .Values.images.tinyauth.tag }}"
+          imagePullPolicy: {{ .Values.images.tinyauth.pullPolicy }}
           ports:
             - containerPort: 3000
           envFrom:

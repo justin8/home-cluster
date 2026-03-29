@@ -1,1 +1,1 @@
-{{- include "common.longhornVolume" (dict "ctx" . "name" "pocketid-data" "sizeGi" 1) -}}
+{{- include "common.longhornVolume" (dict "ctx" . "name" "pocketid-data" "sizeGi" .Values.pocketidVolumeSizeGi) -}}

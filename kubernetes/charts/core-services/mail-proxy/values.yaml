@@ -1,1 +1,7 @@
-spoolVolumeSizeMi: 100
+spoolVolumeSizeGi: 1
+
+images:
+  app:
+    repository: boky/postfix
+    tag: 5.1.0
+    pullPolicy: IfNotPresent

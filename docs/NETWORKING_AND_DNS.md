@@ -223,13 +223,15 @@ The router/firewall is configured to:
 - Block direct access to other cluster IPs from external networks.
 - Cloudflare DDNS ensures the WAN IP is always correct in DNS.
 
-### Network Policies
+### Mail Proxy (Relay)
 
-Kubernetes NetworkPolicies can be used to:
+The cluster provides a centralized Postfix mail relay for outgoing notifications without exposing secrets to all services.
 
-- Isolate application traffic.
-- Control inter-pod communication.
-- Restrict access to sensitive services.
+- **SMTP Host**: `smtp.mail-proxy.svc.cluster.local`
+- **SMTP Port**: `587`
+- **Authentication**: None (trusted in-cluster)
+- **Encryption**: `STARTTLS` (optional)
+- **Allowed Sender Domains**: Emails must be sent from an allowed domain (e.g., `@dray.id.au`).
 
 ## Troubleshooting
 

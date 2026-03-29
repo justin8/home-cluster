@@ -24,8 +24,15 @@ external-dns-cloudflare:
   extraArgs:
     - --ingress-class=traefik-public
   env:
-    - name: CF_API_TOKEN
-      valueFrom:
-        secretKeyRef:
-          name: cloudflare-api-token
-          key: api-token
+
+piholeVolumeSizeGi: 1
+
+images:
+  ddns:
+    repository: favonia/cloudflare-ddns
+    tag: latest
+    pullPolicy: IfNotPresent
+  pihole:
+    repository: pihole/pihole
+    tag: latest
+    pullPolicy: IfNotPresent

@@ -17,7 +17,8 @@ spec:
     spec:
       containers:
         - name: cloudflare-ddns
-          image: favonia/cloudflare-ddns:latest
+          image: "{{ .Values.images.ddns.repository }}:{{ .Values.images.ddns.tag }}"
+          imagePullPolicy: {{ .Values.images.ddns.pullPolicy }}
           env:
             - name: CLOUDFLARE_API_TOKEN
               valueFrom:

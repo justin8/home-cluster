@@ -18,7 +18,8 @@ spec:
       serviceAccountName: pocketid
       containers:
         - name: pocketid
-          image: ghcr.io/pocket-id/pocket-id:v2.4.0
+          image: "{{ .Values.images.pocketid.repository }}:{{ .Values.images.pocketid.tag }}"
+          imagePullPolicy: {{ .Values.images.pocketid.pullPolicy }}
           ports:
             - containerPort: 1411
           envFrom:

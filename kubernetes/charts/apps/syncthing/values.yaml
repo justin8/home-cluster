@@ -1,4 +1,4 @@
-volumeSizeMi: 500
+volumeSizeGi: 1
 
 images:
   app:
