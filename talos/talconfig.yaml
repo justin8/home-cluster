@@ -1,6 +1,6 @@
 ---
 clusterName: home-cluster
-talosVersion: v1.12.4
+talosVersion: v1.12.6
 kubernetesVersion: v1.35.1
 endpoint: https://192.168.5.20:6443
 domain: cluster.local
