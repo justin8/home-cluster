@@ -112,14 +112,8 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /data
-            - name: backgrounds
-              mountPath: /mnt/backgrounds
       volumes:
         - name: data
           nfs:
             server: {{ .Values.network.storage }}
             path: {{ .Values.appStoragePath }}/immich
-        - name: backgrounds
-          nfs:
-            server: {{ .Values.network.storage }}
-            path: {{ .Values.appStoragePath }}/syncthing/Backgrounds
