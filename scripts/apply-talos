@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+# Ensure we're in the talos directory
+cd "$(git rev-parse --show-toplevel)/talos"
+
+# Apply talos config
+talhelper gencommand apply --extra-flags "--mode no-reboot" | bash

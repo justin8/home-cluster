@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+# Ensure we're in the talos directory
+cd "$(git rev-parse --show-toplevel)/talos"
+
+# Extract target version from talconfig.yaml
+TARGET_VERSION=$(yq -r ".kubernetesVersion" talconfig.yaml)
+echo "Target Kubernetes version: $TARGET_VERSION"
+
+# Get current cluster version
+CURRENT_VERSION=$(kubectl version -o json | jq -r ".serverVersion.gitVersion")
+echo "Current Kubernetes version: $CURRENT_VERSION"
+
+if [ "$CURRENT_VERSION" != "$TARGET_VERSION" ]; then
+  echo "Upgrading Kubernetes from $CURRENT_VERSION to $TARGET_VERSION..."
+  talhelper gencommand upgrade-k8s | bash
+else
+  echo "Kubernetes is already running $TARGET_VERSION, no upgrade needed"
+fi

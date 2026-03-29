@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+# Ensure we're in the talos directory
+cd "$(git rev-parse --show-toplevel)/talos"
+
+# Extract target version from talconfig.yaml
+TARGET_VERSION=$(yq -r ".talosVersion" talconfig.yaml)
+echo "Target Talos version: $TARGET_VERSION"
+
+# Extract IP addresses from talconfig.yaml (comma-separated list)
+NODE_IPS=$(yq -r ".nodes[].ipAddress" talconfig.yaml | tr ',' ' ' | xargs)
+echo "Node IPs: $NODE_IPS"
+
+# Check if upgrade is needed
+UPGRADE_NEEDED=false
+for IP in $NODE_IPS; do
+  echo "Checking node $IP..."
+  # Try to get the version, handle failure gracefully
+  CURRENT_VERSION=$(talosctl -n "$IP" version --short 2>/dev/null | grep "Tag:" | awk '{print $2}' || echo "unknown")
+  echo "Current version on $IP: $CURRENT_VERSION"
+  
+  if [ "$CURRENT_VERSION" != "$TARGET_VERSION" ]; then
+    echo "Version mismatch detected on $IP (Current: $CURRENT_VERSION, Target: $TARGET_VERSION)"
+    UPGRADE_NEEDED=true
+    break
+  fi
+done
+
+if [ "$UPGRADE_NEEDED" = true ]; then
+  echo "Upgrading Talos to $TARGET_VERSION..."
+  talhelper gencommand upgrade --extra-flags "--preserve" | bash
+else
+  echo "All nodes are already running $TARGET_VERSION, no upgrade needed"
+fi

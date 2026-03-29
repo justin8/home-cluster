@@ -41,64 +41,10 @@ jobs:
           wireguard-preshared-key: ${{ secrets.WIREGUARD_PRESHARED_KEY }}
 
       - name: Check Talos version and upgrade if needed
-        run: |
-          nix-shell --run '
-            cd talos
-            
-            # Extract target version from talconfig.yaml
-            TARGET_VERSION=$(yq -r ".talosVersion" talconfig.yaml)
-            echo "Target Talos version: $TARGET_VERSION"
-            
-            # Extract IP addresses from talconfig.yaml (comma-separated list)
-            NODE_IPS=$(yq -r ".nodes[0].ipAddress" talconfig.yaml | tr "," "\n" | xargs)
-            echo "Node IPs: $NODE_IPS"
-            
-            # Check if upgrade is needed
-            UPGRADE_NEEDED=false
-            for IP in $NODE_IPS; do
-              echo "Checking node $IP..."
-              CURRENT_VERSION=$(talosctl -n $IP version --short 2>/dev/null | grep "Tag:" | awk "{print \$2}" || echo "unknown")
-              echo "Current version on $IP: $CURRENT_VERSION"
-              
-              if [ "$CURRENT_VERSION" != "$TARGET_VERSION" ]; then
-                echo "Version mismatch detected on $IP"
-                UPGRADE_NEEDED=true
-                break
-              fi
-            done
-            
-            if [ "$UPGRADE_NEEDED" = true ]; then
-              echo "Upgrading Talos to $TARGET_VERSION..."
-              talhelper gencommand upgrade --extra-flags "--preserve" | bash
-            else
-              echo "All nodes are already running $TARGET_VERSION, no upgrade needed"
-            fi
-          '
+        run: nix-shell --run 'scripts/upgrade-talos'
 
       - name: Check Kubernetes version and upgrade if needed
-        run: |
-          nix-shell --run '
-            cd talos
-            
-            # Extract target version from talconfig.yaml
-            TARGET_VERSION=$(yq -r ".kubernetesVersion" talconfig.yaml)
-            echo "Target Kubernetes version: $TARGET_VERSION"
-            
-            # Get current cluster version
-            CURRENT_VERSION=$(kubectl version -o json | jq -r ".serverVersion.gitVersion")
-            echo "Current Kubernetes version: $CURRENT_VERSION"
-            
-            if [ "$CURRENT_VERSION" != "$TARGET_VERSION" ]; then
-              echo "Upgrading Kubernetes from $CURRENT_VERSION to $TARGET_VERSION..."
-              talhelper gencommand upgrade-k8s | bash
-            else
-              echo "Kubernetes is already running $TARGET_VERSION, no upgrade needed"
-            fi
-          '
+        run: nix-shell --run 'scripts/upgrade-k8s'
 
       - name: Apply Talos config
-        run: |
-          nix-shell --run '
-            cd talos
-            talhelper gencommand apply --extra-flags "--mode no-reboot" | bash
-            '
+        run: nix-shell --run 'scripts/apply-talos'
