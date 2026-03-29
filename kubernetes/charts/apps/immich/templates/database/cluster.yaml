@@ -3,8 +3,12 @@ kind: Cluster
 metadata:
   name: immich-database
   namespace: {{ .Release.Namespace }}
+  annotations:
+    cnpg.io/hibernation: "on"
 spec:
-  instances: 0
+  instances: 2
+  nodeMaintenanceWindow:
+    reusePVC: true
   imageName: "{{ .Values.images.database.repository }}:{{ .Values.images.database.tag }}"
   postgresql:
     shared_preload_libraries:
