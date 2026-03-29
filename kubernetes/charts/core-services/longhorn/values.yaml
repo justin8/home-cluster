@@ -8,6 +8,8 @@ longhorn:
     guaranteedEngineManagerCPU: 0.15
     guaranteedReplicaManagerCPU: 0.15
     concurrentReplicaRebuildPerNodeLimit: "1"
+    concurrentVolumeBackupRestorePerNodeLimit: "1"
+    concurrentAutomaticEngineUpgradePerNodeLimit: "1"
     replicaSoftAntiAffinity: "false" # REQUIRE different nodes for replicas
     replicaZoneSoftAntiAffinity: "true" # Prefer different zones if available
     replicaDiskSoftAntiAffinity: "false" # REQUIRE different disks for replicas
