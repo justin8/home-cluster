@@ -12,7 +12,7 @@ images:
     pullPolicy: IfNotPresent
   sonarr:
     repository: lscr.io/linuxserver/sonarr
-    tag: 4.0.16
+    tag: 4.0.17
     pullPolicy: IfNotPresent
   radarr:
     repository: lscr.io/linuxserver/radarr
