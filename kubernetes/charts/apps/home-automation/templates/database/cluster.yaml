@@ -1,7 +1,7 @@
 apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
-  name: homeassistant
+  name: homeassistant-db
   namespace: {{ .Release.Namespace }}
 spec:
   instances: 1
@@ -23,7 +23,7 @@ spec:
         login: true
   bootstrap:
     initdb:
-      database: homeassistant
+      database: homeassistant-db
       owner: homeassistant_user
   storage:
     size: {{ .Values.databaseVolumeSizeGi }}Gi

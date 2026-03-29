@@ -49,6 +49,40 @@ Use the Longhorn UI to monitor volume health, replica status, and backup status.
 
 Only increasing volume sizes is supported. Update the size in the app's `volume.yaml` and sync via ArgoCD.
 
+## Provisioning Patterns
+
+### Manual (Explicit Three-Resource Pattern)
+
+For applications that support only a **single instance**, use the explicit three-resource pattern. This provides stable, human-readable volume names in the Longhorn UI and simplifies manual backups/restores.
+
+This pattern requires three resources in your Helm templates:
+
+1. `longhorn.io/v1beta2 Volume`: Define the volume in `longhorn-system` with recurring job group labels.
+2. `PersistentVolume`: A cluster-scoped PV using CSI binding to the Longhorn volume.
+3. `PersistentVolumeClaim`: Reference the PV by `volumeName` in the application namespace.
+
+Refer to the "Volume Sizing in Helm Charts" section below for example implementation.
+
+### Dynamic Provisioning
+
+For **managed databases** (e.g., CloudNativePG) or applications that require **horizontal scaling/failover**, use dynamic provisioning. This allows the orchestrator to automatically manage the volume lifecycle for each instance.
+
+Use a simple PVC in the application chart:
+
+```yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: my-app-data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: longhorn
+  resources:
+    requests:
+      storage: 10Gi
+```
+
 ## Volume Sizing in Helm Charts
 
 Volume size is defined in `values.yaml` as Mi or Gi. Use Mi for volumes under 1Gi, Gi otherwise:

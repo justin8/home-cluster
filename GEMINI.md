@@ -21,9 +21,11 @@
 
 ## Volume Pattern
 
-Always use the explicit three-resource pattern for Longhorn volumes. Never use dynamic provisioning (PVC-only with storageClassName).
+Always use the explicit three-resource pattern for Longhorn volumes for applications that support only a single instance. This pattern provides stable, human-readable volume names and simplifies manual management.
 
-Every volume requires:
+**Exceptions:** Do NOT use this pattern for managed databases (e.g., CloudNativePG) or services that require dynamic provisioning for horizontal scaling/failover. These services should use dynamic provisioning (PVC-only with `storageClassName: longhorn`).
+
+Every manual volume requires:
 
 1. `longhorn.io/v1beta2 Volume` in `longhorn-system` — with recurring job group labels
 2. `PersistentVolume` (cluster-scoped) — CSI binding to the Longhorn volume
@@ -81,3 +83,7 @@ This includes (but is not limited to):
 Read-only commands (`kubectl get`, `kubectl describe`, `kubectl logs`, `kubectl diff`) are fine.
 
 Always show the user the command and explain what it will do — let them run it.
+
+## CLI Tool Usage
+
+- **Token Efficiency:** Always run project-specific CLI tools (e.g., `kubectl`, `helm`, `talosctl`, `kubeseal`) prefixed with `rtk` (e.g., `rtk kubectl get pods`). This wrapper reduces token usage by optimizing output for the AI.
