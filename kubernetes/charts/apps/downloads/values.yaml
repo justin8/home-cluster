@@ -7,10 +7,6 @@ seerrVolumeSizeGi: 5
 quiVolumeSizeGi: 1
 
 images:
-  qui:
-    repository: ghcr.io/autobrr/qui
-    tag: v1.15.0
-    pullPolicy: IfNotPresent
   seerr:
     repository: ghcr.io/seerr-team/seerr
     tag: v3.1.0

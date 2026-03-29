@@ -1,3 +1,0 @@
-{{- include "common.ingress" (dict "ctx" . "name" "qui" "type" "traefik-private" "port" 7476 "auth" true) }}
----
-{{- include "common.ingress" (dict "ctx" . "name" "qui" "type" "traefik-public" "port" 7476 "auth" true) }}
