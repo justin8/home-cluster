@@ -30,8 +30,8 @@ piholeVolumeSizeGi: 1
 images:
   ddns:
     repository: favonia/cloudflare-ddns
-    tag: 1.15.1
-    pullPolicy: IfNotPresent
+    tag: latest
+    pullPolicy: Always
   pihole:
     repository: pihole/pihole
     tag: 2026.02.0

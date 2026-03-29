@@ -13,4 +13,4 @@ images:
   apicache:
     repository: ghcr.io/justin8/apicache
     tag: latest
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
