@@ -23,3 +23,29 @@ spec:
     - hosts:
         - argocd.{{ .Values.domain }}
       secretName: default-tls
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: argocd-webhook
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    # Point to the home domain (WAN IP) for external DNS
+    external-dns.alpha.kubernetes.io/target: home.{{ .Values.domain }}
+spec:
+  ingressClassName: traefik-public
+  rules:
+    - host: argocd.{{ .Values.domain }}
+      http:
+        paths:
+          - path: /api/webhook
+            pathType: Prefix
+            backend:
+              service:
+                name: argo-cd-argocd-server
+                port:
+                  number: 80
+  tls:
+    - hosts:
+        - argocd.{{ .Values.domain }}
+      secretName: default-tls

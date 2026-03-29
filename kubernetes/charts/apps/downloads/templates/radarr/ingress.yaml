@@ -1,24 +1,3 @@
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: radarr
-  namespace: {{ .Release.Namespace }}
-  annotations:
-    traefik.ingress.kubernetes.io/router.middlewares: traefik-private-tinyauth@kubernetescrd
-spec:
-  ingressClassName: traefik-private
-  rules:
-    - host: radarr.{{ .Values.domain }}
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: radarr
-                port:
-                  number: 7878
-  tls:
-    - hosts:
-        - radarr.{{ .Values.domain }}
-      secretName: default-tls
+{{- include "common.ingress" (dict "ctx" . "type" "traefik-private" "port" 7878 "auth" true) }}
+---
+{{- include "common.ingress" (dict "ctx" . "type" "traefik-public" "port" 7878 "auth" true) }}

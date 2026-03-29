@@ -1,24 +1,3 @@
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: syncthing
-  namespace: {{ .Release.Namespace }}
-  annotations:
-    traefik.ingress.kubernetes.io/router.middlewares: traefik-private-tinyauth@kubernetescrd
-spec:
-  ingressClassName: traefik-private
-  rules:
-    - host: syncthing.{{ .Values.domain }}
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: syncthing
-                port:
-                  number: 8384
-  tls:
-    - hosts:
-        - syncthing.{{ .Values.domain }}
-      secretName: default-tls
+{{- include "common.ingress" (dict "ctx" . "type" "traefik-private" "port" 8384 "auth" true) }}
+---
+{{- include "common.ingress" (dict "ctx" . "type" "traefik-public" "port" 8384 "auth" true) }}

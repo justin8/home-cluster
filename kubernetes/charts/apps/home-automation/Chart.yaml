@@ -2,3 +2,7 @@ apiVersion: v2
 name: home-automation
 description: Home automation stack - Home Assistant, Zigbee2MQTT, MQTT broker
 version: 0.1.0
+dependencies:
+  - name: common
+    version: 0.1.0
+    repository: "file://../../common"

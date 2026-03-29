@@ -1,24 +1,3 @@
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: qbittorrent
-  namespace: {{ .Release.Namespace }}
-  annotations:
-    traefik.ingress.kubernetes.io/router.middlewares: traefik-private-tinyauth@kubernetescrd
-spec:
-  ingressClassName: traefik-private
-  rules:
-    - host: qbittorrent.{{ .Values.domain }}
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: qbittorrent
-                port:
-                  number: 8080
-  tls:
-    - hosts:
-        - qbittorrent.{{ .Values.domain }}
-      secretName: default-tls
+{{- include "common.ingress" (dict "ctx" . "type" "traefik-private" "port" 8080 "auth" true) }}
+---
+{{- include "common.ingress" (dict "ctx" . "type" "traefik-public" "port" 8080 "auth" true) }}

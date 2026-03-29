@@ -1,24 +1,3 @@
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: prowlarr
-  namespace: {{ .Release.Namespace }}
-  annotations:
-    traefik.ingress.kubernetes.io/router.middlewares: traefik-private-tinyauth@kubernetescrd
-spec:
-  ingressClassName: traefik-private
-  rules:
-    - host: prowlarr.{{ .Values.domain }}
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: prowlarr
-                port:
-                  number: 9696
-  tls:
-    - hosts:
-        - prowlarr.{{ .Values.domain }}
-      secretName: default-tls
+{{- include "common.ingress" (dict "ctx" . "type" "traefik-private" "port" 9696 "auth" true) }}
+---
+{{- include "common.ingress" (dict "ctx" . "type" "traefik-public" "port" 9696 "auth" true) }}
