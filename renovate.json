@@ -9,6 +9,15 @@
   "customManagers": [
     {
       "customType": "regex",
+      "description": "Extract images from values.yaml using repository/tag pattern",
+      "fileMatch": ["(^|/)values\\.yaml$", "(^|/)global-values\\.yaml$"],
+      "matchStrings": [
+        "repository:\\s*(?<depName>[^\\s\\n]+)\\s*tag:\\s*\"?(?<currentValue>[^\\s\\n\"#]+)\"?"
+      ],
+      "datasourceTemplate": "docker"
+    },
+    {
+      "customType": "regex",
       "description": "Talos version in talconfig.yaml",
       "fileMatch": ["^talos/talconfig\\.yaml$"],
       "matchStrings": ["talosVersion:\\s*(?<currentValue>v\\d+\\.\\d+\\.\\d+)"],
