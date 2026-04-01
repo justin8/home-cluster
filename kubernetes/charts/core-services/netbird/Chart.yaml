@@ -1,0 +1,11 @@
+apiVersion: v2
+name: netbird
+type: application
+version: 1.0.0
+dependencies:
+  - name: kubernetes-operator
+    version: 0.2.2
+    repository: https://netbirdio.github.io/helms
+  - name: netbird-operator-config
+    version: 0.1.0
+    repository: https://netbirdio.github.io/helms
