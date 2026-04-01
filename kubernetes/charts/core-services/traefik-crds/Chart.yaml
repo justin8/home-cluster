@@ -1,8 +1,0 @@
-apiVersion: v2
-name: traefik-crds
-type: application
-version: 1.0.0
-dependencies:
-  - name: traefik-crds
-    version: 1.16.0
-    repository: https://traefik.github.io/charts

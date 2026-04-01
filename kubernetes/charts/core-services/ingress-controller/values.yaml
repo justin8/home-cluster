@@ -25,4 +25,6 @@ traefik:
   ingressRoute:
     dashboard:
       enabled: false
-  skipCrds: true
+  experimental:
+    kubernetesGateway:
+      enabled: true
