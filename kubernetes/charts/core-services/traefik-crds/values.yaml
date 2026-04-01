@@ -1,0 +1,2 @@
+traefik-crds:
+  gatewayAPIExperimental: true # for netbird

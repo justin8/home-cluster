@@ -25,3 +25,4 @@ traefik:
   ingressRoute:
     dashboard:
       enabled: false
+  skipCrds: true
