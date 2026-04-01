@@ -7,8 +7,8 @@ kubernetes-operator:
       name: "netbird-mgmt-api-key"
       key: "NB_API_KEY"
 
-netbird-operator-config:
-  kubernetesAPI:
-    enabled: true
-  router:
-    enabled: true
+# netbird-operator-config:
+#   kubernetesAPI:
+#     enabled: true
+#   router:
+#     enabled: true
