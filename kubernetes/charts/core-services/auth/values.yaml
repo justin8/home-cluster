@@ -8,5 +8,5 @@ images:
     pullPolicy: IfNotPresent
   tinyauth:
     repository: ghcr.io/steveiliop56/tinyauth
-    tag: v5.0.5
+    tag: v5.0.6
     pullPolicy: IfNotPresent
