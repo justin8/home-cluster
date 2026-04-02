@@ -14,5 +14,5 @@ images:
     pullPolicy: IfNotPresent
   zigbee2mqtt:
     repository: ghcr.io/koenkk/zigbee2mqtt
-    tag: 2.9.1
+    tag: 2.9.2
     pullPolicy: IfNotPresent
