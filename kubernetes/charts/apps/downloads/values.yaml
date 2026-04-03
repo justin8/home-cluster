@@ -22,7 +22,7 @@ images:
     pullPolicy: IfNotPresent
   radarr:
     repository: lscr.io/linuxserver/radarr
-    tag: 6.0.4
+    tag: 6.1.1
     pullPolicy: IfNotPresent
   sabnzbd:
     repository: lscr.io/linuxserver/sabnzbd
