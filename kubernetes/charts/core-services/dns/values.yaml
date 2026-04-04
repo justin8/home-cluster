@@ -38,5 +38,5 @@ images:
     pullPolicy: Always
   pihole:
     repository: pihole/pihole
-    tag: 2026.02.0
+    tag: 2026.04.0
     pullPolicy: IfNotPresent
