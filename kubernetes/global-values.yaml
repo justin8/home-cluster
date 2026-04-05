@@ -4,6 +4,7 @@ clusterName: home-cluster
 TZ: America/Los_Angeles
 PUID: "2000"
 PGID: "2000"
+storageDNSName: "storage.chimera-exponential.ts.net"
 appStoragePath: /mnt/pool/apps
 # Shared IP addresses
 network:

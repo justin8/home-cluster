@@ -41,5 +41,5 @@ spec:
             claimName: shelfmark-config
         - name: books
           nfs:
-            server: {{ .Values.network.storage }}
+            server: {{ .Values.storageDNSName }}
             path: /mnt/pool/media/downloads/complete/Books
