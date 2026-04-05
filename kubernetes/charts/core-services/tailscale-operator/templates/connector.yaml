@@ -1,11 +1,11 @@
 apiVersion: tailscale.com/v1alpha1
 kind: Connector
 metadata:
-  name: lan-subnet-router
+  name: home-exit-node
   namespace: tailscale
 spec:
   replicas: 1
-  hostnamePrefix: lan-subnet-router
+  hostnamePrefix: home-exit-node
   subnetRouter:
     advertiseRoutes:
       - "192.168.5.0/24"
