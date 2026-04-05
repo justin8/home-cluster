@@ -233,6 +233,22 @@ The cluster provides a centralized Postfix mail relay for outgoing notifications
 - **Encryption**: `STARTTLS` (optional)
 - **Allowed Sender Domains**: Emails must be sent from an allowed domain (e.g., `@dray.id.au`).
 
+## Tailscale
+
+[Tailscale](https://tailscale.com) is a zero-config VPN built on WireGuard. It creates a private mesh network (a "tailnet") between enrolled devices, assigning each a stable IP in the `100.64.0.0/10` range. Devices can reach each other directly over this overlay network regardless of their physical location or NAT configuration, with Tailscale's coordination server handling key exchange and peer discovery.
+
+### Talos Node Integration
+
+Tailscale runs directly on each Talos node via the official [Siderolabs Tailscale extension](https://github.com/siderolabs/extensions/tree/main/network/tailscale). This means the nodes themselves are enrolled in the tailnet, enabling direct access to the cluster nodes over Tailscale from any enrolled device.
+
+### DNS Configuration
+
+Talos nodes are configured to use `100.100.100.100` as their first DNS resolver. This is Tailscale's built-in "MagicDNS" resolver, which automatically resolves hostnames of other devices and services on the tailnet. Falling back to PiHole (`192.168.5.53`) handles all other internal and external resolution.
+
+### Kubernetes Operator
+
+The Tailscale Kubernetes operator (deployed in the `tailscale` namespace) allows Kubernetes `Service` and `Ingress` resources to be exposed directly on the tailnet without going through the public or private ingress controllers. This is useful for services that should only be reachable from enrolled devices.
+
 ## Troubleshooting
 
 ### Common Network Issues

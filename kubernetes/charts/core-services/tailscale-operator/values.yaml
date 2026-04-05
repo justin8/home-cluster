@@ -1,3 +1,0 @@
-tailscale-operator:
-  ingressClass:
-    enabled: false
