@@ -5,6 +5,18 @@
 - **Directory:** All project documentation is maintained in the `docs/` directory.
 - **Usage:** Treat the contents of `docs/` as a comprehensive knowledgebase. Before implementing new features or making significant architectural changes, research existing documentation to ensure alignment with established patterns (e.g., Talos configuration, networking, storage).
 
+## Helm Chart Versions
+
+When adding a new Helm chart dependency to a `Chart.yaml`, always look up the current stable version before writing the file. Use:
+
+```bash
+helm repo add <repo-name> <repo-url>
+helm repo update
+helm search repo <repo-name>/<chart-name>
+```
+
+Pin the dependency to the latest stable version found. Never guess or use placeholder versions.
+
 ## ArgoCD Standards
 
 - **Application Manifests:** Must hardcode `repoURL` and `targetRevision` in `kubernetes/root-app/templates/` to ensure reliability during bootstrap.

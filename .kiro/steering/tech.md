@@ -9,6 +9,18 @@
 - **Package Manager**: npm
 - **Development Environment**: Nix shell (all tools managed automatically)
 
+## Helm Chart Versions
+
+When adding a new Helm chart dependency to a `Chart.yaml`, always look up the current stable version before writing the file. Use:
+
+```bash
+helm repo add <repo-name> <repo-url>
+helm repo update
+helm search repo <repo-name>/<chart-name>
+```
+
+Pin the dependency to the latest stable version found. Never guess or use placeholder versions.
+
 ## CLI Tools (via Nix)
 
 - `talosctl` - Talos cluster management
