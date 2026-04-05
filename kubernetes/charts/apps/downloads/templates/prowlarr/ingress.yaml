@@ -1,3 +1,1 @@
 {{- include "common.ingress" (dict "ctx" . "name" "prowlarr" "type" "traefik-private" "port" 9696 "auth" true) }}
----
-{{- include "common.ingress" (dict "ctx" . "name" "prowlarr" "type" "traefik-public" "port" 9696 "auth" true) }}
