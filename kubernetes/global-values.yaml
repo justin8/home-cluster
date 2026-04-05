@@ -10,5 +10,5 @@ appStoragePath: /mnt/pool/apps
 network:
   metallbRange: "192.168.5.80-192.168.5.100"
   publicIngress: "192.168.5.2"
-  privateIngress: "192.168.5.3"
+  privateIngress: "traefik-private.chimera-exponential.ts.net"
   dnsServer: "192.168.5.53"
