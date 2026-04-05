@@ -110,6 +110,7 @@ nodes:
     installDiskSelector:
       size: "> 10GB"
     nameservers:
+      - 100.100.100.100 # Enable tailscale DNS resolution
       - 192.168.5.53
       - 9.9.9.9
       - 1.1.1.1
