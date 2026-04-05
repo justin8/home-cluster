@@ -6,6 +6,8 @@ traefik:
     isDefaultClass: false
   service:
     type: LoadBalancer
+    annotations:
+      tailscale.com/expose: "true"
   providers:
     kubernetesCRD: {}
     kubernetesIngress: {}
