@@ -58,9 +58,9 @@
 - [x] Change kavita to use the mail proxy
 - [x] Fix up remaining container image versions to be picked up by renovate
 - [ ] Set up Tailscale
-  - [ ] Get DNS working to expose ingress
+  - [x] Get DNS working to expose ingress
   - [ ] Change to NFS over Tailscale
-    - [ ] Configure network policies on Tailscale
+    - [x] Configure network policies on Tailscale
     - [ ] Configure NFS restrictions on NAS
 - [ ] Set up [pocketID operator](https://github.com/aclerici38/pocket-id-operator)
 - [ ] Look in to OAuth alternatives that can be deployed fully programatically
