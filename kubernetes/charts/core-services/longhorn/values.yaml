@@ -24,7 +24,7 @@ longhorn:
     nodeDownPodDeletionPolicy: delete-both-statefulset-and-deployment-pod
 
   defaultBackupStore:
-    backupTarget: "nfs://192.168.5.5:/mnt/pool/backups/longhorn"
+    backupTarget: "nfs://storage.chimera-exponential.ts.net:/mnt/pool/backups/longhorn"
 
   persistence:
     defaultClass: true
