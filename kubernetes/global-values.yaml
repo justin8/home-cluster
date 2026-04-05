@@ -11,6 +11,4 @@ network:
   metallbRange: "192.168.5.80-192.168.5.100"
   publicIngress: "192.168.5.2"
   privateIngress: "192.168.5.3"
-  storage: "192.168.5.5"
-  cluster: "192.168.5.20"
   dnsServer: "192.168.5.53"

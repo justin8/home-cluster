@@ -63,7 +63,6 @@ spec:
             name: traefik-private
           service:
             annotations:
-              metallb.io/address-pool: private-ingress
               tailscale.com/hostname: traefik-private
             loadBalancerClass: "tailscale"
           providers:
