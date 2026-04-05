@@ -6,6 +6,7 @@ metadata:
 spec:
   replicas: 1
   hostnamePrefix: home-exit-node
+  exitNode: true
   subnetRouter:
     advertiseRoutes:
       - "192.168.5.0/24"
