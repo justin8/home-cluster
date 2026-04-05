@@ -1,0 +1,11 @@
+apiVersion: tailscale.com/v1alpha1
+kind: Connector
+metadata:
+  name: lan-subnet-router
+  namespace: tailscale
+spec:
+  replicas: 1
+  hostnamePrefix: lan-subnet-router
+  subnetRouter:
+    advertiseRoutes:
+      - "192.168.5.0/24"
