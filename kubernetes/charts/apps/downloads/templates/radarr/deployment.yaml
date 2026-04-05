@@ -41,5 +41,5 @@ spec:
             claimName: radarr-config
         - name: media
           nfs:
-            server: {{ .Values.network.storage }}
+            server: {{ .Values.storageDNSName }}
             path: /mnt/pool/media

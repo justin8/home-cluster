@@ -65,5 +65,5 @@ spec:
             claimName: syncthing-config
         - name: data
           nfs:
-            server: {{ .Values.network.storage }}
+            server: {{ .Values.storageDNSName }}
             path: {{ .Values.appStoragePath }}/syncthing
