@@ -1,3 +1,1 @@
 {{- include "common.ingress" (dict "ctx" . "type" "traefik-private" "port" 5000 "auth" false) }}
----
-{{- include "common.ingress" (dict "ctx" . "type" "traefik-public" "port" 5000 "auth" false) }}
