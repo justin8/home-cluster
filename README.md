@@ -254,10 +254,11 @@ The infrastructure includes the following core services:
 
 6. **IngressControllers** - Traefik ingress controllers
    - Separate public and private controllers
+   - Private ingress accessible over Tailscale only
    - TLS termination with automatic certificate management
 
 7. **DNS** - Multi-tier DNS system
-   - **PiHole**: Internal DNS server (primary + secondary)
+   - **PiHole**: Internal DNS server (Tailscale enrolled)
    - **External DNS**: Automatic DNS record management
      - PiHole provider for private ingress classes
      - Cloudflare provider for public ingress classes
@@ -279,8 +280,8 @@ For detailed networking and DNS architecture information, see [docs/NETWORKING_A
 
 - **MetalLB**: Load balancer providing IPs from `192.168.5.80-100` pool
 - **DNS Services**: PiHole for internal DNS (`192.168.5.53`) + External DNS for automatic record management
-- **Dual Ingress**: Separate public (`192.168.5.2`) and private (`192.168.5.3`) ingress controllers
-- **Storage**: NFS server at `192.168.5.5` + Longhorn distributed storage
+- **Dual Ingress**: Separate public (`192.168.5.2`) and private (Tailscale only) ingress controllers
+- **Storage**: NAS at `192.168.5.5` (Tailscale enrolled) + Longhorn distributed storage; NFS traffic restricted to Tailscale network
 - **Zigbee Co-ordinator**: `192.168.5.6`
 
 ## Storage Options

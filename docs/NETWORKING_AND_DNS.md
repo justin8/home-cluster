@@ -20,19 +20,19 @@
           │                               │
           ▼                               ▼
 ┌─────────────────┐               ┌──────────────────────────────────────────────────┐
-│  NFS Storage    │               │              Kubernetes Cluster                  │
+│  NAS            │               │              Kubernetes Cluster                  │
 │  192.168.5.5    │               │              (API: 192.168.5.20)                 │
-│                 │               │            (Nodes: 192.168.5.11-20)              │
-│                 │               │                                                  │
-│ • File Storage  │◄──────────────│  ┌─────────────────────────────────────────────┐ │
-│ • NFS Shares    │               │  │                    MetalLB                  │ │
+│  (Tailscale)    │               │            (Nodes: 192.168.5.11-20)              │
+│                 │               │                   (Tailscale)                    │
+│ • File Storage  │◄──Tailscale───│  ┌─────────────────────────────────────────────┐ │
+│ • NFS Shares    │  (NFS only)   │  │                    MetalLB                  │ │
 │ • Longhorn      │               │  │              IP Pool: 192.168.5.80-100      │ │
 │   Backups       │               │  │                                             │ │
 └─────────────────┘               │  └─────────────────────────────────────────────┘ │
                                   │                                                  │
                                   │  ┌─────────────────────┐ ┌─────────────────────┐ │
                                   │  │ Private Ingress     │ │ Public Ingress      │ │
-                                  │  │  192.168.5.3        │ │  192.168.5.2        │ │
+                                  │  │  (Tailscale only)   │ │  192.168.5.2        │ │
                                   │  │                     │ │                     │ │
                                   │  │    Traefik          │ │    Traefik          │ │
                                   │  │    (Private)        │ │    (Public)         │ │
@@ -40,14 +40,17 @@
                                   │                                                  │
                                   │  ┌─────────────────────────────────────────────┐ │
                                   │  │                  DNS Server                 │ │
-                                  │  │                 192.168.5.53                │ │
-                                  │  │                                             │ │
-                                  │  │            PiHole Primary + Secondary       │ │
+                                  │  │       192.168.5.53 and over Tailscale       │ │
+                                  │  │                    PiHole                   │ │
+                                  │  └─────────────────────────────────────────────┘ │
+                                  │                                                  │
+                                  │  ┌─────────────────────────────────────────────┐ │
+                                  │  │             Tailscale Exit Node             │ │
+                                  │  │        (LAN access for tailnet devices)     │ │
                                   │  └─────────────────────────────────────────────┘ │
                                   │                                                  │
                                   │  ┌─────────────────────────────────────────────┐ │
                                   │  │                Applications & Workloads     │ │
-                                  │  │                                             │ │
                                   │  │  • Pods        • Services    • Deployments  │ │
                                   │  │  • ConfigMaps  • Secrets     • StatefulSets │ │
                                   │  └─────────────────────────────────────────────┘ │
@@ -56,23 +59,22 @@
 
 ## IP Address Allocation
 
-| IP Range            | Purpose                    | Configuration            | Notes                            |
-| ------------------- | -------------------------- | ------------------------ | -------------------------------- |
-| `192.168.5.1`       | Router/Gateway             | Network infrastructure   | Default gateway                  |
-| `192.168.5.2`       | Public Ingress             | `network.publicIngress`  | External-facing web traffic      |
-| `192.168.5.3`       | Private Ingress            | `network.privateIngress` | Internal-only web traffic        |
-| `192.168.5.4`       | Wifi AP                    |                          | Network infrastructure           |
-| `192.168.5.5`       | NFS Storage                | `network.storage`        | Network file storage server      |
-| `192.168.5.6`       | Zigbee/thread co-ordinator |                          | Network Infrastructure           |
-| `192.168.5.20`      | Talos VIP                  | `network.cluster`        | Kubernetes API server endpoint   |
-| `192.168.5.11-20`   | Talos Nodes                | `talconfig.yaml`         | Reserved for control plane nodes |
-| `192.168.5.53`      | DNS Server                 | `network.dnsServer`      | PiHole DNS service               |
-| `192.168.5.80-100`  | MetalLB Pool               | `network.metallbRange`   | Load balancer IP allocation      |
-| `192.168.5.100-254` | DHCP Pool                  | Router configuration     | Dynamic client allocation        |
+| IP Range            | Purpose                    | Configuration           | Notes                                   |
+| ------------------- | -------------------------- | ----------------------- | --------------------------------------- |
+| `192.168.5.1`       | Router/Gateway             | Network infrastructure  | Default gateway                         |
+| `192.168.5.2`       | Public Ingress             | `network.publicIngress` | External-facing web traffic             |
+| `192.168.5.4`       | Wifi AP                    |                         | Network infrastructure                  |
+| `192.168.5.5`       | NAS                        | `network.storage`       | Network file storage server             |
+| `192.168.5.6`       | Zigbee/thread co-ordinator |                         | Network Infrastructure                  |
+| `192.168.5.20`      | Talos VIP                  | `network.cluster`       | Kubernetes API server endpoint          |
+| `192.168.5.11-20`   | Talos Nodes                | `talconfig.yaml`        | Reserved for control plane nodes        |
+| `192.168.5.53`      | DNS Server                 | `network.dnsServer`     | PiHole DNS service (Tailscale enrolled) |
+| `192.168.5.80-100`  | MetalLB Pool               | `network.metallbRange`  | Load balancer IP allocation             |
+| `192.168.5.100-254` | DHCP Pool                  | Router configuration    | Dynamic client allocation               |
 
 ### Static Reservations
 
-- **`.5`**: NFS storage server
+- **`.5`**: NAS
 - **`.10-.20`**: Talos cluster nodes (VIP + individual nodes)
 - **`.80-.100`**: MetalLB dynamic IP pool for services
 
@@ -86,11 +88,12 @@
 4. **Cloudflare DDNS** updates `home.dray.id.au` with the current WAN IP.
 5. **External DNS (Cloudflare)** manages application CNAME records pointing to `home.dray.id.au`.
 
-### Private Traffic (Internal Network → Applications)
+### Private Traffic (Tailscale → Applications)
 
-1. **Internal Network** → Private Ingress (`192.168.5.3`)
+1. **Tailscale client** → Private Ingress (via Tailscale network)
 2. **Traefik Private** → Application Pods
-3. **External DNS (PiHole)** manages internal DNS records pointing directly to the private ingress IP.
+3. **External DNS (PiHole)** manages internal DNS records pointing to the private ingress Tailscale IP.
+4. Private services are only reachable from devices enrolled in the tailnet.
 
 ## DNS Architecture
 
@@ -100,8 +103,8 @@ The cluster uses a split-horizon DNS setup. The ingress controller configuration
 
 #### PiHole (Internal DNS)
 
-- **IP**: `192.168.5.53`
-- **Purpose**: Primary DNS for internal clients
+- **IP**: `192.168.5.53` (also enrolled in Tailscale)
+- **Purpose**: DNS for internal clients
 - **Manages**: Internal resolution for all cluster services
 - **Features**: Ad blocking, custom DNS records, internal domain resolution
 
@@ -119,10 +122,10 @@ The cluster uses a split-horizon DNS setup. The ingress controller configuration
 
 ### DNS Resolution Flow
 
-**Internal Clients:**
+**Internal Clients (Tailscale enrolled):**
 
 - Use PiHole DNS (`192.168.5.53`) for both public and private domains.
-- Private services resolve to `192.168.5.3`.
+- Private services resolve to the private ingress Tailscale IP (only reachable over the tailnet).
 - Public services resolve to `192.168.5.2` (via internal PiHole records) or the WAN IP (if falling back to upstream).
 
 **External Clients:**
@@ -146,12 +149,11 @@ The cluster uses a split-horizon DNS setup. The ingress controller configuration
 
 #### Private Ingress
 
-- **IP**: `192.168.5.3`
 - **ingressClassName**: `traefik-private`
-- **Purpose**: Internal-only services
-- **DNS**: Managed by PiHole External DNS
+- **Purpose**: Internal-only services, accessible over Tailscale only
+- **DNS**: Managed by PiHole External DNS (resolves to the private ingress Tailscale IP)
 - **TLS**: Wildcard certificate (`default-tls` secret)
-- **Access**: Only available from internal network
+- **Access**: Only available from devices enrolled in the tailnet
 
 ### Ingress Configuration
 
@@ -201,7 +203,7 @@ MetalLB provides LoadBalancer services for the bare metal cluster:
 - **Mode**: Layer 2 (ARP-based)
 - **Ingress IPs**:
   - `public-ingress` pool -> `192.168.5.2`
-  - `private-ingress` pool -> `192.168.5.3`
+  - `private-ingress` pool -> assigned a Tailscale IP via the Tailscale Kubernetes operator
 
 ## Certificate Management
 
@@ -223,6 +225,10 @@ The router/firewall is configured to:
 - Block direct access to other cluster IPs from external networks.
 - Cloudflare DDNS ensures the WAN IP is always correct in DNS.
 
+### NFS Security
+
+NFS traffic is restricted to the Tailscale network only. Network policies enforce that NFS connections are only permitted between the NAS and Talos nodes over their Tailscale IPs, preventing any unencrypted NFS traffic on the local LAN.
+
 ### Mail Proxy (Relay)
 
 The cluster provides a centralized Postfix mail relay for outgoing notifications without exposing secrets to all services.
@@ -241,13 +247,25 @@ The cluster provides a centralized Postfix mail relay for outgoing notifications
 
 Tailscale runs directly on each Talos node via the official [Siderolabs Tailscale extension](https://github.com/siderolabs/extensions/tree/main/network/tailscale). This means the nodes themselves are enrolled in the tailnet, enabling direct access to the cluster nodes over Tailscale from any enrolled device.
 
+### NAS Integration
+
+The NAS is also enrolled in the tailnet. All NFS traffic between the NAS and Talos nodes is routed exclusively over Tailscale (WireGuard-encrypted). Network policies enforce that only the NAS and Talos node Tailscale IPs may communicate over NFS, preventing any unencrypted NFS traffic on the local LAN.
+
+### Private Ingress
+
+The private Traefik ingress controller is exposed on the tailnet via the Tailscale Kubernetes operator. Private services are only reachable from enrolled devices — there is no local LAN IP for the private ingress.
+
 ### DNS Configuration
 
 Talos nodes are configured to use `100.100.100.100` as their first DNS resolver. This is Tailscale's built-in "MagicDNS" resolver, which automatically resolves hostnames of other devices and services on the tailnet. Falling back to PiHole (`192.168.5.53`) handles all other internal and external resolution.
 
 ### Kubernetes Operator
 
-The Tailscale Kubernetes operator (deployed in the `tailscale` namespace) allows Kubernetes `Service` and `Ingress` resources to be exposed directly on the tailnet without going through the public or private ingress controllers. This is useful for services that should only be reachable from enrolled devices.
+The Tailscale Kubernetes operator (deployed in the `tailscale` namespace) allows Kubernetes `Service` and `Ingress` resources to be exposed directly on the tailnet without going through the public ingress controller. This is used to expose the private ingress controller, making private services accessible only to enrolled devices.
+
+### Exit Node
+
+A Tailscale exit node runs in the cluster, allowing enrolled devices to route their traffic through the cluster and access the local LAN (`192.168.5.0/24`). This enables access to LAN resources (such as the NAS, PiHole, and cluster nodes) from anywhere without needing a separate VPN.
 
 ## Troubleshooting
 

@@ -57,11 +57,11 @@
 - [x] Change pocketid to use the mail proxy
 - [x] Change kavita to use the mail proxy
 - [x] Fix up remaining container image versions to be picked up by renovate
-- [ ] Set up Tailscale
+- [x] Set up Tailscale
   - [x] Get DNS working to expose ingress
-  - [ ] Change to NFS over Tailscale
+  - [x] Change to NFS over Tailscale
     - [x] Configure network policies on Tailscale
-    - [ ] Configure NFS restrictions on NAS
+    - [x] Configure NFS restrictions on NAS
 - [ ] Set up [pocketID operator](https://github.com/aclerici38/pocket-id-operator)
 - [ ] Look in to OAuth alternatives that can be deployed fully programatically
 - [ ] Get access by user groups working - coming in tinyauth v4 maybe; alternatively, try out oauth2proxy
