@@ -90,6 +90,7 @@ nodes:
             - siderolabs/i915
             - siderolabs/iscsi-tools
             - siderolabs/util-linux-tools
+            - siderolabs/tailscale
     imageSchematic:
       customization:
         extraKernelArgs:
@@ -100,6 +101,12 @@ nodes:
             - siderolabs/i915
             - siderolabs/iscsi-tools
             - siderolabs/util-linux-tools
+            - siderolabs/tailscale
+    extensionServices:
+      - name: tailscale
+        environment:
+          - TS_AUTHKEY=${tailscale_auth_key}
+          - TS_AUTH_ONCE=true
     installDiskSelector:
       size: "> 10GB"
     nameservers:
