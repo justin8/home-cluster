@@ -10,3 +10,4 @@ reloader:
   reloader:
     watchGlobally: true
     autoReloadAll: true
+    ignoreNamespaces: "tailscale"
