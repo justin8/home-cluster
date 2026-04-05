@@ -19,9 +19,8 @@ external-dns-cloudflare:
   sources:
     - ingress
     - traefik-proxy
+    - service
   provider: cloudflare
-  extraArgs:
-    - --ingress-class=traefik-public
   env:
     - name: CF_API_TOKEN
       valueFrom:
