@@ -2,7 +2,7 @@
 {{- $ctx := .ctx -}}
 {{- $name := .name -}}
 {{- $sizeGi := .sizeGi | default 1 | int -}}
-{{- $backupsEnabled := .backups | default "enabled" -}}
+{{- $backups := .backups | default "enabled" -}}
 {{- if lt $sizeGi 1 -}}
   {{- $sizeGi = 1 -}}
 {{- end -}}
@@ -12,8 +12,10 @@ metadata:
   name: {{ $name }}
   namespace: longhorn-system
   labels:
-    recurring-job-group.longhorn.io/backups-enabled: {{ $backupsEnabled }}
     recurring-job-group.longhorn.io/fstrim-enabled: enabled
+    {{- if ne $backups "disabled" }}
+    recurring-job-group.longhorn.io/backups-enabled: enabled
+    {{- end }}
 spec:
   size: {{ mul $sizeGi 1024 | mul 1024 | mul 1024 | quote }}
   dataLocality: best-effort
