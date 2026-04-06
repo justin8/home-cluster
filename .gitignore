@@ -155,3 +155,4 @@ dist
 .ansible
 .sops-age.key
 *.iso
+.decrypted*

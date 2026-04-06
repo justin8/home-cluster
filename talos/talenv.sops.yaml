@@ -1,6 +1,6 @@
 dockerhub_username: ENC[AES256_GCM,data:rEy34ozkCw==,iv:pq26ypEYEzYdbTxFOuk19LcBCpOMM9UyvotdmGLZlfw=,tag:6m3/u3riDTZ+XuH9OePg4Q==,type:str]
 dockerhub_password: ENC[AES256_GCM,data:uFZY9mToMd8kheIat9T5yMkvVCo4VB6QlTE5cQ/65TUezuBKz9SJgcnvd0gAIFqR6iU=,iv:0vQ5tfLEUEua1fbvhqmFVSikI6kruZKUDx27wFVF7k4=,tag:s4hqJ/ZfYMpKnpFHmZ79Qg==,type:str]
-tailscale_auth_key: ENC[AES256_GCM,data:cTx0mqdOcLTdtKrExmFuelOsf8vaEJKXPFY3Oa/IRyzANKUAwrXuH+vWKgB0b5qhFFm3LoTzAURd1TV9cA==,iv:xaaA5MlobFXyVO5YTw0sT8ZLEg98vH+BedW/Oi/nV+M=,tag:RAI+NLkvBP6+xDAZrkSTSg==,type:str]
+tailscale_auth_key: ENC[AES256_GCM,data:jeuuxTk/dyC2zGU8bAKce3w9cL1wC3NK3rXDQFi/iT7kn4oqS15/lzUjpejamS4Wcb3v3qxj3gnElYA2eH2h,iv:t5zQKbOAXIeFhQr3o0LVatV+6ZOkP1heJPepyCSidRg=,tag:A2RiBNboQturcjOLXSMkSg==,type:str]
 sops:
     age:
         - recipient: age1me7as6xhtzy8eqsqlxgf0v6eq692nstv69eg3hjfrksksm4cm9wspmspwz
@@ -12,7 +12,7 @@ sops:
             emd1b1B3TGFDY2l3Ny9RTkk5b2xEbmsKGjItYwaIF+VxzktG8zQZ+ih+d5yEP5Eb
             iGeUp1jWCRdEjRyQOcepVhF7+yfMCrrXV7kejQnBIs6EkmPAIKgxKQ==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2026-04-05T02:55:53Z"
-    mac: ENC[AES256_GCM,data:YMaVE5PiFiAhbfQTqDPfeNES5IzVOxGkng0FNUv6wzR/lf19E08111XotBtfVRunKtZX+OK6U0QHvViGKxbpcBJ3MfB545P5BHq1BLUf6MFBFecSHg4QmxOYURenFV7eYKPv0EmuY53r9tPNKEkmfWGT4f7+oqM+oMwuh9oSqLc=,iv:gg28v5g2C1MKMRw0iSk8DTDU7gWDg4LefbCMSrhuPwI=,tag:vG7QzW2F2AM82m54BoFFvg==,type:str]
+    lastmodified: "2026-04-06T01:52:37Z"
+    mac: ENC[AES256_GCM,data:fIen/YUCtyUY8H0ghpUx4xIsIEksniFuSR2gsslx2GTAvUKqyLCbeeNIQ6qRsw/Cs4i3UUpFHDf3nq41Bs99NPQX0Jmu3+aiyC0VePrGWBMuEapQFyCy1Jb0ADyCnZgNJnlxhNDUkPkossrcbY79NPgDgzX8dosRHlHvx4SzP/I=,iv:p6j9yU0EGwvjXMK6ikLpiDr/J94xa8CZ4jlqTw3alHI=,tag:/XjBscCXSGr8GkCeH5e/rA==,type:str]
     encrypted_regex: (secret|token|key|passphrase|password|username|url)
     version: 3.12.1
