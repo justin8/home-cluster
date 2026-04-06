@@ -27,7 +27,7 @@ spec:
   name: backups-enabled
   task: backup
   cron: "0 20 * * *"
-  retain: 7
+  retain: 3
   concurrency: 2
   groups:
     - backups-enabled
