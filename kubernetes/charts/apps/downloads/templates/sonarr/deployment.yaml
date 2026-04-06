@@ -41,5 +41,5 @@ spec:
             claimName: sonarr-config
         - name: media
           nfs:
-            server: {{ .Values.storageDNSName }}
+            server: {{ .Values.network.storageServer }}
             path: /mnt/pool/media

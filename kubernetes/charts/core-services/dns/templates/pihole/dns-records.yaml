@@ -6,7 +6,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   annotations:
     external-dns.alpha.kubernetes.io/hostname: storage.{{ .Values.domain }}
-    external-dns.alpha.kubernetes.io/target: {{ .Values.storageDNSName }}
+    external-dns.alpha.kubernetes.io/target: {{ .Values.network.storageServer }}
 spec:
   type: ClusterIP
   clusterIP: None

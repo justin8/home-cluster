@@ -61,7 +61,7 @@ spec:
             claimName: qbittorrent-config
         - name: downloads
           nfs:
-            server: {{ .Values.storageDNSName }}
+            server: {{ .Values.network.storageServer }}
             path: /mnt/pool/media/downloads
         - name: vpn-config
           secret:

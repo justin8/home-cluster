@@ -4,11 +4,11 @@ clusterName: home-cluster
 TZ: America/Los_Angeles
 PUID: "2000"
 PGID: "2000"
-storageDNSName: "storage.chimera-exponential.ts.net"
 appStoragePath: /mnt/pool/apps
 # Shared IP addresses
 network:
   metallbRange: "192.168.5.80-192.168.5.100"
   publicIngress: "192.168.5.2"
   privateIngress: "traefik-private.chimera-exponential.ts.net"
+  storageServer: "storage.chimera-exponential.ts.net"
   dnsServer: "192.168.5.53"

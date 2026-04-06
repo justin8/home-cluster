@@ -4,7 +4,7 @@ metadata:
   name: nfs-csi
 provisioner: nfs.csi.k8s.io
 parameters:
-  server: {{ .Values.storageDNSName }}
+  server: {{ .Values.network.storageServer }}
   share: "{{ .Values.appStoragePath }}/k8s"
 reclaimPolicy: Retain
 allowVolumeExpansion: true
