@@ -2,7 +2,7 @@
 {{- $ctx := .ctx -}}
 {{- $name := .name -}}
 {{- $sizeGi := .sizeGi | default 1 | int -}}
-{{- $backupsEnabled := .backupsEnabled | default "enabled" -}}
+{{- $backupsEnabled := .backups | default "enabled" -}}
 {{- if lt $sizeGi 1 -}}
   {{- $sizeGi = 1 -}}
 {{- end -}}

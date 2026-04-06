@@ -1,1 +1,1 @@
-{{- include "common.longhornVolume" (dict "ctx" . "name" "mqtt-data" "sizeGi" .Values.mqttVolumeSizeGi) -}}
+{{- include "common.longhornVolume" (dict "ctx" . "name" "mqtt-data" "sizeGi" .Values.mqttVolumeSizeGi "backups" "disabled") -}}

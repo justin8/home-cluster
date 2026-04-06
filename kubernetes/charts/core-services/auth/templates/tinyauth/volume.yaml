@@ -1,1 +1,1 @@
-{{- include "common.longhornVolume" (dict "ctx" . "name" "tinyauth-data" "sizeGi" .Values.tinyauthVolumeSizeGi) -}}
+{{- include "common.longhornVolume" (dict "ctx" . "name" "tinyauth-data" "sizeGi" .Values.tinyauthVolumeSizeGi "backups" "disabled") -}}
