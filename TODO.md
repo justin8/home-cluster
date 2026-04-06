@@ -62,9 +62,10 @@
   - [x] Change to NFS over Tailscale
     - [x] Configure network policies on Tailscale
     - [x] Configure NFS restrictions on NAS
+- [x] Network isolation and VLANs (done via Tailscale)
+- [ ] Try out headscale
 - [ ] Set up [pocketID operator](https://github.com/aclerici38/pocket-id-operator)
 - [ ] Look in to OAuth alternatives that can be deployed fully programatically
 - [ ] Get access by user groups working - coming in tinyauth v4 maybe; alternatively, try out oauth2proxy
-- [ ] Network isolation and VLANs
 - [ ] Set up metrics/alerting for cluster services (including longhorn)
 - [ ] Multiple Tinyauth/PocketID instances
