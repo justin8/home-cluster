@@ -62,9 +62,9 @@
 | IP Range            | Purpose                    | Configuration           | Notes                                   |
 | ------------------- | -------------------------- | ----------------------- | --------------------------------------- |
 | `192.168.5.1`       | Router/Gateway             | Network infrastructure  | Default gateway                         |
-| `192.168.5.2`       | Public Ingress             | `network.publicIngress` | External-facing web traffic             |
-| `192.168.5.4`       | Wifi AP                    |                         | Network infrastructure                  |
-| `192.168.5.5`       | NAS                        | `network.storage`       | Network file storage server             |
+| `192.168.5.2`       | Wifi AP                    |                         | Network infrastructure                  |
+| `192.168.5.3`       | Public Ingress             | `network.publicIngress` | External-facing web traffic             |
+| `192.168.5.5`       | NAS                        | `network.storageServer` | Network file storage server             |
 | `192.168.5.6`       | Zigbee/thread co-ordinator |                         | Network Infrastructure                  |
 | `192.168.5.20`      | Talos VIP                  | `network.cluster`       | Kubernetes API server endpoint          |
 | `192.168.5.11-20`   | Talos Nodes                | `talconfig.yaml`        | Reserved for control plane nodes        |

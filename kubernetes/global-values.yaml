@@ -8,7 +8,7 @@ appStoragePath: /mnt/pool/apps
 # Shared IP addresses
 network:
   metallbRange: "192.168.5.80-192.168.5.100"
-  publicIngress: "192.168.5.2"
+  publicIngress: "192.168.5.3"
   privateIngress: "100.71.142.73"
   storageServer: "100.92.202.28"
   dnsServer: "192.168.5.53"
