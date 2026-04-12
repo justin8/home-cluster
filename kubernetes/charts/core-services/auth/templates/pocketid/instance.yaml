@@ -19,6 +19,7 @@ spec:
   persistence:
     enabled: true
     size: {{ .Values.pocketidVolumeSizeGi }}Gi
+    existingClaim: pocketid-data
   smtp:
     from: "justin@dray.be"
     host: "email-smtp.us-west-2.amazonaws.com"
