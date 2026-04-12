@@ -25,97 +25,13 @@ The infrastructure is managed using ArgoCD and Talos Linux with Talhelper provid
 
 Configuration is managed via Helm values and Kubernetes manifests located in the `kubernetes/` directory. Secrets are managed using SOPS.
 
-### Auth
+## Auth
 
-```
-┌─────────────────────────────────────────────────────────────────────────────────┐
-│                           Authentication Flow                                   │
-└─────────────────────────────────────────────────────────────────────────────────┘
+For details on the cluster authentication architecture, OIDC client management, and authentication flows, see [docs/AUTH.md](docs/AUTH.md).
 
-┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
-│    User     │    │ Pocket ID   │    │  Tinyauth   │    │   Service   │
-│  (Browser)  │    │ (Identity   │    │ (Auth Proxy)│    │ (Protected  │
-│             │    │  Provider)  │    │             │    │ Application)│
-└──────┬──────┘    └──────┬──────┘    └──────┬──────┘    └──────┬──────┘
-       │                  │                  │                  │
-       │ 1. Access        │                  │                  │
-       │ Protected        │                  │                  │
-       │ Service          │                  │                  │
-       ├────────────────────────────────────►│                  │
-       │                  │                  │                  │
-       │ 2. Redirect to   │                  │                  │
-       │ Pocket ID        │                  │                  │
-       │◄────────────────────────────────────┤                  │
-       │                  │                  │                  │
-       │ 3. OAuth2        │                  │                  │
-       │ Authorization    │                  │                  │
-       ├─────────────────►│                  │                  │
-       │                  │                  │                  │
-       │ 4. Login &       │                  │                  │
-       │ Consent          │                  │                  │
-       │◄─────────────────┤                  │                  │
-       ├─────────────────►│                  │                  │
-       │                  │                  │                  │
-       │ 5. Authorization │                  │                  │
-       │ Code             │                  │                  │
-       │◄─────────────────┤                  │                  │
-       │                  │                  │                  │
-       │ 6. Return to     │                  │                  │
-       │ Tinyauth with    │                  │                  │
-       │ Auth Code        │                  │                  │
-       ├────────────────────────────────────►│                  │
-       │                  │                  │                  │
-       │                  │ 7. Exchange      │                  │
-       │                  │ Code for Token   │                  │
-       │                  │◄─────────────────┤                  │
-       │                  │                  │                  │
-       │                  │ 8. Access Token  │                  │
-       │                  │ & User Info      │                  │
-       │                  ├─────────────────►│                  │
-       │                  │                  │                  │
-       │ 9. Set Session   │                  │                  │
-       │ Cookie & Proxy   │                  │                  │
-       │ to Service       │                  │                  │
-       │◄────────────────────────────────────┤                  │
-       │                  │                  │                  │
-       │ 10. Subsequent   │                  │ 11. Forward      │
-       │ Requests with    │                  │ Authenticated    │
-       │ Session Cookie   │                  │ Requests         │
-       ├────────────────────────────────────►├─────────────────►│
-       │                  │                  │                  │
-       │ 12. Service      │                  │ 13. Service      │
-       │ Response         │                  │ Response         │
-       │◄────────────────────────────────────┤◄─────────────────┤
-       │                  │                  │                  │
+Pocket ID is used to manage all users. On a clean cluster, navigate to `https://pocketid.${domain}/setup` to do the first-time setup and create an admin user.
 
-┌─────────────────────────────────────────────────────────────────────────────────┐
-│                              Components                                         │
-├─────────────────────────────────────────────────────────────────────────────────┤
-│                                                                                 │
-│ Pocket ID (Identity Provider):                                                  │
-│ • Manages user accounts and authentication                                      │
-│ • Provides OAuth2/OIDC endpoints                                                │
-│ • Requires manual OAuth client setup for each service                           │
-│ • Issues access tokens and ID tokens                                            │
-│                                                                                 │
-│ Tinyauth (Authentication Proxy):                                                │
-│ • Acts as OAuth2 client to Pocket ID                                            │
-│ • Protects services that don't have native OAuth2 support                       │
-│ • Handles OAuth2 flow and session management                                    │
-│ • Proxies authenticated requests to backend services                            │
-│ • Requires its own OAuth client configuration in Pocket ID                      │
-│                                                                                 │
-│ Protected Services:                                                             │
-│ • Applications that need authentication but don't support OAuth2                │
-│ • Receive requests with user context from Tinyauth                              │
-│ • Can trust that all incoming requests are authenticated                        │
-│                                                                                 │
-└─────────────────────────────────────────────────────────────────────────────────┘
-```
-
-Pocket ID is used to manage all users, and also requires manual setup of OAuth clients. On a clean cluster, navigate to `https://pocketid.${domain}/setup` to do the first-time setup and create an admin user.
-
-Tinyauth is used as an auth proxy in front of most services that don't support native OAuth2. It also needs its own OAuth client setup in Pocket ID.
+Tinyauth is used as an auth proxy in front of most services that don't support native OAuth2.
 
 ## Cluster Deployment
 

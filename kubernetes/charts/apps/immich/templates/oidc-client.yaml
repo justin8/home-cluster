@@ -1,0 +1,10 @@
+apiVersion: pocketid.internal/v1alpha1
+kind: PocketIDOIDCClient
+metadata:
+  name: immich
+  namespace: {{ .Release.Namespace }}
+spec:
+  isPublic: false
+  callbackUrls:
+    - https://immich.{{ .Values.domain }}/auth/login
+    - app.immich:///oauth-callback
