@@ -1,0 +1,11 @@
+apiVersion: pocketid.internal/v1alpha1
+kind: PocketIDOIDCClient
+metadata:
+  name: testclient
+  namespace: {{ .Release.Namespace }}
+spec:
+  isPublic: false
+  callbackUrls:
+    - https://test.{{ .Values.domain }}/callback
+  logoutCallbackUrls:
+    - https://test.{{ .Values.domain }}/logout
