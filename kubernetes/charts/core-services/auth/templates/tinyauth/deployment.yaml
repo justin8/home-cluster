@@ -30,13 +30,28 @@ spec:
             - name: TINYAUTH_OAUTH_PROVIDERS_POCKETID_CLIENTID
               valueFrom:
                 secretKeyRef:
-                  name: tinyauth-credentials
-                  key: clientId
+                  name: tinyauth-oidc-credentials
+                  key: client_id
             - name: TINYAUTH_OAUTH_PROVIDERS_POCKETID_CLIENTSECRET
               valueFrom:
                 secretKeyRef:
-                  name: tinyauth-credentials
-                  key: clientSecret
+                  name: tinyauth-oidc-credentials
+                  key: client_secret
+            - name: TINYAUTH_OAUTH_PROVIDERS_POCKETID_AUTHURL
+              valueFrom:
+                secretKeyRef:
+                  name: tinyauth-oidc-credentials
+                  key: authorization_url
+            - name: TINYAUTH_OAUTH_PROVIDERS_POCKETID_TOKENURL
+              valueFrom:
+                secretKeyRef:
+                  name: tinyauth-oidc-credentials
+                  key: token_url
+            - name: TINYAUTH_OAUTH_PROVIDERS_POCKETID_USERINFOURL
+              valueFrom:
+                secretKeyRef:
+                  name: tinyauth-oidc-credentials
+                  key: userinfo_url
             - name: SECRET
               valueFrom:
                 secretKeyRef:

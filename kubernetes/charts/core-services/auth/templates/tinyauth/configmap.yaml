@@ -4,9 +4,6 @@ metadata:
   name: tinyauth-config
   namespace: {{ .Release.Namespace }}
 data:
-  TINYAUTH_OAUTH_PROVIDERS_POCKETID_AUTHURL: "https://pocketid.{{ .Values.domain }}/authorize"
-  TINYAUTH_OAUTH_PROVIDERS_POCKETID_TOKENURL: "https://pocketid.{{ .Values.domain }}/api/oidc/token"
-  TINYAUTH_OAUTH_PROVIDERS_POCKETID_USERINFOURL: "https://pocketid.{{ .Values.domain }}/api/oidc/userinfo"
   TINYAUTH_OAUTH_PROVIDERS_POCKETID_REDIRECTURL: "https://tinyauth.{{ .Values.domain }}/api/oauth/callback/pocketid"
   TINYAUTH_OAUTH_PROVIDERS_POCKETID_SCOPES: "openid profile email"
   TINYAUTH_OAUTH_AUTOREDIRECT: "true"
