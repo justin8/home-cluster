@@ -10,38 +10,6 @@ images:
     repository: ghcr.io/steveiliop56/tinyauth
     tag: v5.0.6
     pullPolicy: IfNotPresent
-
 pocket-id-operator:
   instance:
-    enabled: true
-    name: pocketid
-    spec:
-      appUrl: "https://pocketid2.{{ .Values.domain }}"
-      encryptionKey:
-        valueFrom:
-          secretKeyRef:
-            name: pocketid-secrets
-            key: ENCRYPTION_KEY
-      persistence:
-        enabled: true
-        existingClaim: pocketid-data
-      smtp:
-        from: "justin@dray.be"
-        host: "email-smtp.us-west-2.amazonaws.com"
-        port: 587
-        user: AKIASWRXGFVDIZYPWCSL
-        password:
-          valueFrom:
-            secretKeyRef:
-              name: pocketid-secrets
-              key: SMTP_PASSWORD
-        tls: starttls
-      ui:
-        appName: "Home Cluster"
-      userManagement:
-        allowOwnAccountEdit: true
-        allowUserSignups: "disabled"
-        emailsVerified: true
-      emailNotifications:
-        oneTimeAccessAsAdmin: true
-        apiKeyExpiration: true
+    enabled: false
