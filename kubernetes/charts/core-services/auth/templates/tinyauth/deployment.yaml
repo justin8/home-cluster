@@ -55,7 +55,7 @@ spec:
             - name: SECRET
               valueFrom:
                 secretKeyRef:
-                  name: tinyauth-key
+                  name: tinyauth-credentials
                   key: secretKey
           volumeMounts:
             - name: data
