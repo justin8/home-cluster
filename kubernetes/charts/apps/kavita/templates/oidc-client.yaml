@@ -1,0 +1,8 @@
+apiVersion: pocketid.internal/v1alpha1
+kind: PocketIDOIDCClient
+metadata:
+  name: kavita
+  namespace: {{ .Release.Namespace }}
+spec:
+  callbackUrls:
+    - https://kavita.{{ .Values.domain }}/signin-oidc
