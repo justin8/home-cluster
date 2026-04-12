@@ -26,6 +26,17 @@ spec:
                 name: grist-config
             - secretRef:
                 name: grist-secrets
+          env:
+            - name: GRIST_OIDC_IDP_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: grist-oidc-credentials
+                  key: client_id
+            - name: GRIST_OIDC_IDP_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: grist-oidc-credentials
+                  key: client_secret
           volumeMounts:
             - name: persist
               mountPath: /persist
