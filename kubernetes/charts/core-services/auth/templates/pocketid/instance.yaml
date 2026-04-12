@@ -11,7 +11,7 @@ spec:
         name: pocketid-secrets
         key: ENCRYPTION_KEY
   geoip:
-    maxMindLicenseKey:
+    maxmindLicenseKey:
       valueFrom:
         secretKeyRef:
           name: pocketid-secrets
