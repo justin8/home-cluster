@@ -10,3 +10,7 @@ images:
     repository: ghcr.io/steveiliop56/tinyauth
     tag: v5.0.6
     pullPolicy: IfNotPresent
+
+pocket-id-operator:
+  instance:
+    enabled: false
