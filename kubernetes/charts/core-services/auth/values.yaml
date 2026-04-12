@@ -29,11 +29,7 @@ pocket-id-operator:
         from: "justin@dray.be"
         host: "email-smtp.us-west-2.amazonaws.com"
         port: 587
-        user:
-          valueFrom:
-            secretKeyRef:
-              name: pocketid-secrets
-              key: SMTP_USER
+        user: AKIASWRXGFVDIZYPWCSL
         password:
           valueFrom:
             secretKeyRef:
