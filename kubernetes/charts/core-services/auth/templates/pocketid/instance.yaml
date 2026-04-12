@@ -10,6 +10,12 @@ spec:
       secretKeyRef:
         name: pocketid-secrets
         key: ENCRYPTION_KEY
+  geoip:
+    maxMindLicenseKey:
+      valueFrom:
+        secretKeyRef:
+          name: pocketid-secrets
+          key: MAXMIND_LICENSE_KEY
   persistence:
     enabled: true
     existingClaim: pocketid-data
