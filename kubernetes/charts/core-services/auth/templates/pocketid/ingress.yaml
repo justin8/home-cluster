@@ -1,0 +1,3 @@
+{{- include "common.ingress" (dict "ctx" . "name" "pocketid" "port" 1411 "type" "traefik-private") }}
+---
+{{- include "common.ingress" (dict "ctx" . "name" "pocketid" "port" 1411 "type" "traefik-public") }}
