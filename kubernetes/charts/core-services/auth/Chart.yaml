@@ -7,5 +7,5 @@ dependencies:
     version: 0.1.0
     repository: "file://../../common"
   - name: pocket-id-operator
-    version: 0.5.0
+    version: 0.5.1
     repository: "oci://ghcr.io/aclerici38/charts"
