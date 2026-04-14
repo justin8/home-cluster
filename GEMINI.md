@@ -19,7 +19,11 @@ Pin the dependency to the latest stable version found. Never guess or use placeh
 
 ## ArgoCD Standards
 
-- **Application Manifests:** Must hardcode `repoURL` and `targetRevision` in `kubernetes/root-app/templates/` to ensure reliability during bootstrap.
+- **Application Manifests:** Must follow this strict checklist for `kubernetes/root-app/templates/`:
+  1. **`metadata.namespace`**: Always use `argocd`.
+  2. **`repoURL`**: Always use `https://github.com/justin8/home-cluster.git`.
+  3. **`targetRevision`**: Always use `main`.
+  4. **`valueFiles`**: Must use `../../../global-values.yaml` (exactly 3 levels of up-traversal) to reach the root-level global values from an app chart path.
 - **Namespaces:** Never define `Namespace` resources in `root-app/templates`. Use `managedNamespaceMetadata` within the `Application` resource's `syncPolicy` to manage namespace-level labels and annotations. Use `syncOptions: [CreateNamespace=true]` for automatic namespace creation.
 
 ## Sealed Secrets Standards
