@@ -4,10 +4,16 @@
     "bind": "0.0.0.0",
     "port": 18789,
     "auth": {
-      "mode": "token"
+      "mode": "trusted-proxy",
+      "trustedProxy": {
+        "userHeader": "Remote-User",
+        "allowUsers": ["justin"]
+      }
     },
+    "trustedProxies": ["10.244.0.0/16", "100.64.0.0/10"],
     "controlUi": {
-      "enabled": true
+      "enabled": true,
+      "allowedOrigins": ["https://claw.dray.id.au"]
     }
   },
   "agents": {
