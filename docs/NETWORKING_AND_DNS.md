@@ -144,7 +144,7 @@ The cluster uses a split-horizon DNS setup. The ingress controller configuration
 - **ingressClassName**: `traefik-public`
 - **Purpose**: Internet-accessible services
 - **DNS**: Managed by Cloudflare External DNS (CNAME to `home.dray.id.au`)
-- **TLS**: Wildcard certificate (`default-tls` secret)
+- **TLS**: Wildcard certificate (via Traefik default `TLSStore`)
 - **Access**: Available from both internal and external networks
 
 #### Private Ingress
@@ -152,12 +152,12 @@ The cluster uses a split-horizon DNS setup. The ingress controller configuration
 - **ingressClassName**: `traefik-private`
 - **Purpose**: Internal-only services, accessible over Tailscale only
 - **DNS**: Managed by PiHole External DNS (resolves to the private ingress Tailscale IP)
-- **TLS**: Wildcard certificate (`default-tls` secret)
+- **TLS**: Wildcard certificate (via Traefik default `TLSStore`)
 - **Access**: Only available from devices enrolled in the tailnet
 
 ### Ingress Configuration
 
-Applications typically configure both public and private ingresses in their Helm templates:
+Applications typically configure both public and private ingresses in their Helm templates. Note that `secretName` is omitted from the `tls` section to use the Traefik default `TLSStore`:
 
 ```yaml
 # Example pattern for dual ingress
@@ -190,7 +190,7 @@ spec:
   tls:
   - hosts:
     - my-app.{{ $.Values.domain }}
-    secretName: default-tls
+    # secretName is omitted to use the Traefik default TLSStore
 ---
 {{- end }}
 ```
@@ -213,7 +213,8 @@ MetalLB provides LoadBalancer services for the bare metal cluster:
 - **Issuer**: `letsencrypt-prod` (ClusterIssuer)
 - **DNS Challenge**: Cloudflare DNS-01 challenge
 - **Wildcard Certificate**: Managed as a `Certificate` resource in the `cert-manager` namespace.
-- **Secret Reflection**: The `default-tls` secret is automatically reflected to other namespaces (like `traefik-public`, `traefik-private`, `argocd`, etc.) using Emberstack Reflector.
+- **Secret Reflection**: The `default-tls` secret is automatically reflected to the Ingress Controller namespaces (`traefik-public`, `traefik-private`) using Emberstack Reflector.
+- **Default TLS Store**: Traefik is configured with a default `TLSStore` (named `default`) in its own namespace pointing to the reflected `default-tls` secret. This allows Ingress and IngressRoute resources to use the wildcard certificate without specifying a `secretName` in every namespace.
 
 ## Network Security
 
@@ -284,7 +285,8 @@ A Tailscale exit node runs in the cluster, allowing enrolled devices to route th
 3. **Certificate Issues**
    - Check `cert-manager` logs.
    - Verify `wildcard-cert` status: `kubectl get certificate -n cert-manager`.
-   - Confirm Reflector is mirroring the `default-tls` secret to the target namespace.
+   - Confirm Reflector is mirroring the `default-tls` secret to `traefik-public` and `traefik-private`.
+   - Verify the `TLSStore` is correctly configured in the Traefik namespaces: `kubectl get tlsstores.traefik.io -A`.
 
 ### Diagnostic Commands
 
@@ -295,6 +297,11 @@ rtk kubectl get pods -n metallb-system
 # Check ingress controllers
 rtk kubectl get pods -n traefik-public
 rtk kubectl get pods -n traefik-private
+
+# Check TLS Store
+rtk kubectl get tlsstores.traefik.io -A
+rtk kubectl describe tlsstore default -n traefik-private
+...
 
 # Check DNS services
 rtk kubectl get pods -n dns

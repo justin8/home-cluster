@@ -42,5 +42,4 @@ spec:
   tls:
     - hosts:
         - {{ $subdomain }}.{{ $ctx.Values.domain }}
-      secretName: default-tls
 {{- end }}
