@@ -1,1 +1,1 @@
-{{- include "common.ingress" (dict "ctx" . "subdomain" "claw" "name" "openclaw") -}}
+{{- include "common.ingress" (dict "ctx" . "subdomain" "claw" "name" "openclaw" "port" 18789) -}}
