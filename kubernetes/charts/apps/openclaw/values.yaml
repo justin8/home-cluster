@@ -1,6 +1,6 @@
 image:
   repository: ghcr.io/openclaw/openclaw
-  tag: 2026.4.12-slim
+  tag: 2026.4.12
   pullPolicy: IfNotPresent
 
 volumeSizeGi: 10
