@@ -12,7 +12,25 @@
   },
   "agents": {
     "defaults": {
-      "workspace": "/home/node/.openclaw/workspace"
+      "workspace": "/home/node/.openclaw/workspace",
+      "models": {
+        "openrouter/auto": {
+          "alias": "OpenRouter"
+        },
+        "openrouter/amazon/nova-pro-v1": {},
+        "openrouter/anthropic/claude-sonnet-4.6": {},
+        "openrouter/anthropic/claude-opus-4.6": {},
+        "openrouter/google/gemini-3-flash-preview": {}
+      },
+      "model": {
+        "primary": "openrouter/auto",
+        "fallbacks": [
+          "openrouter/amazon/nova-pro-v1",
+          "openrouter/anthropic/claude-sonnet-4.6",
+          "openrouter/anthropic/claude-opus-4.6",
+          "openrouter/google/gemini-3-flash-preview"
+        ]
+      }
     },
     "list": [
       {
