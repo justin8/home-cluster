@@ -32,18 +32,3 @@ spec:
   groups:
     - backups-enabled
   labels: {}
----
-# Daily system backup at 4am local time (21:00 UTC for America/Los_Angeles)
-# Skips volumes that were already backed up today
-apiVersion: longhorn.io/v1beta2
-kind: RecurringJob
-metadata:
-  name: system-backup
-  namespace: {{ .Release.Namespace }}
-spec:
-  name: system-backup
-  task: system-backup
-  cron: "0 21 * * *"
-  retain: 1
-  parameters:
-    volume-backup-policy: if-not-present
