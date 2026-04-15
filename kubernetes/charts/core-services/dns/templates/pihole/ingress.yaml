@@ -1,1 +1,3 @@
-{{- include "common.ingress" (dict "ctx" . "name" "pihole-web" "subdomain" "pihole" "auth" true) -}}
+{{- $ctx := . -}}
+{{- $extraAnnotations := dict "traefik.ingress.kubernetes.io/router.middlewares" (printf "traefik-private-tinyauth@kubernetescrd,dns-pihole-redirect@kubernetescrd") -}}
+{{- include "common.ingress" (dict "ctx" $ctx "name" "pihole-web" "subdomain" "pihole" "annotations" $extraAnnotations) -}}
