@@ -7,6 +7,7 @@ metadata:
 spec:
   forwardAuth:
     address: http://tinyauth.{{ .Release.Namespace }}.svc.cluster.local:3000/api/auth/traefik
+    maxResponseBodySize: 102400
     authResponseHeaders:
       - remote-user
 ---
@@ -18,5 +19,6 @@ metadata:
 spec:
   forwardAuth:
     address: http://tinyauth.{{ .Release.Namespace }}.svc.cluster.local:3000/api/auth/traefik
+    maxResponseBodySize: 102400
     authResponseHeaders:
       - remote-user
