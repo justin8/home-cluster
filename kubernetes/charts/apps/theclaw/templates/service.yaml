@@ -3,6 +3,9 @@ kind: Service
 metadata:
   name: theclaw
   namespace: {{ .Release.Namespace }}
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: theclaw.{{ .Values.domain }}
+    external-dns.alpha.kubernetes.io/target: {{ .Values.network.theclawServer }}
 spec:
   ports:
     - protocol: TCP
