@@ -3,8 +3,6 @@ kind: Service
 metadata:
   name: immich
   namespace: {{ .Release.Namespace }}
-  annotations:
-    netbird.io/expose: "true"
 spec:
   selector:
     app: immich
