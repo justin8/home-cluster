@@ -11,4 +11,5 @@ network:
   publicIngress: "192.168.5.3"
   privateIngress: "100.71.142.73"
   storageServer: "100.92.202.28"
+  theclawServer: "100.79.208.55"
   dnsServer: "192.168.5.53"
