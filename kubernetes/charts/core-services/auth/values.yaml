@@ -8,7 +8,7 @@ images:
     pullPolicy: IfNotPresent
   tinyauth:
     repository: ghcr.io/steveiliop56/tinyauth
-    tag: v5.0.6
+    tag: v5.0.7
     pullPolicy: IfNotPresent
 pocket-id-operator:
   instance:
