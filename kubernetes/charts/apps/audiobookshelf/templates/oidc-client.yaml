@@ -5,4 +5,4 @@ metadata:
   namespace: {{ .Release.Namespace }}
 spec:
   callbackUrls:
-    - https://audiobookshelf.{{ .Values.domain }}/auth/openid/callback
+    - https://audiobookshelf.{{ .Values.domain }}/audiobookshelf/auth/openid/callback
