@@ -35,6 +35,9 @@ spec:
               mountPath: /config
             - name: books
               mountPath: /books
+            - name: audiobooks
+              mountPath: /audiobooks
+              subPath: audiobooks
       volumes:
         - name: config
           persistentVolumeClaim:
@@ -43,3 +46,7 @@ spec:
           nfs:
             server: {{ .Values.network.storageServer }}
             path: /mnt/pool/media/downloads/complete/Books
+        - name: audiobooks
+          nfs:
+            server: {{ .Values.network.storageServer }}
+            path: /mnt/pool/media
