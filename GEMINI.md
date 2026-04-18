@@ -43,25 +43,37 @@ Always use the explicit three-resource pattern for Longhorn volumes for applicat
 
 **Exceptions:** Do NOT use this pattern for managed databases (e.g., CloudNativePG) or services that require dynamic provisioning for horizontal scaling/failover. These services should use dynamic provisioning (PVC-only with `storageClassName: longhorn`).
 
+### Longhorn Volumes (Config/Data)
+
 Every manual volume requires:
-
-1. `longhorn.io/v1beta2 Volume` in `longhorn-system` — with recurring job group labels
-2. `PersistentVolume` (cluster-scoped) — CSI binding to the Longhorn volume
-3. `PersistentVolumeClaim` in the app namespace — references PV by `volumeName`
-
-The common template `common.longhornVolume` (in `kubernetes/charts/common/templates/_longhornvolume.tpl`) should be used to define these resources. It accepts `ctx`, `name`, `sizeGi`, and `backupsEnabled` parameters.
-
-```yaml
-{
-  {
-    - include "common.longhornVolume" (dict "ctx" . "name" "my-app-data" "sizeGi" .Values.volumeSizeGi) -,
-  },
-}
-```
-
+...
 Volume size is typically configured in `values.yaml` as `volumeSizeGi`.
 
-See `kubernetes/charts/core-services/mail-proxy/templates/volume.yaml` as the reference implementation. Always name the file `volume.yaml`.
+### NFS Storage (Media)
+
+The cluster uses a shared NFS storage server for media.
+
+- **Storage Server IP**: `100.92.202.28` (available via `.Values.network.storageServer`)
+- **Base Export Path**: `/mnt/pool/media`
+- **Verified Media Paths**:
+  - **Books**: `/mnt/pool/media/books`
+  - **Audiobooks**: `/mnt/pool/media/audiobooks`
+  - **Podcasts**: `/mnt/pool/media/podcasts`
+  - **Downloads**: `/mnt/pool/media/downloads`
+  - **General Media**: `/mnt/pool/media`
+
+**Mounting Pattern**:
+Prefer mounting the specific subdirectory directly (e.g., `path: /mnt/pool/media/books`) when possible. If mounting a generic media volume, use the base path with a `subPath` in the `volumeMounts` to isolate directories.
+
+Example:
+
+```yaml
+volumes:
+  - name: media
+    nfs:
+      server: { { .Values.network.storageServer } }
+      path: /mnt/pool/media/books
+```
 
 ## Ingress Pattern
 
