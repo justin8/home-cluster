@@ -1,2 +1,3 @@
-{{- include "common.longhornVolume" (dict "ctx" . "name" "audiobookshelf-config" "sizeGi" .Values.configVolumeSizeGi) -}}
-{{- include "common.longhornVolume" (dict "ctx" . "name" "audiobookshelf-metadata" "sizeGi" .Values.metadataVolumeSizeGi) -}}
+{{- include "common.longhornVolume" (dict "ctx" . "name" "audiobookshelf-config" "sizeGi" .Values.configVolumeSizeGi) }}
+---
+{{- include "common.longhornVolume" (dict "ctx" . "name" "audiobookshelf-metadata" "sizeGi" .Values.metadataVolumeSizeGi) }}
