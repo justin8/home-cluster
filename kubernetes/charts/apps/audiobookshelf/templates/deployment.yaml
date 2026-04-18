@@ -39,12 +39,8 @@ spec:
               mountPath: /config
             - name: metadata
               mountPath: /metadata
-            - name: audiobooks
-              mountPath: /audiobooks
-              subPath: audiobooks
-            - name: podcasts
-              mountPath: /podcasts
-              subPath: podcasts
+            - name: books
+              mountPath: /books
       volumes:
         - name: config
           persistentVolumeClaim:
@@ -52,11 +48,7 @@ spec:
         - name: metadata
           persistentVolumeClaim:
             claimName: audiobookshelf-metadata
-        - name: audiobooks
+        - name: books
           nfs:
             server: {{ .Values.network.storageServer }}
-            path: /mnt/pool/media
-        - name: podcasts
-          nfs:
-            server: {{ .Values.network.storageServer }}
-            path: /mnt/pool/media
+            path: /mnt/pool/media/books

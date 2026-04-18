@@ -6,7 +6,3 @@ images:
     repository: ghcr.io/advplyr/audiobookshelf
     tag: 2.33.1
     pullPolicy: IfNotPresent
-
-mediaPaths:
-  audiobooks: /mnt/pool/media/audiobooks
-  podcasts: /mnt/pool/media/podcasts
