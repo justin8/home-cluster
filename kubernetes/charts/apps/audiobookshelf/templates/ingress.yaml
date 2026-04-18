@@ -1,1 +1,1 @@
-{{- include "common.ingress" (dict "ctx" . "subdomain" "audiobookshelf" "auth" false) }}
+{{- include "common.ingress" (dict "ctx" . "subdomain" "audiobookshelf" "type" "traefik-private" "auth" false) }}
