@@ -1,0 +1,8 @@
+apiVersion: pocketid.internal/v1alpha1
+kind: PocketIDOIDCClient
+metadata:
+  name: audiobookshelf
+  namespace: {{ .Release.Namespace }}
+spec:
+  callbackUrls:
+    - https://audiobookshelf.{{ .Values.domain }}/auth/openid/callback
