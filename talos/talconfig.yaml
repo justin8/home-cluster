@@ -107,6 +107,7 @@ nodes:
         environment:
           - TS_AUTHKEY=${tailscale_auth_key}
           - TS_AUTH_ONCE=true
+          - TS_EXTRA_ARGS=--accept-routes
     installDiskSelector:
       size: "> 10GB"
     nameservers:
