@@ -4,7 +4,10 @@
 {{- $name := .name | default $ctx.Chart.Name -}}
 {{- $subdomain := .subdomain | default $name -}}
 {{- $port := .port | default 80 -}}
-{{- $auth := .auth | default false -}}
+{{- $auth := true -}}
+{{- if hasKey . "auth" -}}
+{{- $auth = .auth -}}
+{{- end -}}
 {{- $extraAnnotations := .annotations | default (dict) -}}
 
 {{- $isPublic := eq $type "traefik-public" -}}
