@@ -4,5 +4,5 @@ metadataVolumeSizeGi: 5
 images:
   app:
     repository: ghcr.io/advplyr/audiobookshelf
-    tag: 2.33.1
+    tag: 2.33.2
     pullPolicy: IfNotPresent
