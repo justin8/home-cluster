@@ -4,6 +4,8 @@
 {{- $name := .name | default $ctx.Chart.Name -}}
 {{- $subdomain := .subdomain | default $name -}}
 {{- $port := .port | default 80 -}}
+{{- $path := .path | default "/" -}}
+{{- $pathSuffix := eq $path "/" | ternary "" (replace "/" "-" $path) -}}
 {{- $auth := true -}}
 {{- if hasKey . "auth" -}}
 {{- $auth = .auth -}}
@@ -13,7 +15,7 @@
 {{- $isPublic := eq $type "traefik-public" -}}
 {{- $ingressSuffix := "" -}}
 {{- if $isPublic }}{{ $ingressSuffix = "-public" }}{{ end -}}
-{{- $ingressName := printf "%s%s" $name $ingressSuffix -}}
+{{- $ingressName := printf "%s%s%s" $name $pathSuffix $ingressSuffix -}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -35,7 +37,7 @@ spec:
     - host: {{ $subdomain }}.{{ $ctx.Values.domain }}
       http:
         paths:
-          - path: /
+          - path: {{ $path }}
             pathType: Prefix
             backend:
               service:
