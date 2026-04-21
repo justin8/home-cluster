@@ -1,3 +1,5 @@
+{{- include "common.ingress" (dict "ctx" . "name" "seerr" "type" "traefik-public" "port" 5055 "auth" true) }}
+---
 {{- include "common.ingress" (dict "ctx" . "name" "seerr" "type" "traefik-private" "port" 5055 "auth" true) }}
 ---
-{{- include "common.ingress" (dict "ctx" . "name" "seerr" "type" "traefik-public" "port" 5055 "auth" true) }}
+{{- include "common.ingress" (dict "ctx" . "name" "seerr" "type" "traefik-private" "port" 5055 "auth" false "path" "/api") }}
