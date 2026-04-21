@@ -35,8 +35,6 @@ spec:
               mountPath: /config
             - name: books
               mountPath: /books
-            - name: audiobooks
-              mountPath: /audiobooks
             - name: downloads
               mountPath: /mnt/pool/media/downloads
       volumes:
@@ -47,10 +45,6 @@ spec:
           nfs:
             server: {{ .Values.network.storageServer }}
             path: /mnt/pool/media/books
-        - name: audiobooks
-          nfs:
-            server: {{ .Values.network.storageServer }}
-            path: /mnt/pool/media/audiobooks
         - name: downloads
           nfs:
             server: {{ .Values.network.storageServer }}
