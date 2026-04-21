@@ -28,6 +28,9 @@ metadata:
     {{- if $isPublic }}
     external-dns.alpha.kubernetes.io/target: home.{{ $ctx.Values.domain }}
     {{- end }}
+    {{- if not (eq $path "/") }}
+    external-dns.alpha.kubernetes.io/ignore: "true"
+    {{- end }}
     {{- with $extraAnnotations }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
