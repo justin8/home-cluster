@@ -1,3 +1,1 @@
 {{- include "common.ingress" (dict "ctx" . "name" "qbittorrent" "type" "traefik-private" "port" 8080 "auth" true) }}
----
-{{- include "common.ingress" (dict "ctx" . "name" "qbittorrent" "type" "traefik-private" "port" 8080 "auth" false "path" "/api") }}
