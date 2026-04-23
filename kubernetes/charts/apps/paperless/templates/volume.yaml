@@ -1,2 +1,4 @@
 {{- include "common.longhornVolume" (dict "ctx" . "name" "paperless-data" "sizeGi" .Values.volumes.dataSizeGi) -}}
+---
 {{- include "common.longhornVolume" (dict "ctx" . "name" "paperless-media" "sizeGi" .Values.volumes.mediaSizeGi) -}}
+
