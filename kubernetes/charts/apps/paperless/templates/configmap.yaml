@@ -18,3 +18,5 @@ data:
   PAPERLESS_TIME_ZONE: {{ .Values.TZ | default "UTC" }}
   PAPERLESS_APPS: "allauth.socialaccount.providers.openid_connect"
   PAPERLESS_SOCIAL_AUTO_SIGNUP: "true"
+  PAPERLESS_ADMIN_USER: admin
+  PAPERLESS_ADMIN_MAIL: {{ .Values.adminEmail | default "admin@localhost" }}
