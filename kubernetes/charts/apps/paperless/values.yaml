@@ -11,7 +11,7 @@ images:
     pullPolicy: IfNotPresent
   gotenberg:
     repository: docker.io/gotenberg/gotenberg
-    tag: "8.25"
+    tag: "8.31"
     pullPolicy: IfNotPresent
   tika:
     repository: docker.io/apache/tika
