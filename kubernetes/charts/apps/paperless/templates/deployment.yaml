@@ -38,11 +38,6 @@ spec:
                 secretKeyRef:
                   name: paperless-secrets
                   key: PAPERLESS_SECRET_KEY
-            - name: PAPERLESS_ADMIN_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: paperless-secrets
-                  key: PAPERLESS_ADMIN_PASSWORD
           volumeMounts:
             - name: data
               mountPath: /usr/src/paperless/data

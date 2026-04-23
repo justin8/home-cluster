@@ -19,5 +19,3 @@ data:
   # Header-based Authentication (Tinyauth)
   PAPERLESS_ENABLE_HTTP_REMOTE_USER: "true"
   PAPERLESS_HTTP_REMOTE_USER_HEADER_NAME: HTTP_REMOTE_USER
-  PAPERLESS_ADMIN_USER: admin
-  PAPERLESS_ADMIN_MAIL: {{ .Values.adminEmail | default "admin@localhost" }}
