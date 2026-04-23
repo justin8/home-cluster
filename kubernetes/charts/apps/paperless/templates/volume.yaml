@@ -1,4 +1,25 @@
-{{- include "common.longhornVolume" (dict "ctx" . "name" "paperless-data" "sizeGi" .Values.volumes.dataSizeGi) -}}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: paperless-data
+  namespace: {{ .Release.Namespace }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: longhorn
+  resources:
+    requests:
+      storage: {{ .Values.volumes.dataSizeGi }}Gi
 ---
-{{- include "common.longhornVolume" (dict "ctx" . "name" "paperless-media" "sizeGi" .Values.volumes.mediaSizeGi) -}}
-
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: paperless-media
+  namespace: {{ .Release.Namespace }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: longhorn
+  resources:
+    requests:
+      storage: {{ .Values.volumes.mediaSizeGi }}Gi
