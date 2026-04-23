@@ -25,13 +25,6 @@ spec:
         - name: webserver
           image: "{{ .Values.images.app.repository }}:{{ .Values.images.app.tag }}"
           imagePullPolicy: {{ .Values.images.app.pullPolicy }}
-          command:
-            - /bin/bash
-            - -c
-            - |
-              export PAPERLESS_SOCIALACCOUNT_PROVIDERS='{"openid_connect": {"APPS": [{"provider_id": "pocketid", "name": "PocketID", "client_id": "'$POCKETID_CLIENT_ID'", "secret": "'$POCKETID_CLIENT_SECRET'", "settings": {"server_url": "'$POCKETID_DISCOVERY_URL'"}}], "OAUTH_PKCE_ENABLED": true}}'
-              /sbin/docker-entrypoint.sh ../paperless_worker.sh &
-              /sbin/docker-entrypoint.sh gunicorn paperless.wsgi:application
           ports:
             - name: http
               containerPort: 8000
@@ -60,6 +53,9 @@ spec:
                 secretKeyRef:
                   name: paperless-oidc-credentials
                   key: discovery_url
+            - name: PAPERLESS_SOCIALACCOUNT_PROVIDERS
+              value: >-
+                {"openid_connect": {"APPS": [{"provider_id": "pocketid", "name": "PocketID", "client_id": "$(POCKETID_CLIENT_ID)", "secret": "$(POCKETID_CLIENT_SECRET)", "settings": {"server_url": "$(POCKETID_DISCOVERY_URL)"}}], "OAUTH_PKCE_ENABLED": true}}
           volumeMounts:
             - name: data
               mountPath: /usr/src/paperless/data
