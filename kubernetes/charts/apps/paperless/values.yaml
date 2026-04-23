@@ -15,7 +15,7 @@ images:
     pullPolicy: IfNotPresent
   tika:
     repository: docker.io/apache/tika
-    tag: "2.9.1.0-full"
+    tag: "2.9.2.1-full"
     pullPolicy: IfNotPresent
 
 dataVolumeSizeGi: 5
