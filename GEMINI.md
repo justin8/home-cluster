@@ -100,6 +100,13 @@ For public services, also include the public ingress:
 {{- include "common.ingress" (dict "ctx" . "subdomain" "my-app" "type" "traefik-public") -}}
 ```
 
+## Security & Secrets
+
+- **NEVER COMMIT PLAIN-TEXT SECRETS:** This includes API keys, passwords, tokens, and OIDC client secrets.
+- **Verification:** Always double-check `git diff` before committing to ensure no sensitive data is staged.
+- **SealedSecrets:** For permanent secrets, use `kubeseal` to create `SealedSecret` resources.
+- **Runtime Injection:** For applications requiring complex JSON configuration (like Paperless-ngx), use runtime injection in the `Deployment` command to construct JSON from environment variables sourced from Kubernetes Secrets.
+
 ## Authentication & OIDC
 
 - **Provider:** The cluster uses PocketID.
