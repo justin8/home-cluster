@@ -53,16 +53,6 @@ spec:
           imagePullPolicy: {{ .Values.images.gotenberg.pullPolicy }}
           ports:
             - containerPort: 3000
-          resources:
-            requests:
-              cpu: 100m
-              memory: 512Mi
-            limits:
-              cpu: "1"
-              memory: 2Gi
-          volumeMounts:
-            - name: shm
-              mountPath: /dev/shm
         - name: tika
           image: "{{ .Values.images.tika.repository }}:{{ .Values.images.tika.tag }}"
           imagePullPolicy: {{ .Values.images.tika.pullPolicy }}
@@ -75,7 +65,3 @@ spec:
         - name: media
           persistentVolumeClaim:
             claimName: paperless-media
-        - name: shm
-          emptyDir:
-            medium: Memory
-
