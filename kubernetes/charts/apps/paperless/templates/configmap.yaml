@@ -4,6 +4,7 @@ metadata:
   name: {{ .Chart.Name }}-config
   namespace: {{ .Release.Namespace }}
 data:
+  PAPERLESS_PORT: "8000"
   PAPERLESS_URL: https://paperless.{{ .Values.domain }}
   PAPERLESS_REDIS: redis://localhost:6379
   PAPERLESS_TIKA_ENABLED: "1"
