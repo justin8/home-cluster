@@ -3,19 +3,19 @@ domain: "" # Overridden by global values
 images:
   app:
     repository: ghcr.io/paperless-ngx/paperless-ngx
-    tag: "2.14.7"
+    tag: "2.20.14"
     pullPolicy: IfNotPresent
   redis:
     repository: docker.io/library/redis
-    tag: "7-alpine"
+    tag: "8"
     pullPolicy: IfNotPresent
   gotenberg:
     repository: docker.io/gotenberg/gotenberg
-    tag: "8.15.2"
+    tag: "8.25"
     pullPolicy: IfNotPresent
   tika:
     repository: docker.io/apache/tika
-    tag: "2.9.1.0-full"
+    tag: "3.3.0.0"
     pullPolicy: IfNotPresent
 
 dataVolumeSizeGi: 5

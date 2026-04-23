@@ -19,7 +19,7 @@ spec:
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
     spec:
       securityContext:
-        fsGroup: {{ .Values.PGID | default 2000 }}
+        fsGroup: {{ .Values.PGID }}
         fsGroupChangePolicy: OnRootMismatch
       containers:
         - name: webserver
