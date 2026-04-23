@@ -156,3 +156,4 @@ dist
 .sops-age.key
 *.iso
 .decrypted*
+Chart.lock
