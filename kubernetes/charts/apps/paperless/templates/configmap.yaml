@@ -21,8 +21,8 @@ data:
           {
             "provider_id": "pocketid",
             "name": "PocketID",
-            "client_id": "540c1df7-c2ca-4504-b78f-0bef1f8a2e32",
-            "secret": "T9JClSX8v8TN3jWSzvZI6u6zulSLGYiW",
+            "client_id": "PLACEHOLDER_CLIENT_ID",
+            "secret": "PLACEHOLDER_CLIENT_SECRET",
             "settings": {
               "server_url": "https://pocketid.{{ .Values.domain }}/.well-known/openid-configuration"
             }
