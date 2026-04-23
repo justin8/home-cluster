@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Chart.Name }}
+  labels:
+    {{- include "common.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      {{- include "common.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "common.selectorLabels" . | nindent 8 }}
+    spec:
+      securityContext:
+        fsGroup: {{ .Values.PGID | default 2000 }}
+        fsGroupChangePolicy: OnRootMismatch
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.images.app.repository }}:{{ .Values.images.app.tag }}"
+          imagePullPolicy: {{ .Values.images.app.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          env:
+            - name: ACTUAL_DATA_DIR
+              value: /data
+            # OIDC Configuration
+            - name: ACTUAL_OAUTH_METHOD
+              value: openid
+            - name: ACTUAL_OAUTH_PROVIDER
+              value: pocketid
+            - name: ACTUAL_OAUTH_ISSUER
+              value: https://pocketid.{{ .Values.domain }}
+            - name: ACTUAL_OAUTH_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: actual-budget-oidc-credentials
+                  key: CLIENT_ID
+            - name: ACTUAL_OAUTH_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: actual-budget-oidc-credentials
+                  key: CLIENT_SECRET
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: actual-budget-data
