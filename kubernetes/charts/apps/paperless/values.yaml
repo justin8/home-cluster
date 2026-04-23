@@ -1,0 +1,26 @@
+domain: "" # Overridden by global values
+
+images:
+  app:
+    repository: ghcr.io/paperless-ngx/paperless-ngx
+    tag: "2.14.7"
+    pullPolicy: IfNotPresent
+  redis:
+    repository: docker.io/library/redis
+    tag: "7-alpine"
+    pullPolicy: IfNotPresent
+  gotenberg:
+    repository: docker.io/gotenberg/gotenberg
+    tag: "8.15.2"
+    pullPolicy: IfNotPresent
+  tika:
+    repository: docker.io/apache/tika
+    tag: "2.9.1.0-full"
+    pullPolicy: IfNotPresent
+
+volumes:
+  dataSizeGi: 5
+  mediaSizeGi: 20
+
+service:
+  port: 8000

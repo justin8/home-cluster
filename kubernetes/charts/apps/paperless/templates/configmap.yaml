@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Chart.Name }}-config
+  namespace: {{ .Release.Namespace }}
+data:
+  PAPERLESS_URL: https://paperless.{{ .Values.domain }}
+  PAPERLESS_REDIS: redis://localhost:6379
+  PAPERLESS_TIKA_ENABLED: "1"
+  PAPERLESS_TIKA_ENDPOINT: http://localhost:9998
+  PAPERLESS_TIKA_GOTENBERG_ENDPOINT: http://localhost:3000
+  PAPERLESS_OCR_LANGUAGE: eng
+  PAPERLESS_TIME_ZONE: {{ .Values.TZ | default "UTC" }}
+  PAPERLESS_APPS: "allauth.socialaccount.providers.openid_connect"
+  # OIDC Configuration
+  PAPERLESS_SOCIALACCOUNT_PROVIDERS: |
+    {
+      "openid_connect": {
+        "APPS": [
+          {
+            "provider_id": "pocketid",
+            "name": "PocketID",
+            "client_id": "PLACEHOLDER_CLIENT_ID",
+            "secret": "PLACEHOLDER_CLIENT_SECRET",
+            "settings": {
+              "server_url": "https://pocketid.{{ .Values.domain }}/.well-known/openid-configuration"
+            }
+          }
+        ],
+        "OAUTH_PKCE_ENABLED": true
+      }
+    }
+  PAPERLESS_SOCIAL_AUTO_SIGNUP: "true"

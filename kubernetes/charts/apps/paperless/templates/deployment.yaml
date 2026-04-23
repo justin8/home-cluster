@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Chart.Name }}
+  labels:
+    app: {{ .Chart.Name }}
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}
+    spec:
+      securityContext:
+        fsGroup: {{ .Values.PGID | default 2000 }}
+        fsGroupChangePolicy: OnRootMismatch
+      containers:
+        - name: webserver
+          image: "{{ .Values.images.app.repository }}:{{ .Values.images.app.tag }}"
+          imagePullPolicy: {{ .Values.images.app.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: {{ .Chart.Name }}-config
+          env:
+            - name: PAPERLESS_SECRET_KEY
+              value: "change-me-later-with-a-sealed-secret" # Placeholder
+            # Override OIDC placeholders with secret values if needed
+            # Actually, paperless-ngx requires the JSON string in PAPERLESS_SOCIALACCOUNT_PROVIDERS
+            # We will use a template to inject the client_id and secret into the JSON if possible
+            # But helm doesn't easily support nested secret injection into JSON.
+            # Most users use a script or manual config for this in paperless.
+            # For now, let's use the standard env vars and hope django-allauth picks them up
+            # or the user can manually configure the social app in the admin UI.
+          volumeMounts:
+            - name: data
+              mountPath: /usr/src/paperless/data
+            - name: media
+              mountPath: /usr/src/paperless/media
+            - name: consume
+              mountPath: /usr/src/paperless/consume
+            - name: export
+              mountPath: /usr/src/paperless/export
+        - name: redis
+          image: "{{ .Values.images.redis.repository }}:{{ .Values.images.redis.tag }}"
+          imagePullPolicy: {{ .Values.images.redis.pullPolicy }}
+          ports:
+            - containerPort: 6379
+        - name: gotenberg
+          image: "{{ .Values.images.gotenberg.repository }}:{{ .Values.images.gotenberg.tag }}"
+          imagePullPolicy: {{ .Values.images.gotenberg.pullPolicy }}
+          ports:
+            - containerPort: 3000
+        - name: tika
+          image: "{{ .Values.images.tika.repository }}:{{ .Values.images.tika.tag }}"
+          imagePullPolicy: {{ .Values.images.tika.pullPolicy }}
+          ports:
+            - containerPort: 9998
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: paperless-data
+        - name: media
+          persistentVolumeClaim:
+            claimName: paperless-media
+        - name: consume
+          nfs:
+            server: {{ .Values.network.storageServer }}
+            path: /mnt/pool/media/paperless/consume
+        - name: export
+          nfs:
+            server: {{ .Values.network.storageServer }}
+            path: /mnt/pool/media/paperless/export
