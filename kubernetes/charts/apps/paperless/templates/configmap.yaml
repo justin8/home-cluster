@@ -15,6 +15,7 @@ data:
   PAPERLESS_TIKA_ENDPOINT: http://localhost:9998
   PAPERLESS_TIKA_GOTENBERG_ENDPOINT: http://localhost:3000
   PAPERLESS_OCR_LANGUAGE: eng
+  PAPERLESS_OCR_OUTPUT_TYPE: pdf
   PAPERLESS_TIME_ZONE: {{ .Values.TZ | default "UTC" }}
   # Header-based Authentication (Tinyauth)
   PAPERLESS_ENABLE_HTTP_REMOTE_USER: "true"
