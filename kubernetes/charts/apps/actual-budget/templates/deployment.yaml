@@ -33,8 +33,6 @@ spec:
             # OIDC Configuration
             - name: ACTUAL_OPENID_SERVER_HOSTNAME
               value: https://budget.{{ .Values.domain }}
-            - name: ACTUAL_OPENID_AUTH_METHOD
-              value: openid
             - name: ACTUAL_OPENID_DISCOVERY_URL
               valueFrom:
                 secretKeyRef:
