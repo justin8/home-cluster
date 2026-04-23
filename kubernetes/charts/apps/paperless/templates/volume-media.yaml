@@ -1,0 +1,1 @@
+{{- include "common.longhornVolume" (dict "ctx" . "name" "paperless-media" "sizeGi" .Values.mediaVolumeSizeGi) -}}

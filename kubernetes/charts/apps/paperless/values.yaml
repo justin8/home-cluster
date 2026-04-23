@@ -18,9 +18,8 @@ images:
     tag: "2.9.1.0-full"
     pullPolicy: IfNotPresent
 
-volumes:
-  dataSizeGi: 5
-  mediaSizeGi: 20
+dataVolumeSizeGi: 5
+mediaVolumeSizeGi: 20
 
 service:
   port: 8000
