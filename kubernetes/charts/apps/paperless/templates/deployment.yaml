@@ -45,10 +45,6 @@ spec:
               mountPath: /usr/src/paperless/data
             - name: media
               mountPath: /usr/src/paperless/media
-            - name: consume
-              mountPath: /usr/src/paperless/consume
-            - name: export
-              mountPath: /usr/src/paperless/export
         - name: redis
           image: "{{ .Values.images.redis.repository }}:{{ .Values.images.redis.tag }}"
           imagePullPolicy: {{ .Values.images.redis.pullPolicy }}
@@ -71,11 +67,4 @@ spec:
         - name: media
           persistentVolumeClaim:
             claimName: paperless-media
-        - name: consume
-          nfs:
-            server: {{ .Values.network.storageServer }}
-            path: /mnt/pool/media/paperless/consume
-        - name: export
-          nfs:
-            server: {{ .Values.network.storageServer }}
-            path: /mnt/pool/media/paperless/export
+
