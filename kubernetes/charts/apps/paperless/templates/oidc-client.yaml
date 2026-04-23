@@ -3,6 +3,8 @@ kind: PocketIDOIDCClient
 metadata:
   name: paperless
   namespace: {{ .Release.Namespace }}
+  annotations:
+    pocket-id.io/rotate-client-secret: "2026-04-22T23:00:00Z"
 spec:
   isPublic: false
   callbackUrls:
