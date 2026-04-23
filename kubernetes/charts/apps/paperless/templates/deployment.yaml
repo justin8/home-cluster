@@ -25,6 +25,13 @@ spec:
         - name: webserver
           image: "{{ .Values.images.app.repository }}:{{ .Values.images.app.tag }}"
           imagePullPolicy: {{ .Values.images.app.pullPolicy }}
+          command:
+            - /bin/bash
+            - -c
+            - |
+              export PAPERLESS_SOCIALACCOUNT_PROVIDERS='{"openid_connect": {"APPS": [{"provider_id": "pocketid", "name": "PocketID", "client_id": "'$POCKETID_CLIENT_ID'", "secret": "'$POCKETID_CLIENT_SECRET'", "settings": {"server_url": "'$POCKETID_DISCOVERY_URL'"}}], "OAUTH_PKCE_ENABLED": true}}'
+              /sbin/docker-entrypoint.sh ../paperless_worker.sh &
+              /sbin/docker-entrypoint.sh gunicorn paperless.wsgi:application
           ports:
             - name: http
               containerPort: 8000
@@ -34,14 +41,22 @@ spec:
                 name: {{ .Chart.Name }}-config
           env:
             - name: PAPERLESS_SECRET_KEY
-              value: "change-me-later-with-a-sealed-secret" # Placeholder
-            # Override OIDC placeholders with secret values if needed
-            # Actually, paperless-ngx requires the JSON string in PAPERLESS_SOCIALACCOUNT_PROVIDERS
-            # We will use a template to inject the client_id and secret into the JSON if possible
-            # But helm doesn't easily support nested secret injection into JSON.
-            # Most users use a script or manual config for this in paperless.
-            # For now, let's use the standard env vars and hope django-allauth picks them up
-            # or the user can manually configure the social app in the admin UI.
+              value: "change-me-later-with-a-sealed-secret"
+            - name: POCKETID_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: paperless-oidc-credentials
+                  key: client_id
+            - name: POCKETID_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: paperless-oidc-credentials
+                  key: client_secret
+            - name: POCKETID_DISCOVERY_URL
+              valueFrom:
+                secretKeyRef:
+                  name: paperless-oidc-credentials
+                  key: discovery_url
           volumeMounts:
             - name: data
               mountPath: /usr/src/paperless/data
