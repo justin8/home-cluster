@@ -43,24 +43,6 @@ spec:
                 secretKeyRef:
                   name: paperless-secrets
                   key: PAPERLESS_ADMIN_PASSWORD
-            - name: POCKETID_CLIENT_ID
-              valueFrom:
-                secretKeyRef:
-                  name: paperless-oidc-credentials
-                  key: client_id
-            - name: POCKETID_CLIENT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: paperless-oidc-credentials
-                  key: client_secret
-            - name: POCKETID_DISCOVERY_URL
-              valueFrom:
-                secretKeyRef:
-                  name: paperless-oidc-credentials
-                  key: discovery_url
-            - name: PAPERLESS_SOCIALACCOUNT_PROVIDERS
-              value: >-
-                {"openid_connect": {"APPS": [{"provider_id": "pocketid", "name": "PocketID", "client_id": "$(POCKETID_CLIENT_ID)", "secret": "$(POCKETID_CLIENT_SECRET)", "settings": {"server_url": "$(POCKETID_DISCOVERY_URL)"}}], "OAUTH_PKCE_ENABLED": true}}
           volumeMounts:
             - name: data
               mountPath: /usr/src/paperless/data
@@ -88,4 +70,3 @@ spec:
         - name: media
           persistentVolumeClaim:
             claimName: paperless-media
-
