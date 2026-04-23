@@ -3,18 +3,18 @@ kind: Deployment
 metadata:
   name: {{ .Chart.Name }}
   labels:
-    {{- include "common.labels" . | nindent 4 }}
+    app: {{ .Chart.Name }}
 spec:
   replicas: 1
   strategy:
     type: Recreate
   selector:
     matchLabels:
-      {{- include "common.selectorLabels" . | nindent 6 }}
+      app: {{ .Chart.Name }}
   template:
     metadata:
       labels:
-        {{- include "common.selectorLabels" . | nindent 8 }}
+        app: {{ .Chart.Name }}
     spec:
       securityContext:
         fsGroup: {{ .Values.PGID | default 2000 }}
