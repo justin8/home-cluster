@@ -100,6 +100,13 @@ For public services, also include the public ingress:
 {{- include "common.ingress" (dict "ctx" . "subdomain" "my-app" "type" "traefik-public") -}}
 ```
 
+## Authentication & OIDC
+
+- **Provider:** The cluster uses PocketID.
+- **Client Management:** Use the `PocketIDOIDCClient` custom resource.
+- **Credentials Secret:** The operator generates a secret named `{metadata.name}-oidc-credentials`.
+- **Secret Keys:** ALWAYS use lowercase keys as defined in `docs/AUTH.md` (e.g., `client_id`, `client_secret`, `issuer_url`). Refer to `docs/AUTH.md` for the full list of available keys and configuration details.
+
 ## Project Steering
 
 - **Directory:** Key project guidance and steering documents are located in `.kiro/steering/`.
