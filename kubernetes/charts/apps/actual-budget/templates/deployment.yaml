@@ -41,12 +41,12 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: actual-budget-oidc-credentials
-                  key: CLIENT_ID
+                  key: client_id
             - name: ACTUAL_OAUTH_CLIENT_SECRET
               valueFrom:
                 secretKeyRef:
                   name: actual-budget-oidc-credentials
-                  key: CLIENT_SECRET
+                  key: client_secret
           volumeMounts:
             - name: data
               mountPath: /data
