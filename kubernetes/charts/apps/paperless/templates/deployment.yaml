@@ -41,7 +41,10 @@ spec:
                 name: {{ .Chart.Name }}-config
           env:
             - name: PAPERLESS_SECRET_KEY
-              value: "change-me-later-with-a-sealed-secret"
+              valueFrom:
+                secretKeyRef:
+                  name: paperless-secrets
+                  key: PAPERLESS_SECRET_KEY
             - name: POCKETID_CLIENT_ID
               valueFrom:
                 secretKeyRef:
