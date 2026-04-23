@@ -6,4 +6,4 @@ metadata:
 spec:
   isPublic: false
   callbackUrls:
-    - https://budget.{{ .Values.domain }}/oidc/callback
+    - https://budget.{{ .Values.domain }}/openid/callback
