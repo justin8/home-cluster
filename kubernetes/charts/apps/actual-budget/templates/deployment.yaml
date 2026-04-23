@@ -31,22 +31,30 @@ spec:
             - name: ACTUAL_DATA_DIR
               value: /data
             # OIDC Configuration
-            - name: ACTUAL_OAUTH_METHOD
+            - name: ACTUAL_OPENID_SERVER_HOSTNAME
+              value: https://budget.{{ .Values.domain }}
+            - name: ACTUAL_OPENID_AUTH_METHOD
               value: openid
-            - name: ACTUAL_OAUTH_PROVIDER
-              value: pocketid
-            - name: ACTUAL_OAUTH_ISSUER
-              value: https://pocketid.{{ .Values.domain }}
-            - name: ACTUAL_OAUTH_CLIENT_ID
+            - name: ACTUAL_OPENID_DISCOVERY_URL
+              valueFrom:
+                secretKeyRef:
+                  name: actual-budget-oidc-credentials
+                  key: discovery_url
+            - name: ACTUAL_OPENID_CLIENT_ID
               valueFrom:
                 secretKeyRef:
                   name: actual-budget-oidc-credentials
                   key: client_id
-            - name: ACTUAL_OAUTH_CLIENT_SECRET
+            - name: ACTUAL_OPENID_CLIENT_SECRET
               valueFrom:
                 secretKeyRef:
                   name: actual-budget-oidc-credentials
                   key: client_secret
+            - name: ACTUAL_USER_CREATION_MODE
+              value: login # Create users automatically on first login
+            - name: ACTUAL_OPENID_ENFORCE
+              value: "true" # Force OIDC login
+
           volumeMounts:
             - name: data
               mountPath: /data
