@@ -2,7 +2,7 @@ homeAssistantVolumeSizeGi: 5
 databaseVolumeSizeGi: 10
 mqttVolumeSizeGi: 1
 zigbee2mqttVolumeSizeGi: 1
-esphomeVolumeSizeGi: 1
+esphomeVolumeSizeGi: 10
 
 images:
   homeAssistant:
