@@ -2,7 +2,6 @@ homeAssistantVolumeSizeGi: 5
 databaseVolumeSizeGi: 10
 mqttVolumeSizeGi: 1
 zigbee2mqttVolumeSizeGi: 1
-esphomeVolumeSizeGi: 1
 
 images:
   homeAssistant:
@@ -16,8 +15,4 @@ images:
   zigbee2mqtt:
     repository: ghcr.io/koenkk/zigbee2mqtt
     tag: 2.9.2
-    pullPolicy: IfNotPresent
-  esphome:
-    repository: esphome/esphome
-    tag: "2026.4"
     pullPolicy: IfNotPresent

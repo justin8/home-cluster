@@ -1,1 +1,0 @@
-{{- include "common.longhornVolume" (dict "ctx" . "name" "esphome-config" "sizeGi" .Values.esphomeVolumeSizeGi) -}}

@@ -1,1 +1,0 @@
-{{- include "common.ingress" (dict "ctx" . "type" "traefik-private" "name" "esphome" "subdomain" "esphome" "port" 6052 "auth" true) }}
