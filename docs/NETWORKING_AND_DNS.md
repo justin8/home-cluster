@@ -40,7 +40,7 @@
                                   │                                                  │
                                   │  ┌─────────────────────────────────────────────┐ │
                                   │  │                  DNS Server                 │ │
-                                  │  │       192.168.5.53 and over Tailscale       │ │
+                                  │  │                over Tailscale               │ │
                                   │  │                    PiHole                   │ │
                                   │  └─────────────────────────────────────────────┘ │
                                   │                                                  │
@@ -59,18 +59,17 @@
 
 ## IP Address Allocation
 
-| IP Range            | Purpose                    | Configuration           | Notes                                   |
-| ------------------- | -------------------------- | ----------------------- | --------------------------------------- |
-| `192.168.5.1`       | Router/Gateway             | Network infrastructure  | Default gateway                         |
-| `192.168.5.2`       | Wifi AP                    |                         | Network infrastructure                  |
-| `192.168.5.3`       | Public Ingress             | `network.publicIngress` | External-facing web traffic             |
-| `192.168.5.5`       | NAS                        | `network.storageServer` | Network file storage server             |
-| `192.168.5.6`       | Zigbee/thread co-ordinator |                         | Network Infrastructure                  |
-| `192.168.5.20`      | Talos VIP                  | `network.cluster`       | Kubernetes API server endpoint          |
-| `192.168.5.11-20`   | Talos Nodes                | `talconfig.yaml`        | Reserved for control plane nodes        |
-| `192.168.5.53`      | DNS Server                 | `network.dnsServer`     | PiHole DNS service (Tailscale enrolled) |
-| `192.168.5.80-100`  | MetalLB Pool               | `network.metallbRange`  | Load balancer IP allocation             |
-| `192.168.5.100-254` | DHCP Pool                  | Router configuration    | Dynamic client allocation               |
+| IP Range            | Purpose                    | Configuration           | Notes                            |
+| ------------------- | -------------------------- | ----------------------- | -------------------------------- |
+| `192.168.5.1`       | Router/Gateway             | Network infrastructure  | Default gateway                  |
+| `192.168.5.2`       | Wifi AP                    |                         | Network infrastructure           |
+| `192.168.5.3`       | Public Ingress             | `network.publicIngress` | External-facing web traffic      |
+| `192.168.5.5`       | NAS                        | `network.storageServer` | Network file storage server      |
+| `192.168.5.6`       | Zigbee/thread co-ordinator |                         | Network Infrastructure           |
+| `192.168.5.20`      | Talos VIP                  | `network.cluster`       | Kubernetes API server endpoint   |
+| `192.168.5.11-20`   | Talos Nodes                | `talconfig.yaml`        | Reserved for control plane nodes |
+| `192.168.5.80-100`  | MetalLB Pool               | `network.metallbRange`  | Load balancer IP allocation      |
+| `192.168.5.100-254` | DHCP Pool                  | Router configuration    | Dynamic client allocation        |
 
 ### Static Reservations
 
@@ -103,8 +102,7 @@ The cluster uses a split-horizon DNS setup. The ingress controller configuration
 
 #### PiHole (Internal DNS)
 
-- **IP**: `192.168.5.53` (also enrolled in Tailscale)
-- **Purpose**: DNS for internal clients
+- **Purpose**: DNS for internal clients (served over Tailscale)
 - **Manages**: Internal resolution for all cluster services
 - **Features**: Ad blocking, custom DNS records, internal domain resolution
 
@@ -124,7 +122,7 @@ The cluster uses a split-horizon DNS setup. The ingress controller configuration
 
 **Internal Clients (Tailscale enrolled):**
 
-- Use PiHole DNS (`192.168.5.53`) for both public and private domains.
+- Use PiHole DNS (served over Tailscale) for both public and private domains.
 - Private services resolve to the private ingress Tailscale IP (only reachable over the tailnet).
 - Public services resolve to `192.168.5.2` (via internal PiHole records) or the WAN IP (if falling back to upstream).
 
@@ -258,7 +256,7 @@ The private Traefik ingress controller is exposed on the tailnet via the Tailsca
 
 ### DNS Configuration
 
-Talos nodes are configured to use `100.100.100.100` as their first DNS resolver. This is Tailscale's built-in "MagicDNS" resolver, which automatically resolves hostnames of other devices and services on the tailnet. Falling back to PiHole (`192.168.5.53`) handles all other internal and external resolution.
+When connected to Tailscale, devices use Tailscale's built-in "MagicDNS" resolver (`100.100.100.100`) for all DNS resolution. MagicDNS is configured via Split DNS to forward all requests for the cluster domain (`*.dray.id.au`) to the Pi-hole service on the tailnet. This ensures that internal cluster services resolve correctly while all other traffic is handled by Tailscale's global DNS settings.
 
 ### Kubernetes Operator
 

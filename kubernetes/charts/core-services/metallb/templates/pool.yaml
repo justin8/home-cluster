@@ -35,22 +35,3 @@ metadata:
 spec:
   ipAddressPools:
     - public-ingress
----
-apiVersion: metallb.io/v1beta1
-kind: IPAddressPool
-metadata:
-  name: dns-server
-  namespace: {{ .Release.Namespace }}
-spec:
-  addresses:
-    - {{ .Values.network.dnsServer }}/32
-  autoAssign: false
----
-apiVersion: metallb.io/v1beta1
-kind: L2Advertisement
-metadata:
-  name: dns-server
-  namespace: {{ .Release.Namespace }}
-spec:
-  ipAddressPools:
-    - dns-server
