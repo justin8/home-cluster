@@ -66,6 +66,6 @@
 - [x] Look in to OAuth alternatives that can be deployed fully programatically
   - [x] Set up [pocketID operator](https://github.com/aclerici38/pocket-id-operator)
 - [ ] Try out headscale
-- [ ] Get access by user groups working - coming in tinyauth v4 maybe; alternatively, try out oauth2proxy
+- [ ] Get access by user groups working - coming in tinyauth v4 maybe; alternatively, try out oauth2proxy or pomerium
 - [ ] Set up metrics/alerting for cluster services (including longhorn)
 - [ ] Multiple Tinyauth/PocketID instances
