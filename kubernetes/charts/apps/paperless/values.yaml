@@ -3,7 +3,7 @@ domain: "" # Overridden by global values
 images:
   app:
     repository: ghcr.io/paperless-ngx/paperless-ngx
-    tag: "2.20.14"
+    tag: "2.20.15"
     pullPolicy: IfNotPresent
   redis:
     repository: docker.io/library/redis
