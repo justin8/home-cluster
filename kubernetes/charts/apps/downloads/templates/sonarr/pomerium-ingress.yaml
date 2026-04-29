@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: sonarr-pomerium
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    ingress.pomerium.io/policy: |
+      - allow:
+          and:
+            - domain:
+                is: {{ .Values.domain }}
+spec:
+  ingressClassName: pomerium
+  rules:
+  - host: sonarr.{{ .Values.domain }}
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: sonarr
+            port:
+              number: 8989
