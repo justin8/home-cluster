@@ -9,3 +9,6 @@ spec:
     url: https://authenticate.{{ .Values.domain }}
   certificates:
     - {{ .Release.Namespace }}/default-tls
+  identityProvider:
+    provider: oidc
+    secret: {{ .Release.Namespace }}/pomerium-oidc-credentials
