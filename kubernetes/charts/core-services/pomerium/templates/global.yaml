@@ -1,0 +1,11 @@
+apiVersion: ingress.pomerium.io/v1
+kind: Pomerium
+metadata:
+  name: global
+  namespace: {{ .Release.Namespace }}
+spec:
+  secrets: {{ .Release.Namespace }}/bootstrap
+  authenticate:
+    url: https://authenticate.{{ .Values.domain }}
+  certificates:
+    - {{ .Release.Namespace }}/default-tls

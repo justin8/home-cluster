@@ -1,0 +1,48 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: pomerium
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  sources:
+    - repoURL: https://github.com/pomerium/ingress-controller.git
+      targetRevision: v0.32.0
+      path: config/default
+      kustomize:
+        commonLabels:
+          app.kubernetes.io/instance: pomerium
+        patches:
+          - target:
+              kind: Service
+              name: pomerium-proxy
+            patch: |-
+              - op: add
+                path: /metadata/annotations
+                value:
+                  metallb.universe.tf/address-pool: pomerium-ingress
+                  metallb.universe.tf/loadBalancerIPs: {{ .Values.network.pomeriumIngress }}
+    - repoURL: https://github.com/justin8/home-cluster.git
+      targetRevision: main
+      path: kubernetes/charts/core-services/pomerium
+      helm:
+        valueFiles:
+          - ../../../global-values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: pomerium
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+  ignoreDifferences:
+    - group: ""
+      kind: Secret
+      name: bootstrap
+      jsonPointers:
+        - /data

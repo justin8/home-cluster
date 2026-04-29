@@ -14,6 +14,6 @@ spec:
   secretTemplate:
     annotations:
       reflector.v1.k8s.emberstack.com/reflection-allowed: "true"
-      reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces: "kube-system,shared-secrets,cert-manager,traefik-private,traefik-public"
+      reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces: "kube-system,shared-secrets,cert-manager,traefik-private,traefik-public,pomerium"
       reflector.v1.k8s.emberstack.com/reflection-auto-enabled: "true"
-      reflector.v1.k8s.emberstack.com/reflection-auto-namespaces: "kube-system,shared-secrets,cert-manager,traefik-private,traefik-public"
+      reflector.v1.k8s.emberstack.com/reflection-auto-namespaces: "kube-system,shared-secrets,cert-manager,traefik-private,traefik-public,pomerium"
