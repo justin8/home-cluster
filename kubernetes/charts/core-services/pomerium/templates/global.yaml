@@ -12,3 +12,4 @@ spec:
   identityProvider:
     provider: oidc
     secret: {{ .Release.Namespace }}/pomerium-oidc-credentials
+    url: https://pocketid.{{ .Values.domain }}
