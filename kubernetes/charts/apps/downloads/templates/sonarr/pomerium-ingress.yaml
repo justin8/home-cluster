@@ -4,8 +4,14 @@ metadata:
   name: sonarr-pomerium
   namespace: {{ .Release.Namespace }}
   annotations:
-    ingress.pomerium.io/allow_any_authenticated_user: "true"
     ingress.pomerium.io/policy: |
+      - allow:
+          or:
+            - domain:
+                not:
+                  is: ""
+            - path:
+                prefix: /api
       - deny:
           and:
             - source_ip: {{ .Values.network.routerIp }}
