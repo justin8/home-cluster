@@ -24,7 +24,6 @@ Pin the dependency to the latest stable version found. Never guess or use placeh
   2. **`repoURL`**: Always use `https://github.com/justin8/home-cluster.git`.
   3. **`targetRevision`**: Always use `main`.
   4. **`valueFiles`**: Must use `../../../global-values.yaml` (exactly 3 levels of up-traversal) to reach the root-level global values from an app chart path.
-  5. **`port`**: When using `common.ingress`, ensure the `port` matches the Service port (it defaults to 80).
 
 - **Namespaces:** Never define `Namespace` resources in `root-app/templates`. Use `managedNamespaceMetadata` within the `Application` resource's `syncPolicy` to manage namespace-level labels and annotations. Use `syncOptions: [CreateNamespace=true]` for automatic namespace creation.
 
@@ -75,30 +74,97 @@ volumes:
       path: /mnt/pool/media/books
 ```
 
-## Ingress Pattern
+## Ingress Pattern (Pomerium)
 
-For consistency, use the `common.ingress` template (in `kubernetes/charts/common/templates/_ingress.tpl`) to define ingress resources.
+The cluster uses **Pomerium** as the sole Ingress Controller and Identity-Aware Proxy. **Do not use shared templates for ingresses; define them manually in the application chart.**
 
-It supports:
+### Standard Ingress Structure
 
-- `ctx`: The helm context (`.`)
-- `type`: `traefik-private` (default) or `traefik-public`
-- `name`: Service name (defaults to `Chart.Name`)
-- `subdomain`: DNS subdomain (defaults to `name`)
-- `port`: Service port (defaults to 80)
-- `auth`: Boolean, enables TinyAuth middleware (defaults to `false`)
-- `annotations`: Optional dictionary of extra annotations
+Every ingress must use `ingressClassName: pomerium`.
 
 ```yaml
-{ { - include "common.ingress" (dict "ctx" . "subdomain" "my-app" "auth" true) - } }
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: my-app
+  annotations:
+    # 1. DNS Sync (Split-horizon)
+    # Pi-hole (Internal) always picks up the ingress.
+    # To enable Cloudflare (Public), add these two:
+    dns.external/enabled: "true"
+    dns.external/target: home.{{ .Values.domain }}
+spec:
+  ingressClassName: pomerium
+  rules:
+    - host: my-app.{{ .Values.domain }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: my-service
+                port: { number: 80 }
 ```
 
-For public services, also include the public ingress:
+### Authentication & Authorization
+
+#### 1. All Valid Users (Private Web UI)
+
+Use the shortcut annotation for services that should be accessible to anyone in your OIDC directory.
+**Note:** Private-only ingresses MUST include the `routerIp` denial.
 
 ```yaml
-{{- include "common.ingress" (dict "ctx" . "subdomain" "my-app") -}}
-{{- include "common.ingress" (dict "ctx" . "subdomain" "my-app" "type" "traefik-public") -}}
+annotations:
+  ingress.pomerium.io/allow_any_authenticated_user: "true"
+  ingress.pomerium.io/policy: |
+    - deny:
+        and:
+          - source_ip: {{ .Values.network.routerIp }}
 ```
+
+#### 2. Public / Unauthenticated (APIs)
+
+Use this for paths that handle their own auth or must be public.
+**Note:** Public endpoints should NOT deny the `routerIp` unless specific routing loops occur.
+
+```yaml
+annotations:
+  ingress.pomerium.io/allow_public_unauthenticated_access: "true"
+```
+
+#### 3. OIDC Group Restrictions
+
+For granular control, define policies based on PocketID groups:
+
+- **`admin`**: For administrative portals (ArgoCD, Longhorn).
+  ```yaml
+  ingress.pomerium.io/policy: |
+    - allow:
+        and:
+          - groups: { has: admin }
+    - deny:
+        and:
+          - source_ip: {{ .Values.network.routerIp }}
+  ```
+- **`private`**: For restricted sensitive tools.
+  ```yaml
+  ingress.pomerium.io/policy: |
+    - allow:
+        and:
+          - groups: { has: private }
+    - deny:
+        and:
+          - source_ip: {{ .Values.network.routerIp }}
+  ```
+
+### Public vs Private Summary
+
+| Feature     | Private (Internal)        | Public (Internet)              |
+| :---------- | :------------------------ | :----------------------------- |
+| **DNS**     | Automatic (Pi-hole)       | `dns.external/enabled: "true"` |
+| **IP Deny** | **Required** (`routerIp`) | Generally not used             |
+| **Auth**    | Usually `authenticated`   | Usually `public` (for APIs)    |
 
 ## Security & Secrets
 

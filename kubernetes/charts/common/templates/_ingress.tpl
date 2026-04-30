@@ -1,41 +1,68 @@
 {{- define "common.ingress" -}}
 {{- $ctx := .ctx -}}
-{{- $type := .type | default "traefik-private" -}}
 {{- $name := .name | default $ctx.Chart.Name -}}
 {{- $subdomain := .subdomain | default $name -}}
 {{- $port := .port | default 80 -}}
 {{- $path := .path | default "/" -}}
 {{- $pathSuffix := eq $path "/" | ternary "" (replace "/" "-" $path) -}}
-{{- $auth := true -}}
-{{- if hasKey . "auth" -}}
-{{- $auth = .auth -}}
+
+{{- /* Backward compatibility for 'type' */ -}}
+{{- $public := .public | default false -}}
+{{- if eq (.type | default "") "traefik-public" -}}
+  {{- $public = true -}}
 {{- end -}}
+
+{{- /* Backward compatibility for 'auth' boolean */ -}}
+{{- $auth := .auth -}}
+{{- if eq (kindOf $auth) "bool" -}}
+  {{- $auth = $auth | ternary "authenticated" "public" -}}
+{{- else -}}
+  {{- $auth = $auth | default "authenticated" -}}
+{{- end -}}
+
+{{- $group := .group | default "" -}}
 {{- $extraAnnotations := .annotations | default (dict) -}}
 
-{{- $isPublic := eq $type "traefik-public" -}}
+{{- /* Ingress name suffix for public instances */ -}}
 {{- $ingressSuffix := "" -}}
-{{- if $isPublic }}{{ $ingressSuffix = "-public" }}{{ end -}}
+{{- if $public }}{{ $ingressSuffix = "-public" }}{{ end -}}
 {{- $ingressName := printf "%s%s%s" $name $pathSuffix $ingressSuffix -}}
+
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ $ingressName }}
   namespace: {{ $ctx.Release.Namespace }}
   annotations:
-    {{- if $auth }}
-    traefik.ingress.kubernetes.io/router.middlewares: {{ $type }}-tinyauth@kubernetescrd
+    # 1. DNS Sync (Internal is always on via ExternalDNS Pi-hole, Public is opt-in)
+    {{- if $public }}
+    dns.external/enabled: "true"
+    dns.external/target: home.{{ $ctx.Values.domain }}
     {{- end }}
-    {{- if $isPublic }}
-    external-dns.alpha.kubernetes.io/target: home.{{ $ctx.Values.domain }}
+
+    # 2. Authentication Strategy
+    {{- if eq $auth "public" }}
+    ingress.pomerium.io/allow_public_unauthenticated_access: "true"
+    {{- else if eq $auth "authenticated" }}
+    ingress.pomerium.io/allow_any_authenticated_user: "true"
     {{- end }}
-    {{- if not (eq $path "/") }}
-    external-dns.alpha.kubernetes.io/ignore: "true"
-    {{- end }}
+
+    # 3. Authorization Policy
+    ingress.pomerium.io/policy: |
+      {{- if $group }}
+      - allow:
+          and:
+            - groups: { has: {{ $group }} }
+      {{- end }}
+      - deny:
+          and:
+            - source_ip: {{ $ctx.Values.network.routerIp }}
+
     {{- with $extraAnnotations }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
-  ingressClassName: {{ $type }}
+  ingressClassName: pomerium
   rules:
     - host: {{ $subdomain }}.{{ $ctx.Values.domain }}
       http:
