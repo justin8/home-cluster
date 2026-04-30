@@ -158,6 +158,23 @@ For granular control, define policies based on PocketID groups:
           - source_ip: {{ .Values.network.routerIp }}
   ```
 
+### Ingress for Apps with Internal OIDC
+
+If an application manages its own OIDC flow (e.g., Audiobookshelf) or requires WebSockets, the Ingress must preserve the original Host header, pass identity headers, and explicitly allow WebSockets with an infinite timeout to avoid connection drops and same-origin validation errors.
+
+```yaml
+annotations:
+  ingress.pomerium.io/preserve_host_header: "true"
+  ingress.pomerium.io/pass_identity_headers: "true"
+  ingress.pomerium.io/policy: |
+    - allow:
+        and:
+          - domain:
+              is: {{ .Values.domain }}
+      allow_websockets: true
+      timeout: 0s
+```
+
 ### Public vs Private Summary
 
 | Feature     | Private (Internal)        | Public (Internet)              |

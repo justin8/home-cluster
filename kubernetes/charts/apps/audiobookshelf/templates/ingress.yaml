@@ -8,6 +8,12 @@ metadata:
     ingress.pomerium.io/preserve_host_header: "true"
     ingress.pomerium.io/pass_identity_headers: "true"
     ingress.pomerium.io/policy: |
+      - allow:
+          and:
+            - domain:
+                is: {{ .Values.domain }}
+        allow_websockets: true
+        timeout: 0s
       - deny:
           and:
             - source_ip: {{ .Values.network.routerIp }}
