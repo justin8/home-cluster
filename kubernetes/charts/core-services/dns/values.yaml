@@ -24,6 +24,7 @@ external-dns-cloudflare:
   provider: cloudflare
   extraArgs:
     - --annotation-prefix=dns.external/
+    - --annotation-filter=dns.external/target=home.{{ .Values.domain }}
     - --ingress-class=traefik-public
     - --ingress-class=pomerium
   env:
