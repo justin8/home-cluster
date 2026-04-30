@@ -1,1 +1,24 @@
-{{- include "common.ingress" (dict "ctx" . "subdomain" "audiobookshelf" "type" "traefik-private" "auth" false) }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Chart.Name }}
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    ingress.pomerium.io/allow_public_unauthenticated_access: "true"
+    ingress.pomerium.io/policy: |
+      - deny:
+          and:
+            - source_ip: {{ .Values.network.routerIp }}
+spec:
+  ingressClassName: pomerium
+  rules:
+    - host: audiobookshelf.{{ .Values.domain }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Chart.Name }}
+                port:
+                  number: 80
