@@ -6,11 +6,10 @@ metadata:
   annotations:
     ingress.pomerium.io/policy: |
       - allow:
-          or:
+          and:
             - domain:
-                is: dray.id.au
-            - domain:
-                is: dray.be
+                not:
+                  is: ""
 spec:
   ingressClassName: pomerium
   rules:
