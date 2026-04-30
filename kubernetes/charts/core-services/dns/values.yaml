@@ -9,6 +9,7 @@ external-dns-pihole:
   provider:
     name: pihole
   extraArgs:
+    - --annotation-prefix=dns.internal/
     - --ingress-class=traefik-private
     - --ingress-class=pomerium
     - --pihole-server=http://pihole-web.dns.svc.cluster.local
@@ -22,7 +23,9 @@ external-dns-cloudflare:
     - traefik-proxy
   provider: cloudflare
   extraArgs:
+    - --annotation-prefix=dns.external/
     - --ingress-class=traefik-public
+    - --ingress-class=pomerium
   env:
     - name: CF_API_TOKEN
       valueFrom:

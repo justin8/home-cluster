@@ -1,3 +1,21 @@
-{{- include "common.ingress" (dict "ctx" . "type" "traefik-private" "port" 2283 "auth" false) }}
----
-{{- include "common.ingress" (dict "ctx" . "type" "traefik-public" "port" 2283 "auth" false) }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: immich-pomerium
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    ingress.pomerium.io/allow_public_unauthenticated_access: "true"
+    dns.external/target: home.{{ .Values.domain }}
+spec:
+  ingressClassName: pomerium
+  rules:
+  - host: immich.{{ .Values.domain }}
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: immich-server
+            port:
+              number: 2283
