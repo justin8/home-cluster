@@ -4,14 +4,8 @@ metadata:
   name: sonarr-pomerium
   namespace: {{ .Release.Namespace }}
   annotations:
+    ingress.pomerium.io/allow_any_authenticated_user: "true"
     ingress.pomerium.io/policy: |
-      - allow:
-          or:
-            - domain:
-                not:
-                  is: ""
-            - path:
-                prefix: /api
       - deny:
           and:
             - source_ip: {{ .Values.network.routerIp }}
@@ -22,6 +16,33 @@ spec:
     http:
       paths:
       - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: sonarr
+            port:
+              number: 8989
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: sonarr-pomerium-api
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    ingress.pomerium.io/policy: |
+      - allow:
+          and:
+            - source_ip: 0.0.0.0/0
+      - deny:
+          and:
+            - source_ip: {{ .Values.network.routerIp }}
+spec:
+  ingressClassName: pomerium
+  rules:
+  - host: sonarr.{{ .Values.domain }}
+    http:
+      paths:
+      - path: /api
         pathType: Prefix
         backend:
           service:
