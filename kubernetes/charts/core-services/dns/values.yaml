@@ -10,6 +10,7 @@ external-dns-pihole:
     name: pihole
   extraArgs:
     - --annotation-prefix=dns.internal/
+    - --annotation-filter=dns.internal/enabled=true
     - --ingress-class=traefik-private
     - --ingress-class=pomerium
     - --pihole-server=http://pihole-web.dns.svc.cluster.local
@@ -24,7 +25,7 @@ external-dns-cloudflare:
   provider: cloudflare
   extraArgs:
     - --annotation-prefix=dns.external/
-    - --annotation-filter=dns.external/target
+    - --annotation-filter=dns.external/enabled=true
     - --ingress-class=traefik-public
     - --ingress-class=pomerium
   env:

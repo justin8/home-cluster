@@ -5,6 +5,8 @@ metadata:
   namespace: {{ .Release.Namespace }}
   annotations:
     ingress.pomerium.io/allow_public_unauthenticated_access: "true"
+    dns.internal/enabled: "true"
+    dns.external/enabled: "true"
     dns.external/target: home.{{ .Values.domain }}
 spec:
   ingressClassName: pomerium

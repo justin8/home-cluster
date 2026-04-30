@@ -5,6 +5,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   annotations:
     ingress.pomerium.io/allow_any_authenticated_user: "true"
+    dns.internal/enabled: "true"
     ingress.pomerium.io/policy: |
       - deny:
           and:
@@ -30,6 +31,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   annotations:
     ingress.pomerium.io/allow_public_unauthenticated_access: "true"
+    dns.internal/enabled: "true"
     ingress.pomerium.io/policy: |
       - deny:
           and:
