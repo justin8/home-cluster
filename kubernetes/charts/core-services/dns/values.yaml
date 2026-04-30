@@ -10,7 +10,6 @@ external-dns-pihole:
     name: pihole
   extraArgs:
     - --annotation-prefix=dns.internal/
-    - --annotation-filter=dns.internal/enabled=true
     - --ingress-class=traefik-private
     - --ingress-class=pomerium
     - --pihole-server=http://pihole-web.dns.svc.cluster.local
