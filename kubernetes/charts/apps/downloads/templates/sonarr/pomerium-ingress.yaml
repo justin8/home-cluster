@@ -7,8 +7,8 @@ metadata:
     ingress.pomerium.io/allow_any_authenticated_user: "true"
     ingress.pomerium.io/policy: |
       - deny:
-          network:
-            is: 192.168.5.155
+          and:
+            - source_ip: 192.168.5.155
 spec:
   ingressClassName: pomerium
   rules:
