@@ -4,12 +4,7 @@ metadata:
   name: sonarr-pomerium
   namespace: {{ .Release.Namespace }}
   annotations:
-    ingress.pomerium.io/policy: |
-      - allow:
-          and:
-            - domain:
-                not:
-                  is: ""
+    ingress.pomerium.io/allow_any_authenticated_user: "true"
 spec:
   ingressClassName: pomerium
   rules:
