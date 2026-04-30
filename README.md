@@ -195,7 +195,7 @@ For detailed networking and DNS architecture information, see [docs/NETWORKING_A
 ### Key Network Components
 
 - **MetalLB**: Load balancer providing IPs from `192.168.5.80-100` pool
-- **DNS Services**: PiHole for internal DNS (served over Tailscale) + External DNS for automatic record management
+- **DNS Services**: PiHole for internal DNS (`192.168.5.53`) + External DNS for automatic record management
 - **Dual Ingress**: Separate public (`192.168.5.2`) and private (Tailscale only) ingress controllers
 - **Storage**: NAS at `192.168.5.5` (Tailscale enrolled) + Longhorn distributed storage; NFS traffic restricted to Tailscale network
 - **Zigbee Co-ordinator**: `192.168.5.6`

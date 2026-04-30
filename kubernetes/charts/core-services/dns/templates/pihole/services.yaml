@@ -15,6 +15,31 @@ spec:
       port: 80
       targetPort: 80
 ---
+# LoadBalancer service for DNS traffic
+apiVersion: v1
+kind: Service
+metadata:
+  name: dns
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: pihole
+  annotations:
+    metallb.io/address-pool: dns-server
+spec:
+  type: LoadBalancer
+  selector:
+    app: pihole
+    pihole/type: primary
+  ports:
+    - name: dns-udp
+      port: 53
+      targetPort: 53
+      protocol: UDP
+    - name: dns-tcp
+      port: 53
+      targetPort: 53
+      protocol: TCP
+---
 # LoadBalancer service for DNS traffic (but on Tailscale)
 apiVersion: v1
 kind: Service
@@ -24,6 +49,7 @@ metadata:
   labels:
     app: pihole
   annotations:
+    metallb.io/address-pool: dns-server
     tailscale.com/hostname: pihole
 spec:
   type: LoadBalancer
