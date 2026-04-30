@@ -1,3 +1,0 @@
-{{- include "common.ingress" (dict "ctx" . "name" "sonarr" "type" "traefik-private" "port" 8989 "auth" true) }}
----
-{{- include "common.ingress" (dict "ctx" . "name" "sonarr" "type" "traefik-private" "port" 8989 "auth" false "path" "/api") }}

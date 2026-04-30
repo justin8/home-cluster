@@ -10,6 +10,7 @@ external-dns-pihole:
     name: pihole
   extraArgs:
     - --ingress-class=traefik-private
+    - --ingress-class=pomerium
     - --pihole-server=http://pihole-web.dns.svc.cluster.local
     - --pihole-api-version=6
 
