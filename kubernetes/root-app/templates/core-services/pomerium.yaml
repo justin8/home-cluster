@@ -24,6 +24,9 @@ spec:
                 value:
                   metallb.universe.tf/address-pool: pomerium-ingress
                   metallb.universe.tf/loadBalancerIPs: {{ .Values.network.pomeriumIngress }}
+              - op: add
+                path: /spec/externalTrafficPolicy
+                value: Local
     - repoURL: https://github.com/justin8/home-cluster.git
       targetRevision: main
       path: kubernetes/charts/core-services/pomerium
