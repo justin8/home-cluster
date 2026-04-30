@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: sonarr-pomerium
+  name: sonarr
   namespace: {{ .Release.Namespace }}
   annotations:
     ingress.pomerium.io/allow_any_authenticated_user: "true"
@@ -26,7 +26,7 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: sonarr-pomerium-api
+  name: sonarr-api
   namespace: {{ .Release.Namespace }}
   annotations:
     ingress.pomerium.io/allow_public_unauthenticated_access: "true"
