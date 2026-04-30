@@ -29,10 +29,8 @@ metadata:
   name: sonarr-pomerium-api
   namespace: {{ .Release.Namespace }}
   annotations:
+    ingress.pomerium.io/allow_public_unauthenticated_access: "true"
     ingress.pomerium.io/policy: |
-      - allow:
-          and:
-            - source_ip: 0.0.0.0/0
       - deny:
           and:
             - source_ip: {{ .Values.network.routerIp }}
