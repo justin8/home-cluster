@@ -17,6 +17,6 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: immich-server
+            name: immich
             port:
               number: 2283
