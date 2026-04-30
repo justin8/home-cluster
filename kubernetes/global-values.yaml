@@ -7,8 +7,9 @@ PGID: "2000"
 appStoragePath: /mnt/pool/apps
 # Shared IP addresses
 network:
-  metallbRange: "192.168.5.80-192.168.5.100"
+  routerIp: "192.168.5.1"
   publicIngress: "192.168.5.3"
   pomeriumIngress: "192.168.5.4"
+  metallbRange: "192.168.5.80-192.168.5.100"
   privateIngress: "100.71.142.73"
   storageServer: "100.92.202.28"

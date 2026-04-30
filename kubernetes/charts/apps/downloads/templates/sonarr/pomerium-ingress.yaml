@@ -8,7 +8,7 @@ metadata:
     ingress.pomerium.io/policy: |
       - deny:
           and:
-            - source_ip: 192.168.5.155
+            - source_ip: {{ .Values.network.routerIp }}
 spec:
   ingressClassName: pomerium
   rules:
