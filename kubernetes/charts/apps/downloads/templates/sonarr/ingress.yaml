@@ -1,57 +1,14 @@
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: sonarr
-  namespace: {{ .Release.Namespace }}
-  annotations:
-    ingress.pomerium.io/allow_websockets: "true"
-    ingress.pomerium.io/timeout: "0s"
-    ingress.pomerium.io/policy: |
-      - allow:
-          and:
-            - authenticated_user: true
-      - deny:
-          and:
-            - source_ip: {{ .Values.network.routerIp }}
-spec:
-  ingressClassName: pomerium
-  rules:
-  - host: sonarr.{{ .Values.domain }}
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: sonarr
-            port:
-              number: 8989
+{{ include "common.pomeriumIngress" (dict
+  "ctx" .
+  "name" "sonarr"
+  "port" 8989
+) }}
 ---
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: sonarr-api
-  namespace: {{ .Release.Namespace }}
-  annotations:
-    ingress.pomerium.io/allow_websockets: "true"
-    ingress.pomerium.io/timeout: "0s"
-    ingress.pomerium.io/policy: |
-      - allow:
-          and:
-            - accept: true
-      - deny:
-          and:
-            - source_ip: {{ .Values.network.routerIp }}
-spec:
-  ingressClassName: pomerium
-  rules:
-  - host: sonarr.{{ .Values.domain }}
-    http:
-      paths:
-      - path: /api
-        pathType: Prefix
-        backend:
-          service:
-            name: sonarr
-            port:
-              number: 8989
+{{ include "common.pomeriumIngress" (dict
+  "ctx" .
+  "name" "sonarr-api"
+  "subdomain" "sonarr"
+  "port" 8989
+  "path" "/api"
+  "allowedUsers" "all"
+) }}

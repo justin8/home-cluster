@@ -1,29 +1,6 @@
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: qbittorrent
-  namespace: {{ .Release.Namespace }}
-  annotations:
-    ingress.pomerium.io/preserve_host_header: "true"
-    ingress.pomerium.io/pass_identity_headers: "true"
-    ingress.pomerium.io/policy: |
-      - allow:
-          and:
-            - user:
-                in: {{ .Values.userGroups.admin }}
-      - deny:
-          and:
-            - source_ip: {{ .Values.network.routerIp }}
-spec:
-  ingressClassName: pomerium
-  rules:
-    - host: qbittorrent.{{ .Values.domain }}
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: qbittorrent
-                port:
-                  number: 8080
+{{ include "common.pomeriumIngress" (dict
+  "ctx" .
+  "name" "qbittorrent"
+  "port" 8080
+  "allowedUsers" "admin"
+) }}

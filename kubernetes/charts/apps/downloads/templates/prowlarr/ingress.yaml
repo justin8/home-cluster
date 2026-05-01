@@ -1,31 +1,6 @@
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: prowlarr
-  namespace: {{ .Release.Namespace }}
-  annotations:
-    ingress.pomerium.io/preserve_host_header: "true"
-    ingress.pomerium.io/pass_identity_headers: "true"
-    ingress.pomerium.io/allow_websockets: "true"
-    ingress.pomerium.io/timeout: "0s"
-    ingress.pomerium.io/policy: |
-      - allow:
-          and:
-            - user:
-                in: {{ .Values.userGroups.admin }}
-      - deny:
-          and:
-            - source_ip: {{ .Values.network.routerIp }}
-spec:
-  ingressClassName: pomerium
-  rules:
-    - host: prowlarr.{{ .Values.domain }}
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: prowlarr
-                port:
-                  number: 9696
+{{ include "common.pomeriumIngress" (dict
+  "ctx" .
+  "name" "prowlarr"
+  "port" 9696
+  "allowedUsers" "admin"
+) }}
