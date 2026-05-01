@@ -4,6 +4,8 @@ metadata:
   name: sonarr
   namespace: {{ .Release.Namespace }}
   annotations:
+    ingress.pomerium.io/allow_websockets: "true"
+    ingress.pomerium.io/timeout: "0s"
     ingress.pomerium.io/policy: |
       - allow:
           and:
@@ -31,6 +33,8 @@ metadata:
   name: sonarr-api
   namespace: {{ .Release.Namespace }}
   annotations:
+    ingress.pomerium.io/allow_websockets: "true"
+    ingress.pomerium.io/timeout: "0s"
     ingress.pomerium.io/policy: |
       - allow:
           and:
