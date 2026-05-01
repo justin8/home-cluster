@@ -4,8 +4,10 @@ metadata:
   name: {{ .Chart.Name }}
   namespace: {{ .Release.Namespace }}
   annotations:
-    ingress.pomerium.io/allow_any_authenticated_user: "true"
     ingress.pomerium.io/policy: |
+      - allow:
+          and:
+            - authenticated_user: true
       - deny:
           and:
             - source_ip: {{ .Values.network.routerIp }}

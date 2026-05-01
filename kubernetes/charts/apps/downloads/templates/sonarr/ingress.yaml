@@ -4,8 +4,10 @@ metadata:
   name: sonarr
   namespace: {{ .Release.Namespace }}
   annotations:
-    ingress.pomerium.io/allow_any_authenticated_user: "true"
     ingress.pomerium.io/policy: |
+      - allow:
+          and:
+            - authenticated_user: true
       - deny:
           and:
             - source_ip: {{ .Values.network.routerIp }}
@@ -29,8 +31,10 @@ metadata:
   name: sonarr-api
   namespace: {{ .Release.Namespace }}
   annotations:
-    ingress.pomerium.io/allow_public_unauthenticated_access: "true"
     ingress.pomerium.io/policy: |
+      - allow:
+          and:
+            - accept: true
       - deny:
           and:
             - source_ip: {{ .Values.network.routerIp }}

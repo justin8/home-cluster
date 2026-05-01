@@ -88,11 +88,13 @@ kind: Ingress
 metadata:
   name: my-app
   annotations:
-    # 1. DNS Sync (Split-horizon)
-    # Pi-hole (Internal) always picks up the ingress.
-    # To enable Cloudflare (Public), add these two:
-    dns.external/enabled: "true"
-    dns.external/target: home.{{ .Values.domain }}
+    ingress.pomerium.io/policy: |
+      - allow:
+          and:
+            - authenticated_user: true
+      - deny:
+          and:
+            - source_ip: {{ .Values.network.routerIp }}
 spec:
   ingressClassName: pomerium
   rules:
@@ -116,24 +118,46 @@ Use the shortcut annotation for services that should be accessible to anyone in 
 
 ```yaml
 annotations:
-  ingress.pomerium.io/allow_any_authenticated_user: "true"
   ingress.pomerium.io/policy: |
+    - allow:
+        and:
+          - authenticated_user: true
     - deny:
         and:
           - source_ip: {{ .Values.network.routerIp }}
 ```
 
-#### 2. Public / Unauthenticated (APIs)
+#### 2. Unauthenticated
 
-Use this for paths that handle their own auth or must be public.
-**Note:** Public endpoints should NOT deny the `routerIp` unless specific routing loops occur.
+Use this for paths that handle their own auth or must be unauthed.
 
 ```yaml
 annotations:
-  ingress.pomerium.io/allow_public_unauthenticated_access: "true"
+  ingress.pomerium.io/policy: |
+    - allow:
+        and:
+          - accept: true
+    - deny:
+        and:
+          - source_ip: {{ .Values.network.routerIp }}
 ```
 
-#### 3. OIDC Group Restrictions
+#### 3. Public endpoint
+
+Use this to make a public ingress. They should be private by default unless explicitly requested to be public. All that is needed is to enable external DNS and to not deny the router IP.
+
+```yaml
+annotations:
+    # Pi-hole (Internal) always picks up the ingress.
+    # To enable Cloudflare (Public), add these two, and don't deny the routerIp:
+    dns.external/enabled: "true"
+    dns.external/target: home.{{ .Values.domain }}  ingress.pomerium.io/policy: |
+    - allow:
+        and:
+          - authenticated_user: true
+```
+
+#### 4. OIDC Group Restrictions
 
 For granular control, define policies based on PocketID groups:
 
@@ -160,28 +184,23 @@ For granular control, define policies based on PocketID groups:
 
 ### Ingress for Apps with Internal OIDC
 
-If an application manages its own OIDC flow (e.g., Audiobookshelf) or requires WebSockets, the Ingress must preserve the original Host header, pass identity headers, and explicitly allow WebSockets with an infinite timeout to avoid connection drops and same-origin validation errors.
+If an application manages its own OIDC flow (e.g. Kavita), the Ingress must preserve the original Host header and pass identity headers:
 
 ```yaml
 annotations:
   ingress.pomerium.io/preserve_host_header: "true"
   ingress.pomerium.io/pass_identity_headers: "true"
-  ingress.pomerium.io/policy: |
-    - allow:
-        and:
-          - domain:
-              is: {{ .Values.domain }}
-      allow_websockets: true
-      timeout: 0s
 ```
 
-### Public vs Private Summary
+### Ingress for Apps with websockets
 
-| Feature     | Private (Internal)        | Public (Internet)              |
-| :---------- | :------------------------ | :----------------------------- |
-| **DNS**     | Automatic (Pi-hole)       | `dns.external/enabled: "true"` |
-| **IP Deny** | **Required** (`routerIp`) | Generally not used             |
-| **Auth**    | Usually `authenticated`   | Usually `public` (for APIs)    |
+If an application requires websockets (e.g., Audiobookshelf), the Ingress must explicitly allow WebSockets with an infinite timeout by specifying:
+
+```yaml
+annotations:
+  ingress.pomerium.io/allow_websockets: "true"
+  ingress.pomerium.io/timeout: "0s"
+```
 
 ## Security & Secrets
 

@@ -11,7 +11,7 @@ metadata:
     ingress.pomerium.io/policy: |
       - allow:
           and:
-            - accept: true
+            - authenticated_user: true
       - deny:
           and:
             - source_ip: {{ .Values.network.routerIp }}
