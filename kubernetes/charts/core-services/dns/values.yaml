@@ -4,7 +4,6 @@ external-dns-pihole:
   registry: noop
   sources:
     - ingress
-    - traefik-proxy
     - service
   provider:
     name: pihole
@@ -19,7 +18,6 @@ external-dns-cloudflare:
   policy: sync
   sources:
     - ingress
-    - traefik-proxy
   provider: cloudflare
   extraArgs:
     - --annotation-prefix=dns.external/
