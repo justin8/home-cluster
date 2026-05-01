@@ -10,7 +10,7 @@ shelfmarkVolumeSizeGi: 1
 images:
   shelfmark:
     repository: ghcr.io/calibrain/shelfmark
-    tag: 1.2.1
+    tag: v1.2.2
     pullPolicy: IfNotPresent
   seerr:
     repository: ghcr.io/seerr-team/seerr
