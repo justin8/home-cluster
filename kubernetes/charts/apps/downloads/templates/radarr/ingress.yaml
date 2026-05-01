@@ -1,3 +1,57 @@
-{{- include "common.ingress" (dict "ctx" . "name" "radarr" "type" "traefik-private" "port" 7878 "auth" true) }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: radarr
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    ingress.pomerium.io/allow_websockets: "true"
+    ingress.pomerium.io/timeout: "0s"
+    ingress.pomerium.io/policy: |
+      - allow:
+          and:
+            - authenticated_user: true
+      - deny:
+          and:
+            - source_ip: {{ .Values.network.routerIp }}
+spec:
+  ingressClassName: pomerium
+  rules:
+  - host: radarr.{{ .Values.domain }}
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: radarr
+            port:
+              number: 7878
 ---
-{{- include "common.ingress" (dict "ctx" . "name" "radarr" "type" "traefik-private" "port" 7878 "auth" false "path" "/api") }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: radarr-api
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    ingress.pomerium.io/allow_websockets: "true"
+    ingress.pomerium.io/timeout: "0s"
+    ingress.pomerium.io/policy: |
+      - allow:
+          and:
+            - accept: true
+      - deny:
+          and:
+            - source_ip: {{ .Values.network.routerIp }}
+spec:
+  ingressClassName: pomerium
+  rules:
+  - host: radarr.{{ .Values.domain }}
+    http:
+      paths:
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: radarr
+            port:
+              number: 7878

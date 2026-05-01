@@ -1,5 +1,28 @@
-{{- include "common.ingress" (dict "ctx" . "name" "seerr" "type" "traefik-public" "port" 5055 "auth" true) }}
----
-{{- include "common.ingress" (dict "ctx" . "name" "seerr" "type" "traefik-private" "port" 5055 "auth" true) }}
----
-{{- include "common.ingress" (dict "ctx" . "name" "seerr" "type" "traefik-private" "port" 5055 "auth" false "path" "/api") }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: seerr
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    dns.external/enabled: "true"
+    dns.external/target: home.{{ .Values.domain }}  
+    ingress.pomerium.io/allow_websockets: "true"
+    ingress.pomerium.io/timeout: "0s"
+    ingress.pomerium.io/policy: |
+      - allow:
+          and:
+            - authenticated_user: true
+
+spec:
+  ingressClassName: pomerium
+  rules:
+  - host: seerr.{{ .Values.domain }}
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: seerr
+            port:
+              number: 5055
