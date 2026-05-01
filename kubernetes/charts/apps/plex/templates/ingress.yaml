@@ -1,3 +1,7 @@
-{{- include "common.ingress" (dict "ctx" . "type" "traefik-private" "port" 32400 "auth" false) }}
----
-{{- include "common.ingress" (dict "ctx" . "type" "traefik-public" "port" 32400 "auth" false) }}
+{{ include "common.pomeriumIngress" (dict
+  "ctx" .
+  "name" .Chart.Name
+  "port" 32400
+  "type" "public"
+  "allowedUsers" "all"
+) }}

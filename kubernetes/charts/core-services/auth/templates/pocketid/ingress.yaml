@@ -1,3 +1,7 @@
-{{- include "common.ingress" (dict "ctx" . "name" "pocketid" "port" 1411 "type" "traefik-private" "auth" false) }}
----
-{{- include "common.ingress" (dict "ctx" . "name" "pocketid" "port" 1411 "type" "traefik-public" "auth" false) }}
+{{ include "common.pomeriumIngress" (dict
+  "ctx" .
+  "name" "pocketid"
+  "port" 1411
+  "type" "public"
+  "allowedUsers" "all"
+) }}
