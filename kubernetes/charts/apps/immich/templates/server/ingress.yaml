@@ -1,22 +1,7 @@
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: immich
-  namespace: {{ .Release.Namespace }}
-  annotations:
-    ingress.pomerium.io/allow_public_unauthenticated_access: "true"
-    dns.external/enabled: "true"
-    dns.external/target: home.{{ .Values.domain }}
-spec:
-  ingressClassName: pomerium
-  rules:
-  - host: immich.{{ .Values.domain }}
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: immich
-            port:
-              number: 2283
+{{ include "common.pomeriumIngress" (dict
+  "ctx" .
+  "name" "immich"
+  "port" 2283
+  "type" "public"
+  "allowedUsers" "all"
+) }}
