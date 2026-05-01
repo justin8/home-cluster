@@ -2,6 +2,7 @@
   "ctx" .
   "name" "argocd"
   "subdomain" "argocd"
+  "serviceName" "argo-cd-argocd-server"
   "port" 80
   "allowedUsers" "admin"
 ) }}
@@ -10,6 +11,7 @@
   "ctx" .
   "name" "argocd-webhook"
   "subdomain" "argocd"
+  "serviceName" "argo-cd-argocd-server"
   "port" 80
   "path" "/api/webhook"
   "type" "public"

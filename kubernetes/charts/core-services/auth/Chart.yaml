@@ -1,6 +1,6 @@
 apiVersion: v2
 name: auth
-description: Authentication services - PocketID and TinyAuth
+description: Authentication services - PocketID
 version: 0.1.0
 dependencies:
   - name: common

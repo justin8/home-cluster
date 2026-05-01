@@ -1,6 +1,7 @@
 {{- define "common.pomeriumIngress" -}}
 {{- $ctx := .ctx -}}
 {{- $name := .name | default $ctx.Chart.Name -}}
+{{- $serviceName := .serviceName | default $name -}}
 {{- $subdomain := .subdomain | default $name -}}
 {{- $port := .port | default 80 -}}
 {{- $path := .path | default "/" -}}
@@ -50,7 +51,7 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: {{ $name }}
+                name: {{ $serviceName }}
                 port:
                   number: {{ $port }}
 {{- end }}
