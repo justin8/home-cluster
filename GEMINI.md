@@ -157,31 +157,6 @@ annotations:
           - authenticated_user: true
 ```
 
-#### 4. OIDC Group Restrictions
-
-For granular control, define policies based on PocketID groups:
-
-- **`admin`**: For administrative portals (ArgoCD, Longhorn).
-  ```yaml
-  ingress.pomerium.io/policy: |
-    - allow:
-        and:
-          - groups: { has: admin }
-    - deny:
-        and:
-          - source_ip: {{ .Values.network.routerIp }}
-  ```
-- **`private`**: For restricted sensitive tools.
-  ```yaml
-  ingress.pomerium.io/policy: |
-    - allow:
-        and:
-          - groups: { has: private }
-    - deny:
-        and:
-          - source_ip: {{ .Values.network.routerIp }}
-  ```
-
 ### Ingress for Apps with Internal OIDC
 
 If an application manages its own OIDC flow (e.g. Kavita), the Ingress must preserve the original Host header and pass identity headers:
