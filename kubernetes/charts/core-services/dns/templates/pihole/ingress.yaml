@@ -1,1 +1,7 @@
-{{- include "common.ingress" (dict "ctx" . "name" "pihole-web" "subdomain" "pihole" "auth" true) -}}
+{{ include "common.pomeriumIngress" (dict
+  "ctx" .
+  "name" "pihole-web"
+  "subdomain" "pihole"
+  "port" 80
+  "allowedUsers" "admin"
+) }}

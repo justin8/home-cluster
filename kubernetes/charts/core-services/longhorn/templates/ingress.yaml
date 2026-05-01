@@ -1,1 +1,7 @@
-{{- include "common.ingress" (dict "ctx" . "name" "longhorn-frontend" "subdomain" "longhorn" "auth" true) -}}
+{{ include "common.pomeriumIngress" (dict
+  "ctx" .
+  "name" "longhorn-frontend"
+  "subdomain" "longhorn"
+  "port" 80
+  "allowedUsers" "admin"
+) }}

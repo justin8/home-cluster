@@ -1,1 +1,6 @@
-{{- include "common.ingress" (dict "ctx" . "type" "traefik-private" "port" 8384 "auth" true) }}
+{{ include "common.pomeriumIngress" (dict
+  "ctx" .
+  "name" "syncthing"
+  "port" 8384
+  "allowedUsers" "admin"
+) }}
