@@ -1,1 +1,6 @@
-{{- include "common.ingress" (dict "ctx" . "name" "zigbee2mqtt" "port" 8080 "auth" true) -}}
+{{ include "common.pomeriumIngress" (dict
+  "ctx" .
+  "name" "zigbee2mqtt"
+  "port" 8080
+  "allowedUsers" "admin"
+) }}

@@ -1,3 +1,8 @@
-{{- include "common.ingress" (dict "ctx" . "type" "traefik-private" "name" "home-assistant-http" "subdomain" "home-assistant" "port" 8123 "auth" false) }}
----
-{{- include "common.ingress" (dict "ctx" . "type" "traefik-public" "name" "home-assistant-http" "subdomain" "home-assistant" "port" 8123 "auth" false) }}
+{{ include "common.pomeriumIngress" (dict
+  "ctx" .
+  "name" "home-assistant-http"
+  "subdomain" "home-assistant"
+  "port" 8123
+  "type" "public"
+  "allowedUsers" "all"
+) }}

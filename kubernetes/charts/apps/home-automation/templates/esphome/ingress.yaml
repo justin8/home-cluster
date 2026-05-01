@@ -1,1 +1,6 @@
-{{- include "common.ingress" (dict "ctx" . "type" "traefik-private" "name" "esphome" "subdomain" "esphome" "port" 6052 "auth" true) }}
+{{ include "common.pomeriumIngress" (dict
+  "ctx" .
+  "name" "esphome"
+  "port" 6052
+  "allowedUsers" "admin"
+) }}
