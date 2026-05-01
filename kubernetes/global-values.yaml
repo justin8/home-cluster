@@ -14,3 +14,9 @@ network:
   privateIngress: "100.71.142.73"
   storageServer: "100.92.202.28"
   dnsServer: "192.168.5.53"
+userGroups:
+  admin:
+    - "b26fb09c-67fb-4cc3-bbf3-c242f47838f2"
+  private:
+    - "b26fb09c-67fb-4cc3-bbf3-c242f47838f2"
+    - "4f1efca6-1f08-4895-9e00-24886fea2585"

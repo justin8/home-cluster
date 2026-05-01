@@ -10,7 +10,7 @@ metadata:
       - allow:
           and:
             - user:
-                in: [b26fb09c-67fb-4cc3-bbf3-c242f47838f2]
+                in: {{ .Values.userGroups.admin }}
       - deny:
           and:
             - source_ip: {{ .Values.network.routerIp }}
