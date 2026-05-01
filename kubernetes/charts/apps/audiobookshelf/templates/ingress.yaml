@@ -4,16 +4,14 @@ metadata:
   name: {{ .Chart.Name }}
   namespace: {{ .Release.Namespace }}
   annotations:
-    ingress.pomerium.io/allow_any_authenticated_user: "true"
     ingress.pomerium.io/preserve_host_header: "true"
     ingress.pomerium.io/pass_identity_headers: "true"
+    ingress.pomerium.io/allow_websockets: "true"
+    ingress.pomerium.io/timeout: "0s"
     ingress.pomerium.io/policy: |
       - allow:
           and:
-            - domain:
-                is: {{ .Values.domain }}
-        allow_websockets: true
-        timeout: 0s
+            - accept: true
       - deny:
           and:
             - source_ip: {{ .Values.network.routerIp }}
