@@ -1,48 +1,17 @@
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: argocd
-  namespace: argocd
-  annotations:
-    traefik.ingress.kubernetes.io/router.middlewares: traefik-private-tinyauth@kubernetescrd
-    traefik.ingress.kubernetes.io/router.priority: "10"
-spec:
-  ingressClassName: traefik-private
-  rules:
-    - host: argocd.{{ .Values.domain }}
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: argo-cd-argocd-server
-                port:
-                  number: 80
-  tls:
-    - hosts:
-        - argocd.{{ .Values.domain }}
+{{ include "common.pomeriumIngress" (dict
+  "ctx" .
+  "name" "argocd"
+  "subdomain" "argocd"
+  "port" 80
+  "allowedUsers" "admin"
+) }}
 ---
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: argocd-webhook
-  namespace: {{ .Release.Namespace }}
-  annotations:
-    external-dns.alpha.kubernetes.io/target: home.{{ .Values.domain }}
-spec:
-  ingressClassName: traefik-public
-  rules:
-    - host: argocd.{{ .Values.domain }}
-      http:
-        paths:
-          - path: /api/webhook
-            pathType: Prefix
-            backend:
-              service:
-                name: argo-cd-argocd-server
-                port:
-                  number: 80
-  tls:
-    - hosts:
-        - argocd.{{ .Values.domain }}
+{{ include "common.pomeriumIngress" (dict
+  "ctx" .
+  "name" "argocd-webhook"
+  "subdomain" "argocd"
+  "port" 80
+  "path" "/api/webhook"
+  "type" "public"
+  "allowedUsers" "all"
+) }}
