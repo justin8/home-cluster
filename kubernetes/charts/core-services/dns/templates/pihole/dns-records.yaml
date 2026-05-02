@@ -1,4 +1,4 @@
-# Custom DNS record: storage.domain -> NFS IP
+# DNS record: storage.domain -> NFS IP
 apiVersion: v1
 kind: Service
 metadata:
@@ -7,6 +7,26 @@ metadata:
   annotations:
     external-dns.alpha.kubernetes.io/hostname: storage.{{ .Values.domain }}
     external-dns.alpha.kubernetes.io/target: {{ .Values.network.storageServer }}
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+---
+# DNS record: authenticate.domain -> Pomerium ingress IP
+apiVersion: v1
+kind: Service
+metadata:
+  name: authenticate-dns-record
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    dns.internal/hostname: authenticate.{{ .Values.domain }}
+    dns.internal/target: {{ .Values.network.pomeriumIngress }}
+    dns.external/enabled: "true"
+    dns.external/hostname: authenticate.{{ .Values.domain }}
+    dns.external/target: home.{{ .Values.domain }}
 spec:
   type: ClusterIP
   clusterIP: None
