@@ -18,6 +18,7 @@ external-dns-cloudflare:
   policy: sync
   sources:
     - ingress
+    - service
   provider: cloudflare
   extraArgs:
     - --annotation-prefix=dns.external/
