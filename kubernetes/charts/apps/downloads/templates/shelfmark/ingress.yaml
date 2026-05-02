@@ -2,5 +2,5 @@
   "ctx" .
   "name" "shelfmark"
   "port" 8084
-  "allowedUsers" "admin"
+  "type" "public"
 ) }}
