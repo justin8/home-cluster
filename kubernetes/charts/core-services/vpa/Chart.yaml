@@ -4,5 +4,5 @@ description: Vertical Pod Autoscaler wrapper chart
 version: 0.1.0
 dependencies:
   - name: vertical-pod-autoscaler
-    version: 0.8.1
+    version: 0.9.0
     repository: https://kubernetes.github.io/autoscaler
