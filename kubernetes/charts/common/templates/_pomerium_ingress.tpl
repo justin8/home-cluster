@@ -37,9 +37,9 @@ metadata:
                 in: {{ $ctx.Values.userGroups.admin }}
             {{- end }}
       {{- if not $isPublic }}
-      - deny:
-          and:
-            - source_ip: {{ $ctx.Values.network.routerIp }}
+      - deny:  
+          not:
+            - source_ip: ["{{ $ctx.Values.network.lanIpRange }}", "{{ $ctx.Values.network.tailscaleIpRange }}", "{{ $ctx.Values.network.clusterPodNet }}"]
       {{- end }}
 spec:
   ingressClassName: pomerium

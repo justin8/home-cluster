@@ -8,36 +8,36 @@ The cluster uses [Pocket ID](https://github.com/pocket-id/pocket-id) as the cent
 ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
 │    User     │    │ Pocket ID   │    │  Pomerium   │    │   Service   │
 │  (Browser)  │    │ (Identity   │    │ (IAP/Ingress)│    │ (Protected  │
-│             │    │  Provider)  │    │             │    │  Backend)   │
-└──────┬──────┘    └──────┬──────┘    └──────┬──────┘    └──────┬──────┘
-       │                  │                  │                  │
-       │ 1. Access        │                  │                  │
-       │ https://app.dom  │                  │                  │
-       ├────────────────────────────────────►│                  │
-       │                  │                  │                  │
-       │ 2. Redirect to   │                  │                  │
-       │ Pomerium Auth    │                  │                  │
-       │◄────────────────────────────────────┤                  │
-       │                  │                  │                  │
-       │ 3. Handshake with│                  │                  │
-       │ PocketID (OIDC)  │                  │                  │
-       │◄─────────────────┼──────────────────┤                  │
-       │                  │                  │                  │
-       │ 4. Login &       │                  │                  │
-       │ Consent          │                  │                  │
-       ├─────────────────►│                  │                  │
-       │                  │                  │                  │
-       │ 5. Callback with │                  │                  │
-       │ Auth Code        │                  │                  │
-       ├────────────────────────────────────►│                  │
-       │                  │                  │                  │
-       │                  │ 6. Verify Policy │                  │
-       │                  │ (Groups/Claims)  │                  │
-       │                  │◄─────────────────┤                  │
-       │                  │                  │                  │
-       │ 7. Set Session   │                  │                  │
-       │ Cookie & Proxy   │                  │                  │
-       │◄────────────────────────────────────┼─────────────────►│
+│             │    │  Provider)  │    │              │    │  Backend)   │
+└──────┬──────┘    └──────┬──────┘    └──────┬───────┘    └──────┬──────┘
+       │                  │                  │                   │
+       │ 1. Access        │                  │                   │
+       │ https://app.dom  │                  │                   │
+       ├────────────────────────────────────►│                   │
+       │                  │                  │                   │
+       │ 2. Redirect to   │                  │                   │
+       │ Pomerium Auth    │                  │                   │
+       │◄────────────────────────────────────┤                   │
+       │                  │                  │                   │
+       │ 3. Handshake with│                  │                   │
+       │ PocketID (OIDC)  │                  │                   │
+       │◄─────────────────┼──────────────────┤                   │
+       │                  │                  │                   │
+       │ 4. Login &       │                  │                   │
+       │ Consent          │                  │                   │
+       ├─────────────────►│                  │                   │
+       │                  │                  │                   │
+       │ 5. Callback with │                  │                   │
+       │ Auth Code        │                  │                   │
+       ├────────────────────────────────────►│                   │
+       │                  │                  │                   │
+       │                  │ 6. Verify Policy │                   │
+       │                  │ (Groups/Claims)  │                   │
+       │                  │◄─────────────────┤                   │
+       │                  │                  │                   │
+       │ 7. Set Session   │                  │                   │
+       │ Cookie & Proxy   │                  │                   │
+       │◄────────────────────────────────────┼──────────────────►│
 ```
 
 ## Pomerium Policies
@@ -73,14 +73,16 @@ Pomerium evaluates groups provided by PocketID in the ID Token.
 #### Example: Admin Only
 
 ```yaml
-annotations:
-  ingress.pomerium.io/policy: |
-    - allow:
-        and:
-          - groups: { has: admin }
-    - deny:
-        and:
-          - source_ip: {{ .Values.network.routerIp }}
+{
+  {
+    include "common.pomeriumIngress" (dict
+    "ctx" .
+    "name" "my-app"
+    "port" 80
+    "allowedUsers" "admin"
+    ),
+  },
+}
 ```
 
 ## Managing OIDC Clients

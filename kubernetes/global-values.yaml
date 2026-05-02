@@ -7,7 +7,9 @@ PGID: "2000"
 appStoragePath: /mnt/pool/apps
 # Shared IP addresses
 network:
-  routerIp: "192.168.5.1"
+  lanIpRange: "192.168.5.0/24"
+  tailscaleIpRange: "100.64.0.0/10"
+  clusterPodNet: "10.244.0.0/16"
   publicIngress: "192.168.5.3"
   pomeriumIngress: "192.168.5.4"
   metallbRange: "192.168.5.80-192.168.5.100"

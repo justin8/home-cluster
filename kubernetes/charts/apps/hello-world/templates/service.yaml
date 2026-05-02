@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello-world
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    dns.external/enabled: "true"
+    dns.external/target: home.{{ .Values.domain }}
+spec:
+  selector:
+    app: hello-world
+  ports:
+    - port: 80
+      targetPort: 80

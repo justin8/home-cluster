@@ -76,106 +76,33 @@ volumes:
 
 ## Ingress Pattern (Pomerium)
 
-The cluster uses **Pomerium** as the sole Ingress Controller and Identity-Aware Proxy. **Do not use shared templates for ingresses; define them manually in the application chart.**
+The cluster uses **Pomerium** as the sole Ingress Controller and Identity-Aware Proxy. **Always use the `common.pomeriumIngress` template from the common chart.**
 
-### Standard Ingress Structure
-
-Every ingress must use `ingressClassName: pomerium`.
+### Template Usage
 
 ```yaml
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: my-app
-  annotations:
-    ingress.pomerium.io/policy: |
-      - allow:
-          and:
-            - authenticated_user: true
-      - deny:
-          and:
-            - source_ip: {{ .Values.network.routerIp }}
-spec:
-  ingressClassName: pomerium
-  rules:
-    - host: my-app.{{ .Values.domain }}
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: my-service
-                port: { number: 80 }
+{{ include "common.pomeriumIngress" (dict
+  "ctx" .
+  "name" "my-app"
+  "subdomain" "my-app"      # optional, defaults to name
+  "port" 80                 # optional, defaults to 80
+  "path" "/"                # optional, defaults to /
+  "serviceName" "my-svc"    # optional, defaults to name
+  "type" "private"          # optional: private (default) or public
+  "allowedUsers" "authed"   # optional: authed (default), all, private, admin
+) }}
 ```
 
-### Authentication & Authorization
+### Parameters
 
-#### 1. All Valid Users (Private Web UI)
+- **`type`**: `private` (default) adds a deny rule blocking non-LAN/Tailscale traffic. `public` enables Cloudflare DNS and removes the deny rule.
+- **`allowedUsers`**:
+  - `authed` (default) — any authenticated user (`authenticated_user: true`)
+  - `all` — unauthenticated access (`accept: true`)
+  - `private` — users in `userGroups.private`
+  - `admin` — users in `userGroups.admin`
 
-Use the shortcut annotation for services that should be accessible to anyone in your OIDC directory.
-**Note:** Private-only ingresses MUST include the `routerIp` denial.
-
-```yaml
-annotations:
-  ingress.pomerium.io/policy: |
-    - allow:
-        and:
-          - authenticated_user: true
-    - deny:
-        and:
-          - source_ip: {{ .Values.network.routerIp }}
-```
-
-#### 2. Unauthenticated
-
-Use this for paths that handle their own auth or must be unauthed.
-
-```yaml
-annotations:
-  ingress.pomerium.io/policy: |
-    - allow:
-        and:
-          - accept: true
-    - deny:
-        and:
-          - source_ip: {{ .Values.network.routerIp }}
-```
-
-#### 3. Public endpoint
-
-Use this to make a public ingress. They should be private by default unless explicitly requested to be public. All that is needed is to enable external DNS and to not deny the router IP.
-
-```yaml
-annotations:
-    # Pi-hole (Internal) always picks up the ingress.
-    # To enable Cloudflare (Public), add these two, and don't deny the routerIp:
-    dns.external/enabled: "true"
-    dns.external/target: home.{{ .Values.domain }}  ingress.pomerium.io/policy: |
-    - allow:
-        and:
-          - authenticated_user: true
-```
-
-### Ingress for Apps with Internal OIDC
-
-If an application manages its own OIDC flow (e.g. Kavita), the Ingress must preserve the original Host header and pass identity headers:
-
-```yaml
-annotations:
-  ingress.pomerium.io/preserve_host_header: "true"
-  ingress.pomerium.io/pass_identity_headers: "true"
-```
-
-### Ingress for Apps with websockets
-
-If an application requires websockets (e.g., Audiobookshelf), the Ingress must explicitly allow WebSockets with an infinite timeout by specifying:
-
-```yaml
-annotations:
-  ingress.pomerium.io/allow_websockets: "true"
-  ingress.pomerium.io/timeout: "0s"
-```
+All ingresses always include: `preserve_host_header`, `pass_identity_headers`, `allow_websockets`, and `timeout: 0s`.
 
 ## Security & Secrets
 

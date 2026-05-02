@@ -58,26 +58,16 @@
 
 | IP Range            | Purpose                    | Configuration             | Notes                                   |
 | ------------------- | -------------------------- | ------------------------- | --------------------------------------- |
-| `192.168.5.1`       | Router/Gateway             | `network.routerIp`        | Default gateway                         |
+| `192.168.5.1`       | Router/Gateway             |                           | Default gateway                         |
 | `192.168.5.2`       | Wifi AP                    |                           | Network infrastructure                  |
-| `192.168.5.3`       | Public Ingress (Legacy)    | `network.publicIngress`   | Traefik Public IP                       |
 | `192.168.5.4`       | Pomerium Ingress           | `network.pomeriumIngress` | Central IAP and Ingress Controller      |
 | `192.168.5.5`       | NAS                        | `network.storageServer`   | Network file storage server             |
 | `192.168.5.6`       | Zigbee/thread co-ordinator |                           | Network Infrastructure                  |
 | `192.168.5.20`      | Talos VIP                  | `network.cluster`         | Kubernetes API server endpoint          |
-| `192.168.5.11-20`   | Talos Nodes                | `talconfig.yaml`          | Reserved for control plane nodes        |
+| `192.168.5.11-19`   | Talos Nodes                | `talconfig.yaml`          | Reserved for control plane nodes        |
 | `192.168.5.53`      | DNS Server                 | `network.dnsServer`       | PiHole DNS service (Tailscale enrolled) |
 | `192.168.5.80-100`  | MetalLB Pool               | `network.metallbRange`    | Load balancer IP allocation             |
 | `192.168.5.100-254` | DHCP Pool                  | Router configuration      | Dynamic client allocation               |
-
-### Static Reservations
-
-- **`.1`**: Router
-- **`.4`**: Pomerium (Primary Ingress)
-- **`.5`**: NAS
-- **`.10-.20`**: Talos cluster nodes (VIP + individual nodes)
-- **`.53`**: PiHole DNS
-- **`.80-.100`**: MetalLB dynamic IP pool for services
 
 ## Traffic Flow
 
@@ -116,7 +106,7 @@ The cluster uses a split-horizon DNS setup powered by two **ExternalDNS** instan
 
 ## Ingress Strategy
 
-The cluster has migrated to a **Unified Ingress Class** using Pomerium.
+The cluster uses a **Unified Ingress Class** via Pomerium as the sole ingress controller and Identity-Aware Proxy.
 
 ### Pomerium Ingress
 
@@ -127,30 +117,21 @@ The cluster has migrated to a **Unified Ingress Class** using Pomerium.
 
 ### Standard Configuration Pattern
 
+Always use the `common.pomeriumIngress` template from the common chart:
+
 ```yaml
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: my-app
-  annotations:
-    # Required for Cloudflare Sync
-    dns.external/enabled: "true"
-    dns.external/target: home.{{ .Values.domain }}
-    # Authentication
-    ingress.pomerium.io/allow_any_authenticated_user: "true"
-spec:
-  ingressClassName: pomerium
-  rules:
-    - host: my-app.{{ .Values.domain }}
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: my-app
-                port: { number: 80 }
+{{ include "common.pomeriumIngress" (dict
+  "ctx" .
+  "name" "my-app"
+  "port" 80
+  "type" "private"       # private (default) or public
+  "allowedUsers" "authed" # authed (default), all, private, admin
+) }}
 ```
+
+- `type: private` — denies traffic not from LAN or Tailscale ranges.
+- `type: public` — enables Cloudflare DNS (`dns.external/enabled: "true"`) and removes the deny rule.
+- `allowedUsers: authed` — any authenticated user; `all` — unauthenticated; `private`/`admin` — specific user groups from `userGroups` in global values.
 
 ## MetalLB Configuration
 
@@ -170,9 +151,7 @@ MetalLB provides LoadBalancer services:
 
 ## Network Security
 
-### Hairpin Protection
-
-Access from the router IP (`192.168.5.1`) is typically denied in Pomerium policies to prevent routing loops and ensure services remain private when accessed via external paths that traverse the gateway.
+Private ingresses deny traffic not originating from the LAN (`network.lanIpRange`) or Tailscale (`network.tailscaleIpRange`) ranges, preventing access via the public internet path.
 
 ## Tailscale
 
