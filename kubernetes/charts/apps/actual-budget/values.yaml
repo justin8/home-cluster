@@ -3,7 +3,7 @@ domain: "" # Overridden by global values
 images:
   app:
     repository: actualbudget/actual-server
-    tag: "26.4.0"
+    tag: "26.5.0"
     pullPolicy: IfNotPresent
 
 volumeSizeGi: 5
