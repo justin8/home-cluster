@@ -4,6 +4,7 @@ metadata:
   name: immich
   namespace: {{ .Release.Namespace }}
 spec:
+  name: Immich
   isPublic: false
   callbackUrls:
     - https://immich.{{ .Values.domain }}/auth/login

@@ -32,7 +32,7 @@ spec:
           key: SMTP_PASSWORD
     tls: starttls
   ui:
-    appName: "Home Cluster"
+    appName: "dray.id.au"
   userManagement:
     allowUserSignups: "disabled"
     emailsVerified: true

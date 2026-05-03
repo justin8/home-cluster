@@ -4,5 +4,6 @@ metadata:
   name: kavita
   namespace: {{ .Release.Namespace }}
 spec:
+  name: Kavita
   callbackUrls:
     - https://kavita.{{ .Values.domain }}/signin-oidc

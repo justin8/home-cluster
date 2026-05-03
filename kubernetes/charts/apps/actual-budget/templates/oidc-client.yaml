@@ -4,6 +4,7 @@ metadata:
   name: actual-budget
   namespace: {{ .Release.Namespace }}
 spec:
+  name: Actual Budget
   isPublic: false
   callbackUrls:
     - https://budget.{{ .Values.domain }}/openid/callback

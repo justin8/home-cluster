@@ -4,6 +4,7 @@ metadata:
   name: audiobookshelf
   namespace: {{ .Release.Namespace }}
 spec:
+  name: Audiobookshelf
   callbackUrls:
     - https://audiobookshelf.{{ .Values.domain }}/audiobookshelf/auth/openid/callback
     - https://audiobookshelf.{{ .Values.domain }}/audiobookshelf/auth/openid/mobile-redirect

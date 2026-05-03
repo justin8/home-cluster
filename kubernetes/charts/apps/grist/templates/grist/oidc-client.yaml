@@ -4,6 +4,7 @@ metadata:
   name: grist
   namespace: {{ .Release.Namespace }}
 spec:
+  name: Grist
   isPublic: false
   callbackUrls:
     - https://grist.{{ .Values.domain }}/oauth2/callback
