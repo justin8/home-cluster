@@ -26,7 +26,7 @@ images:
     pullPolicy: IfNotPresent
   sabnzbd:
     repository: lscr.io/linuxserver/sabnzbd
-    tag: 4.5.5
+    tag: 5.0.1
     pullPolicy: IfNotPresent
   prowlarr:
     repository: lscr.io/linuxserver/prowlarr
