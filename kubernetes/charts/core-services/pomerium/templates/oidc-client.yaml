@@ -4,6 +4,7 @@ metadata:
   name: pomerium
   namespace: {{ .Release.Namespace }}
 spec:
+  name: "dray.id.au"
   isPublic: false
   callbackUrls:
     - https://authenticate.{{ .Values.domain }}/oauth2/callback
