@@ -3,5 +3,5 @@ volumeSizeGi: 10
 images:
   app:
     repository: lscr.io/linuxserver/kavita
-    tag: 0.8.9
+    tag: 0.9.0
     pullPolicy: IfNotPresent
