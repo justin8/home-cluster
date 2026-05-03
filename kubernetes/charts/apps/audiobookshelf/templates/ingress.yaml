@@ -3,4 +3,5 @@
   "name" .Chart.Name
   "subdomain" "audiobookshelf"
   "port" 80
+  "allowedUsers" "all"
 ) }}
