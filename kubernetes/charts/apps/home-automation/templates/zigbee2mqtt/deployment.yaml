@@ -25,6 +25,24 @@ spec:
           env:
             - name: TZ
               value: {{ .Values.TZ }}
+            - name: ZIGBEE2MQTT_CONFIG_MQTT_BASE_TOPIC
+              value: zigbee2mqtt
+            - name: ZIGBEE2MQTT_CONFIG_MQTT_SERVER
+              value: "mqtt://mqtt.{{ .Release.Namespace }}.svc.cluster.local"
+            - name: ZIGBEE2MQTT_CONFIG_MQTT_USER
+              valueFrom:
+                secretKeyRef:
+                  name: mqtt-z2m-credentials
+                  key: username
+            - name: ZIGBEE2MQTT_CONFIG_MQTT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mqtt-z2m-credentials
+                  key: password
+            - name: ZIGBEE2MQTT_CONFIG_SERIAL_ADAPTER
+              value: zstack
+            - name: ZIGBEE2MQTT_CONFIG_SERIAL_PORT
+              value: {{ .Values.zigbeeAdapter }}
           volumeMounts:
             - name: data
               mountPath: /app/data

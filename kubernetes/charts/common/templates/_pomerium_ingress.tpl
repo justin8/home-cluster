@@ -7,6 +7,7 @@
 {{- $path := .path | default "/" -}}
 {{- $type := .type | default "private" -}}
 {{- $allowedUsers := .allowedUsers | default "authed" -}}
+{{- $responseHeaders := .responseHeaders -}}
 {{- $isPublic := eq $type "public" -}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -17,6 +18,9 @@ metadata:
     {{- if $isPublic }}
     dns.external/enabled: "true"
     dns.external/target: home.{{ $ctx.Values.domain }}
+    {{- end }}
+    {{- if $responseHeaders }}
+    ingress.pomerium.io/set_response_headers: {{ $responseHeaders | toJson | quote }}
     {{- end }}
     ingress.pomerium.io/preserve_host_header: "true"
     ingress.pomerium.io/pass_identity_headers: "true"

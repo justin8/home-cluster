@@ -3,4 +3,5 @@
   "name" "esphome"
   "port" 6052
   "allowedUsers" "admin"
+  "responseHeaders" (dict "Content-Security-Policy" (printf "frame-ancestors 'self' https://home-assistant.%s" .Values.domain))
 ) }}

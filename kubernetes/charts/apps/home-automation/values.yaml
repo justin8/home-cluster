@@ -3,6 +3,7 @@ databaseVolumeSizeGi: 10
 mqttVolumeSizeGi: 1
 zigbee2mqttVolumeSizeGi: 1
 esphomeVolumeSizeGi: 10
+zigbeeAdapter: "tcp://192.168.5.6:7638"
 
 images:
   homeAssistant:

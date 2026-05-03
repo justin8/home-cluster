@@ -90,6 +90,7 @@ The cluster uses **Pomerium** as the sole Ingress Controller and Identity-Aware 
   "serviceName" "my-svc"    # optional, defaults to name
   "type" "private"          # optional: private (default) or public
   "allowedUsers" "authed"   # optional: authed (default), all, private, admin
+  "responseHeaders" (dict "X-Custom-Header" "value") # optional
 ) }}
 ```
 

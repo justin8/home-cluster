@@ -126,6 +126,7 @@ Always use the `common.pomeriumIngress` template from the common chart:
   "port" 80
   "type" "private"       # private (default) or public
   "allowedUsers" "authed" # authed (default), all, private, admin
+  "responseHeaders" (dict "X-Custom-Header" "value") # optional
 ) }}
 ```
 
