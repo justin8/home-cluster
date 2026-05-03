@@ -6,7 +6,7 @@ metadata:
   labels:
     app: mqtt
   annotations:
-    external-dns.alpha.kubernetes.io/hostname: mqtt.{{ .Values.domain }}
+    dns.internal/hostname: mqtt.{{ .Values.domain }}
 spec:
   type: LoadBalancer
   selector:
