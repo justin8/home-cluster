@@ -10,7 +10,7 @@
     {
       "customType": "regex",
       "description": "Extract images from values.yaml using repository/tag pattern",
-      "managerFilePatterns": ["(^|/)values\\.yaml$", "(^|/)global-values\\.yaml$"],
+      "fileMatch": ["(^|/)values\\.yaml$", "(^|/)global-values\\.yaml$"],
       "matchStrings": [
         "repository:\\s*(?<depName>[^\\s\\n]+)\\s*tag:\\s*\"?(?<currentValue>[^\\s\\n\"#]+)\"?"
       ],
@@ -19,30 +19,30 @@
     {
       "customType": "regex",
       "description": "Talos version in talconfig.yaml",
-      "managerFilePatterns": ["^talos/talconfig\\.yaml$"],
+      "fileMatch": ["^talos/talconfig\\.yaml$"],
       "matchStrings": ["talosVersion:\\s*(?<currentValue>v\\d+\\.\\d+\\.\\d+)"],
       "depNameTemplate": "siderolabs/talos",
       "datasourceTemplate": "github-releases",
-      "versioningTemplate": "semver"
+      "extractVersionTemplate": "^v(?<version>.*)$"
     },
     {
       "customType": "regex",
       "description": "Kubernetes version in talconfig.yaml",
-      "managerFilePatterns": ["^talos/talconfig\\.yaml$"],
+      "fileMatch": ["^talos/talconfig\\.yaml$"],
       "matchStrings": ["kubernetesVersion:\\s*(?<currentValue>v\\d+\\.\\d+\\.\\d+)"],
       "depNameTemplate": "kubernetes/kubernetes",
       "datasourceTemplate": "github-releases",
-      "versioningTemplate": "semver"
+      "extractVersionTemplate": "^v(?<version>.*)$"
     },
     {
       "customType": "regex",
       "description": "Generic GitHub release URL manager",
-      "managerFilePatterns": [".*\\.yaml$"],
+      "fileMatch": [".*\\.yaml$"],
       "matchStrings": [
         "https://github\\.com/(?<depName>[^/]+/[^/]+)/releases/download/(?<currentValue>v[^/]+)/(?<fileName>[^\\s\\n]+)"
       ],
       "datasourceTemplate": "github-releases",
-      "versioningTemplate": "semver"
+      "extractVersionTemplate": "^v(?<version>.*)$"
     }
   ],
   "packageRules": [
