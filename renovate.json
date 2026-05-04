@@ -23,7 +23,7 @@
       "matchStrings": ["talosVersion:\\s*(?<currentValue>v\\d+\\.\\d+\\.\\d+)"],
       "depNameTemplate": "siderolabs/talos",
       "datasourceTemplate": "github-releases",
-      "extractVersionTemplate": "^v(?<version>.*)$"
+      "versioningTemplate": "semver"
     },
     {
       "customType": "regex",
@@ -32,7 +32,7 @@
       "matchStrings": ["kubernetesVersion:\\s*(?<currentValue>v\\d+\\.\\d+\\.\\d+)"],
       "depNameTemplate": "kubernetes/kubernetes",
       "datasourceTemplate": "github-releases",
-      "extractVersionTemplate": "^v(?<version>.*)$"
+      "versioningTemplate": "semver"
     },
     {
       "customType": "regex",
