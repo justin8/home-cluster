@@ -1,1 +1,1 @@
-{{- include "common.longhornVolume" (dict "ctx" . "name" "grist-persist" "sizeGi" .Values.persistVolumeSizeGi) -}}
+{{- include "common.longhornVolume" (dict "ctx" . "name" "grist-persist-v2" "sizeGi" .Values.persistVolumeSizeGi) -}}

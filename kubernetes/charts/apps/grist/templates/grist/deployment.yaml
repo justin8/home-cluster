@@ -4,7 +4,7 @@ metadata:
   name: grist
   namespace: {{ .Release.Namespace }}
 spec:
-  replicas: 0
+  replicas: 1
   strategy:
     type: Recreate
   selector:
@@ -43,4 +43,4 @@ spec:
       volumes:
         - name: persist
           persistentVolumeClaim:
-            claimName: grist-persist
+            claimName: grist-persist-v2
