@@ -21,6 +21,8 @@ spec:
     initdb:
       database: teslamate
       owner: teslamate
+      postInitSQL:
+        - ALTER USER teslamate WITH SUPERUSER;
   storage:
     size: {{ .Values.databaseVolumeSizeGi }}Gi
     storageClass: longhorn

@@ -28,7 +28,7 @@ spec:
               name: mqtt
           volumeMounts:
             - name: mosquitto-data
-              mountPath: /mosquitto/data
+              mountPath: /mosquitto
       volumes:
         - name: mosquitto-data
           persistentVolumeClaim:

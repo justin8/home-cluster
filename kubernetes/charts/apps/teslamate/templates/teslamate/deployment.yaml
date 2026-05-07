@@ -48,10 +48,4 @@ spec:
               value: teslamate-db-rw
             - name: MQTT_HOST
               value: mosquitto
-          volumeMounts:
-            - name: import
-              mountPath: /opt/app/import
-      volumes:
-        - name: import
-          persistentVolumeClaim:
-            claimName: teslamate-import
+
