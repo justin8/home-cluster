@@ -1,36 +1,44 @@
-# DNS record: storage.domain -> NFS IP
-apiVersion: v1
-kind: Service
+# DNS record: storage.domain -> NFS/Tailscale IP
+apiVersion: externaldns.k8s.io/v1alpha1
+kind: DNSEndpoint
 metadata:
   name: storage-dns-record
   namespace: {{ .Release.Namespace }}
   annotations:
-    dns.internal/hostname: storage.{{ .Values.domain }}
-    dns.internal/target: {{ .Values.network.storageServer }}
+    dns.internal/enabled: "true"
 spec:
-  type: ClusterIP
-  clusterIP: None
-  ports:
-    - name: http
-      port: 80
-      targetPort: 80
+  endpoints:
+    - dnsName: storage.{{ .Values.domain }}
+      recordType: A
+      targets:
+        - {{ .Values.network.storageServer }}
 ---
-# DNS record: authenticate.domain -> Pomerium ingress IP
-apiVersion: v1
-kind: Service
+# DNS record: authenticate.domain -> Pomerium ingress IP (Internal)
+apiVersion: externaldns.k8s.io/v1alpha1
+kind: DNSEndpoint
 metadata:
-  name: authenticate-dns-record
+  name: authenticate-internal-dns-record
   namespace: {{ .Release.Namespace }}
   annotations:
-    dns.internal/hostname: authenticate.{{ .Values.domain }}
-    dns.internal/target: {{ .Values.network.pomeriumIngress }}
-    dns.external/enabled: "true"
-    dns.external/hostname: authenticate.{{ .Values.domain }}
-    dns.external/target: home.{{ .Values.domain }}
+    dns.internal/enabled: "true"
 spec:
-  type: ClusterIP
-  clusterIP: None
-  ports:
-    - name: http
-      port: 80
-      targetPort: 80
+  endpoints:
+    - dnsName: authenticate.{{ .Values.domain }}
+      recordType: A
+      targets:
+        - {{ .Values.network.pomeriumIngress }}
+---
+# DNS record: authenticate.domain -> home.domain (External)
+apiVersion: externaldns.k8s.io/v1alpha1
+kind: DNSEndpoint
+metadata:
+  name: authenticate-external-dns-record
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    dns.external/enabled: "true"
+spec:
+  endpoints:
+    - dnsName: authenticate.{{ .Values.domain }}
+      recordType: CNAME
+      targets:
+        - home.{{ .Values.domain }}

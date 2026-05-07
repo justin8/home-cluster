@@ -4,6 +4,7 @@ metadata:
   name: hello-world
   namespace: {{ .Release.Namespace }}
   annotations:
+    dns.internal/enabled: "true"
     dns.external/enabled: "true"
     dns.external/target: home.{{ .Values.domain }}
 spec:

@@ -5,10 +5,12 @@ external-dns-pihole:
   sources:
     - ingress
     - service
+    - crd
   provider:
     name: pihole
   extraArgs:
     - --annotation-prefix=dns.internal/
+    - --annotation-filter=dns.internal/enabled=true
     - --ingress-class=pomerium
     - --pihole-server=http://pihole-web.dns.svc.cluster.local
     - --pihole-api-version=6
@@ -19,6 +21,7 @@ external-dns-cloudflare:
   sources:
     - ingress
     - service
+    - crd
   provider: cloudflare
   extraArgs:
     - --annotation-prefix=dns.external/

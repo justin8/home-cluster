@@ -15,6 +15,7 @@ metadata:
   name: {{ $name }}
   namespace: {{ $ctx.Release.Namespace }}
   annotations:
+    dns.internal/enabled: "true"
     {{- if $isPublic }}
     dns.external/enabled: "true"
     dns.external/target: home.{{ $ctx.Values.domain }}
