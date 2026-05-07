@@ -1,0 +1,10 @@
+apiVersion: pocketid.internal/v1alpha1
+kind: PocketIDOIDCClient
+metadata:
+  name: grafana
+  namespace: {{ .Release.Namespace }}
+spec:
+  name: TeslaMate Grafana
+  isPublic: false
+  callbackUrls:
+    - https://teslamate-grafana.{{ .Values.domain }}/login/generic_oauth

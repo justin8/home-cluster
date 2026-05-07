@@ -1,5 +1,3 @@
-domain: "" # Overridden by global values
-
 images:
   teslamate:
     repository: teslamate/teslamate
