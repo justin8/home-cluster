@@ -1,0 +1,6 @@
+{{ include "common.pomeriumIngress" (dict
+  "ctx" .
+  "name" "teslamate"
+  "port" 4000
+  "allowedUsers" "admin"
+) }}

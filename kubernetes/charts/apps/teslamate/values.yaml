@@ -1,0 +1,20 @@
+domain: "" # Overridden by global values
+
+images:
+  teslamate:
+    repository: teslamate/teslamate
+    tag: "1.33.0"
+    pullPolicy: IfNotPresent
+  grafana:
+    repository: teslamate/grafana
+    tag: "1.33.0"
+    pullPolicy: IfNotPresent
+  mosquitto:
+    repository: eclipse-mosquitto
+    tag: "2"
+    pullPolicy: IfNotPresent
+
+importVolumeSizeGi: 1
+grafanaVolumeSizeGi: 1
+mqttVolumeSizeGi: 1
+databaseVolumeSizeGi: 5

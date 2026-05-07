@@ -1,0 +1,1 @@
+{{- include "common.longhornVolume" (dict "ctx" . "name" "teslamate-grafana-data" "sizeGi" .Values.grafanaVolumeSizeGi) -}}

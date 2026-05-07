@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: grafana
+  template:
+    metadata:
+      labels:
+        app: grafana
+    spec:
+      containers:
+        - name: grafana
+          image: "{{ .Values.images.grafana.repository }}:{{ .Values.images.grafana.tag }}"
+          imagePullPolicy: {{ .Values.images.grafana.pullPolicy }}
+          ports:
+            - containerPort: 3000
+              name: http
+          env:
+            - name: DATABASE_USER
+              valueFrom:
+                secretKeyRef:
+                  name: teslamate-db-app
+                  key: user
+            - name: DATABASE_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: teslamate-db-app
+                  key: password
+            - name: DATABASE_NAME
+              value: teslamate
+            - name: DATABASE_HOST
+              value: teslamate-db-rw
+          volumeMounts:
+            - name: grafana-data
+              mountPath: /var/lib/grafana
+      volumes:
+        - name: grafana-data
+          persistentVolumeClaim:
+            claimName: teslamate-grafana-data

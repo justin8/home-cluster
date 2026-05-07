@@ -1,0 +1,7 @@
+{{ include "common.pomeriumIngress" (dict
+  "ctx" .
+  "name" "grafana"
+  "subdomain" "teslamate-grafana"
+  "port" 3000
+  "allowedUsers" "admin"
+) }}

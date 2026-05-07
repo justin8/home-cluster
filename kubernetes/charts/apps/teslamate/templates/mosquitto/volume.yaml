@@ -1,0 +1,1 @@
+{{- include "common.longhornVolume" (dict "ctx" . "name" "teslamate-mqtt-data" "sizeGi" .Values.mqttVolumeSizeGi "backups" "disabled") -}}
