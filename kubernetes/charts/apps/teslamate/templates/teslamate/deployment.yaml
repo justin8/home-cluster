@@ -15,12 +15,12 @@ spec:
       labels:
         app: teslamate
     spec:
-      securityContext:
-        capabilities:
-          drop:
-            - ALL
       containers:
         - name: teslamate
+          securityContext:
+            capabilities:
+              drop:
+                - ALL
           image: "{{ .Values.images.teslamate.repository }}:{{ .Values.images.teslamate.tag }}"
           imagePullPolicy: {{ .Values.images.teslamate.pullPolicy }}
           ports:
