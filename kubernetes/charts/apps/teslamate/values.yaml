@@ -1,7 +1,7 @@
 images:
   teslamate:
     repository: teslamate/teslamate
-    tag: "1.33.0"
+    tag: "3.0.0"
     pullPolicy: IfNotPresent
   grafana:
     repository: teslamate/grafana
