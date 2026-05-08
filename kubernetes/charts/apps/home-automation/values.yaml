@@ -8,7 +8,7 @@ zigbeeAdapter: "tcp://192.168.5.6:7638"
 images:
   homeAssistant:
     repository: homeassistant/home-assistant
-    tag: "2026.4"
+    tag: "2026.5"
     pullPolicy: IfNotPresent
   mqtt:
     repository: eclipse-mosquitto
