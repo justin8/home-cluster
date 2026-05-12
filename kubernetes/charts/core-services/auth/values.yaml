@@ -3,7 +3,7 @@ pocketidVolumeSizeGi: 1
 images:
   pocketid:
     repository: ghcr.io/pocket-id/pocket-id
-    tag: v2.6.2
+    tag: v2.7.0
     pullPolicy: IfNotPresent
 pocket-id-operator:
   instance:
