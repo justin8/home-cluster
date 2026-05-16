@@ -3,5 +3,5 @@ volumeSizeGi: 1
 images:
   app:
     repository: ghcr.io/linuxserver/syncthing
-    tag: 2.0.16
+    tag: 2.1.0
     pullPolicy: IfNotPresent
