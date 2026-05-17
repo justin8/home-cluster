@@ -2,6 +2,21 @@
 
 set -euo pipefail
 
+# Parse arguments
+FORCE=false
+while [[ $# -gt 0 ]]; do
+  case $1 in
+  --force)
+    FORCE=true
+    shift
+    ;;
+  *)
+    echo "Unknown argument: $1"
+    exit 1
+    ;;
+  esac
+done
+
 # Ensure we're in the talos directory
 cd "$(git rev-parse --show-toplevel)/talos"
 
@@ -14,23 +29,27 @@ NODE_IPS=$(yq -r ".nodes[].ipAddress" talconfig.yaml | tr ',' ' ' | xargs)
 echo "Node IPs: $NODE_IPS"
 
 # Check if upgrade is needed
-UPGRADE_NEEDED=false
-for IP in $NODE_IPS; do
-  echo "Checking node $IP..."
-  # Try to get the version, handle failure gracefully
-  CURRENT_VERSION=$(talosctl -n "$IP" version --short 2>/dev/null | grep "Tag:" | awk '{print $2}' || echo "unknown")
-  echo "Current version on $IP: $CURRENT_VERSION"
-  
-  if [ "$CURRENT_VERSION" != "$TARGET_VERSION" ]; then
-    echo "Version mismatch detected on $IP (Current: $CURRENT_VERSION, Target: $TARGET_VERSION)"
-    UPGRADE_NEEDED=true
-    break
-  fi
-done
+UPGRADE_NEEDED=$FORCE
+if [ "$FORCE" = true ]; then
+  echo "Force flag detected, skipping version check..."
+else
+  for IP in $NODE_IPS; do
+    echo "Checking node $IP..."
+    # Try to get the version, handle failure gracefully
+    CURRENT_VERSION=$(talosctl -n "$IP" version --short 2>/dev/null | grep "Tag:" | awk '{print $2}' || echo "unknown")
+    echo "Current version on $IP: $CURRENT_VERSION"
+
+    if [ "$CURRENT_VERSION" != "$TARGET_VERSION" ]; then
+      echo "Version mismatch detected on $IP (Current: $CURRENT_VERSION, Target: $TARGET_VERSION)"
+      UPGRADE_NEEDED=true
+      break
+    fi
+  done
+fi
 
 if [ "$UPGRADE_NEEDED" = true ]; then
-  echo "Upgrading Talos to $TARGET_VERSION..."
-  talhelper gencommand upgrade --extra-flags "--preserve" | bash
+  echo "Upgrading Talos to $TARGET_VERSION (with 30m drain timeout for Longhorn)..."
+  talhelper gencommand upgrade --extra-flags "--preserve --drain-timeout 30m" | bash
 else
   echo "All nodes are already running $TARGET_VERSION, no upgrade needed"
 fi

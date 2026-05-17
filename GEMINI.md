@@ -128,6 +128,8 @@ All ingresses always include: `preserve_host_header`, `pass_identity_headers`, `
 
 **NEVER run write/mutating commands against the Kubernetes cluster without explicit user instruction.**
 
+**NEVER perform manual, out-of-band modifications to cluster resources (e.g., `kubectl apply`, `kubectl patch`, `kubectl edit`) that bypass the established GitOps workflow or Talos configuration. All changes MUST be defined in code (Helm charts, `talconfig.yaml`, etc.) and applied through the designated automation (ArgoCD, `talhelper`).**
+
 This includes (but is not limited to):
 
 - `kubectl apply`, `kubectl create`, `kubectl delete`, `kubectl patch`, `kubectl edit`
