@@ -14,8 +14,6 @@ clusterSvcNets:
   - 10.96.0.0/12
 cniConfig:
   name: flannel
-  flannel:
-    kubeNetworkPoliciesEnabled: true
 patches:
   - |-
     machine:
