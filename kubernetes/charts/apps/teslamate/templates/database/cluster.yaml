@@ -6,6 +6,11 @@ metadata:
 spec:
   instances: 1
   enablePDB: false
+  probes:
+    readiness:
+      type: query
+    startup:
+      type: query
   postgresql:
     parameters:
       max_connections: "100"

@@ -7,6 +7,11 @@ spec:
   instances: 2
   nodeMaintenanceWindow:
     reusePVC: true
+  probes:
+    readiness:
+      type: query
+    startup:
+      type: query
   imageName: "{{ .Values.images.database.repository }}:{{ .Values.images.database.tag }}"
   postgresql:
     shared_preload_libraries:
