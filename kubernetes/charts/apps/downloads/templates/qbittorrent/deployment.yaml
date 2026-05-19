@@ -58,7 +58,7 @@ spec:
       volumes:
         - name: config
           persistentVolumeClaim:
-            claimName: qbittorrent-config
+            claimName: qbittorrent-data
         - name: downloads
           nfs:
             server: {{ .Values.network.storageServer }}

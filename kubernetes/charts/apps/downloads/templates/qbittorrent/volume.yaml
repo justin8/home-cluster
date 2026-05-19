@@ -1,1 +1,1 @@
-{{- include "common.longhornVolume" (dict "ctx" . "name" "qbittorrent-config" "sizeGi" .Values.qbittorrentVolumeSizeGi) -}}
+{{- include "common.longhornVolume" (dict "ctx" . "name" "qbittorrent-data" "sizeGi" .Values.qbittorrentVolumeSizeGi) -}}
