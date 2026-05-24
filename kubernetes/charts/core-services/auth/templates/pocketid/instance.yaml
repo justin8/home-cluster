@@ -33,6 +33,7 @@ spec:
     tls: starttls
   ui:
     appName: "dray.id.au"
+    sessionDuration: 10080
   userManagement:
     allowUserSignups: "disabled"
     emailsVerified: true
