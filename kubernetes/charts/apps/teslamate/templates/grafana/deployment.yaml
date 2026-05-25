@@ -31,6 +31,8 @@ spec:
               value: "true"
             - name: GF_AUTH_GENERIC_OAUTH_NAME
               value: PocketID
+            - name: GF_AUTH_GENERIC_OAUTH_AUTO_LOGIN
+              value: "true"
             - name: GF_AUTH_GENERIC_OAUTH_SCOPES
               value: openid profile email
             - name: GF_AUTH_GENERIC_OAUTH_USE_PKCE
