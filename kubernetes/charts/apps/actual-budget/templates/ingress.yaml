@@ -1,6 +1,0 @@
-{{ include "common.pomeriumIngress" (dict
-  "ctx" .
-  "name" .Chart.Name
-  "subdomain" "budget"
-  "port" 80
-) }}
