@@ -1,1 +1,0 @@
-{{- include "common.longhornVolume" (dict "ctx" . "name" "paperless-data" "sizeGi" .Values.dataVolumeSizeGi) -}}
