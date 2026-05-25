@@ -13,3 +13,9 @@ spec:
     provider: oidc
     secret: {{ .Release.Namespace }}/pomerium-oidc-credentials
     url: https://pocketid.{{ .Values.domain }}
+  jwtClaimHeaders:
+    X-Pomerium-Claim-Email: email
+    X-Pomerium-Claim-Email: email
+    X-Pomerium-Claim-User: user
+    X-Pomerium-Claim-Name: name
+    X-Pomerium-Claim-Preferred-Username: preferred_username

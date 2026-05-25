@@ -3,5 +3,5 @@
   "name" "hello-world"
   "subdomain" "hello"
   "port" 80
-  "allowedUsers" "all"
+  "allowedUsers" "authed"
 ) }}
