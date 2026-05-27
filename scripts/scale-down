@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+# Namespaces to scale down
+CORE_NS=("argocd" "auth" "pomerium" "vpa" "node-feature-discovery" "cert-manager" "dns")
+
+# Get app namespaces by listing the apps directory
+APP_NS=($(ls -d kubernetes/charts/apps/*/ | xargs -n1 basename))
+
+scale_namespace() {
+    local ns=$1
+    echo "Processing namespace: $ns"
+    
+    # Scale down all deployments and statefulsets in the namespace
+    kubectl scale deployment,statefulset --replicas=0 --all -n "$ns"
+
+    # Hibernate CloudNativePG clusters if they exist
+    local clusters=$(kubectl get cluster.postgresql.cnpg.io -n "$ns" -o name 2>/dev/null)
+    if [ -n "$clusters" ]; then
+        for cluster in $clusters; do
+            echo "  Hibernating CNPG cluster: $cluster in namespace: $ns"
+            kubectl annotate "$cluster" -n "$ns" cnpg.io/hibernation=on --overwrite
+        done
+    fi
+}
+
+echo "--- Scaling down core services ---"
+for ns in "${CORE_NS[@]}"; do
+    scale_namespace "$ns"
+done
+
+echo ""
+echo "--- Scaling down applications ---"
+for ns in "${APP_NS[@]}"; do
+    scale_namespace "$ns"
+done
+
+echo ""
+echo "Scale down complete."
