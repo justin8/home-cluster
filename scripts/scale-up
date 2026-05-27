@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+echo "--- Scaling up ArgoCD ---"
+kubectl scale deployment,statefulset --replicas=1 --all -n argocd
+
+echo ""
+echo "--- Un-hibernating CNPG clusters ---"
+# Get all namespaces that might have CNPG clusters
+NAMESPACES=$(kubectl get namespaces -o jsonpath='{.items[*].metadata.name}')
+
+for ns in $NAMESPACES; do
+    clusters=$(kubectl get cluster.postgresql.cnpg.io -n "$ns" -o name 2>/dev/null)
+    if [ -n "$clusters" ]; then
+        for cluster in $clusters; do
+            echo "  Un-hibernating CNPG cluster: $cluster in namespace: $ns"
+            kubectl annotate "$cluster" -n "$ns" cnpg.io/hibernation-
+        done
+    fi
+done
+
+echo ""
+echo "Scale up complete."
