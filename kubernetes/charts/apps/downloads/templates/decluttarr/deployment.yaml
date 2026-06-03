@@ -23,12 +23,6 @@ spec:
             - configMapRef:
                 name: downloads-config
           env:
-            - name: LOG_LEVEL
-              value: "INFO"
-            - name: TEST_RUN
-              value: "False"
-            - name: REMOVE_TIMER
-              value: "10"
             # Sourced from SealedSecret
             - name: SONARR_KEY
               valueFrom:
@@ -48,7 +42,13 @@ spec:
           volumeMounts:
             - name: config
               mountPath: /app/config
+            - name: media
+              mountPath: /mnt/pool/media
       volumes:
         - name: config
           configMap:
             name: decluttarr-app-config
+        - name: media
+          nfs:
+            server: {{ .Values.network.storageServer }}
+            path: /mnt/pool/media

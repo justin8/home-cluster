@@ -6,9 +6,9 @@ metadata:
 data:
   config.yaml: |
     general:
-      log_level: !ENV LOG_LEVEL
-      test_run: !ENV TEST_RUN
-      timer: !ENV REMOVE_TIMER
+      log_level: INFO
+      test_run: false
+      timer: 10
     job_defaults:
       max_strikes: 3
       min_days_between_searches: 7
@@ -43,3 +43,6 @@ data:
         - base_url: "http://sabnzbd:8080"
           api_key: !ENV SABNZBD_KEY
           name: "sabnzbd"
+      qbittorrent:
+        - base_url: "http://qbittorrent:8080"
+          name: "qBittorrent"
