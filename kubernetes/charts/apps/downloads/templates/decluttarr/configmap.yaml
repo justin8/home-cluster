@@ -38,6 +38,8 @@ data:
       radarr:
         - base_url: "http://radarr:7878"
           api_key: !ENV RADARR_KEY
+    download_clients:
       sabnzbd:
         - base_url: "http://sabnzbd:8080"
           api_key: !ENV SABNZBD_KEY
+          name: "sabnzbd"
