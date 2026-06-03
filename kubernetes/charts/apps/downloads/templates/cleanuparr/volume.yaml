@@ -1,0 +1,1 @@
+{{- include "common.longhornVolume" (dict "ctx" . "name" "cleanuparr-config" "sizeGi" .Values.cleanuparrVolumeSizeGi) -}}
