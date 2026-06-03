@@ -1,6 +1,0 @@
-{{ include "common.pomeriumIngress" (dict
-  "ctx" .
-  "name" "cleanuparr"
-  "port" 11011
-  "allowedUsers" "admin"
-) }}

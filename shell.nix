@@ -14,6 +14,7 @@ pkgs.mkShell {
     kubeseal
     prettier
     pv
+    rtk
     skopeo
     sops
     talhelper

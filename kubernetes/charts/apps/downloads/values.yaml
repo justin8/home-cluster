@@ -6,12 +6,11 @@ qbittorrentVolumeSizeGi: 1
 seerrVolumeSizeGi: 5
 quiVolumeSizeGi: 1
 shelfmarkVolumeSizeGi: 1
-cleanuparrVolumeSizeGi: 2
 
 images:
-  cleanuparr:
-    repository: ghcr.io/cleanuparr/cleanuparr
-    tag: "2.9.13"
+  decluttarr:
+    repository: ghcr.io/manimatter/decluttarr
+    tag: v2.1.0
     pullPolicy: IfNotPresent
   shelfmark:
     repository: ghcr.io/calibrain/shelfmark

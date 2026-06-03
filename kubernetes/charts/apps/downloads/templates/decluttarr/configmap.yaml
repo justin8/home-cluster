@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: decluttarr-app-config
+  namespace: {{ .Release.Namespace }}
+data:
+  config.yaml: |
+    general:
+      log_level: !ENV LOG_LEVEL
+      test_run: !ENV TEST_RUN
+      timer: !ENV REMOVE_TIMER
+    job_defaults:
+      max_strikes: 3
+      min_days_between_searches: 7
+      max_concurrent_searches: 3
+    jobs:
+      remove_bad_files:
+      remove_failed_downloads:
+      remove_failed_imports:
+        message_patterns:
+          - "Not a Custom Format upgrade for existing*"
+          - "Not an upgrade for existing*"
+          - "*Found potentially dangerous file with extension*"
+          - "Invalid video file*"
+      remove_metadata_missing:
+      remove_missing_files:
+      remove_orphans:
+      remove_slow:
+      remove_stalled:
+      remove_unmonitored:
+      remove_done_seeding:
+      search_unmet_cutoff:
+      search_missing:
+    instances:
+      sonarr:
+        - base_url: "http://sonarr:8989"
+          api_key: !ENV SONARR_KEY
+      radarr:
+        - base_url: "http://radarr:7878"
+          api_key: !ENV RADARR_KEY
+      sabnzbd:
+        - base_url: "http://sabnzbd:8080"
+          api_key: !ENV SABNZBD_KEY

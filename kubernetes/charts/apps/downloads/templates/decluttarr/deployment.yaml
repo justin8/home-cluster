@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: decluttarr
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: decluttarr
+  template:
+    metadata:
+      labels:
+        app: decluttarr
+    spec:
+      containers:
+        - name: decluttarr
+          image: "{{ .Values.images.decluttarr.repository }}:{{ .Values.images.decluttarr.tag }}"
+          imagePullPolicy: {{ .Values.images.decluttarr.pullPolicy }}
+          envFrom:
+            - configMapRef:
+                name: downloads-config
+          env:
+            - name: LOG_LEVEL
+              value: "INFO"
+            - name: TEST_RUN
+              value: "False"
+            - name: REMOVE_TIMER
+              value: "10"
+            # Sourced from SealedSecret
+            - name: SONARR_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: decluttarr-secrets
+                  key: SONARR_KEY
+            - name: RADARR_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: decluttarr-secrets
+                  key: RADARR_KEY
+            - name: SABNZBD_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: decluttarr-secrets
+                  key: SABNZBD_KEY
+          volumeMounts:
+            - name: config
+              mountPath: /app/config
+      volumes:
+        - name: config
+          configMap:
+            name: decluttarr-app-config
