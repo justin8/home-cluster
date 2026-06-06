@@ -19,6 +19,40 @@ echo "🚀 Installing Argo CD ${ARGOCD_CHART_VERSION} via Helm..."
 # Create the namespace if it doesn't exist
 kubectl create namespace "${ARGOCD_NAMESPACE}" --dry-run=client -o yaml | kubectl apply -f -
 
+# Bootstrap repository credentials if the repository is private
+if ! kubectl get secret github-repo-creds -n "${ARGOCD_NAMESPACE}" &>/dev/null; then
+  echo "🔑 Repository credentials secret 'github-repo-creds' not found."
+  SEALED_SECRET_PATH="kubernetes/charts/core-services/argo-cd/templates/github-repo-creds.yaml"
+
+  if [ -f "$SEALED_SECRET_PATH" ]; then
+    echo "🔓 Decrypting credentials offline using SOPS and kubeseal..."
+    TEMP_KEY_FILE=".decrypted-key-temp.yaml"
+
+    # Decrypt the sealed secrets key
+    sops --decrypt sealed-secrets-key.sops.yaml >"$TEMP_KEY_FILE"
+
+    # Decrypt the password from the SealedSecret
+    PASSWORD_B64=$(kubeseal --recovery-unseal --recovery-private-key "$TEMP_KEY_FILE" <"$SEALED_SECRET_PATH" | jq -r '.data.password')
+    PASSWORD=$(echo -n "$PASSWORD_B64" | base64 -d)
+
+    # Clean up the temporary key file immediately
+    rm -f "$TEMP_KEY_FILE"
+
+    # Create the secret in Kubernetes
+    kubectl create secret generic github-repo-creds -n "${ARGOCD_NAMESPACE}" \
+      --from-literal=type=git \
+      --from-literal=url="https://github.com/justin8/home-cluster.git" \
+      --from-literal=username="git" \
+      --from-literal=password="${PASSWORD}" \
+      --dry-run=client -o yaml | kubectl apply -f -
+    kubectl label secret github-repo-creds -n "${ARGOCD_NAMESPACE}" "argocd.argoproj.io/secret-type=repository" --overwrite
+    echo "✅ Successfully bootstrapped 'github-repo-creds' from SealedSecret!"
+  else
+    echo "⚠️  SealedSecret file not found at ${SEALED_SECRET_PATH}."
+    echo "If this is a private repository, please create the credential secret manually or configure the SealedSecret."
+  fi
+fi
+
 # Install ArgoCD via Helm using the same release name the self-managed app expects.
 # This prevents a duplicate install when ArgoCD takes over its own management.
 # yq is used to extract the 'argo-cd' sub-key because the parent chart's values.yaml

@@ -1,0 +1,21 @@
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  name: github-repo-creds
+  namespace: argocd
+  labels:
+    app.kubernetes.io/part-of: argocd
+spec:
+  encryptedData:
+    password: "AgBV4Kq5TIzcNV10cidlJ2aXpinxBG4cRVK/37dlrmQRVE8SB9PNMRp+K9Wd4Ub8WSQpAeBS3TzXcAoGLkmIB7YL+2hVAcJeOWvnkM6P9juBPP6K6iWEeczJL3lFY/u1JC2MYG59XTjL39qVb0v+Yz9z+6AQOc03vEcMa8d0qmMq/JRN5E4jkEcnphQ6ALHBGib3uQF56uow4HLSqkREX/PLwWOMJBIcUbW3RLIZ3rfQgr/AeogqYSx/JyyR3zvzt2+eglYcF2p5CLQy1/tT6rfnMns/y3bu9UoTtdP0yx4+3mPySwlTE/vaIajr+4+oFOrTaVhY+PgXMTnKKQcwCdxNqDB+0nK/msts5GuMqhOZ29+ACtHhgwMcWSGcwPYfpLR62atA4FFQc8/R+mEm6dqiSm5wVbaaR9iOinqO/xFIOonlH94d4qzZyy4aKDiT3Cu8T+pmCuFgXXMrXFfWOH2wc1iSGBh9aIZ9ETX6MLgS6tUOw2DRPt6EEykIk2oNBA35jBeWiKjgnwB1tu58Qt9PTwcOScvcZn9RtDqiaGXpDy/WtUi18/Pc245U/90hVbGavdSRsWTUldX+H1Yq2Dydgo+vwPFHDs3VReDSD+sjLHKB4FRMMTy5IDnFRzmHmT43P+4luqYnX5m4Z1HLfbqJ9JVsQTz+UCH2SYlyimhhVDq9YThFCv8L/EvMUHMAPO5wpoI/jzvlVR8tmWRr55qZU5crySuOeElEOFZFp2APHpluXXEB2tImgmbOEnSuHzh647y4eZXW3y2gX2iC5OkAp+lEI0IfBuOSgjTdlPsD4E1HGvPW+ujZvVKGtp4="
+  template:
+    metadata:
+      name: github-repo-creds
+      namespace: argocd
+      labels:
+        argocd.argoproj.io/secret-type: repository
+    type: Opaque
+    stringData:
+      type: git
+      url: https://github.com/justin8/home-cluster.git
+      username: git

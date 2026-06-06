@@ -5,6 +5,7 @@ pkgs.mkShell {
   buildInputs = with pkgs; [
     age
     argocd
+    coreutils # for base64
     git
     jq
     k9s
