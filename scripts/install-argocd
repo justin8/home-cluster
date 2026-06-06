@@ -31,21 +31,12 @@ if ! kubectl get secret github-repo-creds -n "${ARGOCD_NAMESPACE}" &>/dev/null; 
     # Decrypt the sealed secrets key
     sops --decrypt sealed-secrets-key.sops.yaml >"$TEMP_KEY_FILE"
 
-    # Decrypt the password from the SealedSecret
-    PASSWORD_B64=$(kubeseal --recovery-unseal --recovery-private-key "$TEMP_KEY_FILE" <"$SEALED_SECRET_PATH" | jq -r '.data.password')
-    PASSWORD=$(echo -n "$PASSWORD_B64" | base64 -d)
+    # Decrypt the SealedSecret directly into the cluster
+    kubeseal --recovery-unseal --recovery-private-key "$TEMP_KEY_FILE" <"$SEALED_SECRET_PATH" | kubectl apply -f -
 
     # Clean up the temporary key file immediately
     rm -f "$TEMP_KEY_FILE"
 
-    # Create the secret in Kubernetes
-    kubectl create secret generic github-repo-creds -n "${ARGOCD_NAMESPACE}" \
-      --from-literal=type=git \
-      --from-literal=url="https://github.com/justin8/home-cluster.git" \
-      --from-literal=username="git" \
-      --from-literal=password="${PASSWORD}" \
-      --dry-run=client -o yaml | kubectl apply -f -
-    kubectl label secret github-repo-creds -n "${ARGOCD_NAMESPACE}" "argocd.argoproj.io/secret-type=repository" --overwrite
     echo "✅ Successfully bootstrapped 'github-repo-creds' from SealedSecret!"
   else
     echo "⚠️  SealedSecret file not found at ${SEALED_SECRET_PATH}."
