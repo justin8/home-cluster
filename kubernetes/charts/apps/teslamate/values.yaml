@@ -5,7 +5,7 @@ images:
     pullPolicy: IfNotPresent
   grafana:
     repository: teslamate/grafana
-    tag: "3.0.0"
+    tag: "3.1.0"
     pullPolicy: IfNotPresent
   mosquitto:
     repository: eclipse-mosquitto
