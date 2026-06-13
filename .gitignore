@@ -157,4 +157,3 @@ dist
 *.iso
 .decrypted*
 Chart.lock
-decrypted-key-temp.yaml
