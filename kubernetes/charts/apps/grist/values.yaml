@@ -4,7 +4,7 @@ redisVolumeSizeGi: 2
 images:
   grist:
     repository: gristlabs/grist
-    tag: 1.7.15
+    tag: 1.7.16
     pullPolicy: IfNotPresent
   redis:
     repository: docker.io/valkey/valkey
