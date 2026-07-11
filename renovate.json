@@ -50,7 +50,7 @@
       "matchUpdateTypes": ["minor", "patch"],
       "matchCurrentVersion": "!/^0/",
       "automerge": true,
-      "automergeSchedule": ["* 1-4 * * *"]
+      "automergeSchedule": ["* 0-8 * * *"]
     }
   ],
   "helm-values": {
