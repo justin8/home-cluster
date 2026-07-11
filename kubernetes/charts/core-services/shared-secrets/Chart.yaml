@@ -8,7 +8,7 @@ dependencies:
     version: 10.0.55
     repository: https://emberstack.github.io/helm-charts
   - name: sealed-secrets
-    version: 2.18.6
+    version: 2.19.1
     repository: https://bitnami.github.io/sealed-secrets
   - name: reloader
     version: 2.2.14
