@@ -1,0 +1,7 @@
+{{ include "common.pomeriumIngress" (dict
+  "ctx" .
+  "name" "echo"
+  "port" 80
+  "type" "public"
+  "allowedUsers" "all"
+) }}
