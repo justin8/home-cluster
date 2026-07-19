@@ -5,3 +5,13 @@
   "type" "public"
   "allowedUsers" "all"
 ) }}
+---
+{{ include "common.pomeriumIngress" (dict
+  "ctx" .
+  "name" "echo-logs"
+  "subdomain" "echo-logs"
+  "port" 8081
+  "serviceName" "echo"
+  "type" "public"
+  "allowedUsers" "authed"
+) }}

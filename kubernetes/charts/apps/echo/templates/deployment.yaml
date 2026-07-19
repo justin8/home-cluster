@@ -15,6 +15,9 @@ spec:
     spec:
       containers:
         - name: echo
-          image: mendhak/http-https-echo:latest
+          image: ghcr.io/justin8/http-https-echo:latest
           ports:
             - containerPort: 8080
+              name: http
+            - containerPort: 8081
+              name: logs

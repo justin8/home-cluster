@@ -11,5 +11,9 @@ spec:
   selector:
     app: echo
   ports:
-    - port: 80
+    - name: http
+      port: 80
       targetPort: 8080
+    - name: logs
+      port: 8081
+      targetPort: 8081
