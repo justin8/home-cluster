@@ -34,7 +34,7 @@ images:
     pullPolicy: IfNotPresent
   prowlarr:
     repository: lscr.io/linuxserver/prowlarr
-    tag: 2.4.0
+    tag: 2.5.2
     pullPolicy: IfNotPresent
   qbittorrent:
     repository: lscr.io/linuxserver/qbittorrent
