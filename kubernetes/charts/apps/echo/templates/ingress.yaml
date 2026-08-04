@@ -13,5 +13,5 @@
   "port" 8081
   "serviceName" "echo"
   "type" "public"
-  "allowedUsers" "authed"
+  "allowedUsers" "all"
 ) }}
