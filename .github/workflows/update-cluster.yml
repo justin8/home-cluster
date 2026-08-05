@@ -22,6 +22,7 @@ concurrency:
 
 jobs:
   update-cluster:
+    if: false
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:
