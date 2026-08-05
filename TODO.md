@@ -67,6 +67,7 @@
   - [x] Set up [pocketID operator](https://github.com/aclerici38/pocket-id-operator)
 - [x] Get access by user groups working - coming in tinyauth v4 maybe; alternatively, try out oauth2proxy or pomerium
 - [x] Fix .exe/.scr downloads permanently
+- [ ] Get rid of CNPG
 - [ ] Change to use tailnet IPs for DNS and disable local network IPs
 - [ ] Change to Cilium
 - [ ] Get network policies working
