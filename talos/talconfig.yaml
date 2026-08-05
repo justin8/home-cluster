@@ -109,7 +109,7 @@ nodes:
         environment:
           - TS_AUTHKEY=${tailscale_auth_key}
           - TS_AUTH_ONCE=true
-          - TS_EXTRA_ARGS=--accept-routes=false --advertise-tags=tag:k8s
+          - TS_EXTRA_ARGS=--accept-routes=false --advertise-tags=tag:core-network
     installDiskSelector:
       size: "> 10GB"
     nameservers:
