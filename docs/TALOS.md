@@ -83,6 +83,47 @@ This automatically runs `talhelper genconfig` to regenerate all configuration fi
 6. Run `direnv reload` to regenerate configs (or just press enter as it should be automatic)
 7. Apply changes: `talhelper gencommand apply | bash`
 
+### Replacing / Resetting an Existing Controlplane Node
+
+When replacing or resetting an existing controlplane node (e.g. replacing hardware or re-bootstrapping a node):
+
+1. **Clean up old etcd & node references**:
+   - Drain the node (if responsive): `kubectl drain <node-name> --ignore-daemonsets --delete-emptydir-data --force`
+   - Check etcd membership from an active controlplane node:
+     ```bash
+     talosctl -n <active-node-ip> etcd members
+     ```
+   - If the old member ID exists, remove it:
+     ```bash
+     talosctl -n <active-node-ip> etcd remove-member <member-id>
+     ```
+   - Remove stale K8s node resource if present: `kubectl delete node <node-name>`
+
+2. **Reset / Wipe the target node**:
+   - Reset the target node to clear local state:
+     ```bash
+     talosctl -n <target-node-ip> reset --reboot --graceful=false
+     ```
+
+3. **Re-apply Talos configuration**:
+   - Once the node boots into maintenance mode, apply the generated controlplane config:
+     ```bash
+     talosctl apply-config --insecure -f clusterconfig/home-cluster-controlplane.yaml -n <target-node-ip>
+     ```
+
+4. **Verify etcd & local LAN routing**:
+   - Verify etcd peer URLs use local LAN IPs (`192.168.5.x`) rather than Tailscale IPs:
+     ```bash
+     talosctl -n <target-node-ip> etcd members
+     ```
+   - Confirm all Talos services are healthy:
+     ```bash
+     talosctl -n <target-node-ip> service
+     ```
+
+5. **Remediate Longhorn disk registration**:
+   - Because the target node was re-formatted with a new filesystem UUID on `/var/lib/longhorn`, Longhorn will flag `DiskFilesystemChanged`. Follow the remediation steps in [`docs/LONGHORN.md`](file:///Users/justindray/src/home-cluster/docs/LONGHORN.md#L141) to adopt the fresh disk.
+
 ## Upgrades
 
 ### Kubernetes Upgrades
