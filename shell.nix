@@ -51,7 +51,7 @@ pkgs.mkShell {
       echo "Configuring talos..."
       cd talos
       talhelper genconfig
-      talosctl kubeconfig --talosconfig=./clusterconfig/talosconfig --force --nodes=192.168.5.20 clusterconfig/kubeconfig
+      talosctl kubeconfig --talosconfig=./clusterconfig/talosconfig --force --nodes=192.168.5.20 --endpoints=192.168.5.20 clusterconfig/kubeconfig
     )
   '';
 }
