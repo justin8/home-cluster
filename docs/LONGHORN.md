@@ -137,3 +137,45 @@ When rebuilding a cluster:
 2. Deploy core services (including Longhorn) via ArgoCD, but hold off on apps
 3. Restore volumes from backups in the Longhorn UI with new names
 4. Update the volume, PV and PVC references per the above steps, then push the change to allow ArgoCD to sync the changes
+
+## Node Replacement / Reset Recovery
+
+When a Talos node is replaced, reset (`talosctl reset`), or re-installed:
+
+1. **`DiskFilesystemChanged` / `DiskNotReady` Error**:
+   When the node re-joins Kubernetes, a fresh filesystem is created on `/var/lib/longhorn` with a new `diskUUID`. Longhorn's safety guard detects that the UUID on disk does not match the old `diskUUID` stored in Kubernetes, resulting in:
+   - `Disk default-disk-1030800000000(/var/lib/longhorn) on node <node-name> is not ready: record diskUUID doesn't match the one on the disk`
+   - `ALLOWSCHEDULING: false` or `SCHEDULABLE: false` for the node's disk.
+
+2. **Remediation Procedure**:
+   To clear the stale disk registration and allow Longhorn to adopt the fresh disk:
+
+   a. **Disable scheduling on the stale disk**:
+
+   ```bash
+   kubectl patch node.longhorn.io <node-name> -n longhorn-system --type=merge -p='{"spec":{"disks":{"default-disk-1030800000000":{"allowScheduling":false}}}}'
+   ```
+
+   b. **Remove the stale disk entry from the spec**:
+
+   ```bash
+   kubectl patch node.longhorn.io <node-name> -n longhorn-system --type=json -p='[{"op": "remove", "path": "/spec/disks/default-disk-1030800000000"}]'
+   ```
+
+   c. **Re-add the fresh disk path**:
+
+   ```bash
+   kubectl patch node.longhorn.io <node-name> -n longhorn-system --type=merge -p='{"spec":{"disks":{"default-disk-1030800000000":{"allowScheduling":true,"diskType":"filesystem","evictionRequested":false,"path":"/var/lib/longhorn","storageReserved":50955090329}}}}'
+   ```
+
+   d. **Restart the `longhorn-manager` pod on that node**:
+
+   ```bash
+   kubectl delete pod -n longhorn-system -l app=longhorn-manager --field-selector spec.nodeName=<node-name>
+   ```
+
+3. **Verification**:
+   Verify that the node status returns to `READY: True` and `SCHEDULABLE: True`:
+   ```bash
+   kubectl get nodes.longhorn.io -n longhorn-system
+   ```
