@@ -5,8 +5,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
 spec:
   instances: 2
-  nodeMaintenanceWindow:
-    reusePVC: true
+  enablePDB: true
   probes:
     readiness:
       type: query
@@ -42,10 +41,3 @@ spec:
   storage:
     size: {{ .Values.databaseVolumeSizeGi }}Gi
     storageClass: longhorn
-    pvcTemplate:
-      accessModes:
-        - ReadWriteOnce
-      storageClassName: longhorn
-      resources:
-        requests:
-          storage: {{ .Values.databaseVolumeSizeGi }}Gi

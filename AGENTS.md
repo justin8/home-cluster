@@ -139,8 +139,6 @@ This includes (but is not limited to):
 
 Read-only commands (`kubectl get`, `kubectl describe`, `kubectl logs`, `kubectl diff`) are fine.
 
-Always show the user the command and explain what it will do — let them run it.
-
 ## CLI Tool Usage
 
 - **Token Efficiency:** For project-specific CLI tools like `talosctl` and `kubeseal`, always prefix the command with `rtk` (e.g., `rtk talosctl get members`). This wrapper reduces token usage by optimizing output for the AI.
