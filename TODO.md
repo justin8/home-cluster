@@ -68,6 +68,7 @@
 - [x] Get access by user groups working - coming in tinyauth v4 maybe; alternatively, try out oauth2proxy or pomerium
 - [x] Fix .exe/.scr downloads permanently
 - [ ] Get rid of CNPG
+- [ ] Update github actions to use tailscale as well
 - [ ] Change to use tailnet IPs for DNS and disable local network IPs
 - [ ] Change to Cilium
 - [ ] Get network policies working
