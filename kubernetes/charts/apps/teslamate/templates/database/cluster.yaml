@@ -31,3 +31,11 @@ spec:
   storage:
     size: {{ .Values.databaseVolumeSizeGi }}Gi
     storageClass: longhorn
+    pvcTemplate:
+      accessModes:
+        - ReadWriteOnce
+      storageClassName: longhorn
+      volumeName: pvc-d16a901e-a782-4dc2-a130-c0a2aa2e0eff
+      resources:
+        requests:
+          storage: {{ .Values.databaseVolumeSizeGi }}Gi
