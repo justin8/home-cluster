@@ -49,6 +49,8 @@ patches:
         wipe: true
     cluster:
       etcd:
+        advertisedSubnets:
+          - "192.168.5.0/24"
         extraArgs:
           heartbeat-interval: "300"
           election-timeout: "1500"
@@ -107,7 +109,7 @@ nodes:
         environment:
           - TS_AUTHKEY=${tailscale_auth_key}
           - TS_AUTH_ONCE=true
-          - TS_EXTRA_ARGS=--accept-routes
+          - TS_EXTRA_ARGS=--accept-routes=false --advertise-tags=tag:k8s
     installDiskSelector:
       size: "> 10GB"
     nameservers:
