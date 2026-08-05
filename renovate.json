@@ -51,6 +51,10 @@
       "matchCurrentVersion": "!/^0/",
       "automerge": true,
       "automergeSchedule": ["* 0-8 * * *"]
+    },
+    {
+      "matchPackageNames": ["siderolabs/talos", "kubernetes/kubernetes"],
+      "automerge": false
     }
   ],
   "helm-values": {
