@@ -54,6 +54,7 @@
     },
     {
       "matchPackageNames": ["siderolabs/talos", "kubernetes/kubernetes"],
+      "matchPackagePatterns": ["longhorn"],
       "automerge": false
     }
   ],
