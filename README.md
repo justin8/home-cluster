@@ -109,6 +109,7 @@ If restoring from a previous cluster, restore Longhorn volumes before enabling a
 - `kavita-config` (kavita)
 - `plex-config` (plex)
 - `syncthing-config` (syncthing)
+- `uhf-data` (uhf)
 
 **Steps:**
 

@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: uhf
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: uhf
+  template:
+    metadata:
+      labels:
+        app: uhf
+    spec:
+      containers:
+        - name: uhf
+          image: "{{ .Values.images.app.repository }}:{{ .Values.images.app.tag }}"
+          imagePullPolicy: {{ .Values.images.app.pullPolicy }}
+          command:
+            - uhf-server
+          args:
+            - --port
+            - "8000"
+            - --recordings-dir
+            - /recordings
+            {{- if .Values.commercialDetection }}
+            - --enable-commercial-detection
+            {{- end }}
+            - --password
+            - $(PASSWORD)
+          ports:
+            - containerPort: 8000
+              name: tcp
+              protocol: TCP
+          env:
+            - name: TZ
+              value: {{ .Values.TZ }}
+            - name: PUID
+              value: {{ .Values.PUID | quote }}
+            - name: PGID
+              value: {{ .Values.PGID | quote }}
+            - name: PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: uhf-secrets
+                  key: PASSWORD
+          livenessProbe:
+            tcpSocket:
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readinessProbe:
+            tcpSocket:
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/uhf-server
+            - name: recordings
+              mountPath: /recordings
+              subPath: recordings
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: uhf-data
+        - name: recordings
+          nfs:
+            server: {{ .Values.network.storageServer }}
+            path: /mnt/pool/media
