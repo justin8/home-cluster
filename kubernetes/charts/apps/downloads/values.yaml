@@ -6,13 +6,8 @@ qbittorrentVolumeSizeGi: 1
 seerrVolumeSizeGi: 5
 quiVolumeSizeGi: 1
 shelfmarkVolumeSizeGi: 1
-dispatcharrVolumeSizeGi: 10
 
 images:
-  dispatcharr:
-    repository: ghcr.io/dispatcharr/dispatcharr
-    tag: 0.29.0
-    pullPolicy: IfNotPresent
   decluttarr:
     repository: ghcr.io/manimatter/decluttarr
     tag: v2.1.0

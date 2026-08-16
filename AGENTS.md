@@ -17,18 +17,6 @@ helm search repo <repo-name>/<chart-name>
 
 Pin the dependency to the latest stable version found. Never guess or use placeholder versions.
 
-## Container Image Versions
-
-Always use specific, pinned release tags for container images (e.g. `0.29.0`) instead of floating tags like `latest`.
-
-To look up available container image tags, use the provided helper script:
-
-```bash
-./scripts/get-docker-tags <image>
-```
-
-Always select and pin the latest stable tagged version. Never default to `latest`.
-
 ## ArgoCD Standards
 
 - **Application Manifests:** Must follow this strict checklist for `kubernetes/root-app/templates/`:
