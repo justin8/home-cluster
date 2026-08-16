@@ -197,6 +197,6 @@ helm:
 
 ### Typical Workflow
 
-1. **`kubernetes/charts/my-app/values.yaml`**: Contains app-specific configuration (e.g., specific pinned image tags using `./scripts/get-docker-tags <image>`, replica counts).
+1. **`kubernetes/charts/my-app/values.yaml`**: Contains app-specific configuration (e.g., image tags, replica counts).
 2. **`kubernetes/global-values.yaml`**: Contains cluster-wide settings (e.g., `domain: dray.id.au`).
 3. **Result**: Your templates can access both `{{ .Values.image.tag }}` and `{{ .Values.global.domain }}` seamlessly.
