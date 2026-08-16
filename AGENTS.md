@@ -139,6 +139,11 @@ This includes (but is not limited to):
 
 Read-only commands (`kubectl get`, `kubectl describe`, `kubectl logs`, `kubectl diff`) are fine.
 
+## Talos Node Reset Safety
+
+- **Partition Wipe Flags:** When resetting a Talos node, **ALWAYS** specify `--system-labels-to-wipe STATE --system-labels-to-wipe EPHEMERAL` (along with `--reboot` and `--graceful=false`). This ensures only the `STATE` and `EPHEMERAL` partitions are wiped, leaving the boot partition intact so the node reboots cleanly into maintenance mode without requiring a USB boot drive.
+- **Refuse Incomplete Resets:** **NEVER** run, propose, or execute a `talosctl reset` command without those explicit flags (`--system-labels-to-wipe STATE --system-labels-to-wipe EPHEMERAL`). Refuse any Talos reset that wipes the boot partition or omits these flags.
+
 ## CLI Tool Usage
 
 - **Token Efficiency:** For project-specific CLI tools like `talosctl` and `kubeseal`, always prefix the command with `rtk` (e.g., `rtk talosctl get members`). This wrapper reduces token usage by optimizing output for the AI.
