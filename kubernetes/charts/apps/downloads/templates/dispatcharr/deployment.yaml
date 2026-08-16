@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dispatcharr
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: dispatcharr
+  template:
+    metadata:
+      labels:
+        app: dispatcharr
+    spec:
+      containers:
+        - name: dispatcharr
+          image: "{{ .Values.images.dispatcharr.repository }}:{{ .Values.images.dispatcharr.tag }}"
+          imagePullPolicy: {{ .Values.images.dispatcharr.pullPolicy }}
+          ports:
+            - containerPort: 9191
+          env:
+            - name: DISPATCHARR_ENV
+              value: "aio"
+            - name: REDIS_HOST
+              value: "localhost"
+            - name: CELERY_BROKER_URL
+              value: "redis://localhost:6379/0"
+            - name: DISPATCHARR_LOG_LEVEL
+              value: "info"
+            - name: DISPATCHARR_TRUSTED_PROXIES
+              value: {{ printf "%s,%s" .Values.network.clusterPodNet .Values.network.tailscaleIpRange | quote }}
+            - name: DISPATCHARR_SETUP_ALLOWED_IP
+              value: {{ printf "%s,%s" .Values.network.clusterPodNet .Values.network.tailscaleIpRange | quote }}
+            - name: TZ
+              value: {{ .Values.TZ }}
+          volumeMounts:
+            - name: config
+              mountPath: /data
+            - name: media
+              mountPath: /mnt/pool/media
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: dispatcharr-config
+        - name: media
+          nfs:
+            server: {{ .Values.network.storageServer }}
+            path: /mnt/pool/media

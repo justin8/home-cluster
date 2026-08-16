@@ -1,0 +1,1 @@
+{{- include "common.longhornVolume" (dict "ctx" . "name" "dispatcharr-config" "sizeGi" .Values.dispatcharrVolumeSizeGi) -}}

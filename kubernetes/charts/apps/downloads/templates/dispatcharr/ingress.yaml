@@ -1,0 +1,6 @@
+{{ include "common.pomeriumIngress" (dict
+  "ctx" .
+  "name" "dispatcharr"
+  "port" 9191
+  "allowedUsers" "admin"
+) }}
