@@ -15,6 +15,55 @@ spec:
       labels:
         app: kavita
     spec:
+      initContainers:
+        - name: update-oidc-config
+          image: "{{ .Values.images.app.repository }}:{{ .Values.images.app.tag }}"
+          imagePullPolicy: {{ .Values.images.app.pullPolicy }}
+          env:
+            - name: OIDC_AUTHORITY
+              valueFrom:
+                secretKeyRef:
+                  name: kavita-oidc-credentials
+                  key: issuer_url
+            - name: OIDC_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: kavita-oidc-credentials
+                  key: client_id
+            - name: OIDC_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: kavita-oidc-credentials
+                  key: client_secret
+          command:
+            - /bin/bash
+            - -c
+            - |
+              set -euo pipefail
+              CONFIG_FILE="/config/appsettings.json"
+              if [ -f "$CONFIG_FILE" ]; then
+                echo "Found $CONFIG_FILE, checking OIDC settings..."
+                TMP_FILE=$(mktemp /config/appsettings.json.XXXXXX)
+                jq \
+                  --arg auth "$OIDC_AUTHORITY" \
+                  --arg cid "$OIDC_CLIENT_ID" \
+                  --arg secret "$OIDC_CLIENT_SECRET" \
+                  'if .OpenIdConnectSettings? and (.OpenIdConnectSettings | type == "object") then
+                     (if .OpenIdConnectSettings | has("Authority") then .OpenIdConnectSettings.Authority = $auth else . end) |
+                     (if .OpenIdConnectSettings | has("ClientId") then .OpenIdConnectSettings.ClientId = $cid else . end) |
+                     (if .OpenIdConnectSettings | has("Secret") then .OpenIdConnectSettings.Secret = $secret else . end)
+                   else
+                     .
+                   end' "$CONFIG_FILE" > "$TMP_FILE"
+                cat "$TMP_FILE" > "$CONFIG_FILE"
+                rm -f "$TMP_FILE"
+                echo "Successfully processed OIDC settings in $CONFIG_FILE"
+              else
+                echo "$CONFIG_FILE not found, skipping."
+              fi
+          volumeMounts:
+            - name: config
+              mountPath: /config
       containers:
         - name: kavita
           image: "{{ .Values.images.app.repository }}:{{ .Values.images.app.tag }}"
