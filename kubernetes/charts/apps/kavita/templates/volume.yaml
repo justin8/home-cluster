@@ -1,1 +1,1 @@
-{{- include "common.longhornVolume" (dict "ctx" . "name" "kavita-config" "sizeGi" .Values.volumeSizeGi) -}}
+{{- include "common.longhornVolume" (dict "ctx" . "name" "kavita-config-v2" "sizeGi" .Values.volumeSizeGi) -}}

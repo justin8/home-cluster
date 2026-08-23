@@ -36,7 +36,7 @@ spec:
       volumes:
         - name: config
           persistentVolumeClaim:
-            claimName: kavita-config
+            claimName: kavita-config-v2
         - name: media
           nfs:
             server: {{ .Values.network.storageServer }}
