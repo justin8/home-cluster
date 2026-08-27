@@ -28,28 +28,47 @@ echo "Target Talos version: $TARGET_VERSION"
 NODE_IPS=$(yq -r ".nodes[].ipAddress" talconfig.yaml | tr ',' ' ' | xargs)
 echo "Node IPs: $NODE_IPS"
 
-# Check if upgrade is needed
-UPGRADE_NEEDED=$FORCE
-if [ "$FORCE" = true ]; then
-  echo "Force flag detected, skipping version check..."
-else
-  for IP in $NODE_IPS; do
-    echo "Checking node $IP..."
-    # Try to get the version, handle failure gracefully
-    CURRENT_VERSION=$(talosctl -n "$IP" version --short 2>/dev/null | grep "Tag:" | awk '{print $2}' || echo "unknown")
-    echo "Current version on $IP: $CURRENT_VERSION"
-
-    if [ "$CURRENT_VERSION" != "$TARGET_VERSION" ]; then
-      echo "Version mismatch detected on $IP (Current: $CURRENT_VERSION, Target: $TARGET_VERSION)"
-      UPGRADE_NEEDED=true
+# Function to wait until all Longhorn volumes are healthy (not degraded)
+wait_for_longhorn_health() {
+  echo "Checking Longhorn volume health..."
+  while true; do
+    DEGRADED=$(kubectl get volume.longhorn.io -n longhorn-system -o jsonpath='{range .items[*]}{.status.robustness}{"\n"}{end}' 2>/dev/null | grep -c "degraded" || true)
+    if [ "$DEGRADED" -eq 0 ]; then
+      echo "All Longhorn volumes are healthy."
       break
     fi
+    echo "Waiting for $DEGRADED degraded Longhorn volume(s) to finish rebuilding..."
+    sleep 15
   done
-fi
+}
 
-if [ "$UPGRADE_NEEDED" = true ]; then
-  echo "Upgrading Talos to $TARGET_VERSION (with 30m drain timeout for Longhorn)..."
-  talhelper gencommand upgrade --extra-flags "--preserve --drain-timeout 30m" | bash
+UPGRADED_ANY=false
+
+for IP in $NODE_IPS; do
+  NODE_NAME=$(talosctl -n "$IP" get hostname -o jsonpath='{.spec.hostname}' 2>/dev/null || echo "unknown")
+  echo "Checking node $NODE_NAME ($IP)..."
+  CURRENT_VERSION=$(talosctl -n "$IP" version --short 2>/dev/null | grep "Tag:" | awk '{print $2}' || echo "unknown")
+  echo "Current version on $NODE_NAME ($IP): $CURRENT_VERSION"
+
+  if [ "$FORCE" = true ] || [ "$CURRENT_VERSION" != "$TARGET_VERSION" ]; then
+    echo "Node $NODE_NAME ($IP) needs upgrade (Current: $CURRENT_VERSION, Target: $TARGET_VERSION)."
+
+    # Ensure Longhorn volumes are not degraded before initiating node drain/upgrade
+    wait_for_longhorn_health
+
+    echo "Upgrading node $NODE_NAME ($IP) to $TARGET_VERSION (with 30m drain timeout for Longhorn)..."
+    talhelper gencommand upgrade --node "$IP" --extra-flags "--preserve --drain-timeout 30m" | bash
+
+    UPGRADED_ANY=true
+  else
+    echo "Node $NODE_NAME ($IP) is already running $TARGET_VERSION, skipping."
+  fi
+done
+
+if [ "$UPGRADED_ANY" = true ]; then
+  # Wait for Longhorn volumes to settle after the final upgrade
+  wait_for_longhorn_health
+  echo "All node upgrades completed successfully."
 else
-  echo "All nodes are already running $TARGET_VERSION, no upgrade needed"
+  echo "All nodes are already running $TARGET_VERSION, no upgrade needed."
 fi
