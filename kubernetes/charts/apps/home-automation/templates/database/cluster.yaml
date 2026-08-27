@@ -62,7 +62,7 @@ spec:
         maxParallel: 2
       data:
         compression: gzip
-        immediate: true
+        immediateCheckpoint: true
     retentionPolicy: "30d"
 
   storage:
