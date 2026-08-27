@@ -43,6 +43,8 @@ backup:
     wal:
       compression: gzip
       maxParallel: 2
+      archiveAdditionalCommandArgs:
+        - "--no-check-wal-archive"
     data:
       compression: gzip
       immediate: true
