@@ -116,18 +116,48 @@ bootstrap:
 
 ### Backup and Recovery
 
-- Backups are enabled by default via Longhorn volume backups (see [LONGHORN](LONGHORN.md) for more details)
-- CNPG's native backups are not being used currently
+CNPG databases use **native physical backups (Barman Object Store)** to Backblaze B2 (`jdray-backup` bucket).
 
-#### Restoring a Database Volume
+#### Shared Credentials Architecture (`shared-secrets` & `reflector`)
 
-CNPG manages its own PVC via `pvcTemplate`, so the standard Longhorn volume restore process (renaming the volume in `volume.yaml`) does not apply directly. The correct procedure is:
+The B2 backup credentials (`AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`) are managed centrally as a `SealedSecret` in the `shared-secrets` core service (`kubernetes/charts/core-services/shared-secrets/templates/cnpg-b2-credentials.yaml`).
 
-1. **Scale down the app** — delete or suspend the ArgoCD application (or scale the deployment to 0) so nothing is writing to the database
-2. **Delete the CNPG Cluster** — this releases the PVC so the volume can be replaced. The PV/Longhorn volume are retained due to `persistentVolumeReclaimPolicy: Retain`
-3. **Restore the backup in Longhorn UI** — restore to a **new name** (e.g. `immich-database-data-restored`)
-4. **Update `volume.yaml`** — change the Longhorn `Volume` CR name, PV name, `csi.volumeHandle`, and the `volumeName` in the CNPG cluster's `pvcTemplate` to the new name
-5. **Commit and push** — ArgoCD will recreate the CNPG Cluster pointing at the restored volume
+The `shared-secrets-reflector` automatically mirrors the `cnpg-b2-credentials` Secret from `kube-system` into target database namespaces (such as `home-automation`, `immich`, etc.).
+
+#### Adding B2 Backups to a CNPG Cluster
+
+Add the `bootstrap.recovery` block and single `common.cnpgBackup` template to the application's `cluster.yaml`:
+
+```yaml
+spec:
+  # Automated Disaster Recovery from S3/B2 on fresh PVC
+  bootstrap:
+    recovery:
+      source: <app>-db-b2-backup
+
+{{ include "common.cnpgBackup" (dict "ctx" . "name" "<app>-db") | indent 2 }}
+```
+
+#### Scheduled Backups
+
+Include a `ScheduledBackup` resource in the application database templates (e.g., `templates/database/scheduled-backup.yaml`):
+
+```yaml
+apiVersion: postgresql.cnpg.io/v1
+kind: ScheduledBackup
+metadata:
+  name: <app>-db-daily-backup
+  namespace: { { .Release.Namespace } }
+spec:
+  schedule: "0 0 2 * * *"
+  backupOwnerReference: self
+  cluster:
+    name: <app>-db
+```
+
+#### Disaster Recovery / Restoring a Cluster
+
+If a node, PVC, or cluster is lost, ArgoCD re-deploys the `Cluster` resource. Because the PVC is empty, CNPG detects `bootstrap.recovery`, connects to B2, downloads the latest base backup and WAL logs, and restores PostgreSQL automatically.
 
 ## Limitations
 

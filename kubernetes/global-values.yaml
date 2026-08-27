@@ -13,7 +13,6 @@ network:
   publicIngress: "192.168.5.3"
   pomeriumIngress: "192.168.5.4"
   metallbRange: "192.168.5.80-192.168.5.100"
-  privateIngress: "100.71.142.73"
   storageServer: "100.92.202.28"
   dnsServer: "192.168.5.53"
 userGroups:
@@ -22,3 +21,10 @@ userGroups:
   private:
     - "b26fb09c-67fb-4cc3-bbf3-c242f47838f2"
     - "4f1efca6-1f08-4895-9e00-24886fea2585"
+
+# Global CNPG Backup Configuration
+cnpg:
+  backup:
+    bucket: jdray-backup
+    endpoint: https://s3.us-west-001.backblazeb2.com
+    secretName: cnpg-b2-credentials

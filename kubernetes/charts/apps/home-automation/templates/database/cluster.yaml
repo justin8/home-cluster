@@ -23,11 +23,11 @@ spec:
       random_page_cost: "1.1"
       effective_io_concurrency: "200"
   bootstrap:
-    initdb:
-      database: homeassistant
-      owner: homeassistant_user
-      secret:
-        name: homeassistant-db-password
+    recovery:
+      source: homeassistant-db-b2-backup
+
+{{ include "common.cnpgBackup" (dict "ctx" . "name" "homeassistant-db") | indent 2 }}
+
   storage:
     size: {{ .Values.databaseVolumeSizeGi }}Gi
     storageClass: longhorn
