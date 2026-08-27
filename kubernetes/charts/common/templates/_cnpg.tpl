@@ -1,6 +1,7 @@
 {{/*
 CNPG Backup & Recovery specification template
 Generates both `externalClusters` (for bootstrap recovery) and `backup` (for continuous WAL archiving)
+CNPG automatically appends the cluster name to `destinationPath`
 Usage:
   {{ include "common.cnpgBackup" (dict "ctx" . "name" "homeassistant-db") }}
 */}}
@@ -12,12 +13,13 @@ Usage:
 {{- $cnpg := $global.cnpg | default $ctx.Values.cnpg | default dict -}}
 {{- $backup := $cnpg.backup | default dict -}}
 {{- $bucket := $backup.bucket | default "jdray-backup" -}}
+{{- $basePath := $backup.basePath | default (printf "s3://%s/cnpg" $bucket) -}}
 {{- $endpoint := $backup.endpoint | default "https://s3.us-west-001.backblazeb2.com" -}}
 {{- $secretName := $backup.secretName | default "cnpg-b2-credentials" -}}
 externalClusters:
   - name: {{ $sourceName }}
     barmanObjectStore:
-      destinationPath: {{ printf "s3://%s/cnpg/%s" $bucket $name }}
+      destinationPath: {{ $basePath }}
       endpointURL: {{ $endpoint }}
       s3Credentials:
         accessKeyId:
@@ -29,7 +31,7 @@ externalClusters:
 
 backup:
   barmanObjectStore:
-    destinationPath: {{ printf "s3://%s/cnpg/%s" $bucket $name }}
+    destinationPath: {{ $basePath }}
     endpointURL: {{ $endpoint }}
     s3Credentials:
       accessKeyId:

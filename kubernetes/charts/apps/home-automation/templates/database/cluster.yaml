@@ -25,6 +25,10 @@ spec:
   bootstrap:
     recovery:
       source: homeassistant-db-b2-backup
+      database: homeassistant
+      owner: homeassistant_user
+      secret:
+        name: homeassistant-db-password
 
 {{ include "common.cnpgBackup" (dict "ctx" . "name" "homeassistant-db") | indent 2 }}
 
