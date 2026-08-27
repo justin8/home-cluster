@@ -30,6 +30,10 @@ spec:
       - name: immich-database_user
         login: true
         superuser: true
+
+  # Note: CNPG forbids specifying both initdb and recovery at the same time in spec.bootstrap.
+  # For normal operation/new installs, use initdb. For disaster recovery, comment out initdb
+  # and uncomment recovery below.
   bootstrap:
     initdb:
       database: immich-database
@@ -38,12 +42,12 @@ spec:
         - CREATE EXTENSION vchord CASCADE
         - CREATE EXTENSION IF NOT EXISTS "cube" CASCADE
         - CREATE EXTENSION IF NOT EXISTS "earthdistance" CASCADE
-    recovery:
-      source: immich-database-b2-backup
-      database: immich-database
-      owner: immich-database_user
-      secret:
-        name: immich-database-app
+    # recovery:
+    #   source: immich-database-b2-backup
+    #   database: immich-database
+    #   owner: immich-database_user
+    #   secret:
+    #     name: immich-database-app
 
   externalClusters:
     - name: immich-database-b2-backup

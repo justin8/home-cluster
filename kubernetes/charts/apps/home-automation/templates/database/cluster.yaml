@@ -23,13 +23,19 @@ spec:
       random_page_cost: "1.1"
       effective_io_concurrency: "200"
 
+  # Note: CNPG forbids specifying both initdb and recovery at the same time in spec.bootstrap.
+  # For normal operation/new installs, use initdb. For disaster recovery, comment out initdb
+  # and uncomment recovery below.
   bootstrap:
-    recovery:
-      source: homeassistant-db-b2-backup
+    initdb:
       database: homeassistant
       owner: homeassistant_user
-      secret:
-        name: homeassistant-db-password
+    # recovery:
+    #   source: homeassistant-db-b2-backup
+    #   database: homeassistant
+    #   owner: homeassistant_user
+    #   secret:
+    #     name: homeassistant-db-password
 
   externalClusters:
     - name: homeassistant-db-b2-backup

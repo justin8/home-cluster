@@ -44,6 +44,13 @@ The `serverName` parameter specifies the exact subfolder on Backblaze B2 under `
 
 > ⚠️ **CRITICAL RULE:** If the directory specified in `backup.barmanObjectStore.serverName` already exists and contains WAL files when a new cluster is created or restored, CNPG's pre-flight check will fail with `Expected empty archive` and the database will refuse to start. The backup destination `serverName` must always point to a clean/new directory name.
 
+### Crucial Bootstrap Rule (`initdb` vs `recovery`)
+
+> ⚠️ **BOOTSTRAP MUTUAL EXCLUSION:** CloudNativePG strictly forbids specifying both `initdb` and `recovery` at the same time in `spec.bootstrap`.
+>
+> - **For normal operation & new installs:** Use `initdb` (with extensions in `postInitSQL`) and leave `recovery` commented out.
+> - **For disaster recovery:** Comment out `initdb` and uncomment `recovery`.
+
 ```yaml
 # templates/database/cluster.yaml
 apiVersion: postgresql.cnpg.io/v1
@@ -62,14 +69,19 @@ spec:
       maintenance_work_mem: 64MB
       checkpoint_completion_target: "0.9"
 
-  # Bootstrap recovery settings for fresh PVC provision
+  # Note: CNPG forbids specifying both initdb and recovery at the same time in spec.bootstrap.
+  # For normal operation/new installs, use initdb. For disaster recovery, comment out initdb
+  # and uncomment recovery below.
   bootstrap:
-    recovery:
-      source: {{ .Release.Name }}-db-b2-backup
+    initdb:
       database: {{ .Release.Name }}
       owner: {{ .Release.Name }}_user
-      secret:
-        name: {{ .Release.Name }}-db-password
+    # recovery:
+    #   source: {{ .Release.Name }}-db-b2-backup
+    #   database: {{ .Release.Name }}
+    #   owner: {{ .Release.Name }}_user
+    #   secret:
+    #     name: {{ .Release.Name }}-db-password
 
   # READ PATH: Restores base backup and WAL logs from source directory on B2 (s3://jdray-backup/cnpg/{{ .Release.Name }}-db/)
   externalClusters:
@@ -170,12 +182,13 @@ Disaster recovery in this cluster is **100% GitOps driven via ArgoCD**. No manua
 
 > **Note:** Manual scaling of the application deployment during recovery is unnecessary because CNPG automatically blocks incoming database connections and isolates PostgreSQL until recovery is complete and the state is consistent.
 
-### Step 1: Update Restore & Backup Paths in `cluster.yaml`
+### Step 1: Update `cluster.yaml` in Git for Recovery
 
-When restoring a database (e.g. following storage loss or migrating to a new cluster), update the application's `cluster.yaml` in Git:
+When restoring a database (e.g. following storage loss or migrating to a new cluster), update `cluster.yaml`:
 
-- `externalClusters[0].barmanObjectStore.serverName`: Point to the **existing source directory** on B2 containing the base backup and WAL logs (e.g., `homeassistant-db`).
-- `backup.barmanObjectStore.serverName`: Point to a **new, clean target directory** on B2 for post-recovery WAL logs (e.g., `homeassistant-db-v2`).
+1. In `spec.bootstrap`, comment out `initdb` and uncomment `recovery`.
+2. Set `externalClusters[0].barmanObjectStore.serverName` to the **existing source directory** on B2 containing the base backup and WAL logs (e.g., `homeassistant-db`).
+3. Set `backup.barmanObjectStore.serverName` to a **new, clean target directory** on B2 for post-recovery WAL logs (e.g., `homeassistant-db-v2`).
 
 ### Step 2: Commit and Push to Git
 
