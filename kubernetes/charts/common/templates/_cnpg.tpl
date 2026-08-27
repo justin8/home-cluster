@@ -28,6 +28,9 @@ externalClusters:
         secretAccessKey:
           name: {{ $secretName }}
           key: AWS_SECRET_ACCESS_KEY
+      wal:
+        archiveAdditionalCommandArgs:
+          - "--no-check-wal-archive"
 
 backup:
   barmanObjectStore:
