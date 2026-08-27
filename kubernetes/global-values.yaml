@@ -29,3 +29,4 @@ cnpg:
     destinationPath: s3://jdray-backup/cnpg
     endpointURL: https://s3.us-west-001.backblazeb2.com
     secretName: cnpg-b2-credentials
+    retentionPolicy: "30d"

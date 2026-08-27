@@ -62,7 +62,7 @@ spec:
         maxParallel: 2
       data:
         compression: gzip
-    retentionPolicy: "30d"
+    retentionPolicy: {{ .Values.cnpg.backup.retentionPolicy | quote }}
 
   storage:
     size: {{ .Values.databaseVolumeSizeGi }}Gi
