@@ -26,7 +26,6 @@ userGroups:
 # Global CNPG Backup Configuration
 cnpg:
   backup:
-    bucket: jdray-backup
-    basePath: s3://jdray-backup/cnpg
-    endpoint: https://s3.us-west-001.backblazeb2.com
+    destinationPath: s3://jdray-backup/cnpg
+    endpointURL: https://s3.us-west-001.backblazeb2.com
     secretName: cnpg-b2-credentials
