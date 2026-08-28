@@ -1,5 +1,10 @@
 pocketidVolumeSizeGi: 1
 
+images:
+  pocketid:
+    repository: ghcr.io/pocket-id/pocket-id
+    tag: v2.14.0
+
 pocket-id-operator:
   instance:
     enabled: false

@@ -4,6 +4,7 @@ metadata:
   name: pocketid
   namespace: {{ .Release.Namespace }}
 spec:
+  image: "{{ .Values.images.pocketid.repository }}:{{ .Values.images.pocketid.tag }}"
   appUrl: "https://pocketid.{{ .Values.domain }}"
   encryptionKey:
     valueFrom:
