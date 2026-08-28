@@ -18,7 +18,7 @@ longhorn:
     # Talos Linux control-plane node settings
     taintToleration: "node-role.kubernetes.io/control-plane:NoSchedule;node-role.kubernetes.io/master:NoSchedule"
     disableSchedulingOnCordonedNode: "true"
-    nodeDrainPolicy: "block-for-eviction-if-contains-last-replica"
+    nodeDrainPolicy: "block-if-contains-last-replica"
     replicaReplenishmentWaitInterval: "300"
     storageReservedPercentageForDefaultDisk: "10"
     kubernetesClusterAutoscalerEnabled: "false"
