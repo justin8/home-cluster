@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: echo
+  name: blackhole
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
@@ -11,14 +11,14 @@ spec:
   project: default
   source:
     repoURL: https://github.com/justin8/home-cluster.git
-    path: kubernetes/charts/apps/echo
+    path: kubernetes/charts/apps/blackhole
     targetRevision: main
     helm:
       valueFiles:
         - ../../../global-values.yaml
   destination:
     server: https://kubernetes.default.svc
-    namespace: echo
+    namespace: blackhole
   syncPolicy:
     automated:
       selfHeal: true

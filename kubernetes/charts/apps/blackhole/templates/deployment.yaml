@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: echo
+  name: blackhole
   namespace: {{ .Release.Namespace }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: echo
+      app: blackhole
   template:
     metadata:
       labels:
-        app: echo
+        app: blackhole
     spec:
       containers:
-        - name: echo
+        - name: blackhole
           image: ghcr.io/justin8/http-https-echo:latest
           ports:
             - containerPort: 8080

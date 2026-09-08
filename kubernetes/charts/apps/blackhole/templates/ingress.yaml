@@ -1,6 +1,7 @@
 {{ include "common.pomeriumIngress" (dict
   "ctx" .
-  "name" "echo"
+  "name" "blackhole"
+  "subdomain" "blackhole"
   "port" 80
   "type" "public"
   "allowedUsers" "all"
@@ -8,10 +9,10 @@
 ---
 {{ include "common.pomeriumIngress" (dict
   "ctx" .
-  "name" "echo-logs"
-  "subdomain" "echo-logs"
+  "name" "blackhole-logs"
+  "subdomain" "blackhole-logs"
   "port" 8081
-  "serviceName" "echo"
+  "serviceName" "blackhole"
   "type" "public"
   "allowedUsers" "authed"
 ) }}
