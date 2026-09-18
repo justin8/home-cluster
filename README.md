@@ -102,7 +102,6 @@ If restoring from a previous cluster, restore Longhorn volumes before enabling a
 
 **Apps:**
 
-- `grist-persist`, `grist-redis-data` (grist)
 - `homeassistant-database-data`, `home-assistant-config`, `mqtt-data`, `zigbee2mqtt-data` (home-automation)
 - `immich-database-data` (immich)
 - `prowlarr-config`, `qbittorrent-config`, `radarr-config`, `sabnzbd-config`, `seerr-config`, `sonarr-config` (downloads)
@@ -117,7 +116,7 @@ If restoring from a previous cluster, restore Longhorn volumes before enabling a
 
 2. For each volume to restore, in the Longhorn UI (`https://longhorn.<domain>`):
    - Go to **Backup**, find the volume backup
-   - Click **Restore** and give it a **new name** (e.g. `grist-persist-v2`)
+   - Click **Restore** and give it a **new name** (e.g. `kavita-config-v2`)
 
 3. Update the volume references in the app's `volume.yaml` — change `metadata.name`, `csi.volumeHandle`, and the PVC's `volumeName` to the new name. Commit and push.
 

@@ -1,5 +1,0 @@
-{{ include "common.pomeriumIngress" (dict
-  "ctx" .
-  "name" "grist"
-  "port" 8484
-) }}
