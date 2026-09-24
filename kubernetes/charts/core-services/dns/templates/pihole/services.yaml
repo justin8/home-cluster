@@ -24,7 +24,8 @@ metadata:
   labels:
     app: pihole
   annotations:
-    metallb.io/address-pool: dns-server
+    cilium.io/load-balancer-ip-pools: dns-server
+    io.cilium/lb-ipam-ips: {{ .Values.network.dnsServer }}
 spec:
   type: LoadBalancer
   selector:
@@ -49,7 +50,6 @@ metadata:
   labels:
     app: pihole
   annotations:
-    metallb.io/address-pool: dns-server
     tailscale.com/hostname: pihole
 spec:
   type: LoadBalancer

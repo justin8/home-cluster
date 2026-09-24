@@ -1,3 +1,0 @@
-metallb:
-  speaker:
-    ignoreExcludeLB: true

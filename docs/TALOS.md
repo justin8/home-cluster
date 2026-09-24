@@ -36,10 +36,10 @@ All tools (`talhelper`, `talosctl`, `kubectl`, `sops`, etc.) are automatically p
 
 ### Post-Cluster Setup
 
-After the cluster is running, install ArgoCD to handle everything else:
+After the cluster is running, bootstrap Cilium CNI, ArgoCD, and the root application:
 
 ```bash
-install-argocd
+bootstrap-cluster
 ```
 
 ## Regenerating Configuration

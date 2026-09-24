@@ -14,11 +14,12 @@ We use the **App of Apps** pattern to manage our cluster resources. Argo CD is c
 
 ## Initial Bootstrap
 
-The cluster is bootstrapped using the `scripts/install-argocd` script. This script:
+The cluster is bootstrapped using the `scripts/bootstrap-cluster` script. This script:
 
-1. Installs the Argo CD Helm chart into the `argocd` namespace.
-2. Configures the SOPS age key as a Kubernetes secret for encrypted secrets.
-3. Applies the initial root application.
+1. Installs the Cilium CNI and waits for nodes to become `Ready`.
+2. Installs the Argo CD Helm chart into the `argocd` namespace.
+3. Configures the SOPS age key as a Kubernetes secret for encrypted secrets.
+4. Applies the initial root application.
 
 ## Managing Applications
 

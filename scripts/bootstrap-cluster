@@ -14,6 +14,18 @@ SOPS_KEY_PATH="$REPO_ROOT/.sops-age.key"
 
 cd "$REPO_ROOT"
 
+echo "🚀 Installing Cilium CNI via Helm..."
+helm upgrade --install cilium kubernetes/charts/core-services/cilium \
+  --namespace kube-system \
+  --values kubernetes/global-values.yaml \
+  --values kubernetes/charts/core-services/cilium/values.yaml
+
+echo "⏳ Waiting for Cilium DaemonSet to be ready..."
+kubectl rollout status daemonset/cilium -n kube-system --timeout=120s
+
+echo "⏳ Waiting for nodes to become Ready..."
+kubectl wait --for=condition=Ready nodes --all --timeout=120s
+
 echo "🚀 Installing Argo CD ${ARGOCD_CHART_VERSION} via Helm..."
 
 # Create the namespace if it doesn't exist

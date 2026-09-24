@@ -75,12 +75,12 @@ Before installing ArgoCD, restore the sealed-secrets encryption key so existing 
 sops --decrypt sealed-secrets-key.sops.yaml | kubectl apply -f -
 ```
 
-### 6. Install ArgoCD and Bootstrap GitOps
+### 6. Bootstrap Cluster (CNI, ArgoCD, and GitOps)
 
-This installs ArgoCD via Helm and applies the root App of Apps, which then reconciles all cluster services automatically:
+This installs Cilium CNI, ArgoCD via Helm, and applies the root App of Apps, which then reconciles all cluster services automatically:
 
 ```bash
-install-argocd
+bootstrap-cluster
 ```
 
 ArgoCD will sync all core services and applications in dependency order via sync waves. You can monitor progress via port-forward:

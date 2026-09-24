@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: home-automation
+  name: syncthing
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
@@ -11,14 +11,14 @@ spec:
   project: default
   source:
     repoURL: https://github.com/justin8/home-cluster.git
-    path: kubernetes/charts/apps/home-automation
-    targetRevision: main
+    path: kubernetes/charts/apps/syncthing
+    targetRevision: cilium
     helm:
       valueFiles:
         - ../../../global-values.yaml
   destination:
     server: https://kubernetes.default.svc
-    namespace: home-automation
+    namespace: syncthing
   syncPolicy:
     automated:
       selfHeal: true

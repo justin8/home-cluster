@@ -22,13 +22,13 @@ spec:
               - op: add
                 path: /metadata/annotations
                 value:
-                  metallb.universe.tf/address-pool: pomerium-ingress
-                  metallb.universe.tf/loadBalancerIPs: {{ .Values.network.pomeriumIngress }}
+                  cilium.io/load-balancer-ip-pools: pomerium-ingress
+                  io.cilium/lb-ipam-ips: {{ .Values.network.pomeriumIngress }}
               - op: add
                 path: /spec/externalTrafficPolicy
                 value: Local
     - repoURL: https://github.com/justin8/home-cluster.git
-      targetRevision: main
+      targetRevision: cilium
       path: kubernetes/charts/core-services/pomerium
       helm:
         valueFiles:

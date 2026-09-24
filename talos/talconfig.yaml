@@ -13,7 +13,7 @@ clusterPodNets:
 clusterSvcNets:
   - 10.96.0.0/12
 cniConfig:
-  name: flannel
+  name: none
 patches:
   - |-
     apiVersion: v1alpha1
@@ -25,6 +25,10 @@ patches:
       # permission denied under noexec. We explicitly set secure: false to preserve execution permissions
       # across rolling upgrades, disaster recovery, and fresh node provisioning/resets.
       secure: false
+  - |-
+    apiVersion: v1alpha1
+    kind: KubeProxyConfig
+    enabled: false
   - |-
     machine:
       env:
@@ -55,6 +59,10 @@ patches:
           - name: nvme_tcp
           - name: vfio_pci
           - name: wireguard
+      features:
+        kubePrism:
+          enabled: true
+          port: 7445
       install:
         wipe: true
     cluster:
