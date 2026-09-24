@@ -1,6 +1,6 @@
 ---
 clusterName: home-cluster
-talosVersion: v1.13.9
+talosVersion: v1.14.1
 kubernetesVersion: v1.36.3
 endpoint: https://192.168.5.20:6443
 domain: cluster.local
@@ -15,6 +15,16 @@ clusterSvcNets:
 cniConfig:
   name: flannel
 patches:
+  - |-
+    apiVersion: v1alpha1
+    kind: VolumeConfig
+    name: EPHEMERAL
+    mount:
+      # In Talos 1.14+, EPHEMERAL (/var) defaults to mount.secure: true (enforcing noexec, nosuid, nodev).
+      # Longhorn v1 executes engine binaries from /var/lib/longhorn/engine-binaries/, which fails with
+      # permission denied under noexec. We explicitly set secure: false to preserve execution permissions
+      # across rolling upgrades, disaster recovery, and fresh node provisioning/resets.
+      secure: false
   - |-
     machine:
       env:
@@ -54,15 +64,6 @@ patches:
         extraArgs:
           heartbeat-interval: "300"
           election-timeout: "1500"
-      apiServer:
-        extraArgs:
-          feature-gates: InPlacePodVerticalScaling=true
-      controllerManager:
-        extraArgs:
-          feature-gates: InPlacePodVerticalScaling=true
-      scheduler:
-        extraArgs:
-          feature-gates: InPlacePodVerticalScaling=true
       extraManifests:
         - https://raw.githubusercontent.com/alex1989hu/kubelet-serving-cert-approver/main/deploy/standalone-install.yaml
         - https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
