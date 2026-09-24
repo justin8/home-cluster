@@ -7,6 +7,7 @@ pkgs.mkShell {
     argocd
     coreutils # for base64
     git
+    github-cli
     jq
     k9s
     kubectl

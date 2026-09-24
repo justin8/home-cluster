@@ -144,7 +144,16 @@ Read-only commands (`kubectl get`, `kubectl describe`, `kubectl logs`, `kubectl 
 - **Partition Wipe Flags:** When resetting a Talos node, **ALWAYS** specify `--system-labels-to-wipe STATE --system-labels-to-wipe EPHEMERAL` (along with `--reboot` and `--graceful=false`). This ensures only the `STATE` and `EPHEMERAL` partitions are wiped, leaving the boot partition intact so the node reboots cleanly into maintenance mode without requiring a USB boot drive.
 - **Refuse Incomplete Resets:** **NEVER** run, propose, or execute a `talosctl reset` command without those explicit flags (`--system-labels-to-wipe STATE --system-labels-to-wipe EPHEMERAL`). Refuse any Talos reset that wipes the boot partition or omits these flags.
 
+## Configuration Durability & Disaster Recovery Safety
+
+- **Parity Between Upgrades and Replacements:** **NEVER** rely on "existing nodes keep old behavior during upgrades" when new defaults would break fresh node provisions, node replacements, or full cluster disaster recovery.
+- **Explicit Compatibility Configurations:** All configurations in `talconfig.yaml` and Helm charts MUST be explicitly defined to work identically during rolling upgrades AND when a node is replaced, wiped, or recreated from scratch.
+- **Proactive Mitigation of Breaking Defaults:** When an upstream upgrade introduces new defaults that only apply to newly formatted disks/partitions (e.g., Talos 1.14 defaulting `EPHEMERAL` `/var` to `noexec`, breaking Longhorn v1 binary execution), the configuration MUST explicitly declare the required overrides (e.g., `VolumeConfig` with `mount.secure: false` for `EPHEMERAL`) in `talconfig.yaml` _before_ or _during_ the upgrade.
+- **Raise Ambiguity Immediately:** Any backwards-incompatible change, behavioral divergence between existing and new nodes, or security-versus-compatibility trade-off MUST be raised directly to the user for explicit approval before making decisions or applying changes.
+
 ## CLI Tool Usage
 
-- **Token Efficiency:** For project-specific CLI tools like `talosctl` and `kubeseal`, always prefix the command with `rtk` (e.g., `rtk talosctl get members`). This wrapper reduces token usage by optimizing output for the AI.
-- **Exceptions:** Do **NOT** use `rtk` with `kubectl` or `helm` commands. Use them directly (e.g., `kubectl get pods`).
+- **Environment & direnv:** All CLI tools (`kubectl`, `talosctl`, `helm`, `talhelper`, `kubeseal`, `sops`, `yq`, `gh`, etc.) and environment variables (`KUBECONFIG`, `TALOSCONFIG`, `SOPS_AGE_KEY_FILE`) are managed via Nix through `direnv`. In subshells, scripts, or agent execution environments where direnv has not automatically exported into `$PATH`, always execute commands prefixed with `direnv exec .` (e.g., `direnv exec . kubectl get pods`, `direnv exec . rtk talosctl get members`).
+- **GitHub CLI (`gh`):** The GitHub CLI (`gh`) is available in the environment. When looking up information on GitHub (e.g., repository details, releases, tags, issues, pull requests, file contents, or GitHub API queries), use `gh` (e.g., `gh release view`, `gh repo view`, `gh api`) instead of `curl` wherever possible.
+- **Token Efficiency:** For project-specific CLI tools like `talosctl` and `kubeseal`, always prefix the command with `rtk` (e.g., `direnv exec . rtk talosctl get members`). This wrapper reduces token usage by optimizing output for the AI.
+- **Exceptions:** Do **NOT** use `rtk` with `kubectl`, `helm`, or `gh` commands. Use them directly (e.g., `direnv exec . kubectl get pods`, `direnv exec . gh release view`).

@@ -4,7 +4,7 @@ This directory contains Talos Linux cluster configuration managed with [talhelpe
 
 ## Prerequisites
 
-All tools are automatically installed via direnv and nix when entering the project directory.
+All tools (`talhelper`, `talosctl`, `kubectl`, `sops`, etc.) are automatically provided via `direnv` and Nix. If executing commands from a subshell or environment where `direnv` is not loaded in `$PATH`, prefix commands with `direnv exec .` (e.g. `direnv exec . kubectl get nodes`).
 
 ## Configuration Files
 
@@ -137,7 +137,13 @@ When replacing or resetting an existing controlplane node (e.g. replacing hardwa
 
 **⚠️ CRITICAL: Always use `--preserve` flag to avoid data loss such as Longhorn volume data**
 
-1. Update `talosVersion` in `talconfig.yaml`
+**⚠️ CRITICAL: Configuration Durability & Disaster Recovery Parity**
+
+- **NEVER** rely on "existing nodes keep old behavior during upgrades".
+- Any upstream changes where new defaults break clean installations or node replacements (e.g., Talos 1.14 defaulting `EPHEMERAL` `/var` to `noexec`, which breaks Longhorn v1 binary execution) **MUST** be explicitly configured in `talconfig.yaml` so that replacing, wiping, or rebuilding a node from scratch behaves identically to an upgraded node.
+- For Talos 1.14+, `talconfig.yaml` MUST include the `VolumeConfig` patch for `EPHEMERAL` with `mount.secure: false` as long as Longhorn v1 is used.
+
+1. Update `talosVersion` in `talconfig.yaml` (along with any required explicit configuration overrides for new defaults)
 2. Run `direnv reload`
 3. Upgrade nodes with preservation:
 
