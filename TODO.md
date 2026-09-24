@@ -67,9 +67,9 @@
   - [x] Set up [pocketID operator](https://github.com/aclerici38/pocket-id-operator)
 - [x] Get access by user groups working - coming in tinyauth v4 maybe; alternatively, try out oauth2proxy or pomerium
 - [x] Fix .exe/.scr downloads permanently
-- [ ] Get rid of CNPG
-- [ ] Update github actions to use tailscale as well
-- [ ] Change to use tailnet IPs for DNS and disable local network IPs
+- [x] Get rid of CNPG - actually it's not so bad. Using native backups and restores is a little bit painful, but it's kind of ok.
+- [x] Update github actions to use tailscale as well - I removed anything that is not gitops instead, talos and kubernetes upgrades are now manual after the 1.14 release caused an outage
+- [ ] Change to use tailnet IPs for DNS and disable local network IPs for load balancers
 - [ ] Change to Cilium
 - [ ] Get network policies working
 - [ ] Try out headscale
