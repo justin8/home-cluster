@@ -143,13 +143,34 @@ When replacing or resetting an existing controlplane node (e.g. replacing hardwa
 - Any upstream changes where new defaults break clean installations or node replacements (e.g., Talos 1.14 defaulting `EPHEMERAL` `/var` to `noexec`, which breaks Longhorn v1 binary execution) **MUST** be explicitly configured in `talconfig.yaml` so that replacing, wiping, or rebuilding a node from scratch behaves identically to an upgraded node.
 - For Talos 1.14+, `talconfig.yaml` MUST include the `VolumeConfig` patch for `EPHEMERAL` with `mount.secure: false` as long as Longhorn v1 is used.
 
+**⚠️ CRITICAL: Dual Status Verification (Kubernetes AND Talos)**
+
+Before considering any node as successfully upgraded and before moving to the next node:
+
+1. **Talos Machine Status**: Verify on the node directly via `talosctl`:
+   ```bash
+   talosctl get machinestatus -n <node-ip>
+   ```
+   Must show `READY: true` and `unmetConditions: []` (or check the Talos web dashboard).
+   - _Why_: A node can show `Ready` in Kubernetes while Talos still reports `Ready: false` (e.g., if local static pods like `kube-apiserver` fail `/readyz` probes or encryption configs fail to decrypt etcd secrets).
+2. **Kubernetes Node Status**: Verify in Kubernetes:
+   ```bash
+   kubectl get nodes -o wide
+   ```
+   Must show `STATUS: Ready` and the updated `OS-IMAGE` version (e.g. `Talos (v1.14.1)`).
+3. **Storage Health**: Verify Longhorn volumes are healthy and fully synced (`0` degraded) before proceeding to the next node.
+
+#### Upgrade Procedure
+
 1. Update `talosVersion` in `talconfig.yaml` (along with any required explicit configuration overrides for new defaults)
 2. Run `direnv reload`
-3. Upgrade nodes with preservation:
+3. Upgrade nodes **one node at a time**:
 
    ```bash
-   talhelper gencommand upgrade --extra-flags "--preserve" | bash
+   talhelper gencommand upgrade --node <node-ip> --extra-flags "--preserve --drain-timeout 30m" | bash
    ```
+
+4. Verify both Talos and Kubernetes status on the upgraded node before starting the next node.
 
 **Without `--preserve` flag, all Longhorn data will be wiped during upgrades.**
 

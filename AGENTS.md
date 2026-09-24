@@ -151,9 +151,16 @@ Read-only commands (`kubectl get`, `kubectl describe`, `kubectl logs`, `kubectl 
 - **Proactive Mitigation of Breaking Defaults:** When an upstream upgrade introduces new defaults that only apply to newly formatted disks/partitions (e.g., Talos 1.14 defaulting `EPHEMERAL` `/var` to `noexec`, breaking Longhorn v1 binary execution), the configuration MUST explicitly declare the required overrides (e.g., `VolumeConfig` with `mount.secure: false` for `EPHEMERAL`) in `talconfig.yaml` _before_ or _during_ the upgrade.
 - **Raise Ambiguity Immediately:** Any backwards-incompatible change, behavioral divergence between existing and new nodes, or security-versus-compatibility trade-off MUST be raised directly to the user for explicit approval before making decisions or applying changes.
 
+## Talos Upgrade Verification Safety
+
+- **Dual Status Verification:** NEVER consider a Talos node upgrade complete based solely on `kubectl get nodes`. You MUST verify BOTH:
+  1. **Talos Machine Status:** `rtk talosctl get machinestatus -n <node-ip>` must report `READY: true` and have no unmet conditions (or check the Talos dashboard).
+  2. **Kubernetes Node Status:** `kubectl get nodes -o wide` must report `Ready` with the target OS version.
+- **Sequential Rolling Upgrades:** Always upgrade nodes one at a time. Never proceed to upgrade subsequent nodes until the previous node passes both Talos and Kubernetes health checks and Longhorn volume replication is 100% healthy.
+
 ## CLI Tool Usage
 
-- **Environment & direnv:** All CLI tools (`kubectl`, `talosctl`, `helm`, `talhelper`, `kubeseal`, `sops`, `yq`, `gh`, etc.) and environment variables (`KUBECONFIG`, `TALOSCONFIG`, `SOPS_AGE_KEY_FILE`) are managed via Nix through `direnv`. In subshells, scripts, or agent execution environments where direnv has not automatically exported into `$PATH`, always execute commands prefixed with `direnv exec .` (e.g., `direnv exec . kubectl get pods`, `direnv exec . rtk talosctl get members`).
+- **Environment & direnv:** All CLI tools (`kubectl`, `talosctl`, `helm`, `talhelper`, `kubeseal`, `sops`, `yq`, `gh`, etc.) and environment variables (`KUBECONFIG`, `TALOSCONFIG`, `SOPS_AGE_KEY_FILE`) are managed via Nix through `direnv`. In subshells, scripts, or agent execution environments where direnv has not automatically exported into `$PATH`, always execute commands prefixed with `direnv exec .` (e.g., `direnv exec . rtk kubectl get pods`, `direnv exec . rtk talosctl get members`).
 - **GitHub CLI (`gh`):** The GitHub CLI (`gh`) is available in the environment. When looking up information on GitHub (e.g., repository details, releases, tags, issues, pull requests, file contents, or GitHub API queries), use `gh` (e.g., `gh release view`, `gh repo view`, `gh api`) instead of `curl` wherever possible.
-- **Token Efficiency:** For project-specific CLI tools like `talosctl` and `kubeseal`, always prefix the command with `rtk` (e.g., `direnv exec . rtk talosctl get members`). This wrapper reduces token usage by optimizing output for the AI.
-- **Exceptions:** Do **NOT** use `rtk` with `kubectl`, `helm`, or `gh` commands. Use them directly (e.g., `direnv exec . kubectl get pods`, `direnv exec . gh release view`).
+- **Token Efficiency:** For CLI tools supported by `rtk` (including `kubectl`, `talosctl`, `talhelper`, and `kubeseal`), always prefix the command with `rtk` (e.g., `direnv exec . rtk kubectl get pods`, `direnv exec . rtk talosctl get members`). This wrapper reduces token usage by optimizing output for the AI.
+- **Exceptions:** Do **NOT** use `rtk` with unsupported tools like `helm` or `gh` commands. Use them directly (e.g., `direnv exec . helm search repo ...`, `direnv exec . gh release view`).
