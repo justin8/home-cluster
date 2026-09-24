@@ -9,14 +9,15 @@ spec:
   type: LoadBalancer
   loadBalancerClass: tailscale
   selector:
-    app.kubernetes.io/name: pomerium-proxy
+    app.kubernetes.io/component: proxy
     app.kubernetes.io/instance: pomerium
+    app.kubernetes.io/name: pomerium
   ports:
     - name: https
       port: 443
-      targetPort: 443
+      targetPort: https
       protocol: TCP
     - name: http
       port: 80
-      targetPort: 80
+      targetPort: http
       protocol: TCP
