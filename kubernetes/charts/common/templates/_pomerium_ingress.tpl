@@ -17,8 +17,11 @@ metadata:
   annotations:
     dns.internal/enabled: "true"
     {{- if $isPublic }}
+    dns.internal/target: {{ $ctx.Values.network.pomeriumIngress }}
     dns.external/enabled: "true"
     dns.external/target: home.{{ $ctx.Values.domain }}
+    {{- else }}
+    dns.internal/target: {{ $ctx.Values.network.privateIngress }}
     {{- end }}
     {{- if $responseHeaders }}
     ingress.pomerium.io/set_response_headers: {{ $responseHeaders | toJson | quote }}
@@ -44,7 +47,7 @@ metadata:
       {{- if not $isPublic }}
       - deny:  
           not:
-            - source_ip: ["{{ $ctx.Values.network.lanIpRange }}", "{{ $ctx.Values.network.tailscaleIpRange }}", "{{ $ctx.Values.network.clusterPodNet }}"]
+            - source_ip: ["{{ $ctx.Values.network.tailscaleIpRange }}", "{{ $ctx.Values.network.clusterPodNet }}"]
       {{- end }}
 spec:
   ingressClassName: pomerium

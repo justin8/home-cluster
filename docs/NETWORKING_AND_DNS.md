@@ -130,15 +130,15 @@ Always use the `common.pomeriumIngress` template from the common chart:
 ) }}
 ```
 
-- `type: private` — denies traffic not from LAN or Tailscale ranges.
-- `type: public` — enables Cloudflare DNS (`dns.external/enabled: "true"`) and removes the deny rule.
+- `type: private` — directs internal DNS to the Tailscale ingress IP (`network.privateIngress`) and denies traffic not from the Tailscale range (`network.tailscaleIpRange`) or cluster pods.
+- `type: public` — directs internal DNS to `network.pomeriumIngress` (`192.168.5.4`), enables Cloudflare DNS (`dns.external/enabled: "true"`), and removes the IP deny rule.
 - `allowedUsers: authed` — any authenticated user; `all` — unauthenticated; `private`/`admin` — specific user groups from `userGroups` in global values.
 
 ## MetalLB Configuration
 
 MetalLB provides LoadBalancer services:
 
-- **Pool: `pomerium-ingress`**: `192.168.5.4` (Dedicated IP for IAP).
+- **Pool: `pomerium-ingress`**: `192.168.5.4` (Dedicated IP for IAP / Public Services).
 - **Pool: `dns-server`**: `192.168.5.53` (PiHole).
 - **Pool: `default`**: `192.168.5.80-100` (Dynamic assignment).
 
@@ -152,10 +152,12 @@ MetalLB provides LoadBalancer services:
 
 ## Network Security
 
-Private ingresses deny traffic not originating from the LAN (`network.lanIpRange`) or Tailscale (`network.tailscaleIpRange`) ranges, preventing access via the public internet path.
+Private ingresses deny traffic not originating from Tailscale (`network.tailscaleIpRange`) or cluster pod ranges, preventing access via both the public internet and local LAN.
 
 ## Tailscale
 
-MagicDNS is configured via Split DNS to forward `*.dray.id.au` requests to the Pi-hole service. This ensures Tailscale clients resolve services to the internal Pomerium IP.
+Pomerium is exposed on both the local LAN/WAN (`192.168.5.4`) and directly on the Tailnet via a Tailscale LoadBalancer service (`pomerium-proxy-tailscale` with IP `network.privateIngress`).
+
+MagicDNS is configured via Split DNS to forward `*.dray.id.au` requests to the Pi-hole service. Pi-hole resolves private services directly to the Pomerium Tailnet IP, while public services resolve to the LAN/WAN Pomerium IP.
 
 Talos nodes are configured to use `100.100.100.100` as their first DNS resolver. This is Tailscale's built-in "MagicDNS" resolver, which automatically resolves hostnames of other devices and services on the tailnet. Falling back to PiHole (`192.168.5.53`) handles all other internal and external resolution.

@@ -96,7 +96,7 @@ The cluster uses **Pomerium** as the sole Ingress Controller and Identity-Aware 
 
 ### Parameters
 
-- **`type`**: `private` (default) adds a deny rule blocking non-LAN/Tailscale traffic. `public` enables Cloudflare DNS and removes the deny rule.
+- **`type`**: `private` (default) directs internal DNS to the Tailnet IP (`network.privateIngress`) and adds a deny rule blocking non-Tailscale traffic. `public` points internal DNS to `network.pomeriumIngress`, enables Cloudflare DNS, and removes the IP deny rule.
 - **`allowedUsers`**:
   - `authed` (default) — any authenticated user (`authenticated_user: true`)
   - `all` — unauthenticated access (`accept: true`)
