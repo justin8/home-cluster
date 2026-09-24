@@ -13,7 +13,7 @@ argo-cd:
     secret:
       githubSecret: "$argocd-webhook-secret:webhook.github.secret"
       extra:
-        server.secretkey: "$argocd-webhook-secret:webhook.github.secret"
+        server.secretkey: "$argocd-server-secret:server.secretkey"
   server:
     extraArgs:
       - --insecure
