@@ -16,4 +16,5 @@
   "path" "/api/webhook"
   "type" "public"
   "allowedUsers" "all"
+  "internalDns" false
 ) }}
