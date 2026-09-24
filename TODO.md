@@ -69,7 +69,7 @@
 - [x] Fix .exe/.scr downloads permanently
 - [x] Get rid of CNPG - actually it's not so bad. Using native backups and restores is a little bit painful, but it's kind of ok.
 - [x] Update github actions to use tailscale as well - I removed anything that is not gitops instead, talos and kubernetes upgrades are now manual after the 1.14 release caused an outage
-- [ ] Change to use tailnet IPs for DNS and disable local network IPs for load balancers
+- [x] Change to use tailnet IPs for DNS and disable local network IPs for load balancers
 - [ ] Change to Cilium
 - [ ] Get network policies working
 - [ ] Try out headscale
