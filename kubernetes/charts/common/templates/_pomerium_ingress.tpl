@@ -8,20 +8,26 @@
 {{- $type := .type | default "private" -}}
 {{- $allowedUsers := .allowedUsers | default "authed" -}}
 {{- $responseHeaders := .responseHeaders -}}
+{{- $internalDns := hasKey . "internalDns" | ternary .internalDns true -}}
 {{- $isPublic := eq $type "public" -}}
+{{- $externalDns := hasKey . "externalDns" | ternary .externalDns $isPublic -}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ $name }}
   namespace: {{ $ctx.Release.Namespace }}
   annotations:
+    {{- if $internalDns }}
     dns.internal/enabled: "true"
     {{- if $isPublic }}
     dns.internal/target: {{ $ctx.Values.network.pomeriumIngress }}
-    dns.external/enabled: "true"
-    dns.external/target: home.{{ $ctx.Values.domain }}
     {{- else }}
     dns.internal/target: {{ $ctx.Values.network.privateIngress }}
+    {{- end }}
+    {{- end }}
+    {{- if $externalDns }}
+    dns.external/enabled: "true"
+    dns.external/target: home.{{ $ctx.Values.domain }}
     {{- end }}
     {{- if $responseHeaders }}
     ingress.pomerium.io/set_response_headers: {{ $responseHeaders | toJson | quote }}
