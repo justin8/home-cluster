@@ -97,9 +97,9 @@ To minimize downtime and eliminate network risk:
 - [x] **Wave -2 (Storage & Databases):**
   - [x] Re-enable `longhorn`, `cnpg-operator`, `intel-gpu`.
   - [x] Verify Longhorn manager, instance manager, CSI driver, and CNPG operator are healthy.
-- [ ] **Wave -1 (Network Operator):**
-  - [ ] Re-enable `tailscale-operator`.
-  - [ ] Verify Tailscale operator pod starts and authenticates cleanly.
+- [x] **Wave -1 (Network Operator):**
+  - [x] Re-enable `tailscale-operator`.
+  - [x] Verify Tailscale operator pod starts and authenticates cleanly.
 - [ ] **Wave 0 (Auth, Proxy & Ingress Controller):**
   - [ ] Re-enable `auth` (PocketID).
   - [ ] Re-enable `mail-proxy`.
