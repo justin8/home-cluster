@@ -1,0 +1,6 @@
+apiVersion: v2
+name: multus
+description: Multus CNI meta-plugin for multi-homed pod networking
+type: application
+version: 1.0.0
+appVersion: "v4.3.1"

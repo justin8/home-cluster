@@ -61,6 +61,7 @@ To minimize downtime and eliminate network risk:
 - [x] Update Pomerium and PiHole service annotations to use Cilium IPAM.
 - [x] Update `scripts/bootstrap-cluster` to bootstrap Cilium CNI and wait for Node Readiness prior to installing ArgoCD.
 - [x] Add Cilium to ArgoCD root app (`kubernetes/root-app/templates/core-services/cilium.yaml`) with sync-wave `-5`.
+- [x] Add Multus CNI chart (`kubernetes/charts/core-services/multus/`) and root-app template (`kubernetes/root-app/templates/core-services/multus.yaml`) with sync-wave `-5`.
 - [x] Update `targetRevision` in `root-app/templates/` to track `cilium` branch.
 - [x] Generate new isolated cluster keys in `talos/talsecret.sops.yaml`.
 - [x] Update `talos/talconfig.yaml` to desired state with `cni.name: none`, `proxy.disabled: true`, and `kubePrism.enabled: true`.
@@ -69,23 +70,27 @@ To minimize downtime and eliminate network risk:
 
 ### Phase 2: Bootstrap & Validate Staging Cluster (Live Cluster Remains 100% Online)
 
-#### Phase 2.1: Minimal Baseline (Cilium + ArgoCD + Test Container)
+#### Phase 2.1: Minimal Baseline (Cilium + Multus + ArgoCD + Test Container)
 
 - [x] Apply Talos config to staging VM (`192.168.5.177`) with VIP `192.168.5.19`.
 - [x] Run `talosctl bootstrap` and fetch staging `kubeconfig`.
-- [x] Run `bootstrap-cluster` (bootstraps Cilium CNI without IP pools, waits for node Ready, then installs ArgoCD & Root App).
+- [x] Run `bootstrap-cluster` (restores sealed secret master key, bootstraps Cilium CNI, installs ArgoCD & Root App).
 - [x] Verify Cilium DaemonSet, Operator, Hubble Relay, and Hubble UI are healthy.
-- [ ] Spin up a test container on the staging cluster:
-  - [ ] Verify pod-to-pod networking and CoreDNS lookup.
-  - [ ] Verify internet egress via Cilium eBPF NAT.
-  - [ ] Verify local API server access via KubePrism (`127.0.0.1:7445`).
+- [x] Spin up a test container on the staging cluster:
+  - [x] Verify pod-to-pod networking and CoreDNS lookup.
+  - [x] Verify internet egress via Cilium eBPF NAT.
+  - [x] Verify local API server access via KubePrism (`127.0.0.1:7445`).
+- [ ] Deploy Multus CNI and configure Cilium `cni.exclusive: false`:
+  - [ ] Deploy `multus` via ArgoCD (sync-wave `-5`).
+  - [ ] Verify `kube-multus-ds` DaemonSet runs healthy on all nodes.
+  - [ ] Test multi-homed pod with `NetworkAttachmentDefinition` (verifying `eth0` Cilium default route + `net1` secondary interface).
 
 #### Phase 2.2: Incremental Core Services Bring-Up (Deployment Wave Order)
 
-- [ ] **Wave -4 (Secrets & Drivers):**
-  - [ ] Re-enable `shared-secrets` (`kubernetes/root-app/disabled-core-services/shared-secrets.yaml` -> `templates/core-services/`).
-  - [ ] Re-enable `nfd`, `nfs-csi`, `vpa`.
-  - [ ] Verify Sealed Secrets controller unseals master keys and CSI NFS controller/node pods are healthy.
+- [x] **Wave -4 (Secrets & Drivers):**
+  - [x] Re-enable `shared-secrets` (`kubernetes/root-app/disabled-core-services/shared-secrets.yaml` -> `templates/core-services/`).
+  - [x] Re-enable `nfd`, `nfs-csi`, `vpa`.
+  - [x] Verify Sealed Secrets controller unseals master keys and CSI NFS controller/node pods are healthy.
 - [ ] **Wave -3 (Certificates):**
   - [ ] Re-enable `cert-manager`.
   - [ ] Verify cert-manager controller, webhook, and cainjector are healthy.

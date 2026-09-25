@@ -41,6 +41,8 @@ cilium:
       enabled: true
     ui:
       enabled: true
+  cni:
+    exclusive: false
 
 # Toggled to true after the live cluster is shut down
 ipPools:

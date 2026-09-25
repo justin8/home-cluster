@@ -1,0 +1,27 @@
+multus:
+  image:
+    repository: ghcr.io/k8snetworkplumbingwg/multus-cni
+    tag: v4.3.1-thick
+    pullPolicy: IfNotPresent
+  logLevel: verbose
+  logToStderr: true
+  cniConfigDir: /host/etc/cni/net.d
+  multusAutoconfigDir: /host/etc/cni/net.d
+  multusConfigFile: auto
+  socketDir: /host/run/multus/
+  chrootDir: /hostroot
+  cniVersion: "0.3.1"
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "50Mi"
+    limits:
+      cpu: "500m"
+      memory: "200Mi"
+  initResources:
+    requests:
+      cpu: "10m"
+      memory: "15Mi"
+    limits:
+      cpu: "100m"
+      memory: "50Mi"

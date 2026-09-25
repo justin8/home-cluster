@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: multus-daemon-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+    tier: node
+    app: multus
+  annotations:
+    argocd.argoproj.io/sync-wave: "-5"
+data:
+  daemon-config.json: |
+    {
+        "chrootDir": {{ .Values.multus.chrootDir | quote }},
+        "cniVersion": {{ .Values.multus.cniVersion | quote }},
+        "logLevel": {{ .Values.multus.logLevel | quote }},
+        "logToStderr": {{ .Values.multus.logToStderr }},
+        "cniConfigDir": {{ .Values.multus.cniConfigDir | quote }},
+        "multusAutoconfigDir": {{ .Values.multus.multusAutoconfigDir | quote }},
+        "multusConfigFile": {{ .Values.multus.multusConfigFile | quote }},
+        "socketDir": {{ .Values.multus.socketDir | quote }}
+    }
