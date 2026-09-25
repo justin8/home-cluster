@@ -91,9 +91,9 @@ To minimize downtime and eliminate network risk:
   - [x] Re-enable `shared-secrets` (`kubernetes/root-app/disabled-core-services/shared-secrets.yaml` -> `templates/core-services/`).
   - [x] Re-enable `nfd`, `nfs-csi`, `vpa`.
   - [x] Verify Sealed Secrets controller unseals master keys and CSI NFS controller/node pods are healthy.
-- [ ] **Wave -3 (Certificates):**
-  - [ ] Re-enable `cert-manager`.
-  - [ ] Verify cert-manager controller, webhook, and cainjector are healthy.
+- [x] **Wave -3 (Certificates):**
+  - [x] Re-enable `cert-manager`.
+  - [x] Verify cert-manager controller, webhook, and cainjector are healthy.
 - [ ] **Wave -2 (Storage & Databases):**
   - [ ] Re-enable `longhorn`, `cnpg-operator`, `intel-gpu`.
   - [ ] Verify Longhorn manager, instance manager, CSI driver, and CNPG operator are healthy.
