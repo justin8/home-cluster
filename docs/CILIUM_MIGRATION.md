@@ -69,21 +69,38 @@ To minimize downtime and eliminate network risk:
 
 ### Phase 2: Bootstrap & Validate Staging Cluster (Live Cluster Remains 100% Online)
 
-- [ ] Apply Talos config to staging VM (`192.168.5.177`):
-  ```bash
-  talosctl apply-config --insecure -f talos/clusterconfig/home-cluster-controlplane.yaml -n 192.168.5.177
-  ```
-- [ ] Run `talosctl bootstrap -n 192.168.5.177 -e 192.168.5.177`.
-- [ ] Fetch kubeconfig for the staging cluster:
-  ```bash
-  talosctl kubeconfig --talosconfig=talos/clusterconfig/talosconfig -n 192.168.5.177 -e 192.168.5.177 talos/clusterconfig/kubeconfig
-  ```
-- [ ] Verify KubePrism is listening on `127.0.0.1:7445`.
-- [ ] Run `bootstrap-cluster` (bootstraps Cilium CNI without IP pools, waits for node Ready, then installs ArgoCD & Root App).
-- [ ] Verify Cilium DaemonSet and Operator are healthy.
-- [ ] Verify Hubble Relay and Hubble UI pods are running.
-- [ ] Verify Core Services (Longhorn CSI, Cert-Manager, SealedSecrets) are healthy on the staging cluster.
-- [ ] Confirm live cluster has experienced zero disruption.
+#### Phase 2.1: Minimal Baseline (Cilium + ArgoCD + Test Container)
+
+- [x] Apply Talos config to staging VM (`192.168.5.177`) with VIP `192.168.5.19`.
+- [x] Run `talosctl bootstrap` and fetch staging `kubeconfig`.
+- [x] Run `bootstrap-cluster` (bootstraps Cilium CNI without IP pools, waits for node Ready, then installs ArgoCD & Root App).
+- [x] Verify Cilium DaemonSet, Operator, Hubble Relay, and Hubble UI are healthy.
+- [ ] Spin up a test container on the staging cluster:
+  - [ ] Verify pod-to-pod networking and CoreDNS lookup.
+  - [ ] Verify internet egress via Cilium eBPF NAT.
+  - [ ] Verify local API server access via KubePrism (`127.0.0.1:7445`).
+
+#### Phase 2.2: Incremental Core Services Bring-Up (Deployment Wave Order)
+
+- [ ] **Wave -4 (Secrets & Drivers):**
+  - [ ] Re-enable `shared-secrets` (`kubernetes/root-app/disabled-core-services/shared-secrets.yaml` -> `templates/core-services/`).
+  - [ ] Re-enable `nfd`, `nfs-csi`, `vpa`.
+  - [ ] Verify Sealed Secrets controller unseals master keys and CSI NFS controller/node pods are healthy.
+- [ ] **Wave -3 (Certificates):**
+  - [ ] Re-enable `cert-manager`.
+  - [ ] Verify cert-manager controller, webhook, and cainjector are healthy.
+- [ ] **Wave -2 (Storage & Databases):**
+  - [ ] Re-enable `longhorn`, `cnpg-operator`, `intel-gpu`.
+  - [ ] Verify Longhorn manager, instance manager, CSI driver, and CNPG operator are healthy.
+- [ ] **Wave -1 (Network Operator):**
+  - [ ] Re-enable `tailscale-operator`.
+  - [ ] Verify Tailscale operator pod starts and authenticates cleanly.
+- [ ] **Wave 0 (Auth, Proxy & Ingress Controller):**
+  - [ ] Re-enable `auth` (PocketID).
+  - [ ] Re-enable `mail-proxy`.
+  - [ ] Re-enable `pomerium`.
+  - [ ] Verify PocketID generates OIDC client credentials and Pomerium starts cleanly.
+- [ ] Confirm live production cluster has experienced zero disruption throughout staging validation.
 
 ---
 
@@ -107,6 +124,7 @@ To minimize downtime and eliminate network risk:
 - [ ] Set `ipPools.enabled: true` in `kubernetes/charts/core-services/cilium/values.yaml`.
 - [ ] Commit and sync Cilium application via ArgoCD to deploy `CiliumLoadBalancerIPPool` resources.
 - [ ] Verify Pomerium (`192.168.5.4`) and PiHole (`192.168.5.53`) claim their production IPs via Cilium L2 announcements.
+- [ ] Re-enable core DNS services (`kubernetes/root-app/disabled-core-services/dns.yaml` -> `templates/core-services/`).
 - [ ] Re-enable and restore applications one by one (move from `kubernetes/root-app/disabled-apps/` to `templates/apps/`):
   - [ ] **CloudNativePG (Postgres)**: Restore DB clusters from S3.
   - [ ] **Audiobookshelf**: Restore Longhorn volume & verify.
