@@ -27,16 +27,20 @@ To minimize downtime and eliminate network risk:
 
 ---
 
-## IP Allocation
+## IP Address Allocation
 
-| Resource                | Live Cluster (Pre-Cutover) | Staging Cluster (Temp Node)         | Post-Cutover (Production)  |
-| :---------------------- | :------------------------- | :---------------------------------- | :------------------------- |
-| **Git Branch**          | `main`                     | `cilium`                            | `main`                     |
-| **Talos Endpoint**      | `192.168.5.20` (VIP)       | Temp Node IP                        | `192.168.5.20` (VIP)       |
-| **Pomerium Ingress IP** | `192.168.5.4` (MetalLB)    | Disabled (`ipPools.enabled: false`) | `192.168.5.4` (Cilium L2)  |
-| **PiHole DNS IP**       | `192.168.5.53` (MetalLB)   | Disabled (`ipPools.enabled: false`) | `192.168.5.53` (Cilium L2) |
-| **CNI**                 | Flannel                    | **Cilium eBPF**                     | **Cilium eBPF**            |
-| **Service Routing**     | `kube-proxy`               | **Cilium eBPF (`localhost:7445`)**  | **Cilium eBPF**            |
+| IP Range            | Purpose                    | Configuration             | Notes                                   |
+| ------------------- | -------------------------- | ------------------------- | --------------------------------------- |
+| `192.168.5.1`       | Router/Gateway             |                           | Default gateway                         |
+| `192.168.5.2`       | Wifi AP                    |                           | Network infrastructure                  |
+| `192.168.5.4`       | Pomerium Ingress           | `network.pomeriumIngress` | Central IAP and Ingress Controller      |
+| `192.168.5.5`       | NAS                        | `network.storageServer`   | Network file storage server             |
+| `192.168.5.6`       | Zigbee/thread co-ordinator |                           | Network Infrastructure                  |
+| `192.168.5.20`      | Talos VIP                  | `network.cluster`         | Kubernetes API server endpoint          |
+| `192.168.5.11-19`   | Talos Nodes                | `talconfig.yaml`          | Reserved for control plane nodes        |
+| `192.168.5.53`      | DNS Server                 | `network.dnsServer`       | PiHole DNS service (Tailscale enrolled) |
+| `192.168.5.80-100`  | Cilium IP Pool             | `network.metallbRange`    | Load balancer IP allocation             |
+| `192.168.5.100-254` | DHCP Pool                  | Router configuration      | Dynamic client allocation               |
 
 ---
 
@@ -58,18 +62,27 @@ To minimize downtime and eliminate network risk:
 - [x] Update `scripts/bootstrap-cluster` to bootstrap Cilium CNI and wait for Node Readiness prior to installing ArgoCD.
 - [x] Add Cilium to ArgoCD root app (`kubernetes/root-app/templates/core-services/cilium.yaml`) with sync-wave `-5`.
 - [x] Update `targetRevision` in `root-app/templates/` to track `cilium` branch.
-- [x] Prepare Talos machine config for new cluster (`cni.name: none`, `proxy.disabled: true`, `kubePrism.enabled: true`).
+- [x] Generate new isolated cluster keys in `talos/talsecret.sops.yaml`.
+- [x] Update `talos/talconfig.yaml` to desired state with `cni.name: none`, `proxy.disabled: true`, and `kubePrism.enabled: true`.
 
 ---
 
 ### Phase 2: Bootstrap & Validate Staging Cluster (Live Cluster Remains 100% Online)
 
-- [ ] Apply Talos config to temporary node(s) and run `talosctl bootstrap`.
+- [ ] Apply Talos config to staging VM (`192.168.5.177`):
+  ```bash
+  talosctl apply-config --insecure -f talos/clusterconfig/home-cluster-controlplane.yaml -n 192.168.5.177
+  ```
+- [ ] Run `talosctl bootstrap -n 192.168.5.177 -e 192.168.5.177`.
+- [ ] Fetch kubeconfig for the staging cluster:
+  ```bash
+  talosctl kubeconfig --talosconfig=talos/clusterconfig/talosconfig -n 192.168.5.177 -e 192.168.5.177 talos/clusterconfig/kubeconfig
+  ```
 - [ ] Verify KubePrism is listening on `127.0.0.1:7445`.
 - [ ] Run `bootstrap-cluster` (bootstraps Cilium CNI without IP pools, waits for node Ready, then installs ArgoCD & Root App).
 - [ ] Verify Cilium DaemonSet and Operator are healthy.
 - [ ] Verify Hubble Relay and Hubble UI pods are running.
-- [ ] Verify Core Services (Longhorn CSI, Cert-Manager, SealedSecrets) are healthy on the new cluster.
+- [ ] Verify Core Services (Longhorn CSI, Cert-Manager, SealedSecrets) are healthy on the staging cluster.
 - [ ] Confirm live cluster has experienced zero disruption.
 
 ---
