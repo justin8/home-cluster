@@ -23,6 +23,9 @@ spec:
   numberOfReplicas: 2
   accessMode: rwo
   frontend: blockdev
+  {{- if ne $backups "disabled" }}
+  backupTargetName: default
+  {{- end }}
 ---
 apiVersion: v1
 kind: PersistentVolume
