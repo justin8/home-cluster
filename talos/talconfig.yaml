@@ -2,10 +2,12 @@
 clusterName: home-cluster
 talosVersion: v1.14.1
 kubernetesVersion: v1.37.1
-endpoint: https://192.168.5.20:6443
+endpoint: https://192.168.5.19:6443
 domain: cluster.local
 allowSchedulingOnMasters: true
 additionalApiServerCertSans:
+  - 192.168.5.19
+  - 192.168.5.177
   - home-cluster.local
   - home-cluster.dray.id.au
 clusterPodNets:
@@ -77,13 +79,14 @@ patches:
         - https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
 nodes:
   - hostname: controlplane
-    ipAddress: 192.168.5.11, 192.168.5.12, 192.168.5.13
+    ipAddress: 192.168.5.177
     controlPlane: true
     ignoreHostname: true
     nodeLabels:
       node.kubernetes.io/exclude-from-external-load-balancers: "false"
     certSans:
-      - 192.168.5.20
+      - 192.168.5.177
+      - 192.168.5.19
       - home-cluster.local
       - home-cluster.dray.id.au
     machineSpec:
@@ -130,4 +133,4 @@ nodes:
       - interface: eth0
         dhcp: true
         vip:
-          ip: 192.168.5.20
+          ip: 192.168.5.19
