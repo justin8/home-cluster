@@ -28,6 +28,13 @@ kubectl wait --for=condition=Ready nodes --all --timeout=120s
 
 echo "🚀 Installing Argo CD ${ARGOCD_CHART_VERSION} via Helm..."
 
+# Restore Sealed Secrets master key into kube-system
+if [ -f "sealed-secrets-key.sops.yaml" ]; then
+  echo "🔑 Restoring Sealed Secrets master key to kube-system..."
+  kubectl create namespace kube-system --dry-run=client -o yaml | kubectl apply -f -
+  sops --decrypt sealed-secrets-key.sops.yaml | kubectl apply -f -
+fi
+
 # Create the namespace if it doesn't exist
 kubectl create namespace "${ARGOCD_NAMESPACE}" --dry-run=client -o yaml | kubectl apply -f -
 

@@ -17,6 +17,7 @@ metadata:
     recurring-job-group.longhorn.io/backups-enabled: enabled
     {{- end }}
 spec:
+  dataEngine: v1
   size: {{ mul $sizeGi 1024 | mul 1024 | mul 1024 | quote }}
   dataLocality: best-effort
   numberOfReplicas: 2
