@@ -44,7 +44,7 @@ if ! kubectl get secret github-repo-creds -n "${ARGOCD_NAMESPACE}" &>/dev/null; 
     sops --decrypt sealed-secrets-key.sops.yaml >"$TEMP_KEY_FILE"
 
     # Decrypt the SealedSecret directly into the cluster
-    kubeseal --recovery-unseal --recovery-private-key "$TEMP_KEY_FILE" <"$SEALED_SECRET_PATH" | kubectl apply -f -
+    kubeseal --recovery-unseal --recovery-private-key "$TEMP_KEY_FILE" <"$SEALED_SECRET_PATH" | yq 'del(.metadata.ownerReferences)' | kubectl apply -f -
 
     # Clean up the temporary key file immediately
     rm -f "$TEMP_KEY_FILE"
@@ -70,7 +70,7 @@ helm upgrade --install "${ARGOCD_HELM_RELEASE}" argo-cd \
 echo "✅ Argo CD is installed!"
 
 echo "🌱 Applying Root Application (App of Apps)..."
-helm template kubernetes/root-app | kubectl apply -f -
+helm template kubernetes/root-app -f kubernetes/global-values.yaml | kubectl apply -f -
 
 echo "🎉 Setup complete! You can access the Argo CD UI via port-forward:"
 echo "   kubectl port-forward svc/argo-cd-argocd-server -n argocd 8080:443"
