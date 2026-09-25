@@ -80,10 +80,10 @@ To minimize downtime and eliminate network risk:
   - [x] Verify pod-to-pod networking and CoreDNS lookup.
   - [x] Verify internet egress via Cilium eBPF NAT.
   - [x] Verify local API server access via KubePrism (`127.0.0.1:7445`).
-- [ ] Deploy Multus CNI and configure Cilium `cni.exclusive: false`:
-  - [ ] Deploy `multus` via ArgoCD (sync-wave `-5`).
-  - [ ] Verify `kube-multus-ds` DaemonSet runs healthy on all nodes.
-  - [ ] Test multi-homed pod with `NetworkAttachmentDefinition` (verifying `eth0` Cilium default route + `net1` secondary interface).
+- [x] Deploy Multus CNI and configure Cilium `cni.exclusive: false`:
+  - [x] Deploy `multus` via ArgoCD (sync-wave `-5`).
+  - [x] Verify `kube-multus-ds` DaemonSet runs healthy on all nodes.
+  - [x] Test multi-homed pod with `NetworkAttachmentDefinition` (verifying `eth0` Cilium default route + `net1` secondary interface).
 
 #### Phase 2.2: Incremental Core Services Bring-Up (Deployment Wave Order)
 
