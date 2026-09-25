@@ -94,9 +94,9 @@ To minimize downtime and eliminate network risk:
 - [x] **Wave -3 (Certificates):**
   - [x] Re-enable `cert-manager`.
   - [x] Verify cert-manager controller, webhook, and cainjector are healthy.
-- [ ] **Wave -2 (Storage & Databases):**
-  - [ ] Re-enable `longhorn`, `cnpg-operator`, `intel-gpu`.
-  - [ ] Verify Longhorn manager, instance manager, CSI driver, and CNPG operator are healthy.
+- [x] **Wave -2 (Storage & Databases):**
+  - [x] Re-enable `longhorn`, `cnpg-operator`, `intel-gpu`.
+  - [x] Verify Longhorn manager, instance manager, CSI driver, and CNPG operator are healthy.
 - [ ] **Wave -1 (Network Operator):**
   - [ ] Re-enable `tailscale-operator`.
   - [ ] Verify Tailscale operator pod starts and authenticates cleanly.
