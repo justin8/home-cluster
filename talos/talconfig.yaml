@@ -10,6 +10,7 @@ additionalApiServerCertSans:
   - 192.168.5.144
   - 192.168.5.11
   - 192.168.5.12
+  - 192.168.5.13
   - home-cluster.local
   - home-cluster.dray.id.au
 clusterPodNets:
@@ -84,7 +85,7 @@ patches:
         - https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
 nodes:
   - hostname: controlplane
-    ipAddress: 192.168.5.144, 192.168.5.11, 192.168.5.12
+    ipAddress: 192.168.5.144, 192.168.5.11, 192.168.5.12, 192.168.5.13
     controlPlane: true
     ignoreHostname: true
     nodeLabels:
@@ -93,6 +94,7 @@ nodes:
       - 192.168.5.144
       - 192.168.5.11
       - 192.168.5.12
+      - 192.168.5.13
       - 192.168.5.19
       - home-cluster.local
       - home-cluster.dray.id.au
