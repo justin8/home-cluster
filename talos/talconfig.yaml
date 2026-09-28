@@ -7,7 +7,6 @@ domain: cluster.local
 allowSchedulingOnMasters: true
 additionalApiServerCertSans:
   - 192.168.5.19
-  - 192.168.5.177
   - 192.168.5.144
   - 192.168.5.11
   - home-cluster.local
@@ -56,6 +55,9 @@ patches:
           allowed-unsafe-sysctls: "net.ipv4.conf.all.src_valid_mark"
           rotate-server-certificates: true
           feature-gates: InPlacePodVerticalScaling=true
+        nodeIP:
+          validSubnets:
+            - 192.168.5.0/24
       sysctls:
         vm.nr_hugepages: "1024"
       kernel:
@@ -81,13 +83,12 @@ patches:
         - https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
 nodes:
   - hostname: controlplane
-    ipAddress: 192.168.5.177, 192.168.5.144, 192.168.5.11
+    ipAddress: 192.168.5.144, 192.168.5.11
     controlPlane: true
     ignoreHostname: true
     nodeLabels:
       node.kubernetes.io/exclude-from-external-load-balancers: "false"
     certSans:
-      - 192.168.5.177
       - 192.168.5.144
       - 192.168.5.11
       - 192.168.5.19
