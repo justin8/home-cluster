@@ -164,3 +164,12 @@ Read-only commands (`kubectl get`, `kubectl describe`, `kubectl logs`, `kubectl 
 - **GitHub CLI (`gh`):** The GitHub CLI (`gh`) is available in the environment. When looking up information on GitHub (e.g., repository details, releases, tags, issues, pull requests, file contents, or GitHub API queries), use `gh` (e.g., `gh release view`, `gh repo view`, `gh api`) instead of `curl` wherever possible.
 - **Token Efficiency:** For CLI tools supported by `rtk` (including `kubectl`, `talosctl`, `talhelper`, and `kubeseal`), always prefix the command with `rtk` (e.g., `direnv exec . rtk kubectl get pods`, `direnv exec . rtk talosctl get members`). This wrapper reduces token usage by optimizing output for the AI.
 - **Exceptions:** Do **NOT** use `rtk` with unsupported tools like `helm` or `gh` commands. Use them directly (e.g., `direnv exec . helm search repo ...`, `direnv exec . gh release view`).
+
+## Long-Running Tasks & Polling Discipline
+
+- **No Tight Polling Loops:** NEVER poll in short, rapid loops (e.g., every 5–10 seconds) when monitoring asynchronous operations (Longhorn restores, container image pulls, pod rollouts, node reboots, database syncs).
+- **Start and Wait:** Verify that the task has successfully initiated, estimate the expected duration based on workload size, and set a timer (`schedule`) for the realistic completion time before re-checking.
+- **Blocking Wait Commands Over Loops:** Prefer executing blocking CLI commands or scripts that wait efficiently in the background and only terminate when the desired state is reached (or on timeout). Examples:
+  - `kubectl wait --for=condition=Ready pod/<pod> --timeout=120s`
+  - `kubectl rollout status ds/cilium --timeout=90s`
+  - Shell `until`/`wait` scripts with internal sleep intervals rather than burning LLM round-trips.
