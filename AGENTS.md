@@ -169,6 +169,7 @@ Read-only commands (`kubectl get`, `kubectl describe`, `kubectl logs`, `kubectl 
 
 - **No Tight Polling Loops:** NEVER poll in short, rapid loops (e.g., every 5–10 seconds) when monitoring asynchronous operations (Longhorn restores, container image pulls, pod rollouts, node reboots, database syncs).
 - **Start and Wait:** Verify that the task has successfully initiated, estimate the expected duration based on workload size, and set a timer (`schedule`) for the realistic completion time before re-checking.
+- **Exponential Backoff on Retries:** When a task requires re-checking or retrying, ALWAYS use exponential backoff (e.g. 1m -> 2m -> 4m -> 8m) rather than static or frequent intervals. Never spam status commands.
 - **Blocking Wait Commands Over Loops:** Prefer executing blocking CLI commands or scripts that wait efficiently in the background and only terminate when the desired state is reached (or on timeout). Examples:
   - `kubectl wait --for=condition=Ready pod/<pod> --timeout=120s`
   - `kubectl rollout status ds/cilium --timeout=90s`
