@@ -100,12 +100,12 @@ To minimize downtime and eliminate network risk:
 - [x] **Wave -1 (Network Operator):**
   - [x] Re-enable `tailscale-operator`.
   - [x] Verify Tailscale operator pod starts and authenticates cleanly.
-- [ ] **Wave 0 (Auth, Proxy & Ingress Controller):**
-  - [ ] Re-enable `auth` (PocketID).
-  - [ ] Re-enable `mail-proxy`.
-  - [ ] Re-enable `pomerium`.
-  - [ ] Verify PocketID generates OIDC client credentials and Pomerium starts cleanly.
-- [ ] Confirm live production cluster has experienced zero disruption throughout staging validation.
+- [x] **Wave 0 (Auth, Proxy & Ingress Controller):**
+  - [x] Re-enable `auth` (PocketID).
+  - [x] Re-enable `mail-proxy`.
+  - [x] Re-enable `pomerium`.
+  - [x] Verify PocketID generates OIDC client credentials and Pomerium starts cleanly.
+- [x] Confirm live production cluster has experienced zero disruption throughout staging validation.
 
 ---
 

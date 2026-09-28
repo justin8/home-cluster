@@ -49,7 +49,7 @@ A **zero-impact blue/green staging migration** is in progress. The live producti
 | **Wave -2** | `cnpg-operator`                  | **Healthy** | CloudNativePG operator running (1/1)                                                                    |
 | **Wave -2** | `intel-gpu`                      | **Healthy** | Intel device plugin controller running (1/1)                                                            |
 | **Wave -1** | `tailscale-operator`             | **Healthy** | Operator pod running (1/1) with `tag:k8s-operator`, `home-exit-node` connector active                   |
-| **Wave 0**  | `auth`, `mail-proxy`, `pomerium` | **Staged**  | Manifests placed in `templates/core-services/`                                                          |
+| **Wave 0**  | `auth`, `mail-proxy`, `pomerium` | **Healthy** | PocketID (1/1), mail-proxy (1/1), pomerium (1/1), Pomerium Tailscale proxy (1/1) all running            |
 
 ---
 
