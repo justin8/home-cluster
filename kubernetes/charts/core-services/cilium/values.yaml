@@ -46,4 +46,4 @@ cilium:
 
 # Toggled to true after the live cluster is shut down
 ipPools:
-  enabled: false
+  enabled: true
