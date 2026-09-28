@@ -8,6 +8,7 @@ allowSchedulingOnMasters: true
 additionalApiServerCertSans:
   - 192.168.5.19
   - 192.168.5.177
+  - 192.168.5.144
   - home-cluster.local
   - home-cluster.dray.id.au
 clusterPodNets:
@@ -79,13 +80,14 @@ patches:
         - https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
 nodes:
   - hostname: controlplane
-    ipAddress: 192.168.5.177
+    ipAddress: 192.168.5.177, 192.168.5.144
     controlPlane: true
     ignoreHostname: true
     nodeLabels:
       node.kubernetes.io/exclude-from-external-load-balancers: "false"
     certSans:
       - 192.168.5.177
+      - 192.168.5.144
       - 192.168.5.19
       - home-cluster.local
       - home-cluster.dray.id.au
