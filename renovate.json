@@ -1,6 +1,8 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:recommended"],
+  "prHourlyLimit": 0,
+  "prConcurrentLimit": 0,
   "dependencyDashboard": true,
   "dependencyDashboardTitle": "Dependency Dashboard",
   "dependencyDashboardHeader": "This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.",
@@ -10,10 +12,7 @@
     {
       "customType": "regex",
       "description": "Extract images from values.yaml using repository/tag pattern",
-      "managerFilePatterns": [
-        "/(^|/)values\\.yaml$/",
-        "/(^|/)global-values\\.yaml$/"
-      ],
+      "managerFilePatterns": ["/(^|/)values\\.yaml$/", "/(^|/)global-values\\.yaml$/"],
       "matchStrings": [
         "repository:\\s*(?<depName>[^\\s\\n]+)\\s*tag:\\s*\"?(?<currentValue>[^\\s\\n\"#]+)\"?"
       ],
@@ -32,9 +31,7 @@
       "customType": "regex",
       "description": "Kubernetes version in talconfig.yaml",
       "managerFilePatterns": ["/^talos/talconfig\\.yaml$/"],
-      "matchStrings": [
-        "kubernetesVersion:\\s*(?<currentValue>v\\d+\\.\\d+\\.\\d+)"
-      ],
+      "matchStrings": ["kubernetesVersion:\\s*(?<currentValue>v\\d+\\.\\d+\\.\\d+)"],
       "depNameTemplate": "kubernetes/kubernetes",
       "datasourceTemplate": "github-releases",
       "versioningTemplate": "semver"
@@ -58,19 +55,12 @@
       "automergeSchedule": ["* 0-8 * * *"]
     },
     {
-      "matchPackageNames": [
-        "siderolabs/talos",
-        "kubernetes/kubernetes",
-        "/longhorn/"
-      ],
+      "matchPackageNames": ["siderolabs/talos", "kubernetes/kubernetes", "/longhorn/"],
       "automerge": false
     }
   ],
   "helm-values": {
-    "managerFilePatterns": [
-      "/(^|/)global-values\\.yaml$/",
-      "/(^|/)values\\.yaml$/"
-    ]
+    "managerFilePatterns": ["/(^|/)global-values\\.yaml$/", "/(^|/)values\\.yaml$/"]
   },
   "helmv3": {
     "managerFilePatterns": ["/(^|/)Chart\\.yaml$/"]
