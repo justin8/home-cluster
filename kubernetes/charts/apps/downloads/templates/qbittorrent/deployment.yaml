@@ -19,6 +19,29 @@ spec:
         sysctls:
           - name: net.ipv4.conf.all.src_valid_mark
             value: "1"
+      initContainers:
+        - name: resolve-wireguard-endpoint
+          image: "{{ .Values.images.busybox.repository }}:{{ .Values.images.busybox.tag }}"
+          imagePullPolicy: {{ .Values.images.busybox.pullPolicy }}
+          command:
+            - sh
+            - -c
+            - |
+              cp /etc/wireguard-raw/wg0.conf /gluetun/wireguard/wg0.conf
+              HOST=$(grep -i '^Endpoint' /etc/wireguard-raw/wg0.conf | awk '{print $3}' | cut -d: -f1)
+              IP=$(nslookup "$HOST" 2>/dev/null | awk '/^Address: / { print $2 }' | tail -n1)
+              if [ -n "$IP" ]; then
+                echo "Resolved $HOST to $IP"
+                sed -i "s/$HOST/$IP/" /gluetun/wireguard/wg0.conf
+              else
+                echo "Failed to resolve $HOST"
+                exit 1
+              fi
+          volumeMounts:
+            - name: vpn-raw
+              mountPath: /etc/wireguard-raw
+            - name: vpn-config
+              mountPath: /gluetun/wireguard
       containers:
         - name: gluetun
           image: "{{ .Values.images.gluetun.repository }}:{{ .Values.images.gluetun.tag }}"
@@ -49,8 +72,7 @@ spec:
             failureThreshold: 3
           volumeMounts:
             - name: vpn-config
-              mountPath: /gluetun/wireguard/wg0.conf
-              subPath: wg0.conf
+              mountPath: /gluetun/wireguard
             - name: dev-tun
               mountPath: /dev/net/tun
         - name: qbittorrent
@@ -81,9 +103,11 @@ spec:
           nfs:
             server: {{ .Values.network.storageServer }}
             path: /mnt/pool/media/downloads
-        - name: vpn-config
+        - name: vpn-raw
           secret:
             secretName: qbittorrent-vpn
+        - name: vpn-config
+          emptyDir: {}
         - name: dev-tun
           hostPath:
             path: /dev/net/tun

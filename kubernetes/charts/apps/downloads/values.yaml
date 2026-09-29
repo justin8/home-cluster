@@ -40,6 +40,10 @@ images:
     repository: lscr.io/linuxserver/qbittorrent
     tag: 5.2.3-libtorrentv1
     pullPolicy: IfNotPresent
+  busybox:
+    repository: busybox
+    tag: 1.37.0
+    pullPolicy: IfNotPresent
   gluetun:
     repository: qmcgaw/gluetun
     tag: v3.41.3
