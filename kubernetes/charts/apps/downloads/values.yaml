@@ -38,7 +38,7 @@ images:
     pullPolicy: IfNotPresent
   qbittorrent:
     repository: lscr.io/linuxserver/qbittorrent
-    tag: 5.2.3-libtorrentv1
+    tag: 5.2.4-libtorrentv1
     pullPolicy: IfNotPresent
   busybox:
     repository: busybox
