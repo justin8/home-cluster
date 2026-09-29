@@ -48,8 +48,8 @@ spec:
               CONFIG_DIR="/config/plugins/configurations"
               CONFIG_FILE="$CONFIG_DIR/SSO-Auth.xml"
               mkdir -p "$CONFIG_DIR"
-              if [ ! -f "$CONFIG_FILE" ]; then
-                echo "Creating initial $CONFIG_FILE with Pocket ID credentials..."
+              if [ ! -f "$CONFIG_FILE" ] || ! grep -q "pocketid" "$CONFIG_FILE"; then
+                echo "Injecting Pocket ID configuration into $CONFIG_FILE..."
                 printf '%s\n' \
                   '<?xml version="1.0" encoding="utf-8"?>' \
                   '<PluginConfiguration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">' \
@@ -57,30 +57,29 @@ spec:
                   '  <OidConfigs>' \
                   '    <item>' \
                   '      <key>' \
-                  '        <string>PocketID</string>' \
+                  '        <string>pocketid</string>' \
                   '      </key>' \
                   '      <value>' \
-                  '        <OidConfig>' \
+                  '        <PluginConfiguration>' \
                   "          <OidEndpoint>${OIDC_ISSUER}/.well-known/openid-configuration</OidEndpoint>" \
                   "          <OidClientId>${OIDC_CLIENT_ID}</OidClientId>" \
                   "          <OidSecret>${OIDC_CLIENT_SECRET}</OidSecret>" \
+                  '          <Enabled>true</Enabled>' \
+                  '          <EnableAuthorization>false</EnableAuthorization>' \
+                  '          <EnableAllFolders>true</EnableAllFolders>' \
                   '          <OidScopes>' \
                   '            <string>openid</string>' \
                   '            <string>profile</string>' \
                   '            <string>email</string>' \
                   '          </OidScopes>' \
-                  '          <Enabled>true</Enabled>' \
-                  '          <EnableAuthorization>false</EnableAuthorization>' \
-                  '          <EnableAllFolders>true</EnableAllFolders>' \
-                  '        </OidConfig>' \
+                  '        </PluginConfiguration>' \
                   '      </value>' \
                   '    </item>' \
                   '  </OidConfigs>' \
-                  '  <EnableRateLimit>false</EnableRateLimit>' \
                   '</PluginConfiguration>' > "$CONFIG_FILE"
                 echo "Successfully wrote $CONFIG_FILE"
               else
-                echo "$CONFIG_FILE already exists, preserving existing configuration."
+                echo "$CONFIG_FILE already contains pocketid configuration, preserving existing configuration."
               fi
           volumeMounts:
             - name: config
