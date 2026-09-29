@@ -20,144 +20,178 @@
           │                               │
           ▼                               ▼
 ┌─────────────────┐               ┌──────────────────────────────────────────────────┐
-│  NAS            │               │              Kubernetes Cluster                  │
-│  192.168.5.5    │               │              (API: 192.168.5.20)                 │
-│  (Tailscale)    │               │            (Nodes: 192.168.5.11-20)              │
-│                 │               │                                                  │
-│ • File Storage  │◄──Tailscale───│  ┌─────────────────────────────────────────────┐ │
-│ • NFS Shares    │  (NFS only)   │  │                    MetalLB                  │ │
-│ • Longhorn      │               │  │              IP Pool: 192.168.5.80-100      │ │
-│   Backups       │               │  │                                             │ │
+│  NAS / Storage  │               │              Kubernetes Cluster                  │
+│  192.168.5.5    │               │              (API VIP: 192.168.5.19)             │
+│  (Tailscale:    │               │            (Nodes: 192.168.5.11 - .13)           │
+│  100.92.202.28) │               │                                                  │
+│                 │◄──Tailscale───│  ┌─────────────────────────────────────────────┐ │
+│ • File Storage  │  (NFS only)   │  │             Cilium CNI (eBPF)               │ │
+│ • NFS Shares    │               │  │  • Kube-Proxy Replacement                   │ │
+│ • Longhorn      │               │  │  • L2 Announcements (ARP/NDP)              │ │
+│   Backups       │               │  │  • IPAM Pools: 192.168.5.80-100             │ │
 └─────────────────┘               │  └─────────────────────────────────────────────┘ │
                                   │                                                  │
                                   │  ┌─────────────────────────────────────────────┐ │
+                                  │  │                Multus CNI                   │ │
+                                  │  │  • Meta-CNI plugin (cni.exclusive: false)   │ │
+                                  │  │  • Secondary network interface attachment   │ │
+                                  │  └─────────────────────────────────────────────┘ │
+                                  │                                                  │
+                                  │  ┌─────────────────────────────────────────────┐ │
                                   │  │           Pomerium Ingress (IAP)            │ │
-                                  │  │                192.168.5.4                  │ │
+                                  │  │      LAN: 192.168.5.4 | Tailnet: .223.17    │ │
                                   │  └─────────────────────────────────────────────┘ │
                                   │                                                  │
                                   │  ┌─────────────────────────────────────────────┐ │
                                   │  │                  DNS Server                 │ │
-                                  │  │       192.168.5.53 and over Tailscale       │ │
-                                  │  │                    PiHole                   │ │
+                                  │  │        PiHole: 192.168.5.53 & Tailscale     │ │
                                   │  └─────────────────────────────────────────────┘ │
                                   │                                                  │
                                   │  ┌─────────────────────────────────────────────┐ │
-                                  │  │             Tailscale Exit Node             │ │
-                                  │  │        (LAN access for tailnet devices)     │ │
-                                  │  └─────────────────────────────────────────────┘ │
-                                  │                                                  │
-                                  │  ┌─────────────────────────────────────────────┐ │
-                                  │  │                Applications & Workloads     │ │
-                                  │  │  • Pods        • Services    • Deployments  │ │
-                                  │  │  • ConfigMaps  • Secrets     • StatefulSets │ │
+                                  │  │                Applications                 │ │
+                                  │  │  • Pods (10.244.0.0/16)                     │ │
+                                  │  │  • Services (10.96.0.0/12)                  │ │
                                   │  └─────────────────────────────────────────────┘ │
                                   └──────────────────────────────────────────────────┘
 ```
 
 ## IP Address Allocation
 
-| IP Range            | Purpose                    | Configuration             | Notes                                   |
-| ------------------- | -------------------------- | ------------------------- | --------------------------------------- |
-| `192.168.5.1`       | Router/Gateway             |                           | Default gateway                         |
-| `192.168.5.2`       | Wifi AP                    |                           | Network infrastructure                  |
-| `192.168.5.4`       | Pomerium Ingress           | `network.pomeriumIngress` | Central IAP and Ingress Controller      |
-| `192.168.5.5`       | NAS                        | `network.storageServer`   | Network file storage server             |
-| `192.168.5.6`       | Zigbee/thread co-ordinator |                           | Network Infrastructure                  |
-| `192.168.5.20`      | Talos VIP                  | `network.cluster`         | Kubernetes API server endpoint          |
-| `192.168.5.11-19`   | Talos Nodes                | `talconfig.yaml`          | Reserved for control plane nodes        |
-| `192.168.5.53`      | DNS Server                 | `network.dnsServer`       | PiHole DNS service (Tailscale enrolled) |
-| `192.168.5.80-100`  | MetalLB Pool               | `network.metallbRange`    | Load balancer IP allocation             |
-| `192.168.5.100-254` | DHCP Pool                  | Router configuration      | Dynamic client allocation               |
+| IP Range / Target   | Purpose                     | Configuration Source      | Notes                                     |
+| ------------------- | --------------------------- | ------------------------- | ----------------------------------------- |
+| `192.168.5.1`       | Router / Gateway            | Router                    | Default gateway                           |
+| `192.168.5.4`       | Pomerium Ingress (LAN)      | `network.pomeriumIngress` | Central IAP / Ingress controller VIP      |
+| `192.168.5.5`       | Storage Server (LAN)        | Host network              | Network file storage server               |
+| `192.168.5.19`      | Talos Control Plane VIP     | `network.cluster`         | Shared API VIP on `eth0` via KubePrism    |
+| `192.168.5.11`      | Node: `talos-gcf-e16`       | `talos/talconfig.yaml`    | Bare-metal controlplane / worker node 1   |
+| `192.168.5.12`      | Node: `talos-12k-2sd`       | `talos/talconfig.yaml`    | Bare-metal controlplane / worker node 2   |
+| `192.168.5.13`      | Node: `talos-38m-ewh`       | `talos/talconfig.yaml`    | Bare-metal controlplane / worker node 3   |
+| `192.168.5.53`      | PiHole DNS Service          | `network.dnsServer`       | PiHole DNS service (Cilium LB pool)       |
+| `192.168.5.80-100`  | Cilium LoadBalancer IP Pool | `network.ciliumRange`     | Dynamic service IP allocation range       |
+| `192.168.5.100-254` | DHCP Range                  | Router configuration      | Dynamic LAN client allocation             |
+| `100.99.223.17`     | Pomerium Private Ingress    | `network.privateIngress`  | Tailscale proxy VIP for authenticated IAP |
+| `100.92.202.28`     | NFS Storage Server          | `network.storageServer`   | Tailscale IP for media NFS storage        |
+| `10.244.0.0/16`     | Cluster Pod CIDR            | `clusterPodNets`          | Overlay network managed by Cilium         |
+| `10.96.0.0/12`      | Cluster Service CIDR        | `clusterSvcNets`          | Kubernetes Service virtual IPs            |
 
-## Traffic Flow
+---
 
-### Unified Traffic Path (Internet/Internal → Pomerium)
+## Cilium CNI Architecture
 
-1. **Traffic** hits Pomerium (`192.168.5.4`).
-2. **Pomerium** evaluates OIDC identity and policies.
-3. **Authorized Traffic** is proxied to Application Pods.
+The cluster uses **Cilium** as its sole primary CNI and eBPF dataplane, fully replacing `kube-proxy` and `metallb`.
 
-- **Cloudflare DDNS** updates `home.dray.id.au` with the current WAN IP.
-- **External DNS** instances manage split-horizon resolution (see below).
+### 1. eBPF Kube-Proxy Replacement
+
+- Talos is configured with `KubeProxyConfig.enabled: false`.
+- Cilium operates with `kubeProxyReplacement: true`, handling all Kubernetes Service load-balancing and routing directly inside the Linux kernel via eBPF programs attached to host network interfaces and cgroups.
+- Communication between in-cluster components and the Kubernetes API server uses **KubePrism** (`127.0.0.1:7445`), avoiding circular dependencies before the Cilium daemon is fully initialized.
+
+### 2. Cilium L2 Announcements (MetalLB Replacement)
+
+Layer 2 address resolution (ARP for IPv4) for LoadBalancer Services is managed entirely by Cilium:
+
+- Configured via `CiliumL2AnnouncementPolicy`:
+  ```yaml
+  apiVersion: cilium.io/v2alpha1
+  kind: CiliumL2AnnouncementPolicy
+  metadata:
+    name: default-l2-policy
+  spec:
+    interfaces:
+      - ^eth[0-9]+
+      - ^en[a-z0-9]+
+    loadBalancerIPs: true
+  ```
+- Dedicated and dynamic pools configured via `CiliumLoadBalancerIPPool`:
+  - `pomerium-ingress`: `192.168.5.4/32`
+  - `dns-server`: `192.168.5.53/32`
+  - `default-pool`: `192.168.5.80` - `192.168.5.100`
+
+### 3. Tailscale Compatibility (`socketLB.hostNamespaceOnly`)
+
+- When Cilium attaches socket-level load-balancing eBPF programs across all host cgroups, it can intercept and rewrite Tailscale's encapsulated Wireguard packets between nodes.
+- To prevent node-to-node routing lockups across the Tailnet, Cilium is configured with:
+  ```yaml
+  socketLB:
+    hostNamespaceOnly: true
+  ```
+- This ensures only host-network processes and standard pod sockets are intercepted, allowing the Tailscale system extension daemon on Talos to route traffic unhindered.
+
+---
+
+## Multus CNI Architecture
+
+**Multus CNI** is deployed alongside Cilium as a meta-CNI plugin.
+
+### Coexistence with Cilium
+
+- Standard Kubernetes setups run Cilium exclusively. To allow Multus to insert secondary network interfaces into pods, Cilium is configured with:
+  ```yaml
+  cni:
+    exclusive: false
+  ```
+- Multus runs as a thin daemonset (`kube-multus-ds`) on all nodes, watching `/etc/cni/net.d/`.
+- The default network for all pods remains **Cilium** (`eth0`, `10.244.0.0/16`).
+- Applications requiring direct L2 LAN access, custom VLANs, or secondary routing interfaces use Kubernetes `NetworkAttachmentDefinition` CRDs to attach additional network interfaces (e.g. `net1`).
+
+---
 
 ## DNS Architecture
 
 The cluster uses a split-horizon DNS setup powered by two **ExternalDNS** instances.
 
-### Multi-tier DNS System
-
-#### PiHole (Internal DNS)
+### 1. PiHole (Internal DNS)
 
 - **IP**: `192.168.5.53` (also enrolled in Tailscale)
-- **Purpose**: DNS for internal clients and Tailscale clients.
-- **Controller**: `external-dns-pihole`.
-- **Annotation Prefix**: `dns.internal/`.
-- **Logic**: Automatically syncs **all** Ingress resources with `ingressClassName: pomerium`.
-- **Resolution**: Points services to the internal Pomerium IP (`192.168.5.4`).
+- **Controller**: `external-dns-pihole`
+- **Annotation Prefix**: `dns.internal/`
+- **Behavior**: Automatically synchronizes all Ingress resources with `ingressClassName: pomerium`.
+- **Resolution**: Resolves private services to the Pomerium Tailnet IP (`100.99.223.17`), and public services to the LAN Pomerium IP (`192.168.5.4`).
 
-#### Cloudflare (Public DNS)
+### 2. Cloudflare (Public DNS)
 
-- **Purpose**: External DNS for internet access.
-- **Controller**: `external-dns-cloudflare`.
-- **Annotation Prefix**: `dns.external/`.
-- **Annotation Filter**: `dns.external/enabled=true`.
-- **Logic**: Only syncs Ingress resources explicitly tagged with `dns.external/enabled: "true"`.
-- **Resolution**: Uses the target specified in `dns.external/target` (typically `home.dray.id.au`).
+- **Controller**: `external-dns-cloudflare`
+- **Annotation Prefix**: `dns.external/`
+- **Annotation Filter**: `dns.external/enabled=true`
+- **Behavior**: Only synchronizes Ingress resources explicitly tagged with `dns.external/enabled: "true"`.
+- **Target**: Public DDNS hostname (`home.dray.id.au`).
 
-## Ingress Strategy
+---
 
-The cluster uses a **Unified Ingress Class** via Pomerium as the sole ingress controller and Identity-Aware Proxy.
+## Ingress Architecture (Pomerium)
 
-### Pomerium Ingress
-
-- **IP**: `192.168.5.4`
-- **ingressClassName**: `pomerium`
-- **TLS**: Wildcard certificate (replicated from `cert-manager`).
-- **Policy**: Identity-Aware access control using OIDC (PocketID).
+The cluster uses a **Unified Ingress Class** via **Pomerium** as the sole ingress controller and Identity-Aware Proxy (IAP).
 
 ### Standard Configuration Pattern
 
-Always use the `common.pomeriumIngress` template from the common chart:
+Always use the `common.pomeriumIngress` template from the common library chart:
 
 ```yaml
 {{ include "common.pomeriumIngress" (dict
   "ctx" .
   "name" "my-app"
-  "port" 80
-  "type" "private"       # private (default) or public
-  "allowedUsers" "authed" # authed (default), all, private, admin
+  "subdomain" "my-app"      # optional, defaults to name
+  "port" 80                 # optional, defaults to 80
+  "path" "/"                # optional, defaults to /
+  "serviceName" "my-svc"    # optional, defaults to name
+  "type" "private"          # optional: private (default) or public
+  "allowedUsers" "authed"   # optional: authed (default), all, private, admin
   "responseHeaders" (dict "X-Custom-Header" "value") # optional
 ) }}
 ```
 
-- `type: private` — directs internal DNS to the Tailscale ingress IP (`network.privateIngress`) and denies traffic not from the Tailscale range (`network.tailscaleIpRange`) or cluster pods.
-- `type: public` — directs internal DNS to `network.pomeriumIngress` (`192.168.5.4`), enables Cloudflare DNS (`dns.external/enabled: "true"`), and removes the IP deny rule.
-- `allowedUsers: authed` — any authenticated user; `all` — unauthenticated; `private`/`admin` — specific user groups from `userGroups` in global values.
+- **`type: private` (Default):** Directs internal DNS to the Tailscale ingress IP (`network.privateIngress: 100.99.223.17`) and adds an IP deny rule blocking all non-Tailscale / non-pod traffic.
+- **`type: public`:** Points internal DNS to `network.pomeriumIngress: 192.168.5.4`, enables Cloudflare DNS (`dns.external/enabled: "true"`), and removes the IP deny rule.
+- **`allowedUsers`:**
+  - `authed` (Default) — Any authenticated user via PocketID (`authenticated_user: true`).
+  - `all` — Unauthenticated public access (`accept: true`).
+  - `private` — Users belonging to `userGroups.private`.
+  - `admin` — Users belonging to `userGroups.admin`.
 
-## MetalLB Configuration
+---
 
-MetalLB provides LoadBalancer services:
+## Tailscale Integration
 
-- **Pool: `pomerium-ingress`**: `192.168.5.4` (Dedicated IP for IAP / Public Services).
-- **Pool: `dns-server`**: `192.168.5.53` (PiHole).
-- **Pool: `default`**: `192.168.5.80-100` (Dynamic assignment).
-
-## Certificate Management
-
-### Automatic TLS with cert-manager
-
-- **Wildcard Certificate**: Managed in `cert-manager` namespace.
-- **Secret Reflection**: The `default-tls` secret is reflected to the `pomerium` namespace using Emberstack Reflector.
-- **Pomerium Integration**: The `Pomerium` global resource is configured to use the reflected `default-tls` secret for all routes.
-
-## Network Security
-
-Private ingresses deny traffic not originating from Tailscale (`network.tailscaleIpRange`) or cluster pod ranges, preventing access via both the public internet and local LAN.
-
-## Tailscale
-
-Pomerium is exposed on both the local LAN/WAN (`192.168.5.4`) and directly on the Tailnet via a Tailscale LoadBalancer service (`pomerium-proxy-tailscale` with IP `network.privateIngress`).
-
-MagicDNS is configured via Split DNS to forward `*.dray.id.au` requests to the Pi-hole service. Pi-hole resolves private services directly to the Pomerium Tailnet IP, while public services resolve to the LAN/WAN Pomerium IP.
-
-Talos nodes are configured to use `100.100.100.100` as their first DNS resolver. This is Tailscale's built-in "MagicDNS" resolver, which automatically resolves hostnames of other devices and services on the tailnet. Falling back to PiHole (`192.168.5.53`) handles all other internal and external resolution.
+1. **Talos Extension:** Each Talos node runs the `siderolabs/tailscale` extension service, authenticated via `TS_AUTHKEY` in `talconfig.yaml` with `--accept-routes=false --advertise-tags=tag:core-network`.
+2. **MagicDNS:** Talos nodes use `100.100.100.100` as primary DNS resolver, allowing nodes to resolve storage hosts (such as `storage.chimera-exponential.ts.net`) directly over the tailnet.
+3. **Pomerium Tailscale Proxy:** Pomerium exposes an internal proxy endpoint (`100.99.223.17`) directly on the Tailnet for authenticated remote access.

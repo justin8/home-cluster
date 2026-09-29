@@ -2,8 +2,9 @@
 
 ## Documentation & Knowledgebase
 
-- **Directory:** All project documentation is maintained in the `docs/` directory.
-- **Usage:** Treat the contents of `docs/` as a comprehensive knowledgebase. Before implementing new features or making significant architectural changes, research existing documentation to ensure alignment with established patterns (e.g., Talos configuration, networking, storage).
+- **Directory:** All project documentation is maintained in the `docs/` directory. Refer to `docs/README.md` for the index.
+- **Active Knowledgebase:** Treat the root markdown files in `docs/*.md` as the authoritative, active knowledgebase. Before implementing new features or making architectural changes, research existing documentation to ensure alignment with established patterns (Talos configuration, networking, storage).
+- **Archive Directory (`docs/archive/`):** Completed migration plans, historical phase handovers, and deprecated architecture notes are preserved in `docs/archive/`. Do NOT load or read `docs/archive/` files into active context during standard operations; only consult them when the user explicitly requests historical migration context.
 
 ## Helm Chart Versions
 
