@@ -21,7 +21,7 @@
           ▼                               ▼
 ┌─────────────────┐               ┌──────────────────────────────────────────────────┐
 │  NAS / Storage  │               │              Kubernetes Cluster                  │
-│  192.168.5.5    │               │              (API VIP: 192.168.5.19)             │
+│  192.168.5.5    │               │              (API VIP: 192.168.5.20)             │
 │  (Tailscale:    │               │            (Nodes: 192.168.5.11 - .13)           │
 │  100.92.202.28) │               │                                                  │
 │                 │◄──Tailscale───│  ┌─────────────────────────────────────────────┐ │
@@ -62,7 +62,7 @@
 | `192.168.5.1`       | Router / Gateway            | Router                    | Default gateway                           |
 | `192.168.5.4`       | Pomerium Ingress (LAN)      | `network.pomeriumIngress` | Central IAP / Ingress controller VIP      |
 | `192.168.5.5`       | Storage Server (LAN)        | Host network              | Network file storage server               |
-| `192.168.5.19`      | Talos Control Plane VIP     | `network.cluster`         | Shared API VIP on `eth0` via KubePrism    |
+| `192.168.5.20`      | Talos Control Plane VIP     | `talos/talconfig.yaml`    | Shared API VIP on `eth0` via KubePrism    |
 | `192.168.5.11`      | Node: `talos-gcf-e16`       | `talos/talconfig.yaml`    | Bare-metal controlplane / worker node 1   |
 | `192.168.5.12`      | Node: `talos-12k-2sd`       | `talos/talconfig.yaml`    | Bare-metal controlplane / worker node 2   |
 | `192.168.5.13`      | Node: `talos-38m-ewh`       | `talos/talconfig.yaml`    | Bare-metal controlplane / worker node 3   |
