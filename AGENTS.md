@@ -120,11 +120,6 @@ All ingresses always include: `preserve_host_header`, `pass_identity_headers`, `
 - **Credentials Secret:** The operator generates a secret named `{metadata.name}-oidc-credentials`.
 - **Secret Keys:** ALWAYS use lowercase keys as defined in `docs/AUTH.md` (e.g., `client_id`, `client_secret`, `issuer_url`). Refer to `docs/AUTH.md` for the full list of available keys and configuration details.
 
-## Project Steering
-
-- **Directory:** Key project guidance and steering documents are located in `.kiro/steering/`.
-- **Loading:** Always refer to the files in `.kiro/steering/` (e.g., `product.md`, `structure.md`, `tech.md`) to understand the high-level goals, technical constraints, and organizational structure of this cluster.
-
 ## Cluster Write Safety
 
 **NEVER run write/mutating commands against the Kubernetes cluster without explicit user instruction.**
