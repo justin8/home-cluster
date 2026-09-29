@@ -7,6 +7,7 @@
 {{ include "common.pomeriumIngress" (dict
   "ctx" .
   "name" "sonarr-api"
+  "serviceName" "sonarr"
   "subdomain" "sonarr"
   "port" 8989
   "path" "/api"

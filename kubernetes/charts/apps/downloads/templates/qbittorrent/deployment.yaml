@@ -31,7 +31,16 @@ spec:
                 command:
                   - sh
                   - -c
-                  - sleep 30 && iptables -I OUTPUT 1 -d 10.244.0.0/16 -j ACCEPT
+                  - |
+                    (
+                      until ip link show wg0 >/dev/null 2>&1; do sleep 1; done
+                      sleep 2
+                      GW=$(ip route show default | awk '{print $3}')
+                      for cidr in 10.244.0.0/16 10.96.0.0/12 192.168.5.0/24 100.64.0.0/10; do
+                        ip route add $cidr via $GW dev eth0 2>/dev/null || true
+                        iptables -I OUTPUT 1 -d $cidr -j ACCEPT 2>/dev/null || true
+                      done
+                    ) &
           volumeMounts:
             - name: vpn-config
               mountPath: /etc/wireguard

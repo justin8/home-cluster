@@ -8,6 +8,7 @@
 {{ include "common.pomeriumIngress" (dict
   "ctx" .
   "name" "sabnzbd-api"
+  "serviceName" "sabnzbd"
   "subdomain" "sabnzbd"
   "port" 8080
   "path" "/api"
