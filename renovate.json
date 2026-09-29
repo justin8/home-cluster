@@ -55,8 +55,9 @@
       "automergeSchedule": ["* 0-8 * * *"]
     },
     {
-      "matchPackageNames": ["siderolabs/talos", "kubernetes/kubernetes", "/longhorn/"],
-      "automerge": false
+      "matchPackageNames": ["siderolabs/talos", "kubernetes/kubernetes", "longhorn", "/longhorn/"],
+      "automerge": false,
+      "dependencyDashboardApproval": false
     }
   ],
   "helm-values": {
