@@ -40,7 +40,7 @@ images:
     repository: lscr.io/linuxserver/qbittorrent
     tag: 5.2.3-libtorrentv1
     pullPolicy: IfNotPresent
-  wireguard:
-    repository: jordanpotter/wireguard
-    tag: 2026-03-24
+  gluetun:
+    repository: qmcgaw/gluetun
+    tag: v3.41.3
     pullPolicy: IfNotPresent
