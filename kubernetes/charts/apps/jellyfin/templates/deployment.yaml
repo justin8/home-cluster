@@ -1,0 +1,138 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jellyfin
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: jellyfin
+  template:
+    metadata:
+      labels:
+        app: jellyfin
+    spec:
+      securityContext:
+        fsGroup: {{ .Values.PGID }}
+        fsGroupChangePolicy: OnRootMismatch
+      initContainers:
+        - name: provision-sso-config
+          image: "{{ .Values.images.app.repository }}:{{ .Values.images.app.tag }}"
+          imagePullPolicy: {{ .Values.images.app.pullPolicy }}
+          securityContext:
+            runAsUser: {{ .Values.PUID }}
+            runAsGroup: {{ .Values.PGID }}
+          env:
+            - name: OIDC_ISSUER
+              valueFrom:
+                secretKeyRef:
+                  name: jellyfin-oidc-credentials
+                  key: issuer_url
+            - name: OIDC_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: jellyfin-oidc-credentials
+                  key: client_id
+            - name: OIDC_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: jellyfin-oidc-credentials
+                  key: client_secret
+          command:
+            - /bin/sh
+            - -cu
+            - |
+              CONFIG_DIR="/config/plugins/configurations"
+              CONFIG_FILE="$CONFIG_DIR/SSO-Auth.xml"
+              mkdir -p "$CONFIG_DIR"
+              if [ ! -f "$CONFIG_FILE" ]; then
+                echo "Creating initial $CONFIG_FILE with Pocket ID credentials..."
+                printf '%s\n' \
+                  '<?xml version="1.0" encoding="utf-8"?>' \
+                  '<PluginConfiguration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">' \
+                  '  <SamlConfigs />' \
+                  '  <OidConfigs>' \
+                  '    <item>' \
+                  '      <key>' \
+                  '        <string>PocketID</string>' \
+                  '      </key>' \
+                  '      <value>' \
+                  '        <OidConfig>' \
+                  "          <OidEndpoint>${OIDC_ISSUER}/.well-known/openid-configuration</OidEndpoint>" \
+                  "          <OidClientId>${OIDC_CLIENT_ID}</OidClientId>" \
+                  "          <OidSecret>${OIDC_CLIENT_SECRET}</OidSecret>" \
+                  '          <OidScopes>' \
+                  '            <string>openid</string>' \
+                  '            <string>profile</string>' \
+                  '            <string>email</string>' \
+                  '          </OidScopes>' \
+                  '          <Enabled>true</Enabled>' \
+                  '          <EnableAuthorization>false</EnableAuthorization>' \
+                  '          <EnableAllFolders>true</EnableAllFolders>' \
+                  '        </OidConfig>' \
+                  '      </value>' \
+                  '    </item>' \
+                  '  </OidConfigs>' \
+                  '  <EnableRateLimit>false</EnableRateLimit>' \
+                  '</PluginConfiguration>' > "$CONFIG_FILE"
+                echo "Successfully wrote $CONFIG_FILE"
+              else
+                echo "$CONFIG_FILE already exists, preserving existing configuration."
+              fi
+          volumeMounts:
+            - name: config
+              mountPath: /config
+      containers:
+        - name: jellyfin
+          image: "{{ .Values.images.app.repository }}:{{ .Values.images.app.tag }}"
+          imagePullPolicy: {{ .Values.images.app.pullPolicy }}
+          securityContext:
+            runAsUser: {{ .Values.PUID }}
+            runAsGroup: {{ .Values.PGID }}
+          ports:
+            - containerPort: 8096
+              name: http
+          env:
+            - name: TZ
+              value: {{ .Values.TZ }}
+            - name: JELLYFIN_DATA_DIR
+              value: /config
+            - name: JELLYFIN_CACHE_DIR
+              value: /cache
+          resources:
+            requests:
+              gpu.intel.com/i915: "1"
+            limits:
+              gpu.intel.com/i915: "1"
+          livenessProbe:
+            httpGet:
+              port: 8096
+              path: /health
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              port: 8096
+              path: /health
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: cache
+              mountPath: /cache
+            - name: media
+              mountPath: /mnt/pool/media
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: jellyfin-config
+        - name: cache
+          emptyDir: {}
+        - name: media
+          nfs:
+            server: {{ .Values.network.storageServer }}
+            path: /mnt/pool/media

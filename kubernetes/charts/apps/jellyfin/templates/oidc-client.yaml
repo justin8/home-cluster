@@ -1,0 +1,10 @@
+apiVersion: pocketid.internal/v1alpha1
+kind: PocketIDOIDCClient
+metadata:
+  name: jellyfin
+  namespace: {{ .Release.Namespace }}
+spec:
+  name: Jellyfin
+  callbackUrls:
+    - https://jellyfin.{{ .Values.domain }}/sso/OID/redirect
+    - https://jellyfin.{{ .Values.domain }}/sso/OID/callback

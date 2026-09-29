@@ -1,0 +1,7 @@
+volumeSizeGi: 50
+
+images:
+  app:
+    repository: jellyfin/jellyfin
+    tag: "12.1"
+    pullPolicy: IfNotPresent

@@ -1,0 +1,7 @@
+{{ include "common.pomeriumIngress" (dict
+  "ctx" .
+  "name" "jellyfin"
+  "port" 8096
+  "type" "public"
+  "allowedUsers" "all"
+) }}
