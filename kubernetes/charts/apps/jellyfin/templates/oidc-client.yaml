@@ -7,4 +7,7 @@ spec:
   name: Jellyfin
   callbackUrls:
     - https://jellyfin.{{ .Values.domain }}/sso/OID/redirect
+    - https://jellyfin.{{ .Values.domain }}/sso/OID/redirect/pocketid
+    - https://jellyfin.{{ .Values.domain }}/sso/OID/redirect/PocketID
+    - https://jellyfin.{{ .Values.domain }}/sso/OID/r/pocketid
     - https://jellyfin.{{ .Values.domain }}/sso/OID/callback
