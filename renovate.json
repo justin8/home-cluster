@@ -10,7 +10,10 @@
     {
       "customType": "regex",
       "description": "Extract images from values.yaml using repository/tag pattern",
-      "fileMatch": ["(^|/)values\\.yaml$", "(^|/)global-values\\.yaml$"],
+      "managerFilePatterns": [
+        "/(^|/)values\\.yaml$/",
+        "/(^|/)global-values\\.yaml$/"
+      ],
       "matchStrings": [
         "repository:\\s*(?<depName>[^\\s\\n]+)\\s*tag:\\s*\"?(?<currentValue>[^\\s\\n\"#]+)\"?"
       ],
@@ -19,7 +22,7 @@
     {
       "customType": "regex",
       "description": "Talos version in talconfig.yaml",
-      "fileMatch": ["^talos/talconfig\\.yaml$"],
+      "managerFilePatterns": ["/^talos/talconfig\\.yaml$/"],
       "matchStrings": ["talosVersion:\\s*(?<currentValue>v\\d+\\.\\d+\\.\\d+)"],
       "depNameTemplate": "siderolabs/talos",
       "datasourceTemplate": "github-releases",
@@ -28,8 +31,10 @@
     {
       "customType": "regex",
       "description": "Kubernetes version in talconfig.yaml",
-      "fileMatch": ["^talos/talconfig\\.yaml$"],
-      "matchStrings": ["kubernetesVersion:\\s*(?<currentValue>v\\d+\\.\\d+\\.\\d+)"],
+      "managerFilePatterns": ["/^talos/talconfig\\.yaml$/"],
+      "matchStrings": [
+        "kubernetesVersion:\\s*(?<currentValue>v\\d+\\.\\d+\\.\\d+)"
+      ],
       "depNameTemplate": "kubernetes/kubernetes",
       "datasourceTemplate": "github-releases",
       "versioningTemplate": "semver"
@@ -37,7 +42,7 @@
     {
       "customType": "regex",
       "description": "Generic GitHub release URL manager",
-      "fileMatch": [".*\\.yaml$"],
+      "managerFilePatterns": ["/.*\\.yaml$/"],
       "matchStrings": [
         "https://github\\.com/(?<depName>[^/]+/[^/]+)/releases/download/(?<currentValue>v[^/]+)/(?<fileName>[^\\s\\n]+)"
       ],
@@ -53,15 +58,21 @@
       "automergeSchedule": ["* 0-8 * * *"]
     },
     {
-      "matchPackageNames": ["siderolabs/talos", "kubernetes/kubernetes"],
-      "matchPackagePatterns": ["longhorn"],
+      "matchPackageNames": [
+        "siderolabs/talos",
+        "kubernetes/kubernetes",
+        "/longhorn/"
+      ],
       "automerge": false
     }
   ],
   "helm-values": {
-    "fileMatch": ["(^|/)global-values\\.yaml$", "(^|/)values\\.yaml$"]
+    "managerFilePatterns": [
+      "/(^|/)global-values\\.yaml$/",
+      "/(^|/)values\\.yaml$/"
+    ]
   },
   "helmv3": {
-    "fileMatch": ["(^|/)Chart\\.yaml$"]
+    "managerFilePatterns": ["/(^|/)Chart\\.yaml$/"]
   }
 }
