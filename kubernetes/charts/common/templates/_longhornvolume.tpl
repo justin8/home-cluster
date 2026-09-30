@@ -3,6 +3,7 @@
 {{- $name := .name -}}
 {{- $sizeGi := .sizeGi | default 1 | int -}}
 {{- $backups := .backups | default "enabled" -}}
+{{- $shared := .shared | default false -}}
 {{- if lt $sizeGi 1 -}}
   {{- $sizeGi = 1 -}}
 {{- end -}}
@@ -21,7 +22,7 @@ spec:
   size: {{ mul $sizeGi 1024 | mul 1024 | mul 1024 | quote }}
   dataLocality: best-effort
   numberOfReplicas: 2
-  accessMode: rwo
+  accessMode: {{ if $shared }}rwx{{ else }}rwo{{ end }}
   frontend: blockdev
   {{- if ne $backups "disabled" }}
   backupTargetName: default
@@ -35,13 +36,17 @@ spec:
   capacity:
     storage: {{ $sizeGi }}Gi
   accessModes:
-    - ReadWriteOnce
+    - {{ if $shared }}ReadWriteMany{{ else }}ReadWriteOnce{{ end }}
   persistentVolumeReclaimPolicy: Retain
   storageClassName: longhorn
   csi:
     driver: driver.longhorn.io
     fsType: ext4
     volumeHandle: {{ $name }}
+    {{- if $shared }}
+    volumeAttributes:
+      share: "true"
+    {{- end }}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -50,7 +55,7 @@ metadata:
   namespace: {{ $ctx.Release.Namespace }}
 spec:
   accessModes:
-    - ReadWriteOnce
+    - {{ if $shared }}ReadWriteMany{{ else }}ReadWriteOnce{{ end }}
   storageClassName: longhorn
   volumeName: {{ $name }}
   resources:

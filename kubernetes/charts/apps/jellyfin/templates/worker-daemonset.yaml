@@ -1,3 +1,4 @@
+{{- if ne .Values.workersEnabled false }}
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -60,3 +61,4 @@ spec:
             items:
               - key: authorized_keys
                 path: authorized_keys
+{{- end }}
