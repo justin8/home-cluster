@@ -95,6 +95,31 @@ OIDC clients are managed via the `PocketIDOIDCClient` custom resource. The **Pom
 - **Callback URL:** `https://authenticate.{{ .Values.domain }}/oauth2/callback`
 - **Credentials Secret:** `pomerium-oidc-credentials` (Populated in the `pomerium` namespace).
 
+## Automated OIDC Credential Synchronization
+
+### The Challenge with Native OIDC in Self-Hosted Apps
+
+Many self-hosted applications natively support OpenID Connect, but require credentials (`client_id`, `client_secret`, and issuer/discovery URLs) to be entered through a web admin UI or saved to internal storage (PostgreSQL rows, JSON/XML config files on PVCs), without supporting direct dynamic injection via standard environment variables.
+
+In a GitOps environment with automated rotation and backup restores, relying on manual configuration causes silent failures:
+
+1. **Cluster Restorations & IdP Rotations**: When Pocket ID clients are provisioned or secrets are rotated, the Pocket ID operator creates a new secret `{metadata.name}-oidc-credentials`.
+2. **Database/Storage Restores**: Restoring an application's database or volume restores stale, pre-rotation credentials.
+3. **Desynchronization**: The application attempts token exchange using stale credentials, failing with `401 invalid_client` (`Client authentication failed`).
+
+### Design Pattern: Automated Startup Sync
+
+Wherever an application does not natively read environment variables or Kubernetes Secrets for OIDC, **always automate the sync during container startup** (via an `initContainer` or startup script). The container consumes `{metadata.name}-oidc-credentials` as environment variables and synchronizes them into the application's configuration store before the main container starts.
+
+### Implemented Examples in the Cluster
+
+| Application            | Configuration Store                                             | Sync Mechanism                                                                                                                                                       | Reference Manifest                                               |
+| ---------------------- | --------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| **Immich**             | PostgreSQL (`system_metadata.system-config`)                    | `postgresql-isready` init container updates `system_metadata` using `psql` and `jsonb_set` for `clientId`, `clientSecret`, and `issuerUrl` once PostgreSQL is ready. | `kubernetes/charts/apps/immich/templates/server/deployment.yaml` |
+| **Kavita**             | JSON file (`/config/appsettings.json` on PVC)                   | `update-oidc-config` init container runs `jq` against `appsettings.json` to update `OpenIdConnectSettings` (`Authority`, `ClientId`, `Secret`).                      | `kubernetes/charts/apps/kavita/templates/deployment.yaml`        |
+| **Jellyfin**           | XML file (`/config/plugins/configurations/SSO-Auth.xml` on PVC) | `provision-sso-config` init container generates/patches `SSO-Auth.xml` using environment variables.                                                                  | `kubernetes/charts/apps/jellyfin/templates/deployment.yaml`      |
+| **Pomerium / Grafana** | Native Kubernetes Secret / Env                                  | Directly references `{metadata.name}-oidc-credentials` in Helm chart values or container `env`/`envFrom`.                                                            | `kubernetes/charts/core-services/pomerium/templates/global.yaml` |
+
 ## Component Overview
 
 - **Pocket ID (Identity Provider):**

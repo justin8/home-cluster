@@ -119,6 +119,7 @@ All ingresses always include: `preserve_host_header`, `pass_identity_headers`, `
 - **Client Management:** Use the `PocketIDOIDCClient` custom resource.
 - **Credentials Secret:** The operator generates a secret named `{metadata.name}-oidc-credentials`.
 - **Secret Keys:** ALWAYS use lowercase keys as defined in `docs/AUTH.md` (e.g., `client_id`, `client_secret`, `issuer_url`). Refer to `docs/AUTH.md` for the full list of available keys and configuration details.
+- **Automated OIDC Syncing:** Many applications support OIDC only via internal configuration (database tables, JSON/XML files on PVCs) rather than native environment variable injection. To ensure disaster recovery, cluster restores, and secret rotations work seamlessly without manual intervention, ALWAYS automate the synchronization of credentials from `{metadata.name}-oidc-credentials` into the application's configuration store via an `initContainer` or startup script (see `docs/AUTH.md` for implemented patterns like Immich, Kavita, and Jellyfin).
 
 ## Cluster Write Safety
 
