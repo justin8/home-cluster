@@ -4,7 +4,7 @@ metadata:
   name: jellyfin
   namespace: {{ .Release.Namespace }}
 spec:
-  replicas: {{ if hasKey .Values "replicas" }}{{ .Values.replicas }}{{ else }}1{{ end }}
+  replicas: 1
   strategy:
     type: Recreate
   selector:
@@ -19,17 +19,6 @@ spec:
       securityContext:
         fsGroup: {{ .Values.PGID }}
         fsGroupChangePolicy: OnRootMismatch
-      affinity:
-        podAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-            - weight: 100
-              podAffinityTerm:
-                labelSelector:
-                  matchLabels:
-                    longhorn.io/component: share-manager
-                namespaces:
-                  - longhorn-system
-                topologyKey: kubernetes.io/hostname
       initContainers:
         - name: provision-sso-config
           image: "{{ .Values.images.app.repository }}:{{ .Values.images.app.tag }}"
