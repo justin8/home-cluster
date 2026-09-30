@@ -9,3 +9,4 @@ spec:
   callbackUrls:
     - https://immich.{{ .Values.domain }}/auth/login
     - app.immich:///oauth-callback
+    - https://immich.{{ .Values.domain }}/user-settings

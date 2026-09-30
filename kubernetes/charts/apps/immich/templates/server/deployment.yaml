@@ -51,10 +51,33 @@ spec:
                 secretKeyRef:
                   name: immich-database-app
                   key: port
+            - name: OIDC_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: immich-oidc-credentials
+                  key: client_id
+            - name: OIDC_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: immich-oidc-credentials
+                  key: client_secret
+            - name: OIDC_ISSUER_URL
+              valueFrom:
+                secretKeyRef:
+                  name: immich-oidc-credentials
+                  key: discovery_url
           command:
             - /bin/sh
             - -cu
-            - 'until pg_isready "--user=${DB_USERNAME}" "--dbname=${DB_DATABASE_NAME}" "--host=${DB_HOSTNAME}" "--port=${DB_PORT}" ; do sleep 2 ; done'
+            - |
+              until pg_isready "--user=${DB_USERNAME}" "--dbname=${DB_DATABASE_NAME}" "--host=${DB_HOSTNAME}" "--port=${DB_PORT}" ; do sleep 2 ; done
+              export PGPASSWORD="${DB_PASSWORD}"
+              if psql -h "${DB_HOSTNAME}" -p "${DB_PORT}" -U "${DB_USERNAME}" -d "${DB_DATABASE_NAME}" -tAc "SELECT 1 FROM information_schema.tables WHERE table_name = 'system_metadata'" | grep -q 1; then
+                echo "Syncing OIDC credentials to system_metadata..."
+                psql -h "${DB_HOSTNAME}" -p "${DB_PORT}" -U "${DB_USERNAME}" -d "${DB_DATABASE_NAME}" \
+                  -c "UPDATE system_metadata SET value = jsonb_set(jsonb_set(jsonb_set(value::jsonb, '{oauth,clientId}', to_jsonb('${OIDC_CLIENT_ID}'::text)), '{oauth,clientSecret}', to_jsonb('${OIDC_CLIENT_SECRET}'::text)), '{oauth,issuerUrl}', to_jsonb('${OIDC_ISSUER_URL}'::text))::text WHERE key = 'system-config' AND value::jsonb ? 'oauth';"
+                echo "OIDC credentials synced successfully."
+              fi
       containers:
         - name: immich-server
           image: "{{ .Values.images.server.repository }}:{{ .Values.images.server.tag }}"
