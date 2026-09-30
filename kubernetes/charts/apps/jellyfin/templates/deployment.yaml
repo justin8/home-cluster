@@ -131,11 +131,6 @@ spec:
               value: /cache/temp
             - name: JELLYFIN_FFMPEG
               value: /usr/local/bin/ffmpeg
-          resources:
-            requests:
-              gpu.intel.com/i915: "1"
-            limits:
-              gpu.intel.com/i915: "1"
           livenessProbe:
             httpGet:
               port: 8096
