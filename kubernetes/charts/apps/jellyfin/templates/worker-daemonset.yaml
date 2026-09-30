@@ -31,7 +31,6 @@ spec:
           ports:
             - name: ssh
               containerPort: 2222
-              hostPort: 2222
           resources:
             requests:
               gpu.intel.com/i915: "1"
