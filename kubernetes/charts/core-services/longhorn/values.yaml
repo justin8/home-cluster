@@ -10,9 +10,9 @@ longhorn:
     concurrentReplicaRebuildPerNodeLimit: "3"
     concurrentVolumeBackupRestorePerNodeLimit: "1"
     concurrentAutomaticEngineUpgradePerNodeLimit: "1"
-    replicaSoftAntiAffinity: "true" # Prefer different nodes for replicas, allow single-node staging/DR
+    replicaSoftAntiAffinity: "false" # REQUIRE different nodes for replicas
     replicaZoneSoftAntiAffinity: "true" # Prefer different zones if available
-    replicaDiskSoftAntiAffinity: "true" # Prefer different disks for replicas, allow single-disk staging/DR
+    replicaDiskSoftAntiAffinity: "false" # REQUIRE different disks for replicas
     upgradeChecker: "false"
     autoSalvage: "true"
     # Talos Linux control-plane node settings
