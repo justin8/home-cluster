@@ -1,7 +1,5 @@
 volumeSizeGi: 50
 cacheVolumeSizeGi: 50
-replicas: 0
-workersEnabled: false
 
 images:
   app:
