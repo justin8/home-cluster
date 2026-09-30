@@ -1,7 +1,12 @@
 volumeSizeGi: 50
+cacheVolumeSizeGi: 50
 
 images:
   app:
-    repository: jellyfin/jellyfin
+    repository: ghcr.io/justin8/jellyfin-rffmpeg
+    tag: "12.1"
+    pullPolicy: IfNotPresent
+  worker:
+    repository: ghcr.io/justin8/jellyfin-rffmpeg-worker
     tag: "12.1"
     pullPolicy: IfNotPresent

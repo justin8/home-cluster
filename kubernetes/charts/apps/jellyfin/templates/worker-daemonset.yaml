@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: jellyfin-rffmpeg-worker
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: jellyfin-rffmpeg-worker
+spec:
+  selector:
+    matchLabels:
+      app: jellyfin-rffmpeg-worker
+  template:
+    metadata:
+      labels:
+        app: jellyfin-rffmpeg-worker
+    spec:
+      securityContext:
+        fsGroup: {{ .Values.PGID }}
+        fsGroupChangePolicy: OnRootMismatch
+      containers:
+        - name: worker
+          image: "{{ .Values.images.worker.repository }}:{{ .Values.images.worker.tag }}"
+          imagePullPolicy: {{ .Values.images.worker.pullPolicy }}
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: {{ .Values.PUID }}
+            runAsGroup: {{ .Values.PGID }}
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          ports:
+            - name: ssh
+              containerPort: 2222
+              hostPort: 2222
+          resources:
+            requests:
+              gpu.intel.com/i915: "1"
+            limits:
+              gpu.intel.com/i915: "1"
+          volumeMounts:
+            - name: cache
+              mountPath: /cache
+            - name: media
+              mountPath: /mnt/pool/media
+            - name: ssh-key
+              mountPath: /etc/rffmpeg-worker/keys
+              readOnly: true
+      volumes:
+        - name: cache
+          persistentVolumeClaim:
+            claimName: jellyfin-cache
+        - name: media
+          nfs:
+            server: {{ .Values.network.storageServer }}
+            path: /mnt/pool/media
+        - name: ssh-key
+          secret:
+            secretName: jellyfin-rffmpeg-ssh
+            items:
+              - key: authorized_keys
+                path: authorized_keys

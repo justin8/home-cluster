@@ -15,6 +15,7 @@ spec:
       labels:
         app: jellyfin
     spec:
+      serviceAccountName: jellyfin
       securityContext:
         fsGroup: {{ .Values.PGID }}
         fsGroupChangePolicy: OnRootMismatch
@@ -90,9 +91,25 @@ spec:
               else
                 echo "$CONFIG_FILE already contains updated configuration, preserving existing configuration."
               fi
+        - name: init-rffmpeg
+          image: "{{ .Values.images.app.repository }}:{{ .Values.images.app.tag }}"
+          imagePullPolicy: {{ .Values.images.app.pullPolicy }}
+          securityContext:
+            runAsUser: {{ .Values.PUID }}
+            runAsGroup: {{ .Values.PGID }}
+          command:
+            - rffmpeg-init
           volumeMounts:
             - name: config
               mountPath: /config
+            - name: cache
+              mountPath: /cache
+            - name: rffmpeg-config
+              mountPath: /etc/rffmpeg/rffmpeg.yml
+              subPath: rffmpeg.yml
+            - name: ssh-key
+              mountPath: /etc/rffmpeg-ssh
+              readOnly: true
       containers:
         - name: jellyfin
           image: "{{ .Values.images.app.repository }}:{{ .Values.images.app.tag }}"
@@ -110,6 +127,10 @@ spec:
               value: /config
             - name: JELLYFIN_CACHE_DIR
               value: /cache
+            - name: TMPDIR
+              value: /cache/temp
+            - name: JELLYFIN_FFMPEG
+              value: /usr/local/bin/ffmpeg
           resources:
             requests:
               gpu.intel.com/i915: "1"
@@ -134,13 +155,31 @@ spec:
               mountPath: /cache
             - name: media
               mountPath: /mnt/pool/media
+            - name: rffmpeg-config
+              mountPath: /etc/rffmpeg/rffmpeg.yml
+              subPath: rffmpeg.yml
+            - name: shm
+              mountPath: /run/shm
       volumes:
         - name: config
           persistentVolumeClaim:
             claimName: jellyfin-config
         - name: cache
-          emptyDir: {}
+          persistentVolumeClaim:
+            claimName: jellyfin-cache
         - name: media
           nfs:
             server: {{ .Values.network.storageServer }}
             path: /mnt/pool/media
+        - name: rffmpeg-config
+          configMap:
+            name: jellyfin-rffmpeg-config
+        - name: ssh-key
+          secret:
+            secretName: jellyfin-rffmpeg-ssh
+            defaultMode: 0400
+        - name: shm
+          emptyDir:
+            medium: Memory
+            sizeLimit: 128Mi
+
