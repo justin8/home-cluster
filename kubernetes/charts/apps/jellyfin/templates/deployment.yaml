@@ -155,6 +155,32 @@ spec:
               subPath: rffmpeg.yml
             - name: shm
               mountPath: /run/shm
+        - name: rffmpeg-sync
+          image: "{{ .Values.images.app.repository }}:{{ .Values.images.app.tag }}"
+          imagePullPolicy: {{ .Values.images.app.pullPolicy }}
+          securityContext:
+            runAsUser: {{ .Values.PUID }}
+            runAsGroup: {{ .Values.PGID }}
+          command:
+            - rffmpeg-init
+            - --interval
+            - "60"
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: rffmpeg-config
+              mountPath: /etc/rffmpeg/rffmpeg.yml
+              subPath: rffmpeg.yml
+            - name: ssh-key
+              mountPath: /etc/rffmpeg-ssh
+              readOnly: true
       volumes:
         - name: config
           persistentVolumeClaim:
