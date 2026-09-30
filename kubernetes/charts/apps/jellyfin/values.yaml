@@ -13,7 +13,7 @@ images:
 
 theme:
   abyss:
-    enabled: true
+    enabled: false
     repo: "AumGupta/abyss-jellyfin"
     branch: "main"
     autoDefaults: true
