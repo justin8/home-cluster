@@ -4,7 +4,7 @@ metadata:
   name: jellyfin
   namespace: {{ .Release.Namespace }}
 spec:
-  replicas: {{ .Values.replicas | default 1 }}
+  replicas: {{ if hasKey .Values "replicas" }}{{ .Values.replicas }}{{ else }}1{{ end }}
   strategy:
     type: Recreate
   selector:
