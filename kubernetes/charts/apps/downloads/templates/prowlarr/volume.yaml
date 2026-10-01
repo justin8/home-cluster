@@ -1,1 +1,1 @@
-{{- include "common.longhornVolume" (dict "ctx" . "name" "prowlarr-config" "sizeGi" .Values.prowlarrVolumeSizeGi) -}}
+{{- include "common.longhornVolume" (dict "ctx" . "name" "prowlarr-config-v2" "sizeGi" .Values.prowlarrVolumeSizeGi "dataEngine" "v2") -}}

@@ -126,11 +126,11 @@ Migrate stateful applications one at a time. For each service:
 - [x] `esphome`
 - [ ] `sonarr`
 - [ ] `radarr`
-- [ ] `prowlarr`
+- [x] `prowlarr`
 - [ ] `sabnzbd`
 - [ ] `qbittorrent`
 - [ ] `seerr`
-- [ ] `shelfmark`
+- [x] `shelfmark`
 - [ ] `audiobookshelf`
 - [ ] `syncthing`
 - [ ] `kavita`

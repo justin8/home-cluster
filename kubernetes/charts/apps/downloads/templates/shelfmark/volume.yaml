@@ -1,1 +1,1 @@
-{{- include "common.longhornVolume" (dict "ctx" . "name" "shelfmark-config" "sizeGi" .Values.shelfmarkVolumeSizeGi) -}}
+{{- include "common.longhornVolume" (dict "ctx" . "name" "shelfmark-config-v2" "sizeGi" .Values.shelfmarkVolumeSizeGi "dataEngine" "v2") -}}

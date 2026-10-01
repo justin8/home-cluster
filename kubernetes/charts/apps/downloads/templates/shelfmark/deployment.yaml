@@ -40,7 +40,7 @@ spec:
       volumes:
         - name: config
           persistentVolumeClaim:
-            claimName: shelfmark-config
+            claimName: shelfmark-config-v2
         - name: books
           nfs:
             server: {{ .Values.network.storageServer }}
