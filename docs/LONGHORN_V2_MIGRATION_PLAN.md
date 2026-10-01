@@ -83,28 +83,18 @@ flowchart TD
 
 ### Phase 3: Transition Node 1 to Form 2-Node V2 Pool
 
-- [ ] Select `Node 1` (`talos-gcf-e16`, `192.168.5.11`) for conversion.
-- [ ] In Longhorn, enable **Eviction** on `Node 1`'s V1 disk (`/var/lib/longhorn`).
-- [ ] Wait for replica migration to complete. Confirm `Node 1` has **0 replicas** and all V1 volumes are `healthy` across `Node 2` (`192.168.5.12`) and `Node 3` (`192.168.5.13`).
-- [ ] Drain `Node 1` in Kubernetes:
-  ```bash
-  kubectl drain <node1-name> --ignore-daemonsets --delete-emptydir-data --force
-  ```
-- [ ] Clean up old etcd member and node resource per `docs/TALOS.md`:
-  ```bash
-  talosctl -n 192.168.5.12 etcd remove-member <node1-etcd-id>
-  kubectl delete node <node1-name>
-  ```
-- [ ] Update `talos/talconfig.yaml` to include `VolumeConfig` and `RawVolumeConfig` for `Node 1`.
-- [ ] Reset and reprovision `Node 1`:
-  ```bash
-  talosctl -n 192.168.5.11 reset --reboot --graceful=false --system-labels-to-wipe STATE --system-labels-to-wipe EPHEMERAL
-  ```
-- [ ] Apply updated Talos config to `Node 1` and verify it rejoins Kubernetes and etcd.
-- [ ] In Longhorn, register `/dev/disk/by-partlabel/r-longhorn-v2` as `diskType: block`.
-- [ ] **Milestone Check**:
-  - **V1 Pool**: Node 2 + Node 3 (2 nodes, 26 volumes healthy).
-  - **V2 Pool**: Node Temp + Node 1 (2 nodes, ready for 2-replica V2 workloads).
+- [x] Select `Node 1` (`talos-gcf-e16`, `192.168.5.11`) for conversion.
+- [x] In Longhorn, enable **Eviction** on `Node 1`'s V1 disk (`/var/lib/longhorn`).
+- [x] Wait for replica migration to complete. Confirm `Node 1` has **0 replicas** and all V1 volumes are `healthy` across `Node 2` (`192.168.5.12`) and `Node 3` (`192.168.5.13`).
+- [x] Drain `Node 1` in Kubernetes.
+- [x] Clean up old etcd member and node resource per `docs/TALOS.md`.
+- [x] Update `talos/talconfig.yaml` to include `VolumeConfig` and `RawVolumeConfig` for `Node 1`.
+- [x] Reset and reprovision `Node 1`.
+- [x] Apply updated Talos config to `Node 1` and verify it rejoins Kubernetes and etcd.
+- [x] In Longhorn, register `/dev/disk/by-partlabel/r-longhorn-v2` as `diskType: block`.
+- [x] **Milestone Check**:
+  - **V1 Pool**: Node 2 + Node 3 (2 nodes, 24 volumes healthy).
+  - **V2 Pool**: Node Temp + Node 1 (2 nodes, hosting 2-replica V2 workloads).
 
 ---
 
@@ -128,9 +118,9 @@ Migrate stateful applications one at a time. For each service:
 #### Service Migration Tracking:
 
 - [ ] `pocketid` (Auth service)
-- [ ] `mail-proxy`
+- [x] `mail-proxy`
 - [ ] `pihole`
-- [ ] `mqtt`
+- [x] `mqtt`
 - [ ] `zigbee2mqtt`
 - [ ] `home-assistant`
 - [ ] `esphome`
