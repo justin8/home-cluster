@@ -13,7 +13,6 @@ external-dns-pihole:
     - --annotation-filter=dns.internal/enabled=true
     - --ingress-class=pomerium
     - --pihole-server=http://pihole-web.dns.svc.cluster.local
-    - --pihole-api-version=6
 
 external-dns-cloudflare:
   txtOwnerId: external-dns-cloudflare
