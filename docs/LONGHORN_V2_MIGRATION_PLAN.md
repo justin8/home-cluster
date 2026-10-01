@@ -117,7 +117,7 @@ Migrate stateful applications one at a time. For each service:
 
 #### Service Migration Tracking:
 
-- [ ] `pocketid` (Auth service)
+- [x] `pocketid` (Auth service)
 - [x] `mail-proxy`
 - [x] `pihole`
 - [x] `mqtt`
