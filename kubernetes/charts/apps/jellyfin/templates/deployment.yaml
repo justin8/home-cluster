@@ -305,7 +305,7 @@ spec:
         {{- end }}
         - name: config
           persistentVolumeClaim:
-            claimName: jellyfin-config
+            claimName: jellyfin-config-v2
         - name: cache
           persistentVolumeClaim:
             claimName: jellyfin-cache
