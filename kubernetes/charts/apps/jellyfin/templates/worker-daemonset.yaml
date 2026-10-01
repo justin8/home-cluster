@@ -57,7 +57,7 @@ spec:
       volumes:
         - name: cache
           persistentVolumeClaim:
-            claimName: jellyfin-cache
+            claimName: jellyfin-cache-v2
         - name: media
           nfs:
             server: {{ .Values.network.storageServer }}
