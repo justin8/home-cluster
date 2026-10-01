@@ -41,4 +41,4 @@ spec:
       volumes:
         - name: config
           persistentVolumeClaim:
-            claimName: esphome-config
+            claimName: esphome-config-v2
