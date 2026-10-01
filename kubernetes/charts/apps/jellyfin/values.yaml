@@ -10,10 +10,3 @@ images:
     repository: ghcr.io/justin8/jellyfin-rffmpeg-worker
     tag: "12.1"
     pullPolicy: Always
-
-theme:
-  abyss:
-    enabled: false
-    repo: "AumGupta/abyss-jellyfin"
-    branch: "main"
-    autoDefaults: true

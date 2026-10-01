@@ -110,119 +110,6 @@ spec:
             - name: ssh-key
               mountPath: /etc/rffmpeg-ssh
               readOnly: true
-        {{- if and .Values.theme .Values.theme.abyss .Values.theme.abyss.enabled }}
-        - name: init-abyss-theme
-          image: "{{ .Values.images.app.repository }}:{{ .Values.images.app.tag }}"
-          imagePullPolicy: {{ .Values.images.app.pullPolicy }}
-          securityContext:
-            runAsUser: {{ .Values.PUID }}
-            runAsGroup: {{ .Values.PGID }}
-          env:
-            - name: ABYSS_REPO
-              value: {{ .Values.theme.abyss.repo | quote }}
-            - name: ABYSS_BRANCH
-              value: {{ .Values.theme.abyss.branch | quote }}
-            - name: AUTO_DEFAULTS
-              value: {{ .Values.theme.abyss.autoDefaults | default true | quote }}
-          command:
-            - /bin/sh
-            - -cu
-            - |
-              set -e
-              echo "Copying base web assets to volume..."
-              cp -R /usr/share/jellyfin/web/. /web-override/
-              python3 - << 'EOF'
-              import os, urllib.request
-
-              repo = os.environ.get("ABYSS_REPO", "AumGupta/abyss-jellyfin")
-              branch = os.environ.get("ABYSS_BRANCH", "main")
-              auto_defaults = os.environ.get("AUTO_DEFAULTS", "true").lower() == "true"
-              raw_base = f"https://raw.githubusercontent.com/{repo}/{branch}"
-              web_dir = "/web-override"
-              ui_dir = os.path.join(web_dir, "ui")
-              os.makedirs(ui_dir, exist_ok=True)
-
-              spotlight_files = [
-                  "scripts/spotlight/spotlight.html",
-                  "scripts/spotlight/spotlight.css",
-                  "scripts/spotlight/spotlight-loader.js",
-              ]
-
-              try:
-                  for rel_path in spotlight_files:
-                      fname = os.path.basename(rel_path)
-                      url = f"{raw_base}/{rel_path}"
-                      dest = os.path.join(ui_dir, fname)
-                      print(f"Downloading {url} to {dest}...")
-                      urllib.request.urlretrieve(url, dest)
-
-                  index_file = os.path.join(web_dir, "index.html")
-                  with open(index_file, "r", encoding="utf-8") as f:
-                      html = f.read()
-
-                  if auto_defaults:
-                      defaults_js = (
-                          "(function () {\n"
-                          "  try {\n"
-                          "    var originalGetItem = Storage.prototype.getItem;\n"
-                          "    var defaults = {\n"
-                          "      'enableBackdrops': 'true',\n"
-                          "      'appTheme': 'dark',\n"
-                          "      'homesection0': 'resume',\n"
-                          "      'homesection1': 'nextup',\n"
-                          "      'homesection2': 'smalllibrarytiles',\n"
-                          "      'homesection3': 'latestmedia'\n"
-                          "    };\n"
-                          "    Storage.prototype.getItem = function (key) {\n"
-                          "      var val = originalGetItem.apply(this, arguments);\n"
-                          "      if (val !== null && val !== undefined) return val;\n"
-                          "      if (this === window.localStorage && typeof key === 'string') {\n"
-                          "        for (var suffix in defaults) {\n"
-                          "          if (Object.prototype.hasOwnProperty.call(defaults, suffix)) {\n"
-                          "            if (key === suffix || key.endsWith('-' + suffix)) return defaults[suffix];\n"
-                          "          }\n"
-                          "        }\n"
-                          "      }\n"
-                          "      return val;\n"
-                          "    };\n"
-                          "  } catch (e) {\n"
-                          "    console.warn('[abyss-defaults] Failed to apply storage defaults:', e);\n"
-                          "  }\n"
-                          "})();\n"
-                      )
-                      defaults_path = os.path.join(ui_dir, "abyss-defaults.js")
-                      with open(defaults_path, "w", encoding="utf-8") as f:
-                          f.write(defaults_js)
-                      print("Wrote abyss-defaults.js")
-
-                      defaults_tag = '<script src="ui/abyss-defaults.js"></script>'
-                      if defaults_tag not in html:
-                          if "</head>" in html:
-                              html = html.replace("</head>", f"{defaults_tag}</head>")
-                              print("Injected abyss-defaults.js into <head>")
-                          elif "</body>" in html:
-                              html = html.replace("</body>", f"{defaults_tag}</body>")
-                              print("Injected abyss-defaults.js before </body>")
-
-                  loader_tag = '<script src="ui/spotlight-loader.js" data-abyss-spotlight></script>'
-                  if loader_tag not in html:
-                      if "</body>" in html:
-                          html = html.replace("</body>", f"{loader_tag}</body>")
-                          print("Successfully injected Spotlight loader into index.html")
-                      else:
-                          print("Warning: </body> not found in index.html")
-                  else:
-                      print("Spotlight loader already present in index.html")
-
-                  with open(index_file, "w", encoding="utf-8") as f:
-                      f.write(html)
-              except Exception as e:
-                  print(f"Warning: Failed to setup Abyss files: {e}")
-              EOF
-          volumeMounts:
-            - name: jellyfin-web
-              mountPath: /web-override
-        {{- end }}
       containers:
         - name: jellyfin
           image: "{{ .Values.images.app.repository }}:{{ .Values.images.app.tag }}"
@@ -257,10 +144,6 @@ spec:
             initialDelaySeconds: 15
             periodSeconds: 10
           volumeMounts:
-            {{- if and .Values.theme .Values.theme.abyss .Values.theme.abyss.enabled }}
-            - name: jellyfin-web
-              mountPath: /usr/share/jellyfin/web
-            {{- end }}
             - name: config
               mountPath: /config
             - name: cache
@@ -299,10 +182,6 @@ spec:
               mountPath: /etc/rffmpeg-ssh
               readOnly: true
       volumes:
-        {{- if and .Values.theme .Values.theme.abyss .Values.theme.abyss.enabled }}
-        - name: jellyfin-web
-          emptyDir: {}
-        {{- end }}
         - name: config
           persistentVolumeClaim:
             claimName: jellyfin-config
