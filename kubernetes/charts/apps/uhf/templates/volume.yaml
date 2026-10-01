@@ -1,1 +1,1 @@
-{{- include "common.longhornVolume" (dict "ctx" . "name" "uhf-data" "sizeGi" .Values.volumeSizeGi) -}}
+{{- include "common.longhornVolume" (dict "ctx" . "name" "uhf-data-v2" "sizeGi" .Values.volumeSizeGi "dataEngine" "v2") -}}
