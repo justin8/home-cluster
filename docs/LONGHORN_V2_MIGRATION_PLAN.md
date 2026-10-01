@@ -67,30 +67,17 @@ flowchart TD
 
 ### Phase 2: Join Temporary Node & Smoke Test V2 Engine
 
-- [ ] Prepare `Node Temp` machine configuration using Talos `VolumeConfig` + `RawVolumeConfig`:
-  ```yaml
-  apiVersion: v1alpha1
-  kind: VolumeConfig
-  name: EPHEMERAL
-  provisioning:
-    maxSize: 60GiB
-  ---
-  apiVersion: v1alpha1
-  kind: RawVolumeConfig
-  name: longhorn-v2
-  provisioning:
-    diskSelector:
-      match: disk.transport == "nvme" # Adjust selector to match Node Temp disk
-  ```
-- [ ] Join `Node Temp` to the cluster as a **Worker** node (leaving etcd at 3 members).
-- [ ] Verify partition `/dev/disk/by-partlabel/r-longhorn-v2` is present on `Node Temp`.
-- [ ] In the Longhorn UI (or via `kubectl`), edit `node.longhorn.io/node-temp`:
-  - Add disk `/dev/disk/by-partlabel/r-longhorn-v2` with `diskType: block`.
-- [ ] **Run Smoke Test**:
-  - Deploy a test PVC with `dataEngine: "v2"` and `numberOfReplicas: 1`.
-  - Spin up a test pod mounting the PVC and run an I/O test (`fio` or `dd`).
-  - Verify SPDK instance manager health, low CPU usage in interrupt mode, and successful detachment.
-  - Delete smoke test pod and PVC.
+- [x] Prepare `Node Temp` machine configuration using Talos `VolumeConfig` + `RawVolumeConfig` (60GiB EPHEMERAL, 202GiB raw partition).
+- [x] Join `Node Temp` (`talos-ob8-ctw`, `192.168.5.144`) to the cluster as a **Worker** node.
+- [x] Verify partition `/dev/disk/by-partlabel/r-longhorn-v2` (`/dev/vda7`) is present on `talos-ob8-ctw`.
+- [x] In Longhorn, configure `node.longhorn.io/talos-ob8-ctw`:
+  - Add disk `/dev/disk/by-partlabel/r-longhorn-v2` with `diskType: block` (`diskDriver: auto` -> `aio`).
+  - Remove default filesystem disk `/var/lib/longhorn`.
+- [x] **Run Smoke Test**:
+  - Deployed test Volume, PV, and PVC with `dataEngine: "v2"`, `numberOfReplicas: 1`.
+  - Spun up `smoke-test-v2-pod` on `talos-ob8-ctw`, wrote 50MB random data at 353.9 MB/s, and verified SHA256 checksum.
+  - Verified SPDK instance manager health and low CPU usage in interrupt mode (`~27m CPU`).
+  - Successfully detached and cleaned up smoke test resources.
 
 ---
 

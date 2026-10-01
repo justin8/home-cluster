@@ -31,10 +31,6 @@ patches:
       # across rolling upgrades, disaster recovery, and fresh node provisioning/resets.
       secure: false
   - |-
-    apiVersion: v1alpha1
-    kind: KubeProxyConfig
-    enabled: false
-  - |-
     machine:
       env:
         GRPC_GO_LOG_SEVERITY_LEVEL: error
@@ -74,12 +70,6 @@ patches:
       install:
         wipe: true
     cluster:
-      etcd:
-        advertisedSubnets:
-          - "192.168.5.0/24"
-        extraArgs:
-          heartbeat-interval: "300"
-          election-timeout: "1500"
       extraManifests:
         - https://raw.githubusercontent.com/alex1989hu/kubelet-serving-cert-approver/main/deploy/standalone-install.yaml
         - https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
@@ -90,6 +80,7 @@ nodes:
     ignoreHostname: true
     nodeLabels:
       node.kubernetes.io/exclude-from-external-load-balancers: "false"
+      node.longhorn.io/create-default-disk: "false"
     certSans:
       - 192.168.5.11
       - 192.168.5.12
@@ -143,3 +134,94 @@ nodes:
         dhcp: true
         vip:
           ip: 192.168.5.20
+    patches:
+      - |-
+        apiVersion: v1alpha1
+        kind: VolumeConfig
+        name: EPHEMERAL
+        provisioning:
+          maxSize: 60GiB
+      - |-
+        apiVersion: v1alpha1
+        kind: RawVolumeConfig
+        name: longhorn-v2
+        provisioning:
+          diskSelector:
+            match: disk.size > 100u * GB
+          minSize: 10GiB
+      - |-
+        apiVersion: v1alpha1
+        kind: KubeProxyConfig
+        enabled: false
+      - |-
+        cluster:
+          etcd:
+            advertisedSubnets:
+              - "192.168.5.0/24"
+            extraArgs:
+              heartbeat-interval: "300"
+              election-timeout: "1500"
+  - hostname: temp-worker
+    ipAddress: 192.168.5.144
+    controlPlane: false
+    ignoreHostname: true
+    nodeLabels:
+      node.longhorn.io/create-default-disk: "false"
+    machineSpec:
+      mode: metal
+      arch: amd64
+      useUKI: true
+      secureboot: false
+    schematic:
+      customization:
+        extraKernelArgs:
+          - net.ifnames=0
+        systemExtensions:
+          officialExtensions:
+            - siderolabs/intel-ucode
+            - siderolabs/i915
+            - siderolabs/iscsi-tools
+            - siderolabs/util-linux-tools
+            - siderolabs/tailscale
+    imageSchematic:
+      customization:
+        extraKernelArgs:
+          - net.ifnames=0
+        systemExtensions:
+          officialExtensions:
+            - siderolabs/intel-ucode
+            - siderolabs/i915
+            - siderolabs/iscsi-tools
+            - siderolabs/util-linux-tools
+            - siderolabs/tailscale
+    extensionServices:
+      - name: tailscale
+        environment:
+          - TS_AUTHKEY=${tailscale_auth_key}
+          - TS_AUTH_ONCE=true
+          - TS_EXTRA_ARGS=--accept-routes=false --advertise-tags=tag:core-network
+    installDiskSelector:
+      size: "> 10GB"
+    nameservers:
+      - 100.100.100.100
+      - 192.168.5.53
+      - 9.9.9.9
+      - 1.1.1.1
+    networkInterfaces:
+      - interface: eth0
+        dhcp: true
+    patches:
+      - |-
+        apiVersion: v1alpha1
+        kind: VolumeConfig
+        name: EPHEMERAL
+        provisioning:
+          maxSize: 60GiB
+      - |-
+        apiVersion: v1alpha1
+        kind: RawVolumeConfig
+        name: longhorn-v2
+        provisioning:
+          diskSelector:
+            match: disk.size > 100u * GB
+          minSize: 10GiB

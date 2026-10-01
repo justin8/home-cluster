@@ -1,6 +1,9 @@
 volumeSizeGi: 50
 cacheVolumeSizeGi: 50
 
+worker:
+  replicas: 3
+
 images:
   app:
     repository: ghcr.io/justin8/jellyfin-rffmpeg
