@@ -52,7 +52,7 @@ spec:
       volumes:
         - name: config
           persistentVolumeClaim:
-            claimName: plex-config-v2
+            claimName: plex-config-v3
         - name: media
           nfs:
             server: {{ .Values.network.storageServer }}

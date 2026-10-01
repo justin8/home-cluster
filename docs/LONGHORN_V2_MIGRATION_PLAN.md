@@ -134,7 +134,7 @@ Migrate stateful applications one at a time. For each service:
 - [x] `audiobookshelf`
 - [x] `syncthing`
 - [x] `kavita`
-- [ ] `plex`
+- [x] `plex`
 - [ ] `jellyfin`
 - [x] `immich-model-cache`
 - [x] `uhf`
