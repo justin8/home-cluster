@@ -122,7 +122,7 @@ Migrate stateful applications one at a time. For each service:
 - [x] `pihole`
 - [x] `mqtt`
 - [x] `zigbee2mqtt`
-- [ ] `home-assistant`
+- [x] `home-assistant`
 - [ ] `esphome`
 - [ ] `sonarr`
 - [ ] `radarr`
