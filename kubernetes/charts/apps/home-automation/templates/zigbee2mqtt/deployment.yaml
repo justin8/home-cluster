@@ -61,4 +61,4 @@ spec:
       volumes:
         - name: data
           persistentVolumeClaim:
-            claimName: zigbee2mqtt-data
+            claimName: zigbee2mqtt-data-v2

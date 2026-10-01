@@ -5,7 +5,6 @@
 {{- $backups := .backups | default "enabled" -}}
 {{- $shared := .shared | default false -}}
 {{- $dataEngine := .dataEngine | default "v1" -}}
-{{- $fromBackup := .fromBackup | default "" -}}
 {{- if lt $sizeGi 1 -}}
   {{- $sizeGi = 1 -}}
 {{- end -}}
@@ -21,9 +20,6 @@ metadata:
     {{- end }}
 spec:
   dataEngine: {{ $dataEngine }}
-  {{- if $fromBackup }}
-  fromBackup: {{ $fromBackup | quote }}
-  {{- end }}
   size: {{ mul $sizeGi 1024 | mul 1024 | mul 1024 | quote }}
   dataLocality: best-effort
   numberOfReplicas: 2

@@ -1,1 +1,1 @@
-{{- include "common.longhornVolume" (dict "ctx" . "name" "zigbee2mqtt-data" "sizeGi" .Values.zigbee2mqttVolumeSizeGi) -}}
+{{- include "common.longhornVolume" (dict "ctx" . "name" "zigbee2mqtt-data-v2" "sizeGi" .Values.zigbee2mqttVolumeSizeGi "dataEngine" "v2") -}}
