@@ -23,7 +23,6 @@ longhorn:
     nodeDrainPolicy: "block-if-contains-last-replica"
     replicaReplenishmentWaitInterval: "300"
     storageReservedPercentageForDefaultDisk: "10"
-    storageOverProvisioningPercentage: "200"
     kubernetesClusterAutoscalerEnabled: "false"
     nodeDownPodDeletionPolicy: delete-both-statefulset-and-deployment-pod
 
