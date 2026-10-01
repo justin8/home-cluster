@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cordon-sync
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: cordon-sync
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: cordon-sync
+  template:
+    metadata:
+      labels:
+        app: cordon-sync
+    spec:
+      serviceAccountName: cordon-sync
+      containers:
+        - name: cordon-sync
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - /bin/sh
+            - /scripts/sync.sh
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 50m
+              memory: 64Mi
+          volumeMounts:
+            - name: script
+              mountPath: /scripts
+      volumes:
+        - name: script
+          configMap:
+            name: cordon-sync-script
+            defaultMode: 0755

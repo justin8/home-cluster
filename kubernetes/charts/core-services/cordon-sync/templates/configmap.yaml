@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cordon-sync-script
+  namespace: {{ .Release.Namespace }}
+data:
+  sync.sh: |
+    #!/bin/sh
+    set -e
+    echo "[cordon-sync] Starting cordon-sync reconciler..."
+
+    sync_node() {
+      node="$1"
+      unsched="$2"
+      
+      if [ "$unsched" = "true" ]; then
+        echo "[cordon-sync] Node $node is cordoned. Ensuring label and taint..."
+        kubectl label node "$node" node.kubernetes.io/cordoned=true --overwrite >/dev/null 2>&1 || true
+        kubectl taint node "$node" node.custom/cordoned=true:NoExecute --overwrite >/dev/null 2>&1 || true
+      else
+        kubectl label node "$node" node.kubernetes.io/cordoned- >/dev/null 2>&1 || true
+        kubectl taint node "$node" node.custom/cordoned- >/dev/null 2>&1 || true
+      fi
+    }
+
+    # Initial scan of all nodes
+    kubectl get nodes -o jsonpath='{range .items[*]}{.metadata.name}{" "}{.spec.unschedulable}{"\n"}{end}' | while read -r name unsched; do
+      [ -z "$name" ] && continue
+      sync_node "$name" "$unsched"
+    done
+
+    # Real-time event watch loop
+    while true; do
+      echo "[cordon-sync] Watching node events..."
+      kubectl get nodes --watch --output-watch-events -o jsonpath='{.type}{" "}{.object.metadata.name}{" "}{.object.spec.unschedulable}{"\n"}' 2>/dev/null | while read -r event name unsched; do
+        [ -z "$name" ] && continue
+        sync_node "$name" "$unsched"
+      done
+      echo "[cordon-sync] Watch disconnected, restarting in 3s..."
+      sleep 3
+    done

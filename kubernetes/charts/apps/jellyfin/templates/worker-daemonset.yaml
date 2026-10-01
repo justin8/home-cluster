@@ -1,17 +1,11 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: DaemonSet
 metadata:
   name: jellyfin-rffmpeg-worker
   namespace: {{ .Release.Namespace }}
   labels:
     app: jellyfin-rffmpeg-worker
 spec:
-  replicas: {{ .Values.worker.replicas | default 3 }}
-  strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxSurge: 0
-      maxUnavailable: 1
   selector:
     matchLabels:
       app: jellyfin-rffmpeg-worker
@@ -21,16 +15,15 @@ spec:
         app: jellyfin-rffmpeg-worker
     spec:
       affinity:
-        podAntiAffinity:
+        nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
-            - labelSelector:
-                matchExpressions:
-                  - key: app
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: intel.feature.node.kubernetes.io/gpu
                     operator: In
-                    values: ["jellyfin-rffmpeg-worker"]
-              topologyKey: kubernetes.io/hostname
-      nodeSelector:
-        intel.feature.node.kubernetes.io/gpu: "true"
+                    values: ["true"]
+                  - key: node.kubernetes.io/cordoned
+                    operator: DoesNotExist
       securityContext:
         fsGroup: {{ .Values.PGID }}
         fsGroupChangePolicy: OnRootMismatch
