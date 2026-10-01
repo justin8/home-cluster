@@ -38,7 +38,7 @@ spec:
       volumes:
         - name: config
           persistentVolumeClaim:
-            claimName: sabnzbd-config
+            claimName: sabnzbd-config-v2
         - name: downloads
           nfs:
             server: {{ .Values.network.storageServer }}

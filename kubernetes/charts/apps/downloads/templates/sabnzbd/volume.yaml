@@ -1,1 +1,1 @@
-{{- include "common.longhornVolume" (dict "ctx" . "name" "sabnzbd-config" "sizeGi" .Values.sabnzbdVolumeSizeGi) -}}
+{{- include "common.longhornVolume" (dict "ctx" . "name" "sabnzbd-config-v2" "sizeGi" .Values.sabnzbdVolumeSizeGi "dataEngine" "v2") -}}

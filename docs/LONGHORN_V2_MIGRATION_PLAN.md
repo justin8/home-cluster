@@ -127,8 +127,8 @@ Migrate stateful applications one at a time. For each service:
 - [ ] `sonarr`
 - [ ] `radarr`
 - [x] `prowlarr`
-- [ ] `sabnzbd`
-- [ ] `qbittorrent`
+- [x] `sabnzbd`
+- [x] `qbittorrent`
 - [ ] `seerr`
 - [x] `shelfmark`
 - [ ] `audiobookshelf`

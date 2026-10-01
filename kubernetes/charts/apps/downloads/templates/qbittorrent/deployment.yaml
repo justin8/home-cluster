@@ -105,7 +105,7 @@ spec:
       volumes:
         - name: config
           persistentVolumeClaim:
-            claimName: qbittorrent-data
+            claimName: qbittorrent-data-v2
         - name: downloads
           nfs:
             server: {{ .Values.network.storageServer }}
