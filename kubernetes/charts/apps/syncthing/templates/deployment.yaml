@@ -62,7 +62,7 @@ spec:
       volumes:
         - name: config
           persistentVolumeClaim:
-            claimName: syncthing-config
+            claimName: syncthing-config-v2
         - name: data
           nfs:
             server: {{ .Values.network.storageServer }}

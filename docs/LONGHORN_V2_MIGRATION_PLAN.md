@@ -132,7 +132,7 @@ Migrate stateful applications one at a time. For each service:
 - [x] `seerr`
 - [x] `shelfmark`
 - [ ] `audiobookshelf`
-- [ ] `syncthing`
+- [x] `syncthing`
 - [ ] `kavita`
 - [ ] `plex`
 - [ ] `jellyfin`
