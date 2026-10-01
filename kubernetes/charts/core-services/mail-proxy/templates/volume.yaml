@@ -1,1 +1,1 @@
-{{- include "common.longhornVolume" (dict "ctx" . "name" "mail-proxy-spool" "sizeGi" .Values.spoolVolumeSizeGi "backups" "disabled") -}}
+{{- include "common.longhornVolume" (dict "ctx" . "name" "mail-proxy-spool-v2" "sizeGi" .Values.spoolVolumeSizeGi "backups" "disabled" "dataEngine" "v2") -}}
