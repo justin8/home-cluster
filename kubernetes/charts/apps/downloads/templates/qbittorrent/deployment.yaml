@@ -46,6 +46,13 @@ spec:
         - name: gluetun
           image: "{{ .Values.images.gluetun.repository }}:{{ .Values.images.gluetun.tag }}"
           imagePullPolicy: {{ .Values.images.gluetun.pullPolicy }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              while ip rule del table 51820 2>/dev/null; do :; done
+              while ip -6 rule del table 51820 2>/dev/null; do :; done
+              exec /gluetun-entrypoint
           securityContext:
             capabilities:
               add:
