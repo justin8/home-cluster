@@ -119,9 +119,9 @@ Migrate stateful applications one at a time. For each service:
 
 - [ ] `pocketid` (Auth service)
 - [x] `mail-proxy`
-- [ ] `pihole`
+- [x] `pihole`
 - [x] `mqtt`
-- [ ] `zigbee2mqtt`
+- [x] `zigbee2mqtt`
 - [ ] `home-assistant`
 - [ ] `esphome`
 - [ ] `sonarr`
