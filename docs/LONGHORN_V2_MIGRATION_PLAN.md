@@ -136,7 +136,7 @@ Migrate stateful applications one at a time. For each service:
 - [x] `kavita`
 - [ ] `plex`
 - [ ] `jellyfin`
-- [ ] `immich-model-cache`
+- [x] `immich-model-cache`
 - [x] `uhf`
 - [ ] Dynamic PVCs (CloudNativePG / Postgres databases)
 
