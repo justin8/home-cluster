@@ -1,1 +1,1 @@
-{{- include "common.longhornVolume" (dict "ctx" . "name" "sonarr-config" "sizeGi" .Values.sonarrVolumeSizeGi) -}}
+{{- include "common.longhornVolume" (dict "ctx" . "name" "sonarr-config-v2" "sizeGi" .Values.sonarrVolumeSizeGi "dataEngine" "v2") -}}

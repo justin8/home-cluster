@@ -1,1 +1,1 @@
-{{- include "common.longhornVolume" (dict "ctx" . "name" "seerr-config" "sizeGi" .Values.seerrVolumeSizeGi) -}}
+{{- include "common.longhornVolume" (dict "ctx" . "name" "seerr-config-v2" "sizeGi" .Values.seerrVolumeSizeGi "dataEngine" "v2") -}}

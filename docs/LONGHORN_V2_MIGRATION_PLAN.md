@@ -124,12 +124,12 @@ Migrate stateful applications one at a time. For each service:
 - [x] `zigbee2mqtt`
 - [x] `home-assistant`
 - [x] `esphome`
-- [ ] `sonarr`
-- [ ] `radarr`
+- [x] `sonarr`
+- [x] `radarr`
 - [x] `prowlarr`
 - [x] `sabnzbd`
 - [x] `qbittorrent`
-- [ ] `seerr`
+- [x] `seerr`
 - [x] `shelfmark`
 - [ ] `audiobookshelf`
 - [ ] `syncthing`

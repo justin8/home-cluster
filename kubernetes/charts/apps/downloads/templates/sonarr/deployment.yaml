@@ -38,7 +38,7 @@ spec:
       volumes:
         - name: config
           persistentVolumeClaim:
-            claimName: sonarr-config
+            claimName: sonarr-config-v2
         - name: media
           nfs:
             server: {{ .Values.network.storageServer }}
