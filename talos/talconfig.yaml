@@ -109,6 +109,7 @@ nodes:
       customization:
         extraKernelArgs:
           - net.ifnames=0
+          - talos.halt_if_installed=0
         systemExtensions:
           officialExtensions:
             - siderolabs/intel-ucode
@@ -187,6 +188,7 @@ nodes:
       customization:
         extraKernelArgs:
           - net.ifnames=0
+          - talos.halt_if_installed=0
         systemExtensions:
           officialExtensions:
             - siderolabs/intel-ucode
