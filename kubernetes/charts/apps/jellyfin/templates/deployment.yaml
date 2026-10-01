@@ -130,7 +130,7 @@ spec:
             - |
               set -e
               echo "Copying base web assets to volume..."
-              cp -R /usr/share/jellyfin/web/. /web-override/
+              cp -R /jellyfin/jellyfin-web/. /web-override/
               python3 - << 'EOF'
               import os, urllib.request
 
@@ -259,7 +259,7 @@ spec:
           volumeMounts:
             {{- if and .Values.theme .Values.theme.abyss .Values.theme.abyss.enabled }}
             - name: jellyfin-web
-              mountPath: /usr/share/jellyfin/web
+              mountPath: /jellyfin/jellyfin-web
             {{- end }}
             - name: config
               mountPath: /config
