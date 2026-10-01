@@ -133,7 +133,7 @@ Migrate stateful applications one at a time. For each service:
 - [x] `shelfmark`
 - [x] `audiobookshelf`
 - [x] `syncthing`
-- [ ] `kavita`
+- [x] `kavita`
 - [ ] `plex`
 - [ ] `jellyfin`
 - [ ] `immich-model-cache`
