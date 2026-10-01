@@ -1,4 +1,4 @@
 image:
-  repository: bitnami/kubectl
-  tag: "1.31.0"
+  repository: bitnamilegacy/kubectl
+  tag: "1.31.4"
   pullPolicy: IfNotPresent
