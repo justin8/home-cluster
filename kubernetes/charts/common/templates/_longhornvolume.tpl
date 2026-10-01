@@ -49,12 +49,6 @@ spec:
     volumeAttributes:
       share: "true"
     {{- end }}
-  {{- if $shared }}
-  mountOptions:
-    - soft
-    - timeo=30
-    - retrans=2
-  {{- end }}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
