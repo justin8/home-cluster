@@ -44,10 +44,10 @@ spec:
       volumes:
         - name: config
           persistentVolumeClaim:
-            claimName: audiobookshelf-config
+            claimName: audiobookshelf-config-v2
         - name: metadata
           persistentVolumeClaim:
-            claimName: audiobookshelf-metadata
+            claimName: audiobookshelf-metadata-v2
         - name: books
           nfs:
             server: {{ .Values.network.storageServer }}

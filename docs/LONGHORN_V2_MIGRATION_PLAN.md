@@ -131,7 +131,7 @@ Migrate stateful applications one at a time. For each service:
 - [x] `qbittorrent`
 - [x] `seerr`
 - [x] `shelfmark`
-- [ ] `audiobookshelf`
+- [x] `audiobookshelf`
 - [x] `syncthing`
 - [ ] `kavita`
 - [ ] `plex`
