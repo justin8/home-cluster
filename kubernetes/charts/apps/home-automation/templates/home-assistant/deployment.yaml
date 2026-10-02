@@ -17,6 +17,85 @@ spec:
     spec:
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
+      initContainers:
+        - name: init-database-config
+          image: "{{ .Values.images.homeAssistant.repository }}:{{ .Values.images.homeAssistant.tag }}"
+          imagePullPolicy: {{ .Values.images.homeAssistant.pullPolicy }}
+          env:
+            - name: DB_URL
+              valueFrom:
+                secretKeyRef:
+                  name: homeassistant-db-app
+                  key: fqdn-uri
+          command:
+            - python3
+            - -c
+            - |
+              import os
+
+              db_url = os.environ.get("DB_URL")
+              if not db_url:
+                  print("No DB_URL provided, skipping")
+                  exit(0)
+
+              secrets_path = "/config/secrets.yaml"
+              config_path = "/config/configuration.yaml"
+
+              # 1. Update or add recorder_db_url in secrets.yaml
+              secrets_content = ""
+              if os.path.exists(secrets_path):
+                  with open(secrets_path, "r") as f:
+                      secrets_content = f.read()
+
+              lines = secrets_content.splitlines()
+              found = False
+              new_lines = []
+              for line in lines:
+                  if line.startswith("recorder_db_url:"):
+                      new_lines.append(f'recorder_db_url: "{db_url}"')
+                      found = True
+                  else:
+                      new_lines.append(line)
+              if not found:
+                  new_lines.append(f'recorder_db_url: "{db_url}"')
+              secrets_content = "\n".join(new_lines) + "\n"
+
+              with open(secrets_path, "w") as f:
+                  f.write(secrets_content)
+              print("Updated secrets.yaml with recorder_db_url")
+
+              # 2. Ensure configuration.yaml uses !secret recorder_db_url
+              if os.path.exists(config_path):
+                  with open(config_path, "r") as f:
+                      config_content = f.read()
+
+                  if "db_url:" in config_content:
+                      lines = config_content.splitlines()
+                      new_lines = []
+                      for line in lines:
+                          if line.strip().startswith("db_url:"):
+                              indent = line[:line.find("db_url:")]
+                              new_lines.append(f"{indent}db_url: !secret recorder_db_url")
+                          else:
+                              new_lines.append(line)
+                      config_content = "\n".join(new_lines) + "\n"
+                  elif "recorder:" in config_content:
+                      lines = config_content.splitlines()
+                      new_lines = []
+                      for line in lines:
+                          new_lines.append(line)
+                          if line.strip() == "recorder:":
+                              new_lines.append("  db_url: !secret recorder_db_url")
+                      config_content = "\n".join(new_lines) + "\n"
+                  else:
+                      config_content = config_content.rstrip() + "\n\nrecorder:\n  db_url: !secret recorder_db_url\n"
+
+                  with open(config_path, "w") as f:
+                      f.write(config_content)
+                  print("Ensured configuration.yaml references !secret recorder_db_url")
+          volumeMounts:
+            - name: config
+              mountPath: /config
       containers:
         - name: home-assistant
           image: "{{ .Values.images.homeAssistant.repository }}:{{ .Values.images.homeAssistant.tag }}"
