@@ -1,3 +1,3 @@
 {{- include "common.longhornVolume" (dict "ctx" . "name" "jellyfin-config-v2" "sizeGi" .Values.volumeSizeGi "dataEngine" "v2") }}
 ---
-{{- include "common.longhornVolume" (dict "ctx" . "name" "jellyfin-cache-v2" "sizeGi" (.Values.cacheVolumeSizeGi | default 50) "shared" true "dataEngine" "v2" "replicas" 1) }}
+{{- include "common.longhornVolume" (dict "ctx" . "name" "jellyfin-cache-v2" "sizeGi" (.Values.cacheVolumeSizeGi | default 50) "shared" true "dataEngine" "v2") }}
