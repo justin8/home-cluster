@@ -6,7 +6,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
 spec:
   instances: 2
-  enablePDB: true
+  enablePDB: false
   probes:
     readiness:
       type: query
