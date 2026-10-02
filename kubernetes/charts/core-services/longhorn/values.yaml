@@ -50,7 +50,7 @@ longhorn:
 
   # All Longhorn components need tolerations to run on control-plane-only clusters
   longhornUI:
-    replicas: 1
+    replicas: 2
     tolerations: &controlPlaneTolerations
       - key: node-role.kubernetes.io/control-plane
         operator: Exists
