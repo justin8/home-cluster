@@ -1,5 +1,5 @@
 external-dns-pihole:
-  txtOwnerId: external-dns-pihole
+  txtOwnerId: external-dns-pihole-primary
   policy: sync
   registry: noop
   sources:
@@ -13,6 +13,22 @@ external-dns-pihole:
     - --annotation-filter=dns.internal/enabled=true
     - --ingress-class=pomerium
     - --pihole-server=http://pihole-web.dns.svc.cluster.local
+
+external-dns-pihole-secondary:
+  txtOwnerId: external-dns-pihole-secondary
+  policy: sync
+  registry: noop
+  sources:
+    - ingress
+    - service
+    - crd
+  provider:
+    name: pihole
+  extraArgs:
+    - --annotation-prefix=dns.internal/
+    - --annotation-filter=dns.internal/enabled=true
+    - --ingress-class=pomerium
+    - --pihole-server=http://pihole-secondary-web.dns.svc.cluster.local
 
 external-dns-cloudflare:
   txtOwnerId: external-dns-cloudflare

@@ -10,6 +10,10 @@ dependencies:
   - name: external-dns
     version: 1.23.0
     repository: https://kubernetes-sigs.github.io/external-dns/
+    alias: external-dns-pihole-secondary
+  - name: external-dns
+    version: 1.23.0
+    repository: https://kubernetes-sigs.github.io/external-dns/
     alias: external-dns-cloudflare
   - name: common
     version: 0.1.0

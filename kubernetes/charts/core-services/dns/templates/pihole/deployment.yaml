@@ -1,17 +1,19 @@
+{{- range $instance := list "primary" "secondary" }}
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: pihole
-  namespace: {{ .Release.Namespace }}
+  name: pihole-{{ $instance }}
+  namespace: {{ $.Release.Namespace }}
   labels:
     app: pihole
-    pihole/type: primary
+    pihole/type: {{ $instance }}
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: pihole
-      pihole/type: primary
+      pihole/type: {{ $instance }}
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -21,12 +23,21 @@ spec:
     metadata:
       labels:
         app: pihole
-        pihole/type: primary
+        pihole/type: {{ $instance }}
     spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: pihole
+                topologyKey: kubernetes.io/hostname
       containers:
         - name: pihole
-          image: "{{ .Values.images.pihole.repository }}:{{ .Values.images.pihole.tag }}"
-          imagePullPolicy: {{ .Values.images.pihole.pullPolicy }}
+          image: "{{ $.Values.images.pihole.repository }}:{{ $.Values.images.pihole.tag }}"
+          imagePullPolicy: {{ $.Values.images.pihole.pullPolicy }}
           ports:
             - name: dns-tcp
               containerPort: 53
@@ -49,3 +60,4 @@ spec:
               value: ""
             - name: FTL_CMD
               value: "no-daemon -- --interface=eth0"
+{{- end }}

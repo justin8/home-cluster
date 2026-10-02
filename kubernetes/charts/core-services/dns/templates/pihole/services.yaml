@@ -1,4 +1,4 @@
-# Internal web service for external-dns to reach pihole API
+# Internal web service for external-dns to reach primary pihole API and for Pomerium ingress
 apiVersion: v1
 kind: Service
 metadata:
@@ -15,7 +15,24 @@ spec:
       port: 80
       targetPort: 80
 ---
-# LoadBalancer service for DNS traffic
+# Internal web service for external-dns to reach secondary pihole API
+apiVersion: v1
+kind: Service
+metadata:
+  name: pihole-secondary-web
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: pihole
+spec:
+  selector:
+    app: pihole
+    pihole/type: secondary
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+---
+# LoadBalancer service for DNS traffic (shared across all pihole instances)
 apiVersion: v1
 kind: Service
 metadata:
@@ -30,7 +47,6 @@ spec:
   type: LoadBalancer
   selector:
     app: pihole
-    pihole/type: primary
   ports:
     - name: dns-udp
       port: 53
@@ -41,7 +57,7 @@ spec:
       targetPort: 53
       protocol: TCP
 ---
-# LoadBalancer service for DNS traffic (but on Tailscale)
+# LoadBalancer service for DNS traffic (but on Tailscale, shared across all pihole instances)
 apiVersion: v1
 kind: Service
 metadata:
@@ -56,7 +72,6 @@ spec:
   loadBalancerClass: tailscale
   selector:
     app: pihole
-    pihole/type: primary
   ports:
     - name: dns-udp
       port: 53
