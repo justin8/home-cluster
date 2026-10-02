@@ -10,7 +10,7 @@ shelfmarkVolumeSizeGi: 1
 images:
   decluttarr:
     repository: ghcr.io/manimatter/decluttarr
-    tag: v2.1.0
+    tag: v2.2.0
     pullPolicy: IfNotPresent
   shelfmark:
     repository: ghcr.io/calibrain/shelfmark
