@@ -17,7 +17,7 @@ images:
     pullPolicy: IfNotPresent
   zigbee2mqtt:
     repository: ghcr.io/koenkk/zigbee2mqtt
-    tag: 2.14.1
+    tag: 2.14.2
     pullPolicy: IfNotPresent
   esphome:
     repository: esphome/esphome
