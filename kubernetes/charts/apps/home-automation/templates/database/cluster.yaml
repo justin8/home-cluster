@@ -1,3 +1,4 @@
+{{- if .Values.databaseEnabled }}
 apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
@@ -31,3 +32,4 @@ spec:
   storage:
     size: {{ .Values.databaseVolumeSizeGi }}Gi
     storageClass: longhorn-v2
+{{- end }}

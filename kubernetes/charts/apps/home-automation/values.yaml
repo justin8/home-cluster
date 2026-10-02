@@ -1,4 +1,5 @@
 homeAssistantVolumeSizeGi: 5
+databaseEnabled: false
 databaseVolumeSizeGi: 10
 mqttVolumeSizeGi: 1
 zigbee2mqttVolumeSizeGi: 1
