@@ -2,6 +2,7 @@ longhorn:
   defaultSettings:
     defaultReplicaCount: "2"
     storageMinimalAvailablePercentage: "10"
+    storageOverProvisioningPercentage: "100"
     createDefaultDiskLabeledNodes: false
     defaultDataPath: /var/lib/longhorn
     defaultDataLocality: best-effort
