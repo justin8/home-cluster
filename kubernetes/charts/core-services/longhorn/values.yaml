@@ -16,6 +16,7 @@ longhorn:
     replicaDiskSoftAntiAffinity: "false" # REQUIRE different disks for replicas
     upgradeChecker: "false"
     autoSalvage: "true"
+    v1DataEngine: false
     v2DataEngine: true
     dataEngineInterruptModeEnabled: '{"v2":"true"}'
     # Talos Linux control-plane node settings

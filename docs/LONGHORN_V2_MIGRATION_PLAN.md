@@ -144,36 +144,36 @@ Migrate stateful applications one at a time. For each service:
 
 ### Phase 5: Reprovision Nodes 2 & 3 to V2
 
-- [ ] Once all services are running on V2, confirm the V1 pool on Nodes 2 & 3 has **0 volumes**.
-- [ ] **Reprovision Node 2** (`192.168.5.12`):
+- [x] Once all services are running on V2, confirm the V1 pool on Nodes 2 & 3 has **0 volumes**.
+- [x] **Reprovision Node 2** (`192.168.5.12`):
   - Drain node, remove etcd member, reset with partition wipe flags.
   - Apply Talos config with `VolumeConfig` + `RawVolumeConfig`.
   - Rejoin cluster, register `/dev/disk/by-partlabel/r-longhorn-v2` as `diskType: block`.
   - Confirm etcd quorum and node health.
-- [ ] **Reprovision Node 3** (`192.168.5.13`):
+- [x] **Reprovision Node 3** (`192.168.5.13`):
   - Drain node, remove etcd member, reset with partition wipe flags.
   - Apply Talos config with `VolumeConfig` + `RawVolumeConfig`.
   - Rejoin cluster, register `/dev/disk/by-partlabel/r-longhorn-v2` as `diskType: block`.
   - Confirm etcd quorum and node health.
-- [ ] Verify V2 pool now has 4 nodes (`Node Temp`, `Node 1`, `Node 2`, `Node 3`).
+- [x] Verify V2 pool now has 4 nodes (`Node Temp`, `Node 1`, `Node 2`, `Node 3`).
 
 ---
 
 ### Phase 6: Decommission Node Temp
 
-- [ ] In Longhorn, enable **Eviction** on `Node Temp`'s block disk.
-- [ ] Wait for Longhorn to rebalance all V2 replicas onto permanent Nodes 1, 2, and 3.
-- [ ] Drain and remove `Node Temp` from Kubernetes:
+- [x] In Longhorn, enable **Eviction** on `Node Temp`'s block disk.
+- [x] Wait for Longhorn to rebalance all V2 replicas onto permanent Nodes 1, 2, and 3.
+- [x] Drain and remove `Node Temp` from Kubernetes:
   ```bash
   kubectl drain node-temp --ignore-daemonsets --delete-emptydir-data --force
   kubectl delete node node-temp
   ```
-- [ ] Power down `Node Temp`.
-- [ ] Verify that all 26 V2 volumes are `healthy`, replicated across Nodes 1, 2, and 3.
-- [ ] Disable V1 data engine in Longhorn settings if no longer needed:
+- [x] Power down `Node Temp`.
+- [x] Verify that all 26 V2 volumes are `healthy`, replicated across Nodes 1, 2, and 3.
+- [x] Disable V1 data engine in Longhorn settings if no longer needed:
   ```yaml
   longhorn:
     defaultSettings:
       v1DataEngine: false
   ```
-- [ ] Migration complete!
+- [x] Migration complete!
