@@ -1,1 +1,1 @@
-{{- include "common.longhornVolume" (dict "ctx" . "name" "syncthing-config-v2" "sizeGi" .Values.volumeSizeGi "dataEngine" "v2") -}}
+{{- include "common.longhornVolume" (dict "ctx" . "name" "syncthing-config-v2" "sizeGi" .Values.volumeSizeGi) -}}

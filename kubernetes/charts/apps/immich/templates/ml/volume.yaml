@@ -1,1 +1,1 @@
-{{- include "common.longhornVolume" (dict "ctx" . "name" "immich-model-cache-v2" "sizeGi" .Values.mlVolumeSizeGi "dataEngine" "v2" "backups" "disabled") -}}
+{{- include "common.longhornVolume" (dict "ctx" . "name" "immich-model-cache-v2" "sizeGi" .Values.mlVolumeSizeGi "backups" "disabled") -}}

@@ -1,1 +1,1 @@
-{{- include "common.longhornVolume" (dict "ctx" . "name" "radarr-config-v2" "sizeGi" .Values.radarrVolumeSizeGi "dataEngine" "v2") -}}
+{{- include "common.longhornVolume" (dict "ctx" . "name" "radarr-config-v2" "sizeGi" .Values.radarrVolumeSizeGi) -}}

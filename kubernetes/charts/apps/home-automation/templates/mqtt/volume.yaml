@@ -1,1 +1,1 @@
-{{- include "common.longhornVolume" (dict "ctx" . "name" "mqtt-data-v2" "sizeGi" .Values.mqttVolumeSizeGi "dataEngine" "v2") -}}
+{{- include "common.longhornVolume" (dict "ctx" . "name" "mqtt-data-v2" "sizeGi" .Values.mqttVolumeSizeGi) -}}

@@ -4,7 +4,7 @@
 {{- $sizeGi := .sizeGi | default 1 | int -}}
 {{- $backups := .backups | default "enabled" -}}
 {{- $shared := .shared | default false -}}
-{{- $dataEngine := .dataEngine | default "v1" -}}
+{{- $dataEngine := .dataEngine | default "v2" -}}
 {{- $replicas := .replicas | default 2 | int -}}
 {{- if lt $sizeGi 1 -}}
   {{- $sizeGi = 1 -}}

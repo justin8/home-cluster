@@ -1,1 +1,1 @@
-{{- include "common.longhornVolume" (dict "ctx" . "name" "home-assistant-config-v2" "sizeGi" .Values.homeAssistantVolumeSizeGi "dataEngine" "v2") -}}
+{{- include "common.longhornVolume" (dict "ctx" . "name" "home-assistant-config-v2" "sizeGi" .Values.homeAssistantVolumeSizeGi) -}}
