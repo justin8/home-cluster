@@ -33,8 +33,6 @@ external-dns-cloudflare:
           name: cloudflare-api-token
           key: api-token
 
-piholeVolumeSizeGi: 1
-
 images:
   ddns:
     repository: favonia/cloudflare-ddns
