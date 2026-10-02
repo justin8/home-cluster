@@ -59,6 +59,19 @@ for IP in $NODE_IPS; do
     echo "Upgrading node $NODE_NAME ($IP) to $TARGET_VERSION (with 30m drain timeout for Longhorn)..."
     talhelper gencommand upgrade --node "$IP" --extra-flags "--preserve --drain-timeout 30m" | bash
 
+    echo "Waiting for node $NODE_NAME to report Ready in Kubernetes..."
+    kubectl wait --for=condition=Ready "node/$NODE_NAME" --timeout=600s
+
+    echo "Verifying Talos machine status on $NODE_NAME ($IP)..."
+    until [ "$(talosctl -n "$IP" get machinestatus -o jsonpath='{.spec.status.ready}' 2>/dev/null || echo false)" = "true" ]; do
+      echo "Waiting for Talos machine status READY: true on $IP..."
+      sleep 10
+    done
+    echo "Node $NODE_NAME ($IP) successfully upgraded and verified."
+
+    # Ensure Longhorn volumes settle before proceeding to the next node
+    wait_for_longhorn_health
+
     UPGRADED_ANY=true
   else
     echo "Node $NODE_NAME ($IP) is already running $TARGET_VERSION, skipping."
