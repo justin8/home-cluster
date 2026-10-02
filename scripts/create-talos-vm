@@ -6,7 +6,7 @@ VM_NAME="talos-vm"
 MAC_ADDR="52:54:00:12:34:56"
 RAM_MB=14336
 VCPUS=8
-DISK_SIZE_GB=100
+DISK_SIZE_GB=250
 BRIDGE_IF="br0"
 LIBVIRT_IMAGE_DIR="/var/lib/libvirt/images"
 
@@ -60,7 +60,7 @@ echo "Waiting for VM to acquire an IP (listening on $BRIDGE_IF for MAC $MAC_ADDR
 # ether src: Only packets coming FROM the VM
 # and not ip src 0.0.0.0: Ignore the initial DHCP discovery phase
 # grep -oP: Extract only the IP address part (stopping before the port)
-VM_IP=$(sudo tcpdump -i "$BRIDGE_IF" -n -c 1 "ether src $MAC_ADDR and ip and not ip src 0.0.0.0" 2>/dev/null | grep -oP '(?<=IP )\d+\.\d+\.\d+\.\d+' | head -n 1)
+VM_IP=$(sudo timeout 60s tcpdump -i "$BRIDGE_IF" -n -c 1 "ether src $MAC_ADDR and ip and not ip src 0.0.0.0" 2>/dev/null | grep -oP '(?<=IP )\d+\.\d+\.\d+\.\d+' | head -n 1 || true)
 
 if [[ -n "$VM_IP" ]]; then
   echo "--------------------------------------------------"
