@@ -27,6 +27,25 @@ spec:
               - op: add
                 path: /spec/externalTrafficPolicy
                 value: Local
+          - target:
+              kind: Deployment
+              name: pomerium
+            patch: |-
+              - op: replace
+                path: /spec/replicas
+                value: 2
+              - op: add
+                path: /spec/template/spec/affinity
+                value:
+                  podAntiAffinity:
+                    preferredDuringSchedulingIgnoredDuringExecution:
+                      - weight: 100
+                        podAffinityTerm:
+                          labelSelector:
+                            matchLabels:
+                              app.kubernetes.io/instance: pomerium
+                              app.kubernetes.io/name: pomerium
+                          topologyKey: kubernetes.io/hostname
     - repoURL: https://github.com/justin8/home-cluster.git
       targetRevision: main
       path: kubernetes/charts/core-services/pomerium
