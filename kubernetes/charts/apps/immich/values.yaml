@@ -1,5 +1,5 @@
 mlVolumeSizeGi: 10
-databaseEnabled: false
+databaseEnabled: true
 databaseVolumeSizeGi: 10
 
 images:
