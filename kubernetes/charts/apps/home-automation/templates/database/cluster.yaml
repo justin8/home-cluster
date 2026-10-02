@@ -30,4 +30,4 @@ spec:
 
   storage:
     size: {{ .Values.databaseVolumeSizeGi }}Gi
-    storageClass: longhorn
+    storageClass: longhorn-v2
