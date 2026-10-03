@@ -22,9 +22,22 @@ spec:
         fsGroup: {{ .Values.PGID }}
         fsGroupChangePolicy: OnRootMismatch
       initContainers:
-        - name: init-config
+        - name: init-web
           image: "{{ .Values.images.app.repository }}:{{ .Values.images.app.tag }}"
           imagePullPolicy: {{ .Values.images.app.pullPolicy }}
+          securityContext:
+            runAsUser: {{ .Values.PUID }}
+            runAsGroup: {{ .Values.PGID }}
+          command:
+            - sh
+            - -c
+            - cp -a /jellyfin/jellyfin-web/. /web-override/
+          volumeMounts:
+            - name: jellyfin-web
+              mountPath: /web-override
+        - name: init-config
+          image: "{{ .Values.images.init.repository }}:{{ .Values.images.init.tag }}"
+          imagePullPolicy: {{ .Values.images.init.pullPolicy }}
           securityContext:
             runAsUser: {{ .Values.PUID }}
             runAsGroup: {{ .Values.PGID }}
@@ -63,25 +76,6 @@ spec:
               mountPath: /scripts
             - name: jellyfin-web
               mountPath: /web-override
-        - name: init-rffmpeg
-          image: "{{ .Values.images.app.repository }}:{{ .Values.images.app.tag }}"
-          imagePullPolicy: {{ .Values.images.app.pullPolicy }}
-          securityContext:
-            runAsUser: {{ .Values.PUID }}
-            runAsGroup: {{ .Values.PGID }}
-          command:
-            - rffmpeg-init
-          volumeMounts:
-            - name: config
-              mountPath: /config
-            - name: cache
-              mountPath: /cache
-            - name: rffmpeg-config
-              mountPath: /etc/rffmpeg/rffmpeg.yml
-              subPath: rffmpeg.yml
-            - name: ssh-key
-              mountPath: /etc/rffmpeg-ssh
-              readOnly: true
 
       containers:
         - name: jellyfin
@@ -102,8 +96,6 @@ spec:
               value: /cache
             - name: TMPDIR
               value: /cache/temp
-            - name: JELLYFIN_FFMPEG
-              value: /usr/local/bin/ffmpeg
           livenessProbe:
             httpGet:
               port: 8096
@@ -125,37 +117,6 @@ spec:
               mountPath: /cache
             - name: media
               mountPath: /mnt/pool/media
-            - name: rffmpeg-config
-              mountPath: /etc/rffmpeg/rffmpeg.yml
-              subPath: rffmpeg.yml
-            - name: shm
-              mountPath: /run/shm
-        - name: rffmpeg-sync
-          image: "{{ .Values.images.app.repository }}:{{ .Values.images.app.tag }}"
-          imagePullPolicy: {{ .Values.images.app.pullPolicy }}
-          securityContext:
-            runAsUser: {{ .Values.PUID }}
-            runAsGroup: {{ .Values.PGID }}
-          command:
-            - rffmpeg-init
-            - --interval
-            - "60"
-          resources:
-            requests:
-              cpu: 10m
-              memory: 32Mi
-            limits:
-              cpu: 100m
-              memory: 64Mi
-          volumeMounts:
-            - name: config
-              mountPath: /config
-            - name: rffmpeg-config
-              mountPath: /etc/rffmpeg/rffmpeg.yml
-              subPath: rffmpeg.yml
-            - name: ssh-key
-              mountPath: /etc/rffmpeg-ssh
-              readOnly: true
       volumes:
         - name: init-script
           configMap:
@@ -173,15 +134,4 @@ spec:
           nfs:
             server: {{ .Values.network.storageServer }}
             path: /mnt/pool/media
-        - name: rffmpeg-config
-          configMap:
-            name: jellyfin-rffmpeg-config
-        - name: ssh-key
-          secret:
-            secretName: jellyfin-rffmpeg-ssh
-            defaultMode: 0400
-        - name: shm
-          emptyDir:
-            medium: Memory
-            sizeLimit: 128Mi
 

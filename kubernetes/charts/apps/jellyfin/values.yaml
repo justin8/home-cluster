@@ -3,13 +3,13 @@ cacheVolumeSizeGi: 50
 
 images:
   app:
-    repository: ghcr.io/justin8/jellyfin-rffmpeg
+    repository: jellyfin/jellyfin
     tag: "12.1"
-    pullPolicy: Always
-  worker:
-    repository: ghcr.io/justin8/jellyfin-rffmpeg-worker
-    tag: "12.1"
-    pullPolicy: Always
+    pullPolicy: IfNotPresent
+  init:
+    repository: python
+    tag: "3.12-alpine"
+    pullPolicy: IfNotPresent
 
 grpcWorker:
   enabled: true
