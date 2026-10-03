@@ -46,9 +46,49 @@ spec:
             - /bin/sh
             - -cu
             - |
-              CONFIG_DIR="/config/plugins/configurations"
-              CONFIG_FILE="$CONFIG_DIR/SSO-Auth.xml"
-              mkdir -p "$CONFIG_DIR"
+              # 1. Ensure Jellyfin SSO repository is in system.xml
+              CONFIG_DIR="/config/config"
+              SYSTEM_FILE="$CONFIG_DIR/system.xml"
+              if [ -f "$SYSTEM_FILE" ] && ! grep -q "k0lin/jellyfin-plugin-sso" "$SYSTEM_FILE"; then
+                if grep -q "</PluginRepositories>" "$SYSTEM_FILE"; then
+                  echo "Adding Jellyfin SSO repository to $SYSTEM_FILE..."
+                  sed -i 's|</PluginRepositories>|  <RepositoryInfo>\n      <Name>Jellyfin SSO</Name>\n      <Url>https://raw.githubusercontent.com/k0lin/jellyfin-plugin-sso/manifest-release/manifest.json</Url>\n      <Enabled>true</Enabled>\n    </RepositoryInfo>\n  </PluginRepositories>|' "$SYSTEM_FILE"
+                elif grep -q "<PluginRepositories />" "$SYSTEM_FILE"; then
+                  echo "Expanding self-closing PluginRepositories and adding Jellyfin SSO repository to $SYSTEM_FILE..."
+                  sed -i 's|<PluginRepositories />|<PluginRepositories>\n    <RepositoryInfo>\n      <Name>Jellyfin SSO</Name>\n      <Url>https://raw.githubusercontent.com/k0lin/jellyfin-plugin-sso/manifest-release/manifest.json</Url>\n      <Enabled>true</Enabled>\n    </RepositoryInfo>\n  </PluginRepositories>|' "$SYSTEM_FILE"
+                fi
+              fi
+
+              # 2. Install SSO Authentication plugin if missing (Option 2)
+              PLUGIN_DIR="/config/plugins"
+              mkdir -p "$PLUGIN_DIR"
+              if ! ls -d "$PLUGIN_DIR"/SSO* >/dev/null 2>&1; then
+                echo "SSO Authentication plugin missing from $PLUGIN_DIR. Installing v5.1.1..."
+                TMP_ZIP="/tmp/sso-plugin.zip"
+                TARGET_DIR="$PLUGIN_DIR/SSO Authentication_5.1.1"
+                mkdir -p "$TARGET_DIR"
+                if curl -fsSL "https://github.com/k0lin/jellyfin-plugin-sso/releases/download/v5.1.1/sso-authentication_5.1.1.zip" -o "$TMP_ZIP"; then
+                  if command -v python3 >/dev/null 2>&1; then
+                    python3 -c "import sys, zipfile; zipfile.ZipFile(sys.argv[1]).extractall(sys.argv[2])" "$TMP_ZIP" "$TARGET_DIR"
+                  elif command -v unzip >/dev/null 2>&1; then
+                    unzip -qo "$TMP_ZIP" -d "$TARGET_DIR"
+                  else
+                    echo "ERROR: Neither python3 nor unzip available to extract $TMP_ZIP"
+                  fi
+                  rm -f "$TMP_ZIP"
+                  echo "Installed SSO Authentication plugin to $TARGET_DIR"
+                else
+                  echo "WARNING: Failed to download SSO Authentication plugin"
+                  rm -rf "$TARGET_DIR"
+                fi
+              else
+                echo "SSO Authentication plugin already present in $PLUGIN_DIR"
+              fi
+
+              # 3. Provision SSO configuration if missing (Option 2)
+              PLUGIN_CONFIG_DIR="/config/plugins/configurations"
+              CONFIG_FILE="$PLUGIN_CONFIG_DIR/SSO-Auth.xml"
+              mkdir -p "$PLUGIN_CONFIG_DIR"
               if [ ! -f "$CONFIG_FILE" ]; then
                 echo "SSO configuration missing. Injecting Pocket ID configuration with AdminRoles, SchemeOverride, and DisablePushedAuthorization into $CONFIG_FILE..."
                 printf '%s\n' \
@@ -130,12 +170,46 @@ spec:
             - /bin/sh
             - -cu
             - |
-              SYSTEM_FILE="/config/config/system.xml"
+              # 1. Ensure gRPC-ffmpeg repository is in system.xml
+              CONFIG_DIR="/config/config"
+              SYSTEM_FILE="$CONFIG_DIR/system.xml"
               if [ -f "$SYSTEM_FILE" ] && ! grep -q "CrystalNET-org/Jellyfin.Plugin.GrpcFfmpeg" "$SYSTEM_FILE"; then
-                echo "Adding gRPC-ffmpeg repository to $SYSTEM_FILE..."
-                sed -i 's|</PluginRepositories>|  <RepositoryInfo>\n      <Name>gRPC-ffmpeg</Name>\n      <Url>https://raw.githubusercontent.com/CrystalNET-org/Jellyfin.Plugin.GrpcFfmpeg/main/manifest.json</Url>\n      <Enabled>true</Enabled>\n    </RepositoryInfo>\n  </PluginRepositories>|' "$SYSTEM_FILE"
+                if grep -q "</PluginRepositories>" "$SYSTEM_FILE"; then
+                  echo "Adding gRPC-ffmpeg repository to $SYSTEM_FILE..."
+                  sed -i 's|</PluginRepositories>|  <RepositoryInfo>\n      <Name>gRPC-ffmpeg</Name>\n      <Url>https://raw.githubusercontent.com/CrystalNET-org/Jellyfin.Plugin.GrpcFfmpeg/main/manifest.json</Url>\n      <Enabled>true</Enabled>\n    </RepositoryInfo>\n  </PluginRepositories>|' "$SYSTEM_FILE"
+                elif grep -q "<PluginRepositories />" "$SYSTEM_FILE"; then
+                  echo "Expanding self-closing PluginRepositories and adding gRPC-ffmpeg repository to $SYSTEM_FILE..."
+                  sed -i 's|<PluginRepositories />|<PluginRepositories>\n    <RepositoryInfo>\n      <Name>gRPC-ffmpeg</Name>\n      <Url>https://raw.githubusercontent.com/CrystalNET-org/Jellyfin.Plugin.GrpcFfmpeg/main/manifest.json</Url>\n      <Enabled>true</Enabled>\n    </RepositoryInfo>\n  </PluginRepositories>|' "$SYSTEM_FILE"
+                fi
               fi
 
+              # 2. Install gRPC-ffmpeg plugin if missing (Option 2)
+              PLUGIN_DIR="/config/plugins"
+              mkdir -p "$PLUGIN_DIR"
+              if ! ls -d "$PLUGIN_DIR"/gRPC-ffmpeg* >/dev/null 2>&1; then
+                echo "gRPC-ffmpeg plugin missing from $PLUGIN_DIR. Installing v0.3.2.0..."
+                TMP_ZIP="/tmp/grpc-plugin.zip"
+                TARGET_DIR="$PLUGIN_DIR/gRPC-ffmpeg_0.3.2.0"
+                mkdir -p "$TARGET_DIR"
+                if curl -fsSL "https://github.com/CrystalNET-org/Jellyfin.Plugin.GrpcFfmpeg/releases/download/0.3.2/gRPC-ffmpeg_0.3.2.0.zip" -o "$TMP_ZIP"; then
+                  if command -v python3 >/dev/null 2>&1; then
+                    python3 -c "import sys, zipfile; zipfile.ZipFile(sys.argv[1]).extractall(sys.argv[2])" "$TMP_ZIP" "$TARGET_DIR"
+                  elif command -v unzip >/dev/null 2>&1; then
+                    unzip -qo "$TMP_ZIP" -d "$TARGET_DIR"
+                  else
+                    echo "ERROR: Neither python3 nor unzip available to extract $TMP_ZIP"
+                  fi
+                  rm -f "$TMP_ZIP"
+                  echo "Installed gRPC-ffmpeg plugin to $TARGET_DIR"
+                else
+                  echo "WARNING: Failed to download gRPC-ffmpeg plugin"
+                  rm -rf "$TARGET_DIR"
+                fi
+              else
+                echo "gRPC-ffmpeg plugin already present in $PLUGIN_DIR"
+              fi
+
+              # 3. Provision gRPC-ffmpeg configuration if missing (Option 2)
               PLUGIN_CONFIG_DIR="/config/plugins/configurations"
               PLUGIN_CONFIG_FILE="$PLUGIN_CONFIG_DIR/Jellyfin.Plugin.GrpcFfmpeg.xml"
               mkdir -p "$PLUGIN_CONFIG_DIR"
