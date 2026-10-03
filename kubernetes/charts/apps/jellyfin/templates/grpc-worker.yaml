@@ -1,0 +1,112 @@
+{{- if and .Values.grpcWorker .Values.grpcWorker.enabled }}
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: jellyfin-ffmpeg-worker
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: jellyfin-ffmpeg-worker
+spec:
+  selector:
+    matchLabels:
+      app: jellyfin-ffmpeg-worker
+  template:
+    metadata:
+      labels:
+        app: jellyfin-ffmpeg-worker
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/metrics"
+        prometheus.io/port: "8080"
+    spec:
+      terminationGracePeriodSeconds: 15
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: intel.feature.node.kubernetes.io/gpu
+                    operator: In
+                    values: ["true"]
+                  - key: node.kubernetes.io/cordoned
+                    operator: DoesNotExist
+      securityContext:
+        fsGroup: {{ .Values.PGID }}
+        fsGroupChangePolicy: OnRootMismatch
+      containers:
+        - name: worker
+          image: "{{ .Values.grpcWorker.image.repository }}:{{ .Values.grpcWorker.image.tag }}"
+          imagePullPolicy: {{ .Values.grpcWorker.image.pullPolicy }}
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: {{ .Values.PUID }}
+            runAsGroup: {{ .Values.PGID }}
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          env:
+            - name: VALID_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: jellyfin-grpc-worker
+                  key: VALID_TOKEN
+            - name: MAX_FFMPEG_WORKERS
+              value: {{ .Values.grpcWorker.maxWorkers | default 3 | quote }}
+          ports:
+            - name: grpc
+              containerPort: 50051
+              protocol: TCP
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 500m
+              memory: 512Mi
+              gpu.intel.com/i915: "1"
+            limits:
+              cpu: "4"
+              memory: 4Gi
+              gpu.intel.com/i915: "1"
+          startupProbe:
+            tcpSocket:
+              port: grpc
+            periodSeconds: 5
+            failureThreshold: 20
+          livenessProbe:
+            tcpSocket:
+              port: grpc
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 3
+          volumeMounts:
+            - name: media
+              mountPath: /mnt/pool/media
+              readOnly: true
+            - name: cache
+              mountPath: /cache
+            - name: cache
+              mountPath: /tmp/jellyfin
+              subPath: temp
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: media
+          nfs:
+            server: {{ .Values.network.storageServer }}
+            path: /mnt/pool/media
+        - name: cache
+          persistentVolumeClaim:
+            claimName: jellyfin-cache-v2
+        - name: tmp
+          emptyDir:
+            medium: Memory
+            sizeLimit: 512Mi
+{{- end }}

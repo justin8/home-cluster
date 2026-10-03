@@ -1,0 +1,21 @@
+{{- if and .Values.grpcWorker .Values.grpcWorker.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: jellyfin-ffmpeg-worker
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: jellyfin-ffmpeg-worker
+spec:
+  selector:
+    app: jellyfin-ffmpeg-worker
+  ports:
+    - name: grpc
+      port: 50051
+      targetPort: grpc
+      protocol: TCP
+    - name: http
+      port: 8080
+      targetPort: http
+      protocol: TCP
+{{- end }}

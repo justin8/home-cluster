@@ -17,8 +17,9 @@ data:
       if [ "$unsched" = "true" ]; then
         echo "[cordon-sync] Node $node is cordoned. Ensuring label..."
         kubectl label node "$node" node.kubernetes.io/cordoned=true --overwrite >/dev/null 2>&1 || true
-        # Evict jellyfin-rffmpeg-worker if running on this node so no new transcodes are routed to it
+        # Evict jellyfin workers if running on this node so no new transcodes are routed to it
         kubectl delete pod -n jellyfin -l app=jellyfin-rffmpeg-worker --field-selector spec.nodeName="$node" --ignore-not-found >/dev/null 2>&1 || true
+        kubectl delete pod -n jellyfin -l app=jellyfin-ffmpeg-worker --field-selector spec.nodeName="$node" --ignore-not-found >/dev/null 2>&1 || true
       else
         kubectl label node "$node" node.kubernetes.io/cordoned- >/dev/null 2>&1 || true
       fi

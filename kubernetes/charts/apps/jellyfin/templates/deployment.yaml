@@ -49,8 +49,8 @@ spec:
               CONFIG_DIR="/config/plugins/configurations"
               CONFIG_FILE="$CONFIG_DIR/SSO-Auth.xml"
               mkdir -p "$CONFIG_DIR"
-              if [ ! -f "$CONFIG_FILE" ] || ! grep -q "DisablePushedAuthorization" "$CONFIG_FILE"; then
-                echo "Injecting Pocket ID configuration with AdminRoles, SchemeOverride, and DisablePushedAuthorization into $CONFIG_FILE..."
+              if [ ! -f "$CONFIG_FILE" ]; then
+                echo "SSO configuration missing. Injecting Pocket ID configuration with AdminRoles, SchemeOverride, and DisablePushedAuthorization into $CONFIG_FILE..."
                 printf '%s\n' \
                   '<?xml version="1.0" encoding="utf-8"?>' \
                   '<PluginConfiguration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">' \
@@ -89,8 +89,11 @@ spec:
                   '</PluginConfiguration>' > "$CONFIG_FILE"
                 echo "Successfully wrote $CONFIG_FILE"
               else
-                echo "$CONFIG_FILE already contains updated configuration, preserving existing configuration."
+                echo "$CONFIG_FILE already exists, preserving existing configuration."
               fi
+          volumeMounts:
+            - name: config
+              mountPath: /config
         - name: init-rffmpeg
           image: "{{ .Values.images.app.repository }}:{{ .Values.images.app.tag }}"
           imagePullPolicy: {{ .Values.images.app.pullPolicy }}
@@ -110,6 +113,54 @@ spec:
             - name: ssh-key
               mountPath: /etc/rffmpeg-ssh
               readOnly: true
+        {{- if and .Values.grpcWorker .Values.grpcWorker.enabled }}
+        - name: init-grpc-config
+          image: "{{ .Values.images.app.repository }}:{{ .Values.images.app.tag }}"
+          imagePullPolicy: {{ .Values.images.app.pullPolicy }}
+          securityContext:
+            runAsUser: {{ .Values.PUID }}
+            runAsGroup: {{ .Values.PGID }}
+          env:
+            - name: VALID_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: jellyfin-grpc-worker
+                  key: VALID_TOKEN
+          command:
+            - /bin/sh
+            - -cu
+            - |
+              SYSTEM_FILE="/config/config/system.xml"
+              if [ -f "$SYSTEM_FILE" ] && ! grep -q "CrystalNET-org/Jellyfin.Plugin.GrpcFfmpeg" "$SYSTEM_FILE"; then
+                echo "Adding gRPC-ffmpeg repository to $SYSTEM_FILE..."
+                sed -i 's|</PluginRepositories>|  <RepositoryInfo>\n      <Name>gRPC-ffmpeg</Name>\n      <Url>https://raw.githubusercontent.com/CrystalNET-org/Jellyfin.Plugin.GrpcFfmpeg/main/manifest.json</Url>\n      <Enabled>true</Enabled>\n    </RepositoryInfo>\n  </PluginRepositories>|' "$SYSTEM_FILE"
+              fi
+
+              PLUGIN_CONFIG_DIR="/config/plugins/configurations"
+              PLUGIN_CONFIG_FILE="$PLUGIN_CONFIG_DIR/Jellyfin.Plugin.GrpcFfmpeg.xml"
+              mkdir -p "$PLUGIN_CONFIG_DIR"
+              if [ ! -f "$PLUGIN_CONFIG_FILE" ]; then
+                echo "Pre-seeding gRPC-ffmpeg plugin configuration in $PLUGIN_CONFIG_FILE..."
+                printf '%s\n' \
+                  '<?xml version="1.0" encoding="utf-8"?>' \
+                  '<PluginConfiguration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">' \
+                  '  <Enabled>false</Enabled>' \
+                  '  <GrpcHost>jellyfin-ffmpeg-worker</GrpcHost>' \
+                  '  <GrpcPort>50051</GrpcPort>' \
+                  '  <UseSsl>false</UseSsl>' \
+                  "  <AuthToken>${VALID_TOKEN}</AuthToken>" \
+                  '  <RunCommandsLocally>true</RunCommandsLocally>' \
+                  '  <Retries>2</Retries>' \
+                  '  <ConnectTimeout>5</ConnectTimeout>' \
+                  '</PluginConfiguration>' > "$PLUGIN_CONFIG_FILE"
+                echo "Successfully wrote $PLUGIN_CONFIG_FILE"
+              else
+                echo "$PLUGIN_CONFIG_FILE already exists, preserving existing configuration."
+              fi
+          volumeMounts:
+            - name: config
+              mountPath: /config
+        {{- end }}
         {{- if and .Values.theme .Values.theme.abyss .Values.theme.abyss.enabled }}
         - name: init-abyss-theme
           image: "{{ .Values.images.app.repository }}:{{ .Values.images.app.tag }}"
@@ -131,98 +182,131 @@ spec:
               set -e
               echo "Copying base web assets to volume..."
               cp -R /jellyfin/jellyfin-web/. /web-override/
-              python3 - << 'EOF'
-              import os, urllib.request
 
-              repo = os.environ.get("ABYSS_REPO", "AumGupta/abyss-jellyfin")
-              branch = os.environ.get("ABYSS_BRANCH", "main")
-              auto_defaults = os.environ.get("AUTO_DEFAULTS", "true").lower() == "true"
-              raw_base = f"https://raw.githubusercontent.com/{repo}/{branch}"
-              web_dir = "/web-override"
-              ui_dir = os.path.join(web_dir, "ui")
-              os.makedirs(ui_dir, exist_ok=True)
+              WEB_DIR="/web-override"
+              UI_DIR="${WEB_DIR}/ui"
+              INDEX_FILE="${WEB_DIR}/index.html"
+              mkdir -p "$UI_DIR"
 
-              spotlight_files = [
-                  "scripts/spotlight/spotlight.html",
-                  "scripts/spotlight/spotlight.css",
-                  "scripts/spotlight/spotlight-loader.js",
-              ]
+              RAW_BASE="https://raw.githubusercontent.com/${ABYSS_REPO:-AumGupta/abyss-jellyfin}/${ABYSS_BRANCH:-main}"
 
-              try:
-                  for rel_path in spotlight_files:
-                      fname = os.path.basename(rel_path)
-                      url = f"{raw_base}/{rel_path}"
-                      dest = os.path.join(ui_dir, fname)
-                      print(f"Downloading {url} to {dest}...")
-                      urllib.request.urlretrieve(url, dest)
+              # 1. Download Spotlight files if missing
+              for file in spotlight.html spotlight.css spotlight-loader.js; do
+                dest="${UI_DIR}/${file}"
+                if [ ! -f "$dest" ]; then
+                  echo "Downloading $file to $dest..."
+                  curl -fsSL "${RAW_BASE}/scripts/spotlight/${file}" -o "$dest" || echo "Warning: Failed to download $file"
+                fi
+              done
 
-                  index_file = os.path.join(web_dir, "index.html")
-                  with open(index_file, "r", encoding="utf-8") as f:
-                      html = f.read()
+              # 2. Configure defaults if enabled
+              if [ "${AUTO_DEFAULTS:-true}" = "true" ]; then
+                DEFAULTS_FILE="${UI_DIR}/abyss-defaults.js"
+                if [ ! -f "$DEFAULTS_FILE" ]; then
+                  printf '%s\n' \
+                    '(function () {' \
+                    '  try {' \
+                    '    var originalGetItem = Storage.prototype.getItem;' \
+                    '    var defaults = {' \
+                    "      'enableBackdrops': 'true'," \
+                    "      'appTheme': 'dark'," \
+                    "      'homesection0': 'resume'," \
+                    "      'homesection1': 'nextup'," \
+                    "      'homesection2': 'smalllibrarytiles'," \
+                    "      'homesection3': 'latestmedia'" \
+                    '    };' \
+                    '    Storage.prototype.getItem = function (key) {' \
+                    '      var val = originalGetItem.apply(this, arguments);' \
+                    '      if (val !== null && val !== undefined) return val;' \
+                    "      if (this === window.localStorage && typeof key === 'string') {" \
+                    '        for (var suffix in defaults) {' \
+                    '          if (Object.prototype.hasOwnProperty.call(defaults, suffix)) {' \
+                    "            if (key === suffix || key.endsWith('-' + suffix)) return defaults[suffix];" \
+                    '          }' \
+                    '        }' \
+                    '      }' \
+                    '      return val;' \
+                    '    };' \
+                    '  } catch (e) {' \
+                    "    console.warn('[abyss-defaults] Failed to apply storage defaults:', e);" \
+                    '  }' \
+                    '})();' > "$DEFAULTS_FILE"
+                  echo "Wrote abyss-defaults.js"
+                fi
 
-                  if auto_defaults:
-                      defaults_js = (
-                          "(function () {\n"
-                          "  try {\n"
-                          "    var originalGetItem = Storage.prototype.getItem;\n"
-                          "    var defaults = {\n"
-                          "      'enableBackdrops': 'true',\n"
-                          "      'appTheme': 'dark',\n"
-                          "      'homesection0': 'resume',\n"
-                          "      'homesection1': 'nextup',\n"
-                          "      'homesection2': 'smalllibrarytiles',\n"
-                          "      'homesection3': 'latestmedia'\n"
-                          "    };\n"
-                          "    Storage.prototype.getItem = function (key) {\n"
-                          "      var val = originalGetItem.apply(this, arguments);\n"
-                          "      if (val !== null && val !== undefined) return val;\n"
-                          "      if (this === window.localStorage && typeof key === 'string') {\n"
-                          "        for (var suffix in defaults) {\n"
-                          "          if (Object.prototype.hasOwnProperty.call(defaults, suffix)) {\n"
-                          "            if (key === suffix || key.endsWith('-' + suffix)) return defaults[suffix];\n"
-                          "          }\n"
-                          "        }\n"
-                          "      }\n"
-                          "      return val;\n"
-                          "    };\n"
-                          "  } catch (e) {\n"
-                          "    console.warn('[abyss-defaults] Failed to apply storage defaults:', e);\n"
-                          "  }\n"
-                          "})();\n"
-                      )
-                      defaults_path = os.path.join(ui_dir, "abyss-defaults.js")
-                      with open(defaults_path, "w", encoding="utf-8") as f:
-                          f.write(defaults_js)
-                      print("Wrote abyss-defaults.js")
+                if ! grep -q 'ui/abyss-defaults.js' "$INDEX_FILE"; then
+                  if grep -q "</head>" "$INDEX_FILE"; then
+                    sed -i 's|</head>|<script src="ui/abyss-defaults.js"></script></head>|' "$INDEX_FILE"
+                    echo "Injected abyss-defaults.js into <head>"
+                  elif grep -q "</body>" "$INDEX_FILE"; then
+                    sed -i 's|</body>|<script src="ui/abyss-defaults.js"></script></body>|' "$INDEX_FILE"
+                    echo "Injected abyss-defaults.js before </body>"
+                  fi
+                fi
+              fi
 
-                      defaults_tag = '<script src="ui/abyss-defaults.js"></script>'
-                      if defaults_tag not in html:
-                          if "</head>" in html:
-                              html = html.replace("</head>", f"{defaults_tag}</head>")
-                              print("Injected abyss-defaults.js into <head>")
-                          elif "</body>" in html:
-                              html = html.replace("</body>", f"{defaults_tag}</body>")
-                              print("Injected abyss-defaults.js before </body>")
+              # 3. Inject spotlight loader into index.html
+              if ! grep -q 'data-abyss-spotlight' "$INDEX_FILE"; then
+                if grep -q "</body>" "$INDEX_FILE"; then
+                  sed -i 's|</body>|<script src="ui/spotlight-loader.js" data-abyss-spotlight></script></body>|' "$INDEX_FILE"
+                  echo "Injected Spotlight loader into index.html"
+                fi
+              fi
 
-                  loader_tag = '<script src="ui/spotlight-loader.js" data-abyss-spotlight></script>'
-                  if loader_tag not in html:
-                      if "</body>" in html:
-                          html = html.replace("</body>", f"{loader_tag}</body>")
-                          print("Successfully injected Spotlight loader into index.html")
-                      else:
-                          print("Warning: </body> not found in index.html")
-                  else:
-                      print("Spotlight loader already present in index.html")
+              # 4. Automatic branding.xml management (Option 2: install only if missing)
+              BRANDING_DIR="/config/config"
+              BRANDING_FILE="${BRANDING_DIR}/branding.xml"
+              mkdir -p "$BRANDING_DIR"
 
-                  with open(index_file, "w", encoding="utf-8") as f:
-                      f.write(html)
-              except Exception as e:
-                  print(f"Warning: Failed to setup Abyss files: {e}")
-              EOF
+              if [ ! -f "$BRANDING_FILE" ]; then
+                echo "branding.xml missing. Creating $BRANDING_FILE with Abyss theme..."
+                printf '%s\n' \
+                  '<?xml version="1.0" encoding="utf-8"?>' \
+                  '<BrandingOptions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">' \
+                  '  <LoginDisclaimer>&lt;form action="/sso/OID/start/pocketid" method="get" style="display: block; width: 100%; margin: 0; padding: 0;"&gt;' \
+                  '  &lt;button type="submit" ' \
+                  '          style="display: block; width: 100%; box-sizing: border-box; background-color: #00a4dc; color: #000000; font-family: inherit; font-size: inherit; font-weight: 600; line-height: 1.35; border: 0; border-radius: 0.2em; padding: 0.9em 1em; margin: 0.25em 0; text-align: center; cursor: pointer;"&gt;' \
+                  '    &lt;span style="color: #000000; font-weight: 600;"&gt;Sign in with Pocket ID&lt;/span&gt;' \
+                  '  &lt;/button&gt;' \
+                  '&lt;/form&gt;</LoginDisclaimer>' \
+                  "  <CustomCss>@import url('https://cdn.jsdelivr.net/gh/AumGupta/abyss-jellyfin@main/abyss.css');" \
+                  '' \
+                  '.loginDisclaimerContainer {' \
+                  '  display: block !important;' \
+                  '  width: 100% !important;' \
+                  '  margin-top: 1.5em !important;' \
+                  '}' \
+                  '' \
+                  '.loginDisclaimer {' \
+                  '  display: block !important;' \
+                  '  width: 100% !important;' \
+                  '  max-width: 100% !important;' \
+                  '  margin: 0 !important;' \
+                  '}' \
+                  '' \
+                  '.loginDisclaimer button:hover {' \
+                  '  background-color: #00729a !important;' \
+                  '}</CustomCss>' \
+                  '  <SplashscreenEnabled>true</SplashscreenEnabled>' \
+                  '  <SplashscreenLocation>/config/data/splashscreen-upload.jpg</SplashscreenLocation>' \
+                  '</BrandingOptions>' > "$BRANDING_FILE"
+                echo "Successfully wrote $BRANDING_FILE"
+              elif ! grep -q "abyss-jellyfin" "$BRANDING_FILE"; then
+                echo "Abyss theme @import missing from $BRANDING_FILE. Adding to CustomCss..."
+                if grep -q "<CustomCss>" "$BRANDING_FILE"; then
+                  sed -i "s|<CustomCss>|<CustomCss>@import url('https://cdn.jsdelivr.net/gh/AumGupta/abyss-jellyfin@main/abyss.css');\n\n|" "$BRANDING_FILE"
+                fi
+                echo "Updated $BRANDING_FILE with Abyss theme import"
+              else
+                echo "$BRANDING_FILE already configured with Abyss theme, preserving existing configuration."
+              fi
           volumeMounts:
             - name: jellyfin-web
               mountPath: /web-override
+            - name: config
+              mountPath: /config
         {{- end }}
+
       containers:
         - name: jellyfin
           image: "{{ .Values.images.app.repository }}:{{ .Values.images.app.tag }}"
