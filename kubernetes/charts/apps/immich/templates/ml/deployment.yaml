@@ -33,11 +33,19 @@ spec:
             capabilities:
               drop: ["ALL"]
           livenessProbe:
-            exec:
-              command: ["python", "healthcheck.py"]
+            httpGet:
+              path: /ping
+              port: 2283
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
           readinessProbe:
-            exec:
-              command: ["python", "healthcheck.py"]
+            httpGet:
+              path: /ping
+              port: 2283
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 5
           volumeMounts:
             - name: model-cache
               mountPath: /cache
