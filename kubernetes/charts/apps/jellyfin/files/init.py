@@ -6,12 +6,13 @@ Handles:
   2. Plugin downloads & extraction (Option 2: install only if missing)
   3. Plugin configurations (SSO-Auth.xml, Jellyfin.Plugin.GrpcFfmpeg.xml)
   4. Branding configuration (branding.xml)
-  5. Web overrides & Spotlight injection (abyss theme)
+  5. Web overrides & Spotlight injection (Abyss theme)
 """
 
 import os
 import shutil
 import sys
+import traceback
 import urllib.error
 import urllib.request
 import xml.etree.ElementTree as ET
@@ -23,12 +24,28 @@ def log(msg: str) -> None:
     print(f"[init] {msg}", flush=True)
 
 
-def ensure_plugin_repositories(config_dir: Path, repositories: list[tuple[str, str]]) -> bool:
+def download_file(url: str, dest: Path, timeout: int = 20) -> bool:
+    """Downloads a URL to a local path with User-Agent and timeout."""
+    try:
+        req = urllib.request.Request(
+            url,
+            headers={"User-Agent": "Jellyfin-Init/1.0"},
+        )
+        with urllib.request.urlopen(req, timeout=timeout) as resp, open(dest, "wb") as out_file:
+            shutil.copyfileobj(resp, out_file)
+        return True
+    except Exception as e:
+        log(f"Warning: Failed to download {url}: {e}")
+        if dest.exists():
+            dest.unlink(missing_ok=True)
+        return False
+
+
+def ensure_plugin_repositories(system_file: Path, repositories: list[tuple[str, str]]) -> bool:
     """
-    Ensures that each (name, url) repository is present in config/system.xml.
+    Ensures that each (name, url) repository is present in system.xml.
     Returns True if system.xml was modified.
     """
-    system_file = config_dir / "config" / "system.xml"
     if not system_file.is_file():
         log(f"{system_file} not found; skipping repository registration.")
         return False
@@ -92,12 +109,9 @@ def install_plugin_if_missing(
     temp_zip = plugins_dir / f".tmp_{target_dir_name}.zip"
 
     try:
-        req = urllib.request.Request(
-            download_url,
-            headers={"User-Agent": "Jellyfin-Init/1.0"},
-        )
-        with urllib.request.urlopen(req) as resp, open(temp_zip, "wb") as out_file:
-            shutil.copyfileobj(resp, out_file)
+        if not download_file(download_url, temp_zip, timeout=30):
+            log(f"ERROR: Could not download '{plugin_name}'")
+            return False
 
         target_dir.mkdir(parents=True, exist_ok=True)
         with zipfile.ZipFile(temp_zip, "r") as zf:
@@ -106,7 +120,7 @@ def install_plugin_if_missing(
         log(f"Successfully installed '{plugin_name}' into {target_dir}")
         return True
     except Exception as e:
-        log(f"ERROR: Failed to download or extract plugin '{plugin_name}': {e}")
+        log(f"ERROR: Failed to extract plugin '{plugin_name}': {e}")
         if target_dir.exists():
             shutil.rmtree(target_dir, ignore_errors=True)
         return False
@@ -115,11 +129,10 @@ def install_plugin_if_missing(
             temp_zip.unlink(missing_ok=True)
 
 
-def provision_sso_config(config_dir: Path, issuer: str, client_id: str, client_secret: str) -> bool:
+def provision_sso_config(config_file: Path, issuer: str, client_id: str, client_secret: str) -> bool:
     """
     Creates SSO-Auth.xml if missing (Option 2: install only if missing).
     """
-    config_file = config_dir / "plugins" / "configurations" / "SSO-Auth.xml"
     if config_file.is_file():
         log(f"{config_file} already exists, preserving existing configuration.")
         return False
@@ -168,11 +181,10 @@ def provision_sso_config(config_dir: Path, issuer: str, client_id: str, client_s
     return True
 
 
-def provision_grpc_config(config_dir: Path, token: str, host: str = "jellyfin-ffmpeg-worker", port: int = 50051) -> bool:
+def provision_grpc_config(config_file: Path, token: str, host: str = "jellyfin-ffmpeg-worker", port: int = 50051) -> bool:
     """
     Creates Jellyfin.Plugin.GrpcFfmpeg.xml if missing (Option 2).
     """
-    config_file = config_dir / "plugins" / "configurations" / "Jellyfin.Plugin.GrpcFfmpeg.xml"
     if config_file.is_file():
         log(f"{config_file} already exists, preserving existing configuration.")
         return False
@@ -197,12 +209,11 @@ def provision_grpc_config(config_dir: Path, token: str, host: str = "jellyfin-ff
     return True
 
 
-def configure_branding(config_dir: Path, css_import_url: str) -> bool:
+def configure_branding(branding_file: Path, css_import_url: str) -> bool:
     """
     Ensures branding.xml exists with Pocket ID login disclaimer and Abyss theme @import.
     If branding.xml already exists, ensures the @import is present in CustomCss.
     """
-    branding_file = config_dir / "config" / "branding.xml"
     branding_file.parent.mkdir(parents=True, exist_ok=True)
 
     default_disclaimer = (
@@ -287,9 +298,16 @@ def setup_web_override(
     Copies base web assets to override_web_dir, downloads spotlight assets,
     configures abyss-defaults.js, and injects script tags into index.html.
     """
+    if not override_web_dir.is_dir():
+        log(f"{override_web_dir} is not mounted; skipping web override.")
+        return
+
     if source_web_dir.is_dir() and not (override_web_dir / "index.html").exists():
         log(f"Copying base web assets from {source_web_dir} to {override_web_dir}...")
-        shutil.copytree(source_web_dir, override_web_dir, dirs_exist_ok=True)
+        try:
+            shutil.copytree(source_web_dir, override_web_dir, copy_function=shutil.copy, dirs_exist_ok=True)
+        except Exception as e:
+            log(f"Warning during copytree: {e}")
 
     ui_dir = override_web_dir / "ui"
     ui_dir.mkdir(parents=True, exist_ok=True)
@@ -302,11 +320,7 @@ def setup_web_override(
         if not dest.is_file():
             url = f"{raw_base_url}/scripts/spotlight/{fname}"
             log(f"Downloading {fname} from {url}...")
-            try:
-                with urllib.request.urlopen(url) as resp, open(dest, "wb") as out:
-                    shutil.copyfileobj(resp, out)
-            except Exception as e:
-                log(f"Warning: Failed to download {fname}: {e}")
+            download_file(url, dest, timeout=15)
 
     # 2. Defaults script
     defaults_file = ui_dir / "abyss-defaults.js"
@@ -364,64 +378,74 @@ def setup_web_override(
 
 
 def main() -> None:
-    config_dir = Path(os.environ.get("JELLYFIN_CONFIG_DIR", "/config"))
-    plugins_dir = config_dir / "plugins"
+    try:
+        # Explicit Jellyfin directory layout:
+        # /config (root PVC mount)
+        #   ├── config/ (system.xml, branding.xml)
+        #   └── plugins/ (plugin directories and configurations/)
+        data_dir = Path("/config")
+        config_dir = data_dir / "config"
+        plugins_dir = data_dir / "plugins"
+        plugin_configs_dir = plugins_dir / "configurations"
 
-    log("Starting Jellyfin configuration and plugin initialization...")
+        log("Starting Jellyfin configuration and plugin initialization...")
 
-    # 1. Repositories in system.xml
-    repos = [
-        ("Jellyfin SSO", "https://raw.githubusercontent.com/k0lin/jellyfin-plugin-sso/manifest-release/manifest.json"),
-    ]
-    grpc_enabled = os.environ.get("GRPC_ENABLED", "true").lower() == "true"
-    if grpc_enabled:
-        repos.append(
-            ("gRPC-ffmpeg", "https://raw.githubusercontent.com/CrystalNET-org/Jellyfin.Plugin.GrpcFfmpeg/main/manifest.json")
-        )
-    ensure_plugin_repositories(config_dir, repos)
+        # 1. Repositories in system.xml
+        repos = [
+            ("Jellyfin SSO", "https://raw.githubusercontent.com/k0lin/jellyfin-plugin-sso/manifest-release/manifest.json"),
+        ]
+        grpc_enabled = os.environ.get("GRPC_ENABLED", "true").lower() == "true"
+        if grpc_enabled:
+            repos.append(
+                ("gRPC-ffmpeg", "https://raw.githubusercontent.com/CrystalNET-org/Jellyfin.Plugin.GrpcFfmpeg/main/manifest.json")
+            )
+        ensure_plugin_repositories(config_dir / "system.xml", repos)
 
-    # 2. SSO Plugin & Configuration
-    install_plugin_if_missing(
-        plugins_dir=plugins_dir,
-        glob_pattern="SSO*",
-        target_dir_name="SSO Authentication_5.1.1",
-        download_url="https://github.com/k0lin/jellyfin-plugin-sso/releases/download/v5.1.1/sso-authentication_5.1.1.zip",
-        plugin_name="SSO Authentication",
-    )
-    oidc_issuer = os.environ.get("OIDC_ISSUER", "")
-    oidc_client_id = os.environ.get("OIDC_CLIENT_ID", "")
-    oidc_client_secret = os.environ.get("OIDC_CLIENT_SECRET", "")
-    if oidc_issuer and oidc_client_id:
-        provision_sso_config(config_dir, oidc_issuer, oidc_client_id, oidc_client_secret)
-
-    # 3. gRPC-ffmpeg Plugin & Configuration
-    if grpc_enabled:
+        # 2. SSO Plugin & Configuration
         install_plugin_if_missing(
             plugins_dir=plugins_dir,
-            glob_pattern="gRPC-ffmpeg*",
-            target_dir_name="gRPC-ffmpeg_0.3.2.0",
-            download_url="https://github.com/CrystalNET-org/Jellyfin.Plugin.GrpcFfmpeg/releases/download/0.3.2/gRPC-ffmpeg_0.3.2.0.zip",
-            plugin_name="gRPC-ffmpeg",
+            glob_pattern="SSO*",
+            target_dir_name="SSO Authentication_5.1.1",
+            download_url="https://github.com/k0lin/jellyfin-plugin-sso/releases/download/v5.1.1/sso-authentication_5.1.1.zip",
+            plugin_name="SSO Authentication",
         )
-        grpc_token = os.environ.get("VALID_TOKEN", "")
-        grpc_host = os.environ.get("GRPC_HOST", "jellyfin-ffmpeg-worker")
-        grpc_port = int(os.environ.get("GRPC_PORT", "50051"))
-        provision_grpc_config(config_dir, grpc_token, grpc_host, grpc_port)
+        oidc_issuer = os.environ.get("OIDC_ISSUER", "")
+        oidc_client_id = os.environ.get("OIDC_CLIENT_ID", "")
+        oidc_client_secret = os.environ.get("OIDC_CLIENT_SECRET", "")
+        if oidc_issuer and oidc_client_id:
+            provision_sso_config(plugin_configs_dir / "SSO-Auth.xml", oidc_issuer, oidc_client_id, oidc_client_secret)
 
-    # 4. Branding & Theme (Abyss Theme is always enabled)
-    abyss_repo = "AumGupta/abyss-jellyfin"
-    abyss_branch = "main"
-    css_url = f"@import url('https://cdn.jsdelivr.net/gh/{abyss_repo}@{abyss_branch}/abyss.css');"
+        # 3. gRPC-ffmpeg Plugin & Configuration
+        if grpc_enabled:
+            install_plugin_if_missing(
+                plugins_dir=plugins_dir,
+                glob_pattern="gRPC-ffmpeg*",
+                target_dir_name="gRPC-ffmpeg_0.3.2.0",
+                download_url="https://github.com/CrystalNET-org/Jellyfin.Plugin.GrpcFfmpeg/releases/download/0.3.2/gRPC-ffmpeg_0.3.2.0.zip",
+                plugin_name="gRPC-ffmpeg",
+            )
+            grpc_token = os.environ.get("VALID_TOKEN", "")
+            grpc_host = os.environ.get("GRPC_HOST", "jellyfin-ffmpeg-worker")
+            grpc_port = int(os.environ.get("GRPC_PORT", "50051"))
+            provision_grpc_config(plugin_configs_dir / "Jellyfin.Plugin.GrpcFfmpeg.xml", grpc_token, grpc_host, grpc_port)
 
-    configure_branding(config_dir, css_url)
+        # 4. Branding & Theme (Abyss Theme is always enabled)
+        abyss_repo = "AumGupta/abyss-jellyfin"
+        abyss_branch = "main"
+        css_url = f"@import url('https://cdn.jsdelivr.net/gh/{abyss_repo}@{abyss_branch}/abyss.css');"
 
-    override_web_dir = Path(os.environ.get("WEB_OVERRIDE_DIR", "/web-override"))
-    source_web_dir = Path(os.environ.get("SOURCE_WEB_DIR", "/jellyfin/jellyfin-web"))
-    if override_web_dir.parent.exists():
+        configure_branding(config_dir / "branding.xml", css_url)
+
+        override_web_dir = Path("/web-override")
+        source_web_dir = Path("/jellyfin/jellyfin-web")
         raw_base = f"https://raw.githubusercontent.com/{abyss_repo}/{abyss_branch}"
         setup_web_override(source_web_dir, override_web_dir, raw_base)
 
-    log("Jellyfin initialization complete.")
+        log("Jellyfin initialization complete.")
+    except Exception as e:
+        log(f"CRITICAL ERROR during initialization: {e}")
+        traceback.print_exc()
+        sys.exit(1)
 
 
 if __name__ == "__main__":

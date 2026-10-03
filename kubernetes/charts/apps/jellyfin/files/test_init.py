@@ -2,9 +2,7 @@
 """
 Unit tests for Jellyfin initialization script (init.py).
 Can be run locally with:
-    python3 -m unittest kubernetes/charts/apps/jellyfin/files/test_init.py
-or:
-    pytest kubernetes/charts/apps/jellyfin/files/test_init.py
+    direnv exec . python3 -m unittest discover -s kubernetes/charts/apps/jellyfin/files -p "test_*.py"
 """
 
 import io
@@ -24,19 +22,20 @@ import init
 class TestJellyfinInit(unittest.TestCase):
     def setUp(self):
         self.test_dir = tempfile.mkdtemp()
-        self.config_dir = Path(self.test_dir) / "config"
+        self.base_dir = Path(self.test_dir) / "config"
+        self.config_dir = self.base_dir / "config"
         self.config_dir.mkdir(parents=True, exist_ok=True)
-        self.plugins_dir = self.config_dir / "plugins"
+        self.plugins_dir = self.base_dir / "plugins"
         self.plugins_dir.mkdir(parents=True, exist_ok=True)
+        self.plugin_configs_dir = self.plugins_dir / "configurations"
+        self.plugin_configs_dir.mkdir(parents=True, exist_ok=True)
 
     def tearDown(self):
         shutil.rmtree(self.test_dir)
 
     def test_ensure_plugin_repositories_fresh_system_xml(self):
         """Test adding repos to a fresh system.xml with only default repo."""
-        sys_xml_dir = self.config_dir / "config"
-        sys_xml_dir.mkdir(parents=True, exist_ok=True)
-        system_file = sys_xml_dir / "system.xml"
+        system_file = self.config_dir / "system.xml"
         system_file.write_text(
             """<?xml version="1.0" encoding="utf-8"?>
 <ServerConfiguration>
@@ -58,7 +57,7 @@ class TestJellyfinInit(unittest.TestCase):
         ]
 
         # First run: should modify and add both
-        modified = init.ensure_plugin_repositories(self.config_dir, repos)
+        modified = init.ensure_plugin_repositories(system_file, repos)
         self.assertTrue(modified)
 
         tree = ET.parse(system_file)
@@ -68,7 +67,7 @@ class TestJellyfinInit(unittest.TestCase):
         self.assertEqual(len(urls), 3)
 
         # Second run: idempotent, should not duplicate
-        modified_again = init.ensure_plugin_repositories(self.config_dir, repos)
+        modified_again = init.ensure_plugin_repositories(system_file, repos)
         self.assertFalse(modified_again)
         tree = ET.parse(system_file)
         urls_after = [r.findtext("Url") for r in tree.findall(".//RepositoryInfo")]
@@ -76,21 +75,22 @@ class TestJellyfinInit(unittest.TestCase):
 
     def test_ensure_plugin_repositories_missing_system_xml(self):
         """Test graceful no-op if system.xml doesn't exist yet."""
+        system_file = self.config_dir / "system.xml"
         repos = [("Jellyfin SSO", "https://sso.test/manifest.json")]
-        modified = init.ensure_plugin_repositories(self.config_dir, repos)
+        modified = init.ensure_plugin_repositories(system_file, repos)
         self.assertFalse(modified)
 
     def test_provision_sso_config_option_2(self):
         """Test SSO configuration is created if missing, preserved if present."""
+        sso_file = self.plugin_configs_dir / "SSO-Auth.xml"
         # 1. Missing: should create
         created = init.provision_sso_config(
-            self.config_dir,
+            sso_file,
             issuer="https://pocketid.example.com",
             client_id="my-client-id",
             client_secret="my-client-secret",
         )
         self.assertTrue(created)
-        sso_file = self.config_dir / "plugins" / "configurations" / "SSO-Auth.xml"
         self.assertTrue(sso_file.is_file())
         content = sso_file.read_text(encoding="utf-8")
         self.assertIn("<OidEndpoint>https://pocketid.example.com/.well-known/openid-configuration</OidEndpoint>", content)
@@ -100,7 +100,7 @@ class TestJellyfinInit(unittest.TestCase):
         # 2. Existing: should preserve (Option 2)
         sso_file.write_text("<CustomUserModifications />", encoding="utf-8")
         created_again = init.provision_sso_config(
-            self.config_dir,
+            sso_file,
             issuer="https://different.com",
             client_id="diff-id",
             client_secret="diff-secret",
@@ -110,14 +110,14 @@ class TestJellyfinInit(unittest.TestCase):
 
     def test_provision_grpc_config_option_2(self):
         """Test gRPC configuration is created if missing, preserved if present."""
+        grpc_file = self.plugin_configs_dir / "Jellyfin.Plugin.GrpcFfmpeg.xml"
         created = init.provision_grpc_config(
-            self.config_dir,
+            grpc_file,
             token="secret-token-123",
             host="ffmpeg-worker",
             port=50051,
         )
         self.assertTrue(created)
-        grpc_file = self.config_dir / "plugins" / "configurations" / "Jellyfin.Plugin.GrpcFfmpeg.xml"
         self.assertTrue(grpc_file.is_file())
         content = grpc_file.read_text(encoding="utf-8")
         self.assertIn("<GrpcHost>ffmpeg-worker</GrpcHost>", content)
@@ -127,7 +127,7 @@ class TestJellyfinInit(unittest.TestCase):
 
         # Preserved if exists
         grpc_file.write_text("<UserCustomConfig />", encoding="utf-8")
-        created_again = init.provision_grpc_config(self.config_dir, token="new-token")
+        created_again = init.provision_grpc_config(grpc_file, token="new-token")
         self.assertFalse(created_again)
         self.assertEqual(grpc_file.read_text(encoding="utf-8"), "<UserCustomConfig />")
 
@@ -173,12 +173,12 @@ class TestJellyfinInit(unittest.TestCase):
 
     def test_configure_branding_create_and_update(self):
         """Test creating branding.xml and updating existing branding.xml with @import."""
+        branding_file = self.config_dir / "branding.xml"
         css_url = "@import url('https://cdn.jsdelivr.net/gh/AumGupta/abyss-jellyfin@main/abyss.css');"
 
         # 1. Missing: create with Pocket ID disclaimer and Abyss CSS
-        created = init.configure_branding(self.config_dir, css_url)
+        created = init.configure_branding(branding_file, css_url)
         self.assertTrue(created)
-        branding_file = self.config_dir / "config" / "branding.xml"
         self.assertTrue(branding_file.is_file())
 
         tree = ET.parse(branding_file)
@@ -192,7 +192,7 @@ class TestJellyfinInit(unittest.TestCase):
 </BrandingOptions>
 """
         branding_file.write_text(custom_xml, encoding="utf-8")
-        updated = init.configure_branding(self.config_dir, css_url)
+        updated = init.configure_branding(branding_file, css_url)
         self.assertTrue(updated)
 
         tree = ET.parse(branding_file)
@@ -201,7 +201,7 @@ class TestJellyfinInit(unittest.TestCase):
         self.assertIn("body { font-size: 14px; }", new_css)
 
         # 3. Existing branding with Abyss @import already present: preserves without changes
-        no_change = init.configure_branding(self.config_dir, css_url)
+        no_change = init.configure_branding(branding_file, css_url)
         self.assertFalse(no_change)
 
     def test_setup_web_override(self):
@@ -211,6 +211,7 @@ class TestJellyfinInit(unittest.TestCase):
         (source_web / "index.html").write_text("<!DOCTYPE html><html><head></head><body></body></html>", encoding="utf-8")
 
         override_web = Path(self.test_dir) / "override_web"
+        override_web.mkdir()
 
         with patch("urllib.request.urlopen") as mock_url:
             mock_url.return_value.__enter__.return_value = io.BytesIO(b"/* spotlight mock */")
