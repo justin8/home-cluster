@@ -80,44 +80,41 @@ class TestJellyfinInit(unittest.TestCase):
         modified = init.ensure_plugin_repositories(system_file, repos)
         self.assertFalse(modified)
 
-    def test_provision_sso_config_option_2(self):
-        """Test SSO configuration is created if missing, preserved if present."""
+    def test_provision_sso_config(self):
+        """Test SSO configuration is written directly and unconditionally overrides existing."""
         sso_file = self.plugin_configs_dir / "SSO-Auth.xml"
-        # 1. Missing: should create
-        created = init.provision_sso_config(
+        init.provision_sso_config(
             sso_file,
             issuer="https://pocketid.example.com",
             client_id="my-client-id",
             client_secret="my-client-secret",
         )
-        self.assertTrue(created)
         self.assertTrue(sso_file.is_file())
         content = sso_file.read_text(encoding="utf-8")
         self.assertIn("<OidEndpoint>https://pocketid.example.com/.well-known/openid-configuration</OidEndpoint>", content)
         self.assertIn("<OidClientId>my-client-id</OidClientId>", content)
         self.assertIn("<DisablePushedAuthorization>true</DisablePushedAuthorization>", content)
 
-        # 2. Existing: should preserve (Option 2)
-        sso_file.write_text("<CustomUserModifications />", encoding="utf-8")
-        created_again = init.provision_sso_config(
+        # Overwrites existing config
+        init.provision_sso_config(
             sso_file,
-            issuer="https://different.com",
-            client_id="diff-id",
-            client_secret="diff-secret",
+            issuer="https://new-pocketid.example.com",
+            client_id="new-client-id",
+            client_secret="new-secret",
         )
-        self.assertFalse(created_again)
-        self.assertEqual(sso_file.read_text(encoding="utf-8"), "<CustomUserModifications />")
+        content_overwritten = sso_file.read_text(encoding="utf-8")
+        self.assertIn("<OidEndpoint>https://new-pocketid.example.com/.well-known/openid-configuration</OidEndpoint>", content_overwritten)
+        self.assertIn("<OidClientId>new-client-id</OidClientId>", content_overwritten)
 
-    def test_provision_grpc_config_option_2(self):
-        """Test gRPC configuration is created with Enabled=true, and ensures Enabled=true if false."""
+    def test_provision_grpc_config(self):
+        """Test gRPC configuration is written directly with Enabled=true and overrides existing."""
         grpc_file = self.plugin_configs_dir / "Jellyfin.Plugin.GrpcFfmpeg.xml"
-        created = init.provision_grpc_config(
+        init.provision_grpc_config(
             grpc_file,
             token="secret-token-123",
             host="ffmpeg-worker",
             port=50051,
         )
-        self.assertTrue(created)
         self.assertTrue(grpc_file.is_file())
         content = grpc_file.read_text(encoding="utf-8")
         self.assertIn("<GrpcHost>ffmpeg-worker</GrpcHost>", content)
@@ -125,16 +122,16 @@ class TestJellyfinInit(unittest.TestCase):
         self.assertIn("<AuthToken>secret-token-123</AuthToken>", content)
         self.assertIn("<Enabled>true</Enabled>", content)
 
-        # If existing config has Enabled=false, should update to true
-        grpc_file.write_text("<PluginConfiguration><Enabled>false</Enabled></PluginConfiguration>", encoding="utf-8")
-        updated = init.provision_grpc_config(grpc_file, token="new-token")
-        self.assertTrue(updated)
-        content_updated = grpc_file.read_text(encoding="utf-8")
-        self.assertIn("<Enabled>true</Enabled>", content_updated)
-
-        # If already enabled, preserved without change
-        updated_again = init.provision_grpc_config(grpc_file, token="new-token")
-        self.assertFalse(updated_again)
+        # Overwrites existing config
+        init.provision_grpc_config(
+            grpc_file,
+            token="new-token-456",
+            host="new-host",
+            port=50052,
+        )
+        content_overwritten = grpc_file.read_text(encoding="utf-8")
+        self.assertIn("<GrpcHost>new-host</GrpcHost>", content_overwritten)
+        self.assertIn("<AuthToken>new-token-456</AuthToken>", content_overwritten)
 
     @patch("urllib.request.urlopen")
     def test_install_plugin_if_missing(self, mock_urlopen):

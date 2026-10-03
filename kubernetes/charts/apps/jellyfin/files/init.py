@@ -129,17 +129,9 @@ def install_plugin_if_missing(
             temp_zip.unlink(missing_ok=True)
 
 
-def provision_sso_config(config_file: Path, issuer: str, client_id: str, client_secret: str) -> bool:
-    """
-    Creates SSO-Auth.xml if missing (Option 2: install only if missing).
-    """
-    if config_file.is_file():
-        log(f"{config_file} already exists, preserving existing configuration.")
-        return False
-
+def provision_sso_config(config_file: Path, issuer: str, client_id: str, client_secret: str) -> None:
+    """Writes SSO-Auth.xml directly."""
     config_file.parent.mkdir(parents=True, exist_ok=True)
-    log(f"Writing SSO configuration to {config_file}...")
-
     xml_content = f"""<?xml version="1.0" encoding="utf-8"?>
 <PluginConfiguration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <SamlConfigs />
@@ -177,38 +169,12 @@ def provision_sso_config(config_file: Path, issuer: str, client_id: str, client_
 </PluginConfiguration>
 """
     config_file.write_text(xml_content, encoding="utf-8")
-    log(f"Successfully created {config_file}")
-    return True
+    log(f"Wrote SSO configuration to {config_file}")
 
 
-def provision_grpc_config(config_file: Path, token: str, host: str = "jellyfin-ffmpeg-worker", port: int = 50051) -> bool:
-    """
-    Creates Jellyfin.Plugin.GrpcFfmpeg.xml if missing (with Enabled=true),
-    or ensures Enabled is true in existing configuration.
-    """
-    if config_file.is_file():
-        try:
-            tree = ET.parse(config_file)
-            root = tree.getroot()
-            enabled_elem = root.find("Enabled")
-            if enabled_elem is None:
-                enabled_elem = ET.SubElement(root, "Enabled")
-            if enabled_elem.text != "true":
-                log(f"Enabling gRPC workers in existing {config_file}...")
-                enabled_elem.text = "true"
-                ET.indent(tree, space="  ")
-                tree.write(config_file, encoding="utf-8", xml_declaration=True)
-                return True
-            else:
-                log(f"gRPC workers already enabled in {config_file}.")
-                return False
-        except Exception as e:
-            log(f"Warning: Failed to update {config_file}: {e}")
-            return False
-
+def provision_grpc_config(config_file: Path, token: str, host: str = "jellyfin-ffmpeg-worker", port: int = 50051) -> None:
+    """Writes Jellyfin.Plugin.GrpcFfmpeg.xml directly with Enabled=true."""
     config_file.parent.mkdir(parents=True, exist_ok=True)
-    log(f"Writing gRPC-ffmpeg configuration with Enabled=true to {config_file}...")
-
     xml_content = f"""<?xml version="1.0" encoding="utf-8"?>
 <PluginConfiguration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <Enabled>true</Enabled>
@@ -224,8 +190,7 @@ def provision_grpc_config(config_file: Path, token: str, host: str = "jellyfin-f
 </PluginConfiguration>
 """
     config_file.write_text(xml_content, encoding="utf-8")
-    log(f"Successfully created {config_file}")
-    return True
+    log(f"Wrote gRPC-ffmpeg configuration to {config_file}")
 
 
 def configure_branding(branding_file: Path, css_import_url: str) -> bool:
@@ -323,10 +288,12 @@ def setup_web_override(
 
     if source_web_dir.is_dir() and not (override_web_dir / "index.html").exists():
         log(f"Copying base web assets from {source_web_dir} to {override_web_dir}...")
-        try:
-            shutil.copytree(source_web_dir, override_web_dir, copy_function=shutil.copy, dirs_exist_ok=True)
-        except Exception as e:
-            log(f"Warning during copytree: {e}")
+        for item in source_web_dir.iterdir():
+            dest_item = override_web_dir / item.name
+            if item.is_dir():
+                shutil.copytree(item, dest_item, copy_function=shutil.copy, dirs_exist_ok=True)
+            else:
+                shutil.copy(item, dest_item)
 
     ui_dir = override_web_dir / "ui"
     ui_dir.mkdir(parents=True, exist_ok=True)
