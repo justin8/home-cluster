@@ -14,6 +14,8 @@ spec:
     metadata:
       labels:
         app: jellyfin
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap-init.yaml") . | sha256sum }}
     spec:
       serviceAccountName: jellyfin
       securityContext:
