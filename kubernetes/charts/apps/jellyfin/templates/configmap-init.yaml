@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: jellyfin-init-script
+  namespace: {{ .Release.Namespace }}
+data:
+  init.py: |-
+{{ .Files.Get "files/init.py" | indent 4 }}

@@ -11,13 +11,6 @@ images:
     tag: "12.1"
     pullPolicy: Always
 
-theme:
-  abyss:
-    enabled: true
-    repo: "AumGupta/abyss-jellyfin"
-    branch: "main"
-    autoDefaults: true
-
 grpcWorker:
   enabled: true
   maxWorkers: 3
