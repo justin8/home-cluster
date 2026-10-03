@@ -183,23 +183,42 @@ def provision_sso_config(config_file: Path, issuer: str, client_id: str, client_
 
 def provision_grpc_config(config_file: Path, token: str, host: str = "jellyfin-ffmpeg-worker", port: int = 50051) -> bool:
     """
-    Creates Jellyfin.Plugin.GrpcFfmpeg.xml if missing (Option 2).
+    Creates Jellyfin.Plugin.GrpcFfmpeg.xml if missing (with Enabled=true),
+    or ensures Enabled is true in existing configuration.
     """
     if config_file.is_file():
-        log(f"{config_file} already exists, preserving existing configuration.")
-        return False
+        try:
+            tree = ET.parse(config_file)
+            root = tree.getroot()
+            enabled_elem = root.find("Enabled")
+            if enabled_elem is None:
+                enabled_elem = ET.SubElement(root, "Enabled")
+            if enabled_elem.text != "true":
+                log(f"Enabling gRPC workers in existing {config_file}...")
+                enabled_elem.text = "true"
+                ET.indent(tree, space="  ")
+                tree.write(config_file, encoding="utf-8", xml_declaration=True)
+                return True
+            else:
+                log(f"gRPC workers already enabled in {config_file}.")
+                return False
+        except Exception as e:
+            log(f"Warning: Failed to update {config_file}: {e}")
+            return False
 
     config_file.parent.mkdir(parents=True, exist_ok=True)
-    log(f"Writing gRPC-ffmpeg configuration to {config_file}...")
+    log(f"Writing gRPC-ffmpeg configuration with Enabled=true to {config_file}...")
 
     xml_content = f"""<?xml version="1.0" encoding="utf-8"?>
 <PluginConfiguration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <Enabled>false</Enabled>
+  <Enabled>true</Enabled>
   <GrpcHost>{host}</GrpcHost>
   <GrpcPort>{port}</GrpcPort>
-  <UseSsl>false</UseSsl>
   <AuthToken>{token}</AuthToken>
-  <RunCommandsLocally>true</RunCommandsLocally>
+  <UseSsl>false</UseSsl>
+  <CertificatePath />
+  <EnableFallback>true</EnableFallback>
+  <FallbackDirectory />
   <Retries>2</Retries>
   <ConnectTimeout>5</ConnectTimeout>
 </PluginConfiguration>

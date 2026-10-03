@@ -109,7 +109,7 @@ class TestJellyfinInit(unittest.TestCase):
         self.assertEqual(sso_file.read_text(encoding="utf-8"), "<CustomUserModifications />")
 
     def test_provision_grpc_config_option_2(self):
-        """Test gRPC configuration is created if missing, preserved if present."""
+        """Test gRPC configuration is created with Enabled=true, and ensures Enabled=true if false."""
         grpc_file = self.plugin_configs_dir / "Jellyfin.Plugin.GrpcFfmpeg.xml"
         created = init.provision_grpc_config(
             grpc_file,
@@ -123,13 +123,18 @@ class TestJellyfinInit(unittest.TestCase):
         self.assertIn("<GrpcHost>ffmpeg-worker</GrpcHost>", content)
         self.assertIn("<GrpcPort>50051</GrpcPort>", content)
         self.assertIn("<AuthToken>secret-token-123</AuthToken>", content)
-        self.assertIn("<Enabled>false</Enabled>", content)
+        self.assertIn("<Enabled>true</Enabled>", content)
 
-        # Preserved if exists
-        grpc_file.write_text("<UserCustomConfig />", encoding="utf-8")
-        created_again = init.provision_grpc_config(grpc_file, token="new-token")
-        self.assertFalse(created_again)
-        self.assertEqual(grpc_file.read_text(encoding="utf-8"), "<UserCustomConfig />")
+        # If existing config has Enabled=false, should update to true
+        grpc_file.write_text("<PluginConfiguration><Enabled>false</Enabled></PluginConfiguration>", encoding="utf-8")
+        updated = init.provision_grpc_config(grpc_file, token="new-token")
+        self.assertTrue(updated)
+        content_updated = grpc_file.read_text(encoding="utf-8")
+        self.assertIn("<Enabled>true</Enabled>", content_updated)
+
+        # If already enabled, preserved without change
+        updated_again = init.provision_grpc_config(grpc_file, token="new-token")
+        self.assertFalse(updated_again)
 
     @patch("urllib.request.urlopen")
     def test_install_plugin_if_missing(self, mock_urlopen):
