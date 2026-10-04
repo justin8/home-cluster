@@ -63,6 +63,7 @@
 | `192.168.5.4`       | Pomerium Ingress (LAN)      | `network.pomeriumIngress` | Central IAP / Ingress controller VIP      |
 | `192.168.5.5`       | Storage Server (LAN)        | Host network              | Network file storage server               |
 | `192.168.5.6`       | Zigbee Coordinator (LAN)    | Hardware device           | Network coordinator (ESP32, port 7638)    |
+| `192.168.5.7`       | Apple TV (LAN)              | DHCP / Static             | Living Room Apple TV                      |
 | `192.168.5.8`       | Home Assistant (Multus LAN) | Multus NAD `lan`          | Secondary macvlan interface on `eth0`     |
 | `192.168.5.20`      | Talos Control Plane VIP     | `talos/talconfig.yaml`    | Shared API VIP on `eth0` via KubePrism    |
 | `192.168.5.11`      | Node: `talos-gcf-e16`       | `talos/talconfig.yaml`    | Bare-metal controlplane / worker node 1   |
