@@ -167,6 +167,8 @@ spec:
         - ports:
             - port: "5432"
               protocol: TCP
+            - port: "8000"
+              protocol: TCP
     # CNPG Operator
     - fromEndpoints:
         - matchLabels:
@@ -187,6 +189,8 @@ spec:
       toPorts:
         - ports:
             - port: "5432"
+              protocol: TCP
+            - port: "8000"
               protocol: TCP
     # Backblaze B2 S3 Backup
     - toFQDNs:
