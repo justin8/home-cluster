@@ -56,6 +56,10 @@
     {
       "matchPackageNames": ["siderolabs/talos", "kubernetes/kubernetes", "/longhorn/"],
       "automerge": false
+    },
+    {
+      "matchPackageNames": ["rancher/hardened-cni-plugins"],
+      "versioning": "regex:^v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)-build(?<build>\\d+)$"
     }
   ],
   "helm-values": {
