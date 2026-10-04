@@ -5,9 +5,11 @@ pkgs.mkShell {
   buildInputs = with pkgs; [
     age
     argocd
+    cilium-cli
     coreutils # for base64
     git
     github-cli
+    hubble
     jq
     k9s
     kubectl

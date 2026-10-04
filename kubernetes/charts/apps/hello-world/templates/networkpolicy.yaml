@@ -1,0 +1,21 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: hello-world
+  namespace: {{ .Release.Namespace }}
+spec:
+  endpointSelector:
+    matchLabels:
+      app: hello-world
+  ingress:
+    - fromEntities:
+        - host
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: pomerium
+            app.kubernetes.io/name: pomerium
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+  egress: []

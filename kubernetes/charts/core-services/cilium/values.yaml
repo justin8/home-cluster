@@ -35,6 +35,7 @@ cilium:
     qps: 30
     burst: 50
   rollOutPods: true
+  policyAuditMode: true
   operator:
     replicas: 1
     rollOutPods: true

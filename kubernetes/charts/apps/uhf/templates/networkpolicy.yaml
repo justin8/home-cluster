@@ -1,0 +1,22 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: uhf
+  namespace: {{ .Release.Namespace }}
+spec:
+  endpointSelector:
+    matchLabels:
+      app: uhf
+  ingress:
+    - fromEntities:
+        - host
+    - fromCIDRSet:
+        - cidr: {{ .Values.network.lanIpRange }}
+        - cidr: {{ .Values.network.tailscaleIpRange }}
+      toPorts:
+        - ports:
+            - port: "8000"
+              protocol: TCP
+  egress:
+    - toEntities:
+        - world

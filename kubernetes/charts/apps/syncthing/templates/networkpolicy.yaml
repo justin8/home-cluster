@@ -1,0 +1,38 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: syncthing
+  namespace: {{ .Release.Namespace }}
+spec:
+  endpointSelector:
+    matchLabels:
+      app: syncthing
+  ingress:
+    - fromEntities:
+        - host
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: pomerium
+            app.kubernetes.io/name: pomerium
+      toPorts:
+        - ports:
+            - port: "8384"
+              protocol: TCP
+    - fromEntities:
+        - world
+        - cluster
+      toPorts:
+        - ports:
+            - port: "22000"
+              protocol: TCP
+            - port: "22000"
+              protocol: UDP
+    - fromCIDRSet:
+        - cidr: {{ .Values.network.lanIpRange }}
+      toPorts:
+        - ports:
+            - port: "21027"
+              protocol: UDP
+  egress:
+    - toEntities:
+        - world
