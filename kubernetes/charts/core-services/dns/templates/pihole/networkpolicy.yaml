@@ -10,11 +10,13 @@ spec:
   ingress:
     - fromEntities:
         - host
-    # Web UI from Pomerium
+    # Web UI from Pomerium & API from ExternalDNS
     - fromEndpoints:
         - matchLabels:
             k8s:io.kubernetes.pod.namespace: pomerium
             app.kubernetes.io/name: pomerium
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: {{ .Release.Namespace }}
       toPorts:
         - ports:
             - port: "80"
