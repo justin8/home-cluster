@@ -12,11 +12,11 @@ spec:
       app: home-assistant
   template:
     metadata:
+      annotations:
+        k8s.v1.cni.cncf.io/networks: lan
       labels:
         app: home-assistant
     spec:
-      hostNetwork: true
-      dnsPolicy: ClusterFirstWithHostNet
       initContainers:
         - name: init-database-config
           image: "{{ .Values.images.homeAssistant.repository }}:{{ .Values.images.homeAssistant.tag }}"

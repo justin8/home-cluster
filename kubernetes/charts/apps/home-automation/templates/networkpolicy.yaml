@@ -24,6 +24,8 @@ spec:
         - ports:
             - port: "8123"
               protocol: TCP
+            - port: "21063"
+              protocol: TCP
   egress:
     - toEndpoints:
         - matchLabels:

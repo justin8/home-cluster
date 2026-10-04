@@ -91,6 +91,21 @@ spec:
             - name: cnibin
               mountPath: /host/opt/cni/bin
               mountPropagation: Bidirectional
+        - name: install-cni-plugins
+          image: "{{ .Values.multus.cniPlugins.image.repository }}:{{ .Values.multus.cniPlugins.image.tag }}"
+          imagePullPolicy: {{ .Values.multus.cniPlugins.image.pullPolicy }}
+          env:
+            - name: UPDATE_CNI_BINARIES
+              value: "false"
+          resources:
+            {{- toYaml .Values.multus.initResources | nindent 12 }}
+          securityContext:
+            privileged: true
+          terminationMessagePolicy: FallbackToLogsOnError
+          volumeMounts:
+            - name: cnibin
+              mountPath: /host/opt/cni/bin
+              mountPropagation: Bidirectional
       terminationGracePeriodSeconds: 30
       volumes:
         - name: cni
