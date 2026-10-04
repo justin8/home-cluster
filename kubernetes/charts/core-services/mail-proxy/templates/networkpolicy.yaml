@@ -1,0 +1,23 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: mail-proxy
+  namespace: {{ .Release.Namespace }}
+spec:
+  endpointSelector:
+    matchLabels:
+      app: mail-proxy
+  ingress:
+    - fromEntities:
+        - host
+    - fromEntities:
+        - cluster
+      toPorts:
+        - ports:
+            - port: "587"
+              protocol: TCP
+            - port: "25"
+              protocol: TCP
+  egress:
+    - toEntities:
+        - world

@@ -1,0 +1,70 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: jellyfin
+  namespace: {{ .Release.Namespace }}
+spec:
+  endpointSelector:
+    matchLabels:
+      app: jellyfin
+  ingress:
+    - fromEntities:
+        - host
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: pomerium
+            app.kubernetes.io/name: pomerium
+      toPorts:
+        - ports:
+            - port: "8096"
+              protocol: TCP
+    - fromCIDRSet:
+        - cidr: {{ .Values.network.lanIpRange }}
+      toPorts:
+        - ports:
+            - port: "8096"
+              protocol: TCP
+  egress:
+    - toCIDRSet:
+        - cidr: {{ .Values.network.pomeriumIngress }}/32
+        - cidr: {{ .Values.network.privateIngress }}/32
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+    {{- if and .Values.grpcWorker .Values.grpcWorker.enabled }}
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: {{ .Release.Namespace }}
+            app: jellyfin-ffmpeg-worker
+      toPorts:
+        - ports:
+            - port: "50051"
+              protocol: TCP
+    {{- end }}
+    - toEntities:
+        - world
+{{- if and .Values.grpcWorker .Values.grpcWorker.enabled }}
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: jellyfin-ffmpeg-worker
+  namespace: {{ .Release.Namespace }}
+spec:
+  endpointSelector:
+    matchLabels:
+      app: jellyfin-ffmpeg-worker
+  ingress:
+    - fromEntities:
+        - host
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: {{ .Release.Namespace }}
+            app: jellyfin
+      toPorts:
+        - ports:
+            - port: "50051"
+              protocol: TCP
+  egress: []
+{{- end }}

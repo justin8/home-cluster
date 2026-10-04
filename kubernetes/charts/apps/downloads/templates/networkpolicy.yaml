@@ -1,0 +1,124 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: downloads-workloads
+  namespace: {{ .Release.Namespace }}
+spec:
+  endpointSelector:
+    matchExpressions:
+      - key: app
+        operator: In
+        values:
+          - prowlarr
+          - radarr
+          - sonarr
+          - seerr
+          - shelfmark
+          - decluttarr
+          - qbittorrent
+          - sabnzbd
+  ingress:
+    - fromEntities:
+        - host
+    # Ingress from Pomerium for all Web UIs
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: pomerium
+            app.kubernetes.io/name: pomerium
+      toPorts:
+        - ports:
+            - port: "9696"
+              protocol: TCP
+            - port: "7878"
+              protocol: TCP
+            - port: "8989"
+              protocol: TCP
+            - port: "5055"
+              protocol: TCP
+            - port: "8084"
+              protocol: TCP
+            - port: "8080"
+              protocol: TCP
+    # Intra-namespace communication between Arr stack and download clients
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: {{ .Release.Namespace }}
+      toPorts:
+        - ports:
+            - port: "9696"
+              protocol: TCP
+            - port: "7878"
+              protocol: TCP
+            - port: "8989"
+              protocol: TCP
+            - port: "8080"
+              protocol: TCP
+    # BitTorrent swarm ingress (TCP/UDP)
+    - fromEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "6881"
+              protocol: TCP
+            - port: "6881"
+              protocol: UDP
+  egress:
+    # Intra-namespace communication
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: {{ .Release.Namespace }}
+      toPorts:
+        - ports:
+            - port: "9696"
+              protocol: TCP
+            - port: "7878"
+              protocol: TCP
+            - port: "8989"
+              protocol: TCP
+            - port: "8080"
+              protocol: TCP
+    # Media servers (Plex in plex namespace, Jellyfin in jellyfin namespace) for Seerr
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: plex
+            app: plex
+      toPorts:
+        - ports:
+            - port: "32400"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: jellyfin
+            app: jellyfin
+      toPorts:
+        - ports:
+            - port: "8096"
+              protocol: TCP
+    # Audiobookshelf & Kavita for Shelfmark
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: audiobookshelf
+            app: audiobookshelf
+      toPorts:
+        - ports:
+            - port: "80"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kavita
+            app: kavita
+      toPorts:
+        - ports:
+            - port: "5000"
+              protocol: TCP
+    # PocketID OIDC via Pomerium VIPs
+    - toCIDRSet:
+        - cidr: {{ .Values.network.pomeriumIngress }}/32
+        - cidr: {{ .Values.network.privateIngress }}/32
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+    # External Indexers, Trackers, Swarms, Usenet, Metadata
+    - toEntities:
+        - world

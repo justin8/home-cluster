@@ -1,0 +1,29 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: plex
+  namespace: {{ .Release.Namespace }}
+spec:
+  endpointSelector:
+    matchLabels:
+      app: plex
+  ingress:
+    - fromEntities:
+        - host
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: pomerium
+            app.kubernetes.io/name: pomerium
+      toPorts:
+        - ports:
+            - port: "32400"
+              protocol: TCP
+    - fromCIDRSet:
+        - cidr: {{ .Values.network.lanIpRange }}
+      toPorts:
+        - ports:
+            - port: "32400"
+              protocol: TCP
+  egress:
+    - toEntities:
+        - world

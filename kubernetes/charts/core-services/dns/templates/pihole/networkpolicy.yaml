@@ -1,0 +1,46 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: pihole
+  namespace: {{ .Release.Namespace }}
+spec:
+  endpointSelector:
+    matchLabels:
+      app: pihole
+  ingress:
+    - fromEntities:
+        - host
+    # Web UI from Pomerium
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: pomerium
+            app.kubernetes.io/name: pomerium
+      toPorts:
+        - ports:
+            - port: "80"
+              protocol: TCP
+    # DNS queries from LAN & Tailscale
+    - fromCIDRSet:
+        - cidr: {{ .Values.network.lanIpRange }}
+        - cidr: {{ .Values.network.tailscaleIpRange }}
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: ANY
+    # DNS queries from internal cluster pods
+    - fromEntities:
+        - cluster
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: ANY
+  egress:
+    # Upstream DNS resolution and blocklist updates
+    - toEntities:
+        - world
+    - toCIDRSet:
+        - cidr: 192.168.5.1/32
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: ANY

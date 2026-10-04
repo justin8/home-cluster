@@ -1,0 +1,197 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: home-assistant
+  namespace: {{ .Release.Namespace }}
+spec:
+  endpointSelector:
+    matchLabels:
+      app: home-assistant
+  ingress:
+    - fromEntities:
+        - host
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: pomerium
+            app.kubernetes.io/name: pomerium
+      toPorts:
+        - ports:
+            - port: "8123"
+              protocol: TCP
+    - fromCIDRSet:
+        - cidr: {{ .Values.network.lanIpRange }}
+      toPorts:
+        - ports:
+            - port: "8123"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: {{ .Release.Namespace }}
+            app: mqtt
+      toPorts:
+        - ports:
+            - port: "1883"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: {{ .Release.Namespace }}
+            cnpg.io/cluster: homeassistant-db
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP
+    - toCIDRSet:
+        - cidr: {{ .Values.network.lanIpRange }}
+    - toEntities:
+        - world
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: zigbee2mqtt
+  namespace: {{ .Release.Namespace }}
+spec:
+  endpointSelector:
+    matchLabels:
+      app: zigbee2mqtt
+  ingress:
+    - fromEntities:
+        - host
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: pomerium
+            app.kubernetes.io/name: pomerium
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: {{ .Release.Namespace }}
+            app: mqtt
+      toPorts:
+        - ports:
+            - port: "1883"
+              protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: mqtt
+  namespace: {{ .Release.Namespace }}
+spec:
+  endpointSelector:
+    matchLabels:
+      app: mqtt
+  ingress:
+    - fromEntities:
+        - host
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: {{ .Release.Namespace }}
+            app: home-assistant
+      toPorts:
+        - ports:
+            - port: "1883"
+              protocol: TCP
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: {{ .Release.Namespace }}
+            app: zigbee2mqtt
+      toPorts:
+        - ports:
+            - port: "1883"
+              protocol: TCP
+    - fromCIDRSet:
+        - cidr: {{ .Values.network.lanIpRange }}
+      toPorts:
+        - ports:
+            - port: "1883"
+              protocol: TCP
+  egress: []
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: esphome
+  namespace: {{ .Release.Namespace }}
+spec:
+  endpointSelector:
+    matchLabels:
+      app: esphome
+  ingress:
+    - fromEntities:
+        - host
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: pomerium
+            app.kubernetes.io/name: pomerium
+      toPorts:
+        - ports:
+            - port: "6052"
+              protocol: TCP
+  egress:
+    - toCIDRSet:
+        - cidr: {{ .Values.network.lanIpRange }}
+    - toEntities:
+        - world
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: homeassistant-db
+  namespace: {{ .Release.Namespace }}
+spec:
+  endpointSelector:
+    matchLabels:
+      cnpg.io/cluster: homeassistant-db
+  ingress:
+    - fromEntities:
+        - host
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: {{ .Release.Namespace }}
+            app: home-assistant
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP
+    # Peer replication
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: {{ .Release.Namespace }}
+            cnpg.io/cluster: homeassistant-db
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP
+    # CNPG Operator
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: cnpg-system
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP
+            - port: "8000"
+              protocol: TCP
+            - port: "9187"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: {{ .Release.Namespace }}
+            cnpg.io/cluster: homeassistant-db
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP
+    # Backblaze B2 S3 Backup
+    - toFQDNs:
+        - matchName: "s3.us-west-001.backblazeb2.com"
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
