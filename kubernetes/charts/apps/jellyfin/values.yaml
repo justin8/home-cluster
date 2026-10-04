@@ -8,7 +8,7 @@ images:
     pullPolicy: IfNotPresent
   init:
     repository: python
-    tag: "3.12-alpine"
+    tag: "3.14-alpine"
     pullPolicy: IfNotPresent
 
 grpcWorker:
