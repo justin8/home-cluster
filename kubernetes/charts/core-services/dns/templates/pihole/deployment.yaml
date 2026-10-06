@@ -48,13 +48,6 @@ spec:
             - name: http
               containerPort: 80
               protocol: TCP
-          resources:
-            requests:
-              cpu: 20m
-              memory: 256Mi
-            limits:
-              cpu: 200m
-              memory: 512Mi
           env:
             - name: FTLCONF_webserver_api_password
               value: ""

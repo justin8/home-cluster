@@ -61,12 +61,8 @@ spec:
               protocol: TCP
           resources:
             requests:
-              cpu: 500m
-              memory: 512Mi
               gpu.intel.com/i915: "1"
             limits:
-              cpu: "4"
-              memory: 4Gi
               gpu.intel.com/i915: "1"
           startupProbe:
             tcpSocket:
