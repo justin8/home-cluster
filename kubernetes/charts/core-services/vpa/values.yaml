@@ -3,7 +3,7 @@ vertical-pod-autoscaler:
     extraArgs:
       - --memory-aggregation-interval-count=35
       - --memory-histogram-decay-half-life=168h
-      - --recommendation-margin-fraction=0.2
+      - --recommendation-margin-fraction=0.15
   updater:
     extraArgs:
       - --in-place-skip-disruption-budget=true

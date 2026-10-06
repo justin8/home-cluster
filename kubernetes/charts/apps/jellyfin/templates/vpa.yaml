@@ -1,5 +1,5 @@
-{{ include "common.vpa" (dict "ctx" . "name" "jellyfin") }}
+{{ include "common.vpa" (dict "ctx" . "name" "jellyfin" "maxAllowed" (dict "cpu" "750m")) }}
 {{- if and .Values.grpcWorker .Values.grpcWorker.enabled }}
 ---
-{{ include "common.vpa" (dict "ctx" . "name" "jellyfin-ffmpeg-worker" "targetKind" "DaemonSet") }}
+{{ include "common.vpa" (dict "ctx" . "name" "jellyfin-ffmpeg-worker" "targetKind" "DaemonSet" "maxAllowed" (dict "cpu" "750m")) }}
 {{- end }}

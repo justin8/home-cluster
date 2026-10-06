@@ -1,1 +1,1 @@
-{{- include "common.vpa" (dict "ctx" .) -}}
+{{- include "common.vpa" (dict "ctx" . "maxAllowed" (dict "cpu" "750m")) -}}
