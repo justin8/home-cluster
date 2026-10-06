@@ -1,5 +1,39 @@
-{{ include "common.vpa" (dict "ctx" . "name" "jellyfin" "maxAllowed" (dict "cpu" "750m")) }}
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: jellyfin
+  namespace: {{ .Release.Namespace }}
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: jellyfin
+  updatePolicy:
+    updateMode: "InPlaceOrRecreate"
+    minReplicas: 1
+  resourcePolicy:
+    containerPolicies:
+      - containerName: "*"
+        maxAllowed:
+          cpu: 750m
 {{- if and .Values.grpcWorker .Values.grpcWorker.enabled }}
 ---
-{{ include "common.vpa" (dict "ctx" . "name" "jellyfin-ffmpeg-worker" "targetKind" "DaemonSet" "maxAllowed" (dict "cpu" "750m")) }}
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: jellyfin-ffmpeg-worker
+  namespace: {{ .Release.Namespace }}
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: DaemonSet
+    name: jellyfin-ffmpeg-worker
+  updatePolicy:
+    updateMode: "InPlaceOrRecreate"
+    minReplicas: 1
+  resourcePolicy:
+    containerPolicies:
+      - containerName: "*"
+        maxAllowed:
+          cpu: 750m
 {{- end }}
