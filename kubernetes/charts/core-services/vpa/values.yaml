@@ -1,1 +1,6 @@
-vertical-pod-autoscaler: {}
+vertical-pod-autoscaler:
+  recommender:
+    extraArgs:
+      - --memory-aggregation-interval-count=35
+      - --memory-histogram-decay-half-life=168h
+      - --recommendation-margin-fraction=0.2
