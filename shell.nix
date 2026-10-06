@@ -1,6 +1,12 @@
 # shell.nix
 { pkgs ? import <nixpkgs> { } }:
 
+let
+  kubectl-krew = pkgs.runCommand "kubectl-krew" { } ''
+    mkdir -p $out/bin
+    ln -s ${pkgs.krew}/bin/krew $out/bin/kubectl-krew
+  '';
+in
 pkgs.mkShell {
   buildInputs = with pkgs; [
     age
@@ -12,8 +18,10 @@ pkgs.mkShell {
     hubble
     jq
     k9s
+    krew
     kubectl
     kubectl-cnpg
+    kubectl-krew
     kubernetes-helm
     kubeseal
     prettier
@@ -33,7 +41,22 @@ pkgs.mkShell {
     export TALOSCONFIG=$PWD/talos/clusterconfig/talosconfig
     export KUBECONFIG=$PWD/talos/clusterconfig/kubeconfig
     export SOPS_AGE_KEY_FILE=$PWD/.sops-age.key
-    export PATH=$PWD/scripts:$PATH
+    export PATH="''${KREW_ROOT:-$HOME/.krew}/bin:$PWD/scripts:$PATH"
+
+    # Install krew plugins if not available
+    for plugin in view-allocations ktop; do
+      cmd_hyphen="kubectl-$plugin"
+      cmd_underscore="kubectl-''${plugin//-/_}"
+      if ! command -v "$cmd_hyphen" >/dev/null 2>&1 && ! command -v "$cmd_underscore" >/dev/null 2>&1; then
+        echo "Installing kubectl $plugin plugin..."
+        kubectl krew install "$plugin"
+      fi
+    done
+
+    # Allow ktop to be run directly as `ktop` in addition to `kubectl ktop`
+    if command -v kubectl-ktop >/dev/null 2>&1 && ! command -v ktop >/dev/null 2>&1; then
+      ln -sf "$(command -v kubectl-ktop)" "''${KREW_ROOT:-$HOME/.krew}/bin/ktop"
+    fi
 
     git submodule update --init --recursive
 
