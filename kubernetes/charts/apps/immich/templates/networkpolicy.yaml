@@ -140,8 +140,6 @@ spec:
               protocol: TCP
             - port: "8000"
               protocol: TCP
-            - port: "9187"
-              protocol: TCP
   egress:
     # Peer replication
     - toEndpoints:

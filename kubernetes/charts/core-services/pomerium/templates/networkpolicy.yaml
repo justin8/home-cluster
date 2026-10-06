@@ -8,25 +8,31 @@ spec:
     matchLabels:
       app.kubernetes.io/name: pomerium
   ingress:
+    # Client web traffic (HTTPS, HTTP redirect, QUIC)
     - fromEntities:
         - host
         - world
         - cluster
       toPorts:
         - ports:
-            - port: "80"
-              protocol: TCP
             - port: "443"
               protocol: TCP
             - port: "443"
               protocol: UDP
-            - port: "8080"
-              protocol: TCP
             - port: "8443"
               protocol: TCP
-            - port: "5443"
+            - port: "80"
               protocol: TCP
-            - port: "9090"
+            - port: "8080"
+              protocol: TCP
+    # Pomerium databroker / control plane (inter-replica only)
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: {{ .Release.Namespace }}
+            app.kubernetes.io/name: pomerium
+      toPorts:
+        - ports:
+            - port: "5443"
               protocol: TCP
   egress:
     # Egress to all internal cluster backend services
