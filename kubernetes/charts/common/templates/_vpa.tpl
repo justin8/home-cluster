@@ -4,7 +4,8 @@
 {{- $targetKind := .targetKind | default "Deployment" -}}
 {{- $targetName := .targetName | default $name -}}
 {{- $targetApiVersion := .targetApiVersion | default "apps/v1" -}}
-{{- $updateMode := .updateMode | default "Off" -}}
+{{- $updateMode := .updateMode | default "InPlaceOrRecreate" -}}
+{{- $minReplicas := .minReplicas | default 1 | int -}}
 apiVersion: autoscaling.k8s.io/v1
 kind: VerticalPodAutoscaler
 metadata:
@@ -17,4 +18,5 @@ spec:
     name: {{ $targetName }}
   updatePolicy:
     updateMode: {{ $updateMode | quote }}
+    minReplicas: {{ $minReplicas }}
 {{- end -}}

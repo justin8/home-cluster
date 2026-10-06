@@ -4,3 +4,8 @@ vertical-pod-autoscaler:
       - --memory-aggregation-interval-count=35
       - --memory-histogram-decay-half-life=168h
       - --recommendation-margin-fraction=0.2
+  updater:
+    extraArgs:
+      - --in-place-skip-disruption-budget=true
+      - --feature-gates=InPlace=true
+      - --min-replicas=1
