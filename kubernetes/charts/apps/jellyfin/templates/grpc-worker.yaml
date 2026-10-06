@@ -60,8 +60,6 @@ spec:
               containerPort: 8080
               protocol: TCP
           resources:
-            requests:
-              gpu.intel.com/i915: "1"
             limits:
               gpu.intel.com/i915: "1"
           startupProbe:
