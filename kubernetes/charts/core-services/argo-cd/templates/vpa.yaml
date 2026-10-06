@@ -1,0 +1,9 @@
+{{ include "common.vpa" (dict "ctx" . "name" "argo-cd-server" "targetName" "argo-cd-argocd-server") }}
+---
+{{ include "common.vpa" (dict "ctx" . "name" "argo-cd-repo-server" "targetName" "argo-cd-argocd-repo-server") }}
+---
+{{ include "common.vpa" (dict "ctx" . "name" "argo-cd-application-controller" "targetKind" "StatefulSet" "targetName" "argo-cd-argocd-application-controller") }}
+---
+{{ include "common.vpa" (dict "ctx" . "name" "argo-cd-applicationset-controller" "targetName" "argo-cd-argocd-applicationset-controller") }}
+---
+{{ include "common.vpa" (dict "ctx" . "name" "argo-cd-redis" "targetName" "argo-cd-argocd-redis") }}

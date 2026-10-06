@@ -1,0 +1,3 @@
+{{ include "common.vpa" (dict "ctx" . "name" "pocketid") }}
+---
+{{ include "common.vpa" (dict "ctx" . "name" "pocket-id-operator") }}

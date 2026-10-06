@@ -1,0 +1,4 @@
+{{- range (list "esphome" "home-assistant" "mqtt" "zigbee2mqtt") }}
+---
+{{ include "common.vpa" (dict "ctx" $ "name" .) }}
+{{- end }}

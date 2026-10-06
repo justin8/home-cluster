@@ -1,0 +1,5 @@
+{{ include "common.vpa" (dict "ctx" . "name" "jellyfin") }}
+{{- if and .Values.grpcWorker .Values.grpcWorker.enabled }}
+---
+{{ include "common.vpa" (dict "ctx" . "name" "jellyfin-ffmpeg-worker" "targetKind" "DaemonSet") }}
+{{- end }}

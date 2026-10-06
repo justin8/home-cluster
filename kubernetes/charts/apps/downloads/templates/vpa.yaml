@@ -1,0 +1,4 @@
+{{- range (list "decluttarr" "prowlarr" "qbittorrent" "radarr" "sabnzbd" "seerr" "shelfmark" "sonarr") }}
+---
+{{ include "common.vpa" (dict "ctx" $ "name" .) }}
+{{- end }}

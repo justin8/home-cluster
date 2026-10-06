@@ -1,0 +1,11 @@
+{{ include "common.vpa" (dict "ctx" . "name" "pihole-primary") }}
+---
+{{ include "common.vpa" (dict "ctx" . "name" "pihole-secondary") }}
+---
+{{ include "common.vpa" (dict "ctx" . "name" "cloudflare-ddns") }}
+---
+{{ include "common.vpa" (dict "ctx" . "name" "dns-external-dns-cloudflare") }}
+---
+{{ include "common.vpa" (dict "ctx" . "name" "dns-external-dns-pihole") }}
+---
+{{ include "common.vpa" (dict "ctx" . "name" "dns-external-dns-pihole-secondary") }}

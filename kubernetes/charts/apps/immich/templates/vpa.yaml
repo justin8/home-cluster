@@ -1,0 +1,5 @@
+{{ include "common.vpa" (dict "ctx" . "name" "immich") }}
+---
+{{ include "common.vpa" (dict "ctx" . "name" "immich-ml" "targetName" "ml") }}
+---
+{{ include "common.vpa" (dict "ctx" . "name" "immich-redis" "targetName" "redis") }}
