@@ -19,12 +19,25 @@ spec:
             - port: "80"
               protocol: TCP
   egress:
+    # Pomerium Ingress & VIPs (for PocketID OIDC)
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: pomerium
+            app.kubernetes.io/name: pomerium
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+            - port: "8443"
+              protocol: TCP
     - toCIDRSet:
         - cidr: {{ .Values.network.pomeriumIngress }}/32
         - cidr: {{ .Values.network.privateIngress }}/32
       toPorts:
         - ports:
             - port: "443"
+              protocol: TCP
+            - port: "8443"
               protocol: TCP
     - toEntities:
         - world
