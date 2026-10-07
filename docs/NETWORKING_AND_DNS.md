@@ -122,6 +122,45 @@ Layer 2 address resolution (ARP for IPv4) for LoadBalancer Services is managed e
 
 ---
 
+## Zero-Trust Network Policies (CiliumNetworkPolicy)
+
+The cluster enforces a strict **Zero-Trust Default-Deny** model across all applications and core services using Cilium eBPF network policies.
+
+### 1. Architecture & Policy Standards
+
+- **Explicit YAML in Each Chart:** All policies are defined as explicit `CiliumNetworkPolicy` resources located at `<chart>/templates/networkpolicy.yaml`. No opaque helper macros are used.
+- **Cluster-Wide Baselines (`CiliumClusterwideNetworkPolicy`):** Universal baselines are deployed once in `core-services/cilium/templates/baseline-policies.yaml`:
+  - `default-allow-coredns`: Allows UDP/TCP egress on port 53 to `kube-dns` in `kube-system` for all pods (`enableDefaultDeny: { egress: false }`).
+  - `default-allow-host-probes`: Allows ingress from entity `host` (Kubelet readiness and liveness probes) for all pods (`enableDefaultDeny: { ingress: false }`).
+- **Default-Deny Posture:** Any workload targeted by a `CiliumNetworkPolicy` automatically operates in default-deny for both ingress and egress. Only explicitly declared paths are permitted.
+
+### 2. Multi-Tier Workload & Storage Rules
+
+- **Pomerium Ingress Translation:** Policies grant ingress from `app.kubernetes.io/name: pomerium` in namespace `pomerium` to the application's actual listening container port (e.g. 8123 for Home Assistant, 2283 for Immich, 32400 for Plex).
+- **NFS Volumes:** In-tree NFS volumes (`100.92.202.28:/mnt/pool/media`) and Longhorn volumes are mounted at the Talos host kernel / Kubelet level. Pod-level network policies do not intercept host NFS traffic and do not require egress rules on port 2049.
+- **CloudNativePG Databases:** CNPG cluster pods require:
+  - Port `5432`: Postgres client traffic and replication.
+  - Port `8000`: Patroni / instance manager status and peer synchronization.
+  - Port `443` (FQDN `s3.us-west-001.backblazeb2.com`): Nightly WAL archiving and backups to Backblaze B2.
+  - Ports `6443` and `443` (entities `kube-apiserver`, `host`, `remote-node`): Instance manager Kubernetes API server communication for leader lease acquisition and cluster CR watches.
+- **Metrics Scraping Policy:** Prometheus exporter ports (e.g., 9090, 9187) remain closed until a dedicated Prometheus monitoring stack is introduced with restricted pod selectors.
+
+### 3. Monitoring & Diagnostics via Hubble
+
+Real-time traffic flows and policy verdicts are observed via the Hubble CLI:
+
+```bash
+# Check dropped flows in a specific namespace
+direnv exec . rtk kubectl -n kube-system exec ds/cilium -c cilium-agent -- \
+  hubble observe --namespace <namespace> --verdict DROPPED --last 20
+
+# Observe cluster-wide dropped packets
+direnv exec . rtk kubectl -n kube-system exec ds/cilium -c cilium-agent -- \
+  hubble observe --verdict DROPPED --last 50
+```
+
+---
+
 ## Multus CNI Architecture
 
 **Multus CNI** is deployed alongside Cilium as a meta-CNI plugin.
