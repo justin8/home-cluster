@@ -159,3 +159,14 @@ spec:
         - ports:
             - port: "443"
               protocol: TCP
+    # Kubernetes API Server (instance manager & leader leases)
+    - toEntities:
+        - kube-apiserver
+        - host
+        - remote-node
+      toPorts:
+        - ports:
+            - port: "6443"
+              protocol: TCP
+            - port: "443"
+              protocol: TCP
