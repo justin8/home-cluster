@@ -108,6 +108,10 @@ spec:
           envFrom:
             - configMapRef:
                 name: home-automation-config
+          resources:
+            requests:
+              cpu: 25m
+              memory: 560Mi
           livenessProbe:
             httpGet:
               path: /

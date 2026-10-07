@@ -24,6 +24,10 @@ spec:
           ports:
             - containerPort: 6052
               name: http
+          resources:
+            requests:
+              cpu: 25m
+              memory: 250Mi
           livenessProbe:
             httpGet:
               path: /

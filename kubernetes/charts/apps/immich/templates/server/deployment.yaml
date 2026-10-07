@@ -123,6 +123,10 @@ spec:
             runAsGroup: {{ .Values.PGID }}
             capabilities:
               drop: ["ALL"]
+          resources:
+            requests:
+              cpu: 25m
+              memory: 2048Mi
           livenessProbe:
             httpGet:
               port: 2283

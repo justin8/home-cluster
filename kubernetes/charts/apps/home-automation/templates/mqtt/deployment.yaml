@@ -52,6 +52,10 @@ spec:
           ports:
             - containerPort: 1883
               name: mqtt
+          resources:
+            requests:
+              cpu: 25m
+              memory: 250Mi
           livenessProbe:
             exec:
               command:
