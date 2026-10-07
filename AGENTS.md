@@ -120,6 +120,10 @@ All ingresses always include: `preserve_host_header`, `pass_identity_headers`, `
 - **Credentials Secret:** The operator generates a secret named `{metadata.name}-oidc-credentials`.
 - **Secret Keys:** ALWAYS use lowercase keys as defined in `docs/AUTH.md` (e.g., `client_id`, `client_secret`, `issuer_url`). Refer to `docs/AUTH.md` for the full list of available keys and configuration details.
 - **Automated OIDC Syncing:** Many applications support OIDC only via internal configuration (database tables, JSON/XML files on PVCs) rather than native environment variable injection. To ensure disaster recovery, cluster restores, and secret rotations work seamlessly without manual intervention, ALWAYS automate the synchronization of credentials from `{metadata.name}-oidc-credentials` into the application's configuration store via an `initContainer` or startup script (see `docs/AUTH.md` for implemented patterns like Immich, Kavita, and Jellyfin).
+- **OIDC & Pomerium Egress Network Policy:** PocketID is exposed via Pomerium (`https://pocketid.<domain>`). When in-cluster workloads connect to the Pomerium VIP (`192.168.5.4:443`), Cilium eBPF socket-level load balancing (`connect4`) translates the destination socket directly to Pomerium proxy pods on container port `8443`. Every workload with an OIDC integration MUST include egress rules allowing:
+  1. `toEndpoints` matching `app.kubernetes.io/name: pomerium` in `namespace: pomerium` on ports `443` and `8443`.
+  2. `toCIDRSet` matching `network.pomeriumIngress/32` and `network.privateIngress/32` on ports `443` and `8443`.
+     Without both ports and endpoints, Cilium drops outbound OIDC discovery/token requests post-DNAT.
 
 ## Cluster Write Safety
 

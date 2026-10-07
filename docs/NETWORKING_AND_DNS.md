@@ -137,6 +137,10 @@ The cluster enforces a strict **Zero-Trust Default-Deny** model across all appli
 ### 2. Multi-Tier Workload & Storage Rules
 
 - **Pomerium Ingress Translation:** Policies grant ingress from `app.kubernetes.io/name: pomerium` in namespace `pomerium` to the application's actual listening container port (e.g. 8123 for Home Assistant, 2283 for Immich, 32400 for Plex).
+- **Pomerium Egress & Socket-LB (OIDC):** When applications connect out to Pomerium ingress endpoints (e.g. `https://pocketid.<domain>` for OIDC discovery or token exchange), Cilium eBPF socket-level load balancing rewrites the connection to `192.168.5.4:443` directly to backend Pomerium proxy pods on container port `8443`. Therefore, any workload requiring Pomerium egress MUST allow:
+  - `toEndpoints` matching `app.kubernetes.io/name: pomerium` in namespace `pomerium` on ports `443` and `8443`.
+  - `toCIDRSet` matching `network.pomeriumIngress/32` and `network.privateIngress/32` on ports `443` and `8443`.
+- **Inter-Service Communication (Cluster DNS):** For app-to-app integrations (e.g. Seerr to Jellyfin, Sonarr to qBittorrent), always prefer direct in-cluster service DNS (`<service>.<namespace>.svc.cluster.local:<port>`). Ingress policies on the destination service must explicitly allow `fromEndpoints` from the source application/namespace, avoiding unnecessary routing through Pomerium.
 - **NFS Volumes:** In-tree NFS volumes (`100.92.202.28:/mnt/pool/media`) and Longhorn volumes are mounted at the Talos host kernel / Kubelet level. Pod-level network policies do not intercept host NFS traffic and do not require egress rules on port 2049.
 - **CloudNativePG Databases:** CNPG cluster pods require:
   - Port `5432`: Postgres client traffic and replication.

@@ -131,3 +131,33 @@ Wherever an application does not natively read environment variables or Kubernet
   - Provides a single, secure entry point for all web traffic.
 - **Tinyauth (Legacy):**
   - Previously used for applications without native OIDC support. Native Pomerium integration is now preferred for all ingresses.
+
+## Network Policy Requirements for OIDC Clients
+
+Because Pocket ID discovery and token endpoints (`https://pocketid.<domain>`) are exposed through Pomerium, outbound requests to Pomerium VIPs are intercepted by Cilium's eBPF socket-level load balancing and DNATed to the Pomerium proxy pods on container port `8443`.
+
+Any application workload utilizing OIDC MUST have the following egress rules in its `CiliumNetworkPolicy`:
+
+```yaml
+  egress:
+    # Pomerium Ingress & VIPs (for PocketID OIDC)
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: pomerium
+            app.kubernetes.io/name: pomerium
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+            - port: "8443"
+              protocol: TCP
+    - toCIDRSet:
+        - cidr: {{ .Values.network.pomeriumIngress }}/32
+        - cidr: {{ .Values.network.privateIngress }}/32
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+            - port: "8443"
+              protocol: TCP
+```
