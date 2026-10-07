@@ -4,9 +4,6 @@ metadata:
   name: audiobookshelf
   namespace: {{ .Release.Namespace }}
 spec:
-  enableDefaultDeny:
-    ingress: false
-    egress: false
   endpointSelector:
     matchLabels:
       app: audiobookshelf

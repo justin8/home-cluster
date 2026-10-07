@@ -4,9 +4,6 @@ metadata:
   name: kavita
   namespace: {{ .Release.Namespace }}
 spec:
-  enableDefaultDeny:
-    ingress: false
-    egress: false
   endpointSelector:
     matchLabels:
       app: kavita

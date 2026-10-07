@@ -4,9 +4,6 @@ metadata:
   name: jellyfin
   namespace: {{ .Release.Namespace }}
 spec:
-  enableDefaultDeny:
-    ingress: false
-    egress: false
   endpointSelector:
     matchLabels:
       app: jellyfin
@@ -55,9 +52,6 @@ metadata:
   name: jellyfin-ffmpeg-worker
   namespace: {{ .Release.Namespace }}
 spec:
-  enableDefaultDeny:
-    ingress: false
-    egress: false
   endpointSelector:
     matchLabels:
       app: jellyfin-ffmpeg-worker
