@@ -34,12 +34,24 @@ spec:
             - port: "8096"
               protocol: TCP
   egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: pomerium
+            app.kubernetes.io/name: pomerium
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+            - port: "8443"
+              protocol: TCP
     - toCIDRSet:
         - cidr: {{ .Values.network.pomeriumIngress }}/32
         - cidr: {{ .Values.network.privateIngress }}/32
       toPorts:
         - ports:
             - port: "443"
+              protocol: TCP
+            - port: "8443"
               protocol: TCP
     {{- if and .Values.grpcWorker .Values.grpcWorker.enabled }}
     - toEndpoints:
