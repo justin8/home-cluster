@@ -197,8 +197,8 @@ spec:
             - port: "8000"
               protocol: TCP
     # Backblaze B2 S3 Backup
-    - toFQDNs:
-        - matchName: "s3.us-west-001.backblazeb2.com"
+    - toEntities:
+        - world
       toPorts:
         - ports:
             - port: "443"
