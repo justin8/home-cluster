@@ -4,9 +4,6 @@ metadata:
   name: home-assistant
   namespace: {{ .Release.Namespace }}
 spec:
-  enableDefaultDeny:
-    ingress: false
-    egress: false
   endpointSelector:
     matchLabels:
       app: home-assistant
@@ -57,9 +54,6 @@ metadata:
   name: zigbee2mqtt
   namespace: {{ .Release.Namespace }}
 spec:
-  enableDefaultDeny:
-    ingress: false
-    egress: false
   endpointSelector:
     matchLabels:
       app: zigbee2mqtt
@@ -94,9 +88,6 @@ metadata:
   name: mqtt
   namespace: {{ .Release.Namespace }}
 spec:
-  enableDefaultDeny:
-    ingress: false
-    egress: false
   endpointSelector:
     matchLabels:
       app: mqtt
@@ -133,9 +124,6 @@ metadata:
   name: esphome
   namespace: {{ .Release.Namespace }}
 spec:
-  enableDefaultDeny:
-    ingress: false
-    egress: false
   endpointSelector:
     matchLabels:
       app: esphome
@@ -162,9 +150,6 @@ metadata:
   name: homeassistant-db
   namespace: {{ .Release.Namespace }}
 spec:
-  enableDefaultDeny:
-    ingress: false
-    egress: false
   endpointSelector:
     matchLabels:
       cnpg.io/cluster: homeassistant-db
