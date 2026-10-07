@@ -77,6 +77,10 @@ spec:
         - ports:
             - port: "1883"
               protocol: TCP
+    - toCIDRSet:
+        - cidr: {{ .Values.network.lanIpRange }}
+    - toEntities:
+        - world
 ---
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
