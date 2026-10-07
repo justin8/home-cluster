@@ -60,9 +60,6 @@ pkgs.mkShell {
 
     git submodule update --init --recursive
 
-    # Cleanup old talos configs
-    rm -rf talos/clusterconfig
-
     # Install git hooks
     echo "Installing git hooks..."
     cp git-hooks/* .git/hooks/
