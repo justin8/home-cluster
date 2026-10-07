@@ -18,6 +18,15 @@ spec:
         - ports:
             - port: "8096"
               protocol: TCP
+    # Ingress from Seerr (downloads namespace)
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: downloads
+            app: seerr
+      toPorts:
+        - ports:
+            - port: "8096"
+              protocol: TCP
     - fromCIDRSet:
         - cidr: {{ .Values.network.lanIpRange }}
       toPorts:
