@@ -4,6 +4,9 @@ metadata:
   name: pomerium
   namespace: {{ .Release.Namespace }}
 spec:
+  enableDefaultDeny:
+    ingress: false
+    egress: false
   endpointSelector:
     matchLabels:
       app.kubernetes.io/name: pomerium

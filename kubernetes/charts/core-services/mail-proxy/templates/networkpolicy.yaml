@@ -4,6 +4,9 @@ metadata:
   name: mail-proxy
   namespace: {{ .Release.Namespace }}
 spec:
+  enableDefaultDeny:
+    ingress: false
+    egress: false
   endpointSelector:
     matchLabels:
       app: mail-proxy

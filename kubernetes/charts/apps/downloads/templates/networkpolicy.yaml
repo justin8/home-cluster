@@ -4,6 +4,9 @@ metadata:
   name: downloads-workloads
   namespace: {{ .Release.Namespace }}
 spec:
+  enableDefaultDeny:
+    ingress: false
+    egress: false
   endpointSelector:
     matchExpressions:
       - key: app
