@@ -4,9 +4,6 @@ metadata:
   name: pocket-id
   namespace: {{ .Release.Namespace }}
 spec:
-  enableDefaultDeny:
-    ingress: false
-    egress: false
   endpointSelector:
     matchLabels:
       app.kubernetes.io/name: pocket-id
@@ -45,9 +42,6 @@ metadata:
   name: pocket-id-operator
   namespace: {{ .Release.Namespace }}
 spec:
-  enableDefaultDeny:
-    ingress: false
-    egress: false
   endpointSelector:
     matchLabels:
       app.kubernetes.io/name: pocket-id-operator
@@ -66,3 +60,4 @@ spec:
     - toEntities:
         - host
         - remote-node
+        - kube-apiserver
