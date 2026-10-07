@@ -111,7 +111,17 @@ spec:
         - ports:
             - port: "5000"
               protocol: TCP
-    # PocketID OIDC via Pomerium VIPs
+    # Pomerium Ingress & VIPs (for jellyfin.dray.id.au endpoint, PocketID OIDC)
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: pomerium
+            app.kubernetes.io/name: pomerium
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+            - port: "8443"
+              protocol: TCP
     - toCIDRSet:
         - cidr: {{ .Values.network.pomeriumIngress }}/32
         - cidr: {{ .Values.network.privateIngress }}/32
@@ -119,6 +129,8 @@ spec:
         - ports:
             - port: "443"
               protocol: TCP
-    # External Indexers, Trackers, Swarms, Usenet, Metadata
+            - port: "8443"
+              protocol: TCP
+    # Outbound access to world (external indexers, trackers, swarms, usenet, metadata, APIs)
     - toEntities:
         - world
