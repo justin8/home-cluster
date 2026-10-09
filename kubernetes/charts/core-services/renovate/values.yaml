@@ -1,0 +1,24 @@
+renovate:
+  renovate:
+    config: |
+      {
+        "platform": "github",
+        "autodiscover": false,
+        "repositories": [
+          "justin8/home-cluster"
+        ]
+      }
+  cronjob:
+    schedule: "*/30 * * * *"
+    timeZone: "America/Los_Angeles"
+    concurrencyPolicy: "Forbid"
+    failedJobsHistoryLimit: 3
+    successfulJobsHistoryLimit: 1
+    jobRestartPolicy: "Never"
+  existingSecret: "renovate-secret"
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      memory: 2Gi
