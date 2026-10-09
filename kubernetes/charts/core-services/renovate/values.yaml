@@ -3,10 +3,11 @@ renovate:
     config: |
       {
         "platform": "github",
-        "autodiscover": false,
-        "repositories": [
-          "justin8/home-cluster"
-        ]
+        "autodiscover": true,
+        "autodiscoverFilter": [
+          "justin8/*"
+        ],
+        "onboarding": false
       }
   cronjob:
     schedule: "*/30 * * * *"
