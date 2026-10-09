@@ -10,7 +10,6 @@ renovate:
       }
   cronjob:
     schedule: "*/30 * * * *"
-    timeZone: "America/Los_Angeles"
     concurrencyPolicy: "Forbid"
     failedJobsHistoryLimit: 3
     successfulJobsHistoryLimit: 1
