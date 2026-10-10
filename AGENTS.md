@@ -164,6 +164,13 @@ egress:
             protocol: TCP
 ```
 
+## Hardware Acceleration & AI/ML Workloads
+
+When adding, creating, or deploying any software or service that clearly supports hardware encoding/decoding (e.g., video transcoding, Intel QuickSync/VAAPI) or AI/ML features (e.g., facial recognition, object detection, OCR, text/image embeddings, LLMs):
+
+- **Proactive Inquiry:** ALWAYS ask the user beforehand whether hardware acceleration or AI/ML features should be enabled and configured before drafting or creating the service manifests.
+- **Hardware Integration:** When enabled, ensure required GPU device allocations (e.g., `gpu.intel.com/i915: "1"` limits for Intel nodes), required device passthrough, and accelerator-specific container image variants (such as `-openvino`) are explicitly defined.
+
 ## Cluster Write Safety
 
 **NEVER run write/mutating commands against the Kubernetes cluster without explicit user instruction.**
