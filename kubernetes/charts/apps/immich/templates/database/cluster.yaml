@@ -50,39 +50,6 @@ spec:
     #   secret:
     #     name: immich-database-app
 
-  externalClusters:
-    - name: immich-database-b2-backup
-      barmanObjectStore:
-        destinationPath: {{ .Values.cnpg.backup.destinationPath }}
-        serverName: immich-database-v2
-        endpointURL: {{ .Values.cnpg.backup.endpointURL }}
-        s3Credentials:
-          accessKeyId:
-            name: {{ .Values.cnpg.backup.secretName }}
-            key: AWS_ACCESS_KEY_ID
-          secretAccessKey:
-            name: {{ .Values.cnpg.backup.secretName }}
-            key: AWS_SECRET_ACCESS_KEY
-
-  backup:
-    barmanObjectStore:
-      destinationPath: {{ .Values.cnpg.backup.destinationPath }}
-      serverName: immich-database-v3
-      endpointURL: {{ .Values.cnpg.backup.endpointURL }}
-      s3Credentials:
-        accessKeyId:
-          name: {{ .Values.cnpg.backup.secretName }}
-          key: AWS_ACCESS_KEY_ID
-        secretAccessKey:
-          name: {{ .Values.cnpg.backup.secretName }}
-          key: AWS_SECRET_ACCESS_KEY
-      wal:
-        compression: gzip
-        maxParallel: 2
-      data:
-        compression: gzip
-    retentionPolicy: {{ .Values.cnpg.backup.retentionPolicy | quote }}
-
   storage:
     size: {{ .Values.databaseVolumeSizeGi }}Gi
     storageClass: longhorn-v2
