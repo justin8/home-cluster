@@ -1,1 +1,1 @@
-{{- include "common.longhornVolume" (dict "ctx" . "name" "pomerium-storage-v2" "sizeGi" (.Values.storageVolumeSizeGi | default 1) "backups" "disabled") -}}
+{{- include "common.longhornVolume" (dict "ctx" . "name" "pomerium-storage" "sizeGi" (.Values.storageVolumeSizeGi | default 1) "backups" "disabled") -}}

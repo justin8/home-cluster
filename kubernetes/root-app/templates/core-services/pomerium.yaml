@@ -51,7 +51,7 @@ spec:
                 value:
                   name: databroker-storage
                   persistentVolumeClaim:
-                    claimName: pomerium-storage-v2
+                    claimName: pomerium-storage
               - op: add
                 path: /spec/template/spec/containers/0/volumeMounts/-
                 value:
