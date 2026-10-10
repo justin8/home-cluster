@@ -27,8 +27,10 @@ spec:
             - port: "1411"
               protocol: TCP
   egress:
-    - toFQDNs:
-        - matchName: "email-smtp.us-west-2.amazonaws.com"
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: mail-proxy
+            app: mail-proxy
       toPorts:
         - ports:
             - port: "587"
