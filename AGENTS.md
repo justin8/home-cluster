@@ -125,6 +125,33 @@ All ingresses always include: `preserve_host_header`, `pass_identity_headers`, `
   2. `toCIDRSet` matching `network.pomeriumIngress/32` and `network.privateIngress/32` on ports `443` and `8443`.
      Without both ports and endpoints, Cilium drops outbound OIDC discovery/token requests post-DNAT.
 
+## Email & Outbound Mail Pattern (`mail-proxy`)
+
+Workloads in the cluster MUST NEVER connect directly to external SMTP providers (such as AWS SES) or store cloud SMTP credentials. All outbound emails must be relayed through the in-cluster Postfix proxy (`mail-proxy`).
+
+### Configuration Standards
+
+- **Host & Port:** `smtp.mail-proxy.svc.cluster.local:587` (or port `25`).
+- **Authentication:** None. Pods within the cluster network (`10.0.0.0/8`) are trusted by Postfix `mynetworks`. Do not configure SMTP usernames or passwords.
+- **TLS:** `none` (or opportunistic). Postfix uses internal opportunistic TLS with a self-signed certificate, so client verification should be disabled (`tls: none`).
+- **Sender Address Domain:** All sender addresses MUST use the cluster domain (`*@{{ .Values.domain }}` or `*@dray.id.au`, e.g. `<service>@{{ .Values.domain }}`). Postfix enforces `ALLOWED_SENDER_DOMAINS` (`dray.id.au`) and will reject emails sent from personal or external domains (e.g. `dray.be`).
+
+### Cilium Egress Network Policy
+
+Any workload sending email must allow egress to `mail-proxy` pods:
+
+```yaml
+egress:
+  - toEndpoints:
+      - matchLabels:
+          k8s:io.kubernetes.pod.namespace: mail-proxy
+          app: mail-proxy
+    toPorts:
+      - ports:
+          - port: "587"
+            protocol: TCP
+```
+
 ## Cluster Write Safety
 
 **NEVER run write/mutating commands against the Kubernetes cluster without explicit user instruction.**
