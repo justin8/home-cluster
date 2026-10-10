@@ -1,14 +1,23 @@
 renovate:
   renovate:
+    configIsJavaScript: true
     config: |
-      {
-        "platform": "github",
-        "autodiscover": true,
-        "autodiscoverFilter": [
-          "justin8/*"
+      module.exports = {
+        platform: 'github',
+        autodiscover: true,
+        autodiscoverFilter: [
+          'justin8/*',
         ],
-        "onboarding": false
-      }
+        onboarding: false,
+        hostRules: [
+          {
+            matchHost: 'ghcr.io',
+            hostType: 'docker',
+            username: 'justin8',
+            password: process.env.RENOVATE_TOKEN,
+          },
+        ],
+      };
   cronjob:
     schedule: "0 * * * *"
     concurrencyPolicy: "Forbid"
