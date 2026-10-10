@@ -43,6 +43,18 @@ Always use the explicit three-resource pattern for Longhorn volumes for applicat
 
 **Exceptions:** Do NOT use this pattern for managed databases (e.g., CloudNativePG) or services that require dynamic provisioning for horizontal scaling/failover. These services should use dynamic provisioning (PVC-only with `storageClassName: longhorn`).
 
+### Volume Naming Standards
+
+- **Fresh Volumes:** NEVER use versioned suffixes (e.g. `-v2`). Fresh volume names must always be clean and descriptive (e.g. `pomerium-storage`, not `pomerium-storage-v2`).
+- **Restored / Migration Volumes Only:** Suffixes like `-v2` are strictly reserved for situations where a volume is restored from backup or migrated and the original volume name is already taken or in use by Longhorn.
+
+### Single-Replica Deployment Volume Mounts
+
+When attaching a single-instance Longhorn volume (`ReadWriteOnce`) to a `Deployment`:
+
+1. **Deployment Strategy:** Always configure `strategy: type: RollingUpdate` with `rollingUpdate: { maxSurge: 0, maxUnavailable: 1 }`. This guarantees the old pod terminates and detaches the volume before the new pod schedules, preventing multi-attach deadlocks while avoiding Server-Side Apply validation errors that occur when switching to `type: Recreate`.
+2. **Non-Root Permissions (`fsGroup`):** For non-root container workloads (e.g. `runAsUser: 65532`), always set pod-level `securityContext.fsGroup` matching the container group/user so the pod has write permissions to the freshly mounted ext4 volume.
+
 ### Longhorn Volumes (Config/Data)
 
 Every manual volume requires:
