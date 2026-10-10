@@ -54,7 +54,7 @@ spec:
     - name: immich-database-b2-backup
       barmanObjectStore:
         destinationPath: {{ .Values.cnpg.backup.destinationPath }}
-        serverName: immich-database
+        serverName: immich-database-v2
         endpointURL: {{ .Values.cnpg.backup.endpointURL }}
         s3Credentials:
           accessKeyId:
@@ -67,7 +67,7 @@ spec:
   backup:
     barmanObjectStore:
       destinationPath: {{ .Values.cnpg.backup.destinationPath }}
-      serverName: immich-database-v2
+      serverName: immich-database-v3
       endpointURL: {{ .Values.cnpg.backup.endpointURL }}
       s3Credentials:
         accessKeyId:

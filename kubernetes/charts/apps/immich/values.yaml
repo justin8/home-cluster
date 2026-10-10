@@ -1,6 +1,6 @@
 mlVolumeSizeGi: 10
 databaseEnabled: true
-databaseVolumeSizeGi: 10
+databaseVolumeSizeGi: 20
 
 images:
   server:
