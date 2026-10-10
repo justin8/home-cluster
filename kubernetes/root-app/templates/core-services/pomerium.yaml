@@ -34,8 +34,26 @@ spec:
               - op: replace
                 path: /spec/replicas
                 value: 1
+              - op: add
+                path: /spec/strategy
+                value:
+                  type: Recreate
               - op: remove
                 path: /spec/template/spec/containers/0/resources
+              - op: add
+                path: /spec/template/spec/securityContext/fsGroup
+                value: 65532
+              - op: add
+                path: /spec/template/spec/volumes/-
+                value:
+                  name: databroker-storage
+                  persistentVolumeClaim:
+                    claimName: pomerium-storage-v2
+              - op: add
+                path: /spec/template/spec/containers/0/volumeMounts/-
+                value:
+                  name: databroker-storage
+                  mountPath: /var/pomerium/databroker
               - op: add
                 path: /spec/template/spec/affinity
                 value:
