@@ -36,6 +36,8 @@ spec:
             requests:
               cpu: 25m
               memory: 2048Mi
+            limits:
+              gpu.intel.com/i915: "1"
           livenessProbe:
             httpGet:
               path: /ping

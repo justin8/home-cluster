@@ -9,7 +9,7 @@ images:
     pullPolicy: IfNotPresent
   machineLearning:
     repository: ghcr.io/immich-app/immich-machine-learning
-    tag: v3.3.1
+    tag: v3.3.1-openvino
     pullPolicy: IfNotPresent
   redis:
     repository: docker.io/valkey/valkey
