@@ -57,6 +57,19 @@
     {
       "matchPackageNames": ["siderolabs/talos", "kubernetes/kubernetes", "/longhorn/"],
       "automerge": false
+    },
+    {
+      "matchPackageNames": ["ghcr.io/immich-app/immich-server"],
+      "overrideDatasource": "github-releases",
+      "overridePackageName": "immich-app/immich"
+    },
+    {
+      "matchPackageNames": [
+        "ghcr.io/immich-app/immich-server",
+        "ghcr.io/immich-app/immich-machine-learning",
+        "immich-app/immich"
+      ],
+      "groupName": "immich monorepo"
     }
   ],
   "helm-values": {
