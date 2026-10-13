@@ -32,6 +32,7 @@ spec:
             runAsNonRoot: true
             runAsUser: {{ .Values.PUID }}
             runAsGroup: {{ .Values.PGID }}
+            readOnlyRootFilesystem: true
             capabilities:
               drop: ["ALL"]
           volumeMounts:
@@ -41,6 +42,8 @@ spec:
               mountPath: /metadata
             - name: books
               mountPath: /books
+            - name: tmp
+              mountPath: /tmp
       volumes:
         - name: config
           persistentVolumeClaim:
@@ -52,3 +55,6 @@ spec:
           nfs:
             server: {{ .Values.network.storageServer }}
             path: /mnt/pool/media/books
+        - name: tmp
+          emptyDir: {}
+
