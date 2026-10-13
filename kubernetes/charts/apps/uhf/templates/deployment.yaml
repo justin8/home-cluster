@@ -57,12 +57,16 @@ spec:
               port: 8000
             initialDelaySeconds: 10
             periodSeconds: 10
+          securityContext:
+            readOnlyRootFilesystem: true
           volumeMounts:
             - name: data
               mountPath: /var/lib/uhf-server
             - name: recordings
               mountPath: /recordings
               subPath: recordings
+            - name: tmp
+              mountPath: /tmp
       volumes:
         - name: data
           persistentVolumeClaim:
@@ -71,3 +75,6 @@ spec:
           nfs:
             server: {{ .Values.network.storageServer }}
             path: /mnt/pool/media
+        - name: tmp
+          emptyDir: {}
+
