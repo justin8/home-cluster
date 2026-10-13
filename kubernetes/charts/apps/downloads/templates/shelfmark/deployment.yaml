@@ -30,6 +30,8 @@ spec:
               port: 8084
             initialDelaySeconds: 60
             periodSeconds: 30
+          securityContext:
+            readOnlyRootFilesystem: true
           volumeMounts:
             - name: config
               mountPath: /config
@@ -37,6 +39,8 @@ spec:
               mountPath: /books
             - name: downloads
               mountPath: /mnt/pool/media/downloads
+            - name: tmp
+              mountPath: /tmp
       volumes:
         - name: config
           persistentVolumeClaim:
@@ -49,3 +53,6 @@ spec:
           nfs:
             server: {{ .Values.network.storageServer }}
             path: /mnt/pool/media/downloads
+        - name: tmp
+          emptyDir: {}
+
