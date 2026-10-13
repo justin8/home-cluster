@@ -44,10 +44,6 @@ spec:
               value: {{ .Values.PUID | quote }}
             - name: PGID
               value: {{ .Values.PGID | quote }}
-            - name: S6_READ_ONLY_ROOT
-              value: "1"
-          securityContext:
-            readOnlyRootFilesystem: true
           livenessProbe:
             httpGet:
               port: 8384
@@ -63,12 +59,6 @@ spec:
               mountPath: /config
             - name: data
               mountPath: /data
-            - name: tmp
-              mountPath: /tmp
-            - name: run
-              mountPath: /run
-            - name: log
-              mountPath: /var/log
       volumes:
         - name: config
           persistentVolumeClaim:
@@ -77,9 +67,3 @@ spec:
           nfs:
             server: {{ .Values.network.storageServer }}
             path: {{ .Values.appStoragePath }}/syncthing
-        - name: tmp
-          emptyDir: {}
-        - name: run
-          emptyDir: {}
-        - name: log
-          emptyDir: {}
