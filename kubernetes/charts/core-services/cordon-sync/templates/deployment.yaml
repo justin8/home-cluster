@@ -25,11 +25,24 @@ spec:
           command:
             - /bin/sh
             - /scripts/sync.sh
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          env:
+            - name: HOME
+              value: /tmp
           volumeMounts:
             - name: script
               mountPath: /scripts
+            - name: tmp
+              mountPath: /tmp
       volumes:
         - name: script
           configMap:
             name: cordon-sync-script
             defaultMode: 0755
+        - name: tmp
+          emptyDir: {}
+
