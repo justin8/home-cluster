@@ -28,6 +28,7 @@ spec:
           securityContext:
             runAsUser: {{ .Values.PUID }}
             runAsGroup: {{ .Values.PGID }}
+            readOnlyRootFilesystem: true
           command:
             - sh
             - -c
@@ -41,6 +42,7 @@ spec:
           securityContext:
             runAsUser: {{ .Values.PUID }}
             runAsGroup: {{ .Values.PGID }}
+            readOnlyRootFilesystem: true
           env:
             - name: OIDC_ISSUER
               valueFrom:
@@ -76,6 +78,8 @@ spec:
               mountPath: /scripts
             - name: jellyfin-web
               mountPath: /web-override
+            - name: tmp
+              mountPath: /tmp
 
       containers:
         - name: jellyfin
@@ -84,6 +88,7 @@ spec:
           securityContext:
             runAsUser: {{ .Values.PUID }}
             runAsGroup: {{ .Values.PGID }}
+            readOnlyRootFilesystem: true
           ports:
             - containerPort: 8096
               name: http
@@ -117,6 +122,8 @@ spec:
               mountPath: /cache
             - name: media
               mountPath: /mnt/pool/media
+            - name: tmp
+              mountPath: /tmp
       volumes:
         - name: init-script
           configMap:
@@ -134,4 +141,6 @@ spec:
           nfs:
             server: {{ .Values.network.storageServer }}
             path: /mnt/pool/media
+        - name: tmp
+          emptyDir: {}
 
