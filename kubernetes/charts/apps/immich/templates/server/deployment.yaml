@@ -66,6 +66,8 @@ spec:
                 secretKeyRef:
                   name: immich-oidc-credentials
                   key: discovery_url
+          securityContext:
+            readOnlyRootFilesystem: true
           command:
             - /bin/sh
             - -cu
@@ -79,6 +81,9 @@ spec:
                   -c "UPDATE system_metadata SET value = jsonb_set(jsonb_set(jsonb_set(value, '{oauth,clientId}', to_jsonb('${OIDC_CLIENT_ID}'::text)), '{oauth,clientSecret}', to_jsonb('${OIDC_CLIENT_SECRET}'::text)), '{oauth,issuerUrl}', to_jsonb('${OIDC_ISSUER_URL}'::text)) WHERE key = 'system-config' AND value ? 'oauth';"
                 echo "OIDC credentials synced successfully."
               fi
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
       containers:
         - name: immich-server
           image: "{{ .Values.images.server.repository }}:{{ .Values.images.server.tag }}"
@@ -118,6 +123,7 @@ spec:
                   key: port
           securityContext:
             allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
             runAsNonRoot: true
             runAsUser: {{ .Values.PUID }}
             runAsGroup: {{ .Values.PGID }}
@@ -142,8 +148,12 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /data
+            - name: tmp
+              mountPath: /tmp
       volumes:
         - name: data
           nfs:
             server: {{ .Values.network.storageServer }}
             path: {{ .Values.appStoragePath }}/immich
+        - name: tmp
+          emptyDir: {}
