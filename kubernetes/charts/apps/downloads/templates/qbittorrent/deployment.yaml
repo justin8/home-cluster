@@ -23,8 +23,6 @@ spec:
         - name: resolve-wireguard-endpoint
           image: "{{ .Values.images.busybox.repository }}:{{ .Values.images.busybox.tag }}"
           imagePullPolicy: {{ .Values.images.busybox.pullPolicy }}
-          securityContext:
-            readOnlyRootFilesystem: true
           command:
             - sh
             - -c
@@ -44,8 +42,6 @@ spec:
               mountPath: /etc/wireguard-raw
             - name: vpn-config
               mountPath: /gluetun/wireguard
-            - name: tmp
-              mountPath: /tmp
       containers:
         - name: gluetun
           image: "{{ .Values.images.gluetun.repository }}:{{ .Values.images.gluetun.tag }}"
@@ -58,7 +54,6 @@ spec:
               while ip -6 rule del table 51820 2>/dev/null; do :; done
               exec /gluetun-entrypoint
           securityContext:
-            readOnlyRootFilesystem: true
             capabilities:
               add:
                 - NET_ADMIN
@@ -87,8 +82,6 @@ spec:
               mountPath: /gluetun/wireguard
             - name: dev-tun
               mountPath: /dev/net/tun
-            - name: tmp
-              mountPath: /tmp
         - name: qbittorrent
           image: "{{ .Values.images.qbittorrent.repository }}:{{ .Values.images.qbittorrent.tag }}"
           imagePullPolicy: {{ .Values.images.qbittorrent.pullPolicy }}
@@ -97,11 +90,6 @@ spec:
           envFrom:
             - configMapRef:
                 name: qbittorrent-config
-          env:
-            - name: S6_READ_ONLY_ROOT
-              value: "1"
-          securityContext:
-            readOnlyRootFilesystem: true
           livenessProbe:
             httpGet:
               path: /
@@ -114,12 +102,6 @@ spec:
               mountPath: /config
             - name: downloads
               mountPath: /mnt/pool/media/downloads
-            - name: tmp
-              mountPath: /tmp
-            - name: run
-              mountPath: /run
-            - name: log
-              mountPath: /var/log
       volumes:
         - name: config
           persistentVolumeClaim:
@@ -136,9 +118,3 @@ spec:
         - name: dev-tun
           hostPath:
             path: /dev/net/tun
-        - name: tmp
-          emptyDir: {}
-        - name: run
-          emptyDir: {}
-        - name: log
-          emptyDir: {}
