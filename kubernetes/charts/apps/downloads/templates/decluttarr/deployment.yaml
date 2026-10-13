@@ -39,18 +39,11 @@ spec:
                 secretKeyRef:
                   name: decluttarr-secrets
                   key: SABNZBD_KEY
-          securityContext:
-            readOnlyRootFilesystem: true
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop: ["ALL"]
           volumeMounts:
             - name: config
               mountPath: /app/config
             - name: media
               mountPath: /mnt/pool/media
-            - name: tmp
-              mountPath: /tmp
       volumes:
         - name: config
           configMap:
@@ -59,6 +52,3 @@ spec:
           nfs:
             server: {{ .Values.network.storageServer }}
             path: /mnt/pool/media
-        - name: tmp
-          emptyDir: {}
-
