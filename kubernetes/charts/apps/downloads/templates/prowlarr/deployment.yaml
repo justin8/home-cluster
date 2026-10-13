@@ -24,6 +24,11 @@ spec:
           envFrom:
             - configMapRef:
                 name: downloads-config
+          env:
+            - name: S6_READ_ONLY_ROOT
+              value: "1"
+          securityContext:
+            readOnlyRootFilesystem: true
           livenessProbe:
             httpGet:
               path: /
@@ -33,7 +38,20 @@ spec:
           volumeMounts:
             - name: config
               mountPath: /config
+            - name: tmp
+              mountPath: /tmp
+            - name: run
+              mountPath: /run
+            - name: log
+              mountPath: /var/log
       volumes:
         - name: config
           persistentVolumeClaim:
             claimName: prowlarr-config-v2
+        - name: tmp
+          emptyDir: {}
+        - name: run
+          emptyDir: {}
+        - name: log
+          emptyDir: {}
+
