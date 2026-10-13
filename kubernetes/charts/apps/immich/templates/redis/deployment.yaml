@@ -27,6 +27,8 @@ spec:
           envFrom:
             - secretRef:
                 name: immich-secrets
+          securityContext:
+            readOnlyRootFilesystem: true
           resources:
             requests:
               cpu: 25m
@@ -39,3 +41,9 @@ spec:
             exec:
               command: ["/bin/sh", "-c", 'valkey-cli -a "$REDIS_PASSWORD" ping']
             initialDelaySeconds: 30
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}
