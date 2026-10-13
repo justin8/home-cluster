@@ -61,9 +61,13 @@ spec:
               else
                 echo "$CONFIG_FILE not found, skipping."
               fi
+          securityContext:
+            readOnlyRootFilesystem: true
           volumeMounts:
             - name: config
               mountPath: /config
+            - name: tmp
+              mountPath: /tmp
       containers:
         - name: kavita
           image: "{{ .Values.images.app.repository }}:{{ .Values.images.app.tag }}"
@@ -77,11 +81,21 @@ spec:
               value: {{ .Values.PUID | quote }}
             - name: PGID
               value: {{ .Values.PGID | quote }}
+            - name: S6_READ_ONLY_ROOT
+              value: "1"
+          securityContext:
+            readOnlyRootFilesystem: true
           volumeMounts:
             - name: config
               mountPath: /config
             - name: media
               mountPath: /mnt/pool/media
+            - name: tmp
+              mountPath: /tmp
+            - name: run
+              mountPath: /run
+            - name: log
+              mountPath: /var/log
       volumes:
         - name: config
           persistentVolumeClaim:
@@ -90,3 +104,10 @@ spec:
           nfs:
             server: {{ .Values.network.storageServer }}
             path: /mnt/pool/media
+        - name: tmp
+          emptyDir: {}
+        - name: run
+          emptyDir: {}
+        - name: log
+          emptyDir: {}
+
