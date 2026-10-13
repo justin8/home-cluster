@@ -31,7 +31,7 @@ spec:
             allowPrivilegeEscalation: false
             capabilities:
               drop: ["ALL"]
-            readOnlyRootFilesystem: false
+            readOnlyRootFilesystem: true
             runAsNonRoot: true
             privileged: false
             runAsUser: 1000
@@ -47,7 +47,16 @@ spec:
           volumeMounts:
             - name: config
               mountPath: /app/config
+            - name: tmp
+              mountPath: /tmp
+            - name: home
+              mountPath: /home/node
       volumes:
         - name: config
           persistentVolumeClaim:
             claimName: seerr-config-v2
+        - name: tmp
+          emptyDir: {}
+        - name: home
+          emptyDir: {}
+
