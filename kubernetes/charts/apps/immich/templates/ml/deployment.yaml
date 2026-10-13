@@ -30,6 +30,7 @@ spec:
                 name: immich-secrets
           securityContext:
             allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
             capabilities:
               drop: ["ALL"]
           resources:
@@ -55,7 +56,15 @@ spec:
           volumeMounts:
             - name: model-cache
               mountPath: /cache
+            - name: tmp
+              mountPath: /tmp
+            - name: root
+              mountPath: /root
       volumes:
         - name: model-cache
           persistentVolumeClaim:
             claimName: immich-model-cache-v2
+        - name: tmp
+          emptyDir: {}
+        - name: root
+          emptyDir: {}
