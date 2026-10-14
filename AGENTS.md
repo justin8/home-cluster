@@ -18,6 +18,10 @@ helm search repo <repo-name>/<chart-name>
 
 Pin the dependency to the latest stable version found. Never guess or use placeholder versions.
 
+## Container Image Standards
+
+- **Semantic Versioning:** Always use explicit semantic version tags (e.g. `2.1.6`, `v1.4.0`) where available. Never use `latest` or unversioned tags.
+
 ## ArgoCD Standards
 
 - **Application Manifests:** Must follow this strict checklist for `kubernetes/root-app/templates/`:
