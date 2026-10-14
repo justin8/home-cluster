@@ -7,6 +7,7 @@ data:
   mosquitto.conf: |
     persistence true
     persistence_location /mosquitto/data/
+    autosave_interval 300
     log_dest stdout
 
     listener 1883 0.0.0.0

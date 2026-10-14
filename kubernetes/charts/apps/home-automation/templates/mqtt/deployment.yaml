@@ -12,6 +12,8 @@ spec:
       app: mqtt
   template:
     metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/mqtt/configmap.yaml") . | sha256sum }}
       labels:
         app: mqtt
     spec:
