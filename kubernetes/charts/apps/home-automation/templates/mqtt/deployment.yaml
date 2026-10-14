@@ -19,6 +19,8 @@ spec:
         - name: mqtt-init
           image: "{{ .Values.images.mqtt.repository }}:{{ .Values.images.mqtt.tag }}"
           imagePullPolicy: {{ .Values.images.mqtt.pullPolicy }}
+          securityContext:
+            readOnlyRootFilesystem: true
           command:
             - sh
             - -c
@@ -45,10 +47,14 @@ spec:
             - name: mqtt-test-secret
               mountPath: /run/secrets/mqtt-test
               readOnly: true
+            - name: tmp
+              mountPath: /tmp
       containers:
         - name: mosquitto
           image: "{{ .Values.images.mqtt.repository }}:{{ .Values.images.mqtt.tag }}"
           imagePullPolicy: {{ .Values.images.mqtt.pullPolicy }}
+          securityContext:
+            readOnlyRootFilesystem: true
           ports:
             - containerPort: 1883
               name: mqtt
@@ -80,6 +86,8 @@ spec:
             - name: mqtt-test-secret
               mountPath: /run/secrets/mqtt-test
               readOnly: true
+            - name: tmp
+              mountPath: /tmp
       volumes:
         - name: mosquitto-data
           persistentVolumeClaim:
@@ -96,3 +104,5 @@ spec:
         - name: mqtt-test-secret
           secret:
             secretName: mqtt-test-credentials
+        - name: tmp
+          emptyDir: {}
