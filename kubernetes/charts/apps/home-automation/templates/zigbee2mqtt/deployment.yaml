@@ -19,6 +19,8 @@ spec:
         - name: zigbee2mqtt
           image: "{{ .Values.images.zigbee2mqtt.repository }}:{{ .Values.images.zigbee2mqtt.tag }}"
           imagePullPolicy: {{ .Values.images.zigbee2mqtt.pullPolicy }}
+          securityContext:
+            readOnlyRootFilesystem: true
           ports:
             - containerPort: 8080
               name: http
@@ -62,7 +64,11 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /app/data
+            - name: tmp
+              mountPath: /tmp
       volumes:
         - name: data
           persistentVolumeClaim:
             claimName: zigbee2mqtt-data-v2
+        - name: tmp
+          emptyDir: {}
