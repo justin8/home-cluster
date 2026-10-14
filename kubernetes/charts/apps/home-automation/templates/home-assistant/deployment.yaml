@@ -21,6 +21,8 @@ spec:
         - name: init-database-config
           image: "{{ .Values.images.homeAssistant.repository }}:{{ .Values.images.homeAssistant.tag }}"
           imagePullPolicy: {{ .Values.images.homeAssistant.pullPolicy }}
+          securityContext:
+            readOnlyRootFilesystem: true
           env:
             - name: DB_URL
               valueFrom:
@@ -96,15 +98,21 @@ spec:
           volumeMounts:
             - name: config
               mountPath: /config
+            - name: tmp
+              mountPath: /tmp
       containers:
         - name: home-assistant
           image: "{{ .Values.images.homeAssistant.repository }}:{{ .Values.images.homeAssistant.tag }}"
           imagePullPolicy: {{ .Values.images.homeAssistant.pullPolicy }}
           securityContext:
             privileged: true
+            readOnlyRootFilesystem: true
           ports:
             - containerPort: 8123
               name: http
+          env:
+            - name: S6_READ_ONLY_ROOT
+              value: "1"
           envFrom:
             - configMapRef:
                 name: home-automation-config
@@ -121,7 +129,23 @@ spec:
           volumeMounts:
             - name: config
               mountPath: /config
+            - name: run
+              mountPath: /run
+            - name: tmp
+              mountPath: /tmp
+            - name: var-log
+              mountPath: /var/log
+            - name: root
+              mountPath: /root
       volumes:
         - name: config
           persistentVolumeClaim:
             claimName: home-assistant-config-v2
+        - name: run
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}
+        - name: var-log
+          emptyDir: {}
+        - name: root
+          emptyDir: {}
