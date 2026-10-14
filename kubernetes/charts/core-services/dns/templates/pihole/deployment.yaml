@@ -53,28 +53,4 @@ spec:
               value: ""
             - name: FTL_CMD
               value: "no-daemon -- --interface=eth0"
-          {{- if eq $instance "secondary" }}
-          securityContext:
-            readOnlyRootFilesystem: true
-          volumeMounts:
-            - name: run
-              mountPath: /run
-            - name: tmp
-              mountPath: /tmp
-            - name: var-log
-              mountPath: /var/log
-            - name: etc-pihole
-              mountPath: /etc/pihole
-          {{- end }}
-      {{- if eq $instance "secondary" }}
-      volumes:
-        - name: run
-          emptyDir: {}
-        - name: tmp
-          emptyDir: {}
-        - name: var-log
-          emptyDir: {}
-        - name: etc-pihole
-          emptyDir: {}
-      {{- end }}
 {{- end }}
