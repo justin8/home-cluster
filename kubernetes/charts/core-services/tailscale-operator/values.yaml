@@ -2,5 +2,3 @@ tailscale-operator:
   operatorConfig:
     defaultTags:
       - "tag:k8s-operator"
-    securityContext:
-      readOnlyRootFilesystem: true
