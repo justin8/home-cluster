@@ -21,6 +21,8 @@ spec:
         - name: esphome
           image: "{{ .Values.images.esphome.repository }}:{{ .Values.images.esphome.tag }}"
           imagePullPolicy: {{ .Values.images.esphome.pullPolicy }}
+          securityContext:
+            readOnlyRootFilesystem: true
           ports:
             - containerPort: 6052
               name: http
@@ -42,7 +44,11 @@ spec:
           volumeMounts:
             - name: config
               mountPath: /config
+            - name: tmp
+              mountPath: /tmp
       volumes:
         - name: config
           persistentVolumeClaim:
             claimName: esphome-config-v2
+        - name: tmp
+          emptyDir: {}
