@@ -90,6 +90,11 @@ spec:
           envFrom:
             - configMapRef:
                 name: qbittorrent-config
+          env:
+            - name: S6_READ_ONLY_ROOT
+              value: "1"
+          securityContext:
+            readOnlyRootFilesystem: true
           livenessProbe:
             httpGet:
               path: /
@@ -102,6 +107,12 @@ spec:
               mountPath: /config
             - name: downloads
               mountPath: /mnt/pool/media/downloads
+            - name: tmp
+              mountPath: /tmp
+            - name: run
+              mountPath: /run
+            - name: log
+              mountPath: /var/log
       volumes:
         - name: config
           persistentVolumeClaim:
@@ -118,3 +129,9 @@ spec:
         - name: dev-tun
           hostPath:
             path: /dev/net/tun
+        - name: tmp
+          emptyDir: {}
+        - name: run
+          emptyDir: {}
+        - name: log
+          emptyDir: {}
