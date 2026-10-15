@@ -24,6 +24,7 @@ renovate:
     failedJobsHistoryLimit: 3
     successfulJobsHistoryLimit: 1
     jobRestartPolicy: "Never"
+    ttlSecondsAfterFinished: 86400
   existingSecret: "renovate-secret"
   resources:
     requests:
