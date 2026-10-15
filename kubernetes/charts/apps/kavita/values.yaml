@@ -2,6 +2,14 @@ volumeSizeGi: 10
 
 images:
   app:
-    repository: lscr.io/linuxserver/kavita
+    repository: jvmilazz0/kavita
     tag: 0.9.1
+    pullPolicy: IfNotPresent
+  python:
+    repository: python
+    tag: 3.12-alpine
+    pullPolicy: IfNotPresent
+  busybox:
+    repository: busybox
+    tag: 1.38.0
     pullPolicy: IfNotPresent

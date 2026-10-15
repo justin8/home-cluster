@@ -15,10 +15,27 @@ spec:
       labels:
         app: kavita
     spec:
+      securityContext:
+        runAsUser: {{ .Values.PUID }}
+        runAsGroup: {{ .Values.PGID }}
+        fsGroup: {{ .Values.PGID }}
+        fsGroupChangePolicy: OnRootMismatch
       initContainers:
+        - name: fix-permissions
+          image: "{{ .Values.images.busybox.repository }}:{{ .Values.images.busybox.tag }}"
+          imagePullPolicy: {{ .Values.images.busybox.pullPolicy }}
+          command:
+            - sh
+            - -c
+            - chown -R {{ .Values.PUID }}:{{ .Values.PGID }} /kavita/config
+          volumeMounts:
+            - name: config
+              mountPath: /kavita/config
+          securityContext:
+            runAsUser: 0
         - name: update-oidc-config
-          image: "{{ .Values.images.app.repository }}:{{ .Values.images.app.tag }}"
-          imagePullPolicy: {{ .Values.images.app.pullPolicy }}
+          image: "{{ .Values.images.python.repository }}:{{ .Values.images.python.tag }}"
+          imagePullPolicy: {{ .Values.images.python.pullPolicy }}
           env:
             - name: OIDC_AUTHORITY
               valueFrom:
@@ -36,36 +53,35 @@ spec:
                   name: kavita-oidc-credentials
                   key: client_secret
           command:
-            - /bin/bash
+            - python3
             - -c
             - |
-              set -euo pipefail
-              CONFIG_FILE="/config/appsettings.json"
-              if [ -f "$CONFIG_FILE" ]; then
-                echo "Found $CONFIG_FILE, checking OIDC settings..."
-                TMP_FILE=$(mktemp /config/appsettings.json.XXXXXX)
-                jq \
-                  --arg auth "$OIDC_AUTHORITY" \
-                  --arg cid "$OIDC_CLIENT_ID" \
-                  --arg secret "$OIDC_CLIENT_SECRET" \
-                  'if .OpenIdConnectSettings? and (.OpenIdConnectSettings | type == "object") then
-                     (if .OpenIdConnectSettings | has("Authority") then .OpenIdConnectSettings.Authority = $auth else . end) |
-                     (if .OpenIdConnectSettings | has("ClientId") then .OpenIdConnectSettings.ClientId = $cid else . end) |
-                     (if .OpenIdConnectSettings | has("Secret") then .OpenIdConnectSettings.Secret = $secret else . end)
-                   else
-                     .
-                   end' "$CONFIG_FILE" > "$TMP_FILE"
-                cat "$TMP_FILE" > "$CONFIG_FILE"
-                rm -f "$TMP_FILE"
-                echo "Successfully processed OIDC settings in $CONFIG_FILE"
-              else
-                echo "$CONFIG_FILE not found, skipping."
-              fi
+              import json, os, tempfile
+              config_file = "/kavita/config/appsettings.json"
+              if os.path.exists(config_file):
+                  print(f"Found {config_file}, checking OIDC settings...")
+                  with open(config_file, "r") as f:
+                      data = json.load(f)
+                  oidc = data.get("OpenIdConnectSettings")
+                  if isinstance(oidc, dict):
+                      if "Authority" in oidc and os.environ.get("OIDC_AUTHORITY"):
+                          oidc["Authority"] = os.environ["OIDC_AUTHORITY"]
+                      if "ClientId" in oidc and os.environ.get("OIDC_CLIENT_ID"):
+                          oidc["ClientId"] = os.environ["OIDC_CLIENT_ID"]
+                      if "Secret" in oidc and os.environ.get("OIDC_CLIENT_SECRET"):
+                          oidc["Secret"] = os.environ["OIDC_CLIENT_SECRET"]
+                      with tempfile.NamedTemporaryFile("w", dir="/kavita/config", delete=False) as tmp:
+                          json.dump(data, tmp, indent=2)
+                          tmp_name = tmp.name
+                      os.replace(tmp_name, config_file)
+                      print(f"Successfully processed OIDC settings in {config_file}")
+              else:
+                  print(f"{config_file} not found, skipping.")
           securityContext:
             readOnlyRootFilesystem: true
           volumeMounts:
             - name: config
-              mountPath: /config
+              mountPath: /kavita/config
             - name: tmp
               mountPath: /tmp
       containers:
@@ -77,25 +93,15 @@ spec:
           env:
             - name: TZ
               value: {{ .Values.TZ }}
-            - name: PUID
-              value: {{ .Values.PUID | quote }}
-            - name: PGID
-              value: {{ .Values.PGID | quote }}
-            - name: S6_READ_ONLY_ROOT
-              value: "1"
           securityContext:
             readOnlyRootFilesystem: true
           volumeMounts:
             - name: config
-              mountPath: /config
+              mountPath: /kavita/config
             - name: media
               mountPath: /mnt/pool/media
             - name: tmp
               mountPath: /tmp
-            - name: run
-              mountPath: /run
-            - name: log
-              mountPath: /var/log
       volumes:
         - name: config
           persistentVolumeClaim:
@@ -105,9 +111,5 @@ spec:
             server: {{ .Values.network.storageServer }}
             path: /mnt/pool/media
         - name: tmp
-          emptyDir: {}
-        - name: run
-          emptyDir: {}
-        - name: log
           emptyDir: {}
 

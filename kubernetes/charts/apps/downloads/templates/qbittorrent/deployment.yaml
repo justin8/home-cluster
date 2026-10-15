@@ -16,10 +16,22 @@ spec:
         app: qbittorrent
     spec:
       securityContext:
+        fsGroup: {{ .Values.PGID }}
+        fsGroupChangePolicy: OnRootMismatch
         sysctls:
           - name: net.ipv4.conf.all.src_valid_mark
             value: "1"
       initContainers:
+        - name: fix-permissions
+          image: "{{ .Values.images.busybox.repository }}:{{ .Values.images.busybox.tag }}"
+          imagePullPolicy: {{ .Values.images.busybox.pullPolicy }}
+          command:
+            - sh
+            - -c
+            - chown -R {{ .Values.PUID }}:{{ .Values.PGID }} /config
+          volumeMounts:
+            - name: config
+              mountPath: /config
         - name: resolve-wireguard-endpoint
           image: "{{ .Values.images.busybox.repository }}:{{ .Values.images.busybox.tag }}"
           imagePullPolicy: {{ .Values.images.busybox.pullPolicy }}
@@ -90,10 +102,9 @@ spec:
           envFrom:
             - configMapRef:
                 name: qbittorrent-config
-          env:
-            - name: S6_READ_ONLY_ROOT
-              value: "1"
           securityContext:
+            runAsUser: {{ .Values.PUID }}
+            runAsGroup: {{ .Values.PGID }}
             readOnlyRootFilesystem: true
           livenessProbe:
             httpGet:
@@ -109,10 +120,6 @@ spec:
               mountPath: /mnt/pool/media/downloads
             - name: tmp
               mountPath: /tmp
-            - name: run
-              mountPath: /run
-            - name: log
-              mountPath: /var/log
       volumes:
         - name: config
           persistentVolumeClaim:
@@ -130,8 +137,4 @@ spec:
           hostPath:
             path: /dev/net/tun
         - name: tmp
-          emptyDir: {}
-        - name: run
-          emptyDir: {}
-        - name: log
           emptyDir: {}

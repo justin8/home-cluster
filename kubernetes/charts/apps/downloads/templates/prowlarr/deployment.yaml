@@ -15,6 +15,24 @@ spec:
       labels:
         app: prowlarr
     spec:
+      securityContext:
+        runAsUser: {{ .Values.PUID }}
+        runAsGroup: {{ .Values.PGID }}
+        fsGroup: {{ .Values.PGID }}
+        fsGroupChangePolicy: OnRootMismatch
+      initContainers:
+        - name: fix-permissions
+          image: "{{ .Values.images.busybox.repository }}:{{ .Values.images.busybox.tag }}"
+          imagePullPolicy: {{ .Values.images.busybox.pullPolicy }}
+          command:
+            - sh
+            - -c
+            - chown -R {{ .Values.PUID }}:{{ .Values.PGID }} /config
+          volumeMounts:
+            - name: config
+              mountPath: /config
+          securityContext:
+            runAsUser: 0
       containers:
         - name: prowlarr
           image: "{{ .Values.images.prowlarr.repository }}:{{ .Values.images.prowlarr.tag }}"
@@ -24,9 +42,6 @@ spec:
           envFrom:
             - configMapRef:
                 name: downloads-config
-          env:
-            - name: S6_READ_ONLY_ROOT
-              value: "1"
           securityContext:
             readOnlyRootFilesystem: true
           livenessProbe:
@@ -40,18 +55,10 @@ spec:
               mountPath: /config
             - name: tmp
               mountPath: /tmp
-            - name: run
-              mountPath: /run
-            - name: log
-              mountPath: /var/log
       volumes:
         - name: config
           persistentVolumeClaim:
             claimName: prowlarr-config-v2
         - name: tmp
-          emptyDir: {}
-        - name: run
-          emptyDir: {}
-        - name: log
           emptyDir: {}
 
