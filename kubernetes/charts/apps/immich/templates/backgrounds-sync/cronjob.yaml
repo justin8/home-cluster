@@ -1,0 +1,66 @@
+{{- if .Values.backgroundsSync.enabled }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: immich-backgrounds-sync
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: backgrounds-sync
+spec:
+  schedule: {{ .Values.backgroundsSync.schedule | quote }}
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: backgrounds-sync
+        spec:
+          restartPolicy: OnFailure
+          securityContext:
+            runAsUser: {{ .Values.userId }}
+            runAsGroup: {{ .Values.groupId }}
+            fsGroup: {{ .Values.groupId }}
+            fsGroupChangePolicy: OnRootMismatch
+          containers:
+            - name: sync
+              image: "{{ .Values.images.backgroundsSync.repository }}:{{ .Values.images.backgroundsSync.tag }}"
+              imagePullPolicy: {{ .Values.images.backgroundsSync.pullPolicy }}
+              command: ["python", "-u", "/scripts/sync.py"]
+              env:
+                - name: IMMICH_URL
+                  value: "http://immich:2283/api"
+                - name: IMMICH_API_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: immich-backgrounds-sync-secret
+                      key: IMMICH_API_KEY
+                - name: ALBUM_NAME
+                  value: {{ .Values.backgroundsSync.albumName | quote }}
+                - name: SYNC_DIR
+                  value: "/data/Backgrounds"
+                - name: STATE_FILE
+                  value: "/data/.immich-backgrounds-sync-state.json"
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 64Mi
+                limits:
+                  memory: 256Mi
+              volumeMounts:
+                - name: data
+                  mountPath: /data
+                - name: script
+                  mountPath: /scripts
+          volumes:
+            - name: data
+              nfs:
+                server: {{ .Values.network.storageServer }}
+                path: {{ .Values.appStoragePath }}/syncthing
+            - name: script
+              configMap:
+                name: immich-backgrounds-sync-script
+                defaultMode: 0755
+{{- end }}

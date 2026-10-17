@@ -168,6 +168,13 @@ egress:
             protocol: TCP
 ```
 
+## Cilium Network Policies & Baselines
+
+- **Cluster-Wide Baselines (DO NOT DUPLICATE):** Universal network policies are deployed cluster-wide in `core-services/cilium/templates/baseline-policies.yaml`:
+  1. **CoreDNS (`default-allow-coredns`):** All pods in all namespaces are globally permitted egress on port 53 (UDP/TCP) to `kube-dns` in `kube-system`. **NEVER add `kube-dns` or port 53 egress rules to application-level `CiliumNetworkPolicy` resources.**
+  2. **Host / Kubelet Probes (`default-allow-host-probes`):** All pods in all namespaces are globally permitted ingress from the `host` entity for Kubelet liveness and readiness health checks.
+- **Application Policies:** Application `CiliumNetworkPolicy` manifests should strictly declare application-specific traffic paths (e.g. database, redis, inter-service traffic, Pomerium ingress, or external APIs) without duplicating global baselines.
+
 ## Hardware Acceleration & AI/ML Workloads
 
 When adding, creating, or deploying any software or service that clearly supports hardware encoding/decoding (e.g., video transcoding, Intel QuickSync/VAAPI) or AI/ML features (e.g., facial recognition, object detection, OCR, text/image embeddings, LLMs):

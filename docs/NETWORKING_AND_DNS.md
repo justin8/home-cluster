@@ -130,7 +130,7 @@ The cluster enforces a strict **Zero-Trust Default-Deny** model across all appli
 
 - **Explicit YAML in Each Chart:** All policies are defined as explicit `CiliumNetworkPolicy` resources located at `<chart>/templates/networkpolicy.yaml`. No opaque helper macros are used.
 - **Cluster-Wide Baselines (`CiliumClusterwideNetworkPolicy`):** Universal baselines are deployed once in `core-services/cilium/templates/baseline-policies.yaml`:
-  - `default-allow-coredns`: Allows UDP/TCP egress on port 53 to `kube-dns` in `kube-system` for all pods (`enableDefaultDeny: { egress: false }`).
+  - `default-allow-coredns`: Allows UDP/TCP egress on port 53 to `kube-dns` in `kube-system` for all pods (`enableDefaultDeny: { egress: false }`). **Workload policies MUST NOT declare redundant port 53 / kube-dns egress rules.**
   - `default-allow-host-probes`: Allows ingress from entity `host` (Kubelet readiness and liveness probes) for all pods (`enableDefaultDeny: { ingress: false }`).
 - **Default-Deny Posture:** Any workload targeted by a `CiliumNetworkPolicy` automatically operates in default-deny for both ingress and egress. Only explicitly declared paths are permitted.
 
