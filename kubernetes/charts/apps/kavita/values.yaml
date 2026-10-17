@@ -7,5 +7,5 @@ images:
     pullPolicy: IfNotPresent
   python:
     repository: python
-    tag: 3.12-alpine
+    tag: 3.15-alpine
     pullPolicy: IfNotPresent
