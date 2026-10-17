@@ -4,5 +4,5 @@ commercialDetection: true
 images:
   app:
     repository: swapplications/uhf-server
-    tag: 2.2.0
+    tag: 2.2.1
     pullPolicy: IfNotPresent
