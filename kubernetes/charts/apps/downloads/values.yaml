@@ -22,7 +22,7 @@ images:
     pullPolicy: IfNotPresent
   sonarr:
     repository: ghcr.io/home-operations/sonarr
-    tag: 4.0.20
+    tag: 5.0.0
     pullPolicy: IfNotPresent
   radarr:
     repository: ghcr.io/home-operations/radarr
