@@ -102,11 +102,7 @@ To avoid false alarms, the health check applies specific operational domain know
 
 - **Rule:** Python WSGI/HTTP servers (such as Cheroot in SABnzbd) frequently log `Bad file descriptor` or `IOBase.__del__` exceptions when browser clients disconnect before a response finishes. These are benign and should be filtered out.
 
-### 4. LinuxServer.io UID/GID Remapping
-
-- **Rule:** LinuxServer container images require write access to `/etc/passwd` to apply `PUID` and `PGID`. If `securityContext.readOnlyRootFilesystem: true` is set, user modification fails silently and the container runs as default UID `911`. Ensure apps needing NFS write permissions run with appropriate permissions or writable `/etc`.
-
-### 5. CNPG S3/B2 WAL Archiving
+### 4. CNPG S3/B2 WAL Archiving
 
 - **Rule:** When initializing a fresh CNPG cluster (`initdb` on timeline 1), Barman requires an **empty target archive** (`Expected empty archive`). If the server name collides with a previous cluster prefix that contains old WALs, archiving will fail, causing WALs to accumulate until the disk fills up and CNPG stops PostgreSQL to prevent corruption.
 
