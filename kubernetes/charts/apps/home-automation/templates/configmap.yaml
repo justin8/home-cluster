@@ -5,5 +5,3 @@ metadata:
   namespace: {{ .Release.Namespace }}
 data:
   TZ: {{ .Values.TZ }}
-  PUID: {{ .Values.PUID | quote }}
-  PGID: {{ .Values.PGID | quote }}

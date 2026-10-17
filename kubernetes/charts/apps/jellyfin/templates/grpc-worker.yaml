@@ -31,7 +31,7 @@ spec:
                   - key: node.kubernetes.io/cordoned
                     operator: DoesNotExist
       securityContext:
-        fsGroup: {{ .Values.PGID }}
+        fsGroup: {{ .Values.groupId }}
         fsGroupChangePolicy: OnRootMismatch
       containers:
         - name: worker
@@ -39,8 +39,8 @@ spec:
           imagePullPolicy: {{ .Values.grpcWorker.image.pullPolicy }}
           securityContext:
             runAsNonRoot: true
-            runAsUser: {{ .Values.PUID }}
-            runAsGroup: {{ .Values.PGID }}
+            runAsUser: {{ .Values.userId }}
+            runAsGroup: {{ .Values.groupId }}
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
             capabilities:

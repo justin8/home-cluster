@@ -2,8 +2,8 @@ domain: dray.id.au
 adminEmail: admin@dray.id.au
 clusterName: home-cluster
 TZ: America/Los_Angeles
-PUID: "2000"
-PGID: "2000"
+userId: 2000
+groupId: 2000
 appStoragePath: /mnt/pool/apps
 # Shared IP addresses
 network:

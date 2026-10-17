@@ -39,9 +39,9 @@ spec:
             - name: TZ
               value: {{ .Values.TZ }}
             - name: PUID
-              value: {{ .Values.PUID | quote }}
+              value: {{ .Values.userId | quote }}
             - name: PGID
-              value: {{ .Values.PGID | quote }}
+              value: {{ .Values.groupId | quote }}
             - name: PASSWORD
               valueFrom:
                 secretKeyRef:

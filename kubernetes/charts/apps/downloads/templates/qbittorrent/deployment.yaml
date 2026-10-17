@@ -16,22 +16,12 @@ spec:
         app: qbittorrent
     spec:
       securityContext:
-        fsGroup: {{ .Values.PGID }}
+        fsGroup: {{ .Values.groupId }}
         fsGroupChangePolicy: OnRootMismatch
         sysctls:
           - name: net.ipv4.conf.all.src_valid_mark
             value: "1"
       initContainers:
-        - name: fix-permissions
-          image: "{{ .Values.images.busybox.repository }}:{{ .Values.images.busybox.tag }}"
-          imagePullPolicy: {{ .Values.images.busybox.pullPolicy }}
-          command:
-            - sh
-            - -c
-            - chown -R {{ .Values.PUID }}:{{ .Values.PGID }} /config
-          volumeMounts:
-            - name: config
-              mountPath: /config
         - name: resolve-wireguard-endpoint
           image: "{{ .Values.images.busybox.repository }}:{{ .Values.images.busybox.tag }}"
           imagePullPolicy: {{ .Values.images.busybox.pullPolicy }}
@@ -103,8 +93,8 @@ spec:
             - configMapRef:
                 name: qbittorrent-config
           securityContext:
-            runAsUser: {{ .Values.PUID }}
-            runAsGroup: {{ .Values.PGID }}
+            runAsUser: {{ .Values.userId }}
+            runAsGroup: {{ .Values.groupId }}
             readOnlyRootFilesystem: true
           livenessProbe:
             httpGet:

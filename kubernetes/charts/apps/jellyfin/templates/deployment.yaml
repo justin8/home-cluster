@@ -19,15 +19,15 @@ spec:
     spec:
       serviceAccountName: jellyfin
       securityContext:
-        fsGroup: {{ .Values.PGID }}
+        fsGroup: {{ .Values.groupId }}
         fsGroupChangePolicy: OnRootMismatch
       initContainers:
         - name: init-web
           image: "{{ .Values.images.app.repository }}:{{ .Values.images.app.tag }}"
           imagePullPolicy: {{ .Values.images.app.pullPolicy }}
           securityContext:
-            runAsUser: {{ .Values.PUID }}
-            runAsGroup: {{ .Values.PGID }}
+            runAsUser: {{ .Values.userId }}
+            runAsGroup: {{ .Values.groupId }}
             readOnlyRootFilesystem: true
           command:
             - sh
@@ -40,8 +40,8 @@ spec:
           image: "{{ .Values.images.init.repository }}:{{ .Values.images.init.tag }}"
           imagePullPolicy: {{ .Values.images.init.pullPolicy }}
           securityContext:
-            runAsUser: {{ .Values.PUID }}
-            runAsGroup: {{ .Values.PGID }}
+            runAsUser: {{ .Values.userId }}
+            runAsGroup: {{ .Values.groupId }}
             readOnlyRootFilesystem: true
           env:
             - name: OIDC_ISSUER
@@ -86,8 +86,8 @@ spec:
           image: "{{ .Values.images.app.repository }}:{{ .Values.images.app.tag }}"
           imagePullPolicy: {{ .Values.images.app.pullPolicy }}
           securityContext:
-            runAsUser: {{ .Values.PUID }}
-            runAsGroup: {{ .Values.PGID }}
+            runAsUser: {{ .Values.userId }}
+            runAsGroup: {{ .Values.groupId }}
             readOnlyRootFilesystem: true
           ports:
             - containerPort: 8096

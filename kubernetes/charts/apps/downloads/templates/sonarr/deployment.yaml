@@ -16,23 +16,10 @@ spec:
         app: sonarr
     spec:
       securityContext:
-        runAsUser: {{ .Values.PUID }}
-        runAsGroup: {{ .Values.PGID }}
-        fsGroup: {{ .Values.PGID }}
+        runAsUser: {{ .Values.userId }}
+        runAsGroup: {{ .Values.groupId }}
+        fsGroup: {{ .Values.groupId }}
         fsGroupChangePolicy: OnRootMismatch
-      initContainers:
-        - name: fix-permissions
-          image: "{{ .Values.images.busybox.repository }}:{{ .Values.images.busybox.tag }}"
-          imagePullPolicy: {{ .Values.images.busybox.pullPolicy }}
-          command:
-            - sh
-            - -c
-            - chown -R {{ .Values.PUID }}:{{ .Values.PGID }} /config
-          volumeMounts:
-            - name: config
-              mountPath: /config
-          securityContext:
-            runAsUser: 0
       containers:
         - name: sonarr
           image: "{{ .Values.images.sonarr.repository }}:{{ .Values.images.sonarr.tag }}"

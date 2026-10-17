@@ -9,7 +9,3 @@ images:
     repository: python
     tag: 3.12-alpine
     pullPolicy: IfNotPresent
-  busybox:
-    repository: busybox
-    tag: 1.38.0
-    pullPolicy: IfNotPresent

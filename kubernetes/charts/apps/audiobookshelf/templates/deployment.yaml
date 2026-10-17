@@ -16,7 +16,7 @@ spec:
         app: audiobookshelf
     spec:
       securityContext:
-        fsGroup: {{ .Values.PGID }}
+        fsGroup: {{ .Values.groupId }}
         fsGroupChangePolicy: OnRootMismatch
       containers:
         - name: audiobookshelf
@@ -30,8 +30,8 @@ spec:
           securityContext:
             allowPrivilegeEscalation: false
             runAsNonRoot: true
-            runAsUser: {{ .Values.PUID }}
-            runAsGroup: {{ .Values.PGID }}
+            runAsUser: {{ .Values.userId }}
+            runAsGroup: {{ .Values.groupId }}
             readOnlyRootFilesystem: true
             capabilities:
               drop: ["ALL"]

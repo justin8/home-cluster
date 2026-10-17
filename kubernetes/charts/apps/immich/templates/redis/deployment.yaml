@@ -16,7 +16,7 @@ spec:
         app: redis
     spec:
       securityContext:
-        fsGroup: {{ .Values.PGID }}
+        fsGroup: {{ .Values.groupId }}
       containers:
         - name: redis
           image: "{{ .Values.images.redis.repository }}:{{ .Values.images.redis.tag }}"
