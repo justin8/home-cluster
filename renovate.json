@@ -46,6 +46,17 @@
       ],
       "datasourceTemplate": "github-releases",
       "extractVersionTemplate": "^v(?<version>.*)$"
+    },
+    {
+      "customType": "regex",
+      "description": "immich-machine-learning image tag with -openvino suffix",
+      "managerFilePatterns": ["/(^|/)values\\.yaml$/"],
+      "matchStrings": [
+        "repository:\\s*(?<depName>ghcr\\.io/immich-app/immich-machine-learning)\\s*\\n\\s*tag:\\s*\"?(?<currentValue>v\\d+\\.\\d+\\.\\d+)(?:-openvino)?\"?"
+      ],
+      "packageNameTemplate": "immich-app/immich",
+      "datasourceTemplate": "github-releases",
+      "versioningTemplate": "semver"
     }
   ],
   "packageRules": [
@@ -57,6 +68,11 @@
     {
       "matchPackageNames": ["siderolabs/talos", "kubernetes/kubernetes", "/longhorn/"],
       "automerge": false
+    },
+    {
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["ghcr.io/immich-app/immich-machine-learning"],
+      "enabled": false
     },
     {
       "matchPackageNames": ["ghcr.io/immich-app/immich-server"],
