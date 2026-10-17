@@ -122,7 +122,7 @@ When replacing or resetting an existing controlplane node (e.g. replacing hardwa
      ```
 
 5. **Remediate Longhorn disk registration**:
-   - Because the target node was re-formatted with a new filesystem UUID on `/var/lib/longhorn`, Longhorn will flag `DiskFilesystemChanged`. Follow the remediation steps in [`docs/LONGHORN.md`](file:///Users/justindray/src/home-cluster/docs/LONGHORN.md#L141) to adopt the fresh disk.
+   - Because the target node was re-formatted with a new filesystem UUID on `/var/lib/longhorn`, Longhorn will flag `DiskFilesystemChanged`. Follow the remediation steps in [`docs/LONGHORN.md`](LONGHORN.md) to adopt the fresh disk.
 
 ## Upgrades
 

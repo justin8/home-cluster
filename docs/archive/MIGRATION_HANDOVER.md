@@ -166,8 +166,8 @@ direnv exec . rtk kubectl get applications -n argocd
 
 ## 6. Critical Reference Files
 
-- [CILIUM_MIGRATION.md](file:///Users/justindray/src/home-cluster/docs/CILIUM_MIGRATION.md): Detailed migration tracker and checklist.
-- [talconfig.yaml](file:///Users/justindray/src/home-cluster/talos/talconfig.yaml): Talos node and cluster configuration.
-- [cilium values.yaml](file:///Users/justindray/src/home-cluster/kubernetes/charts/core-services/cilium/values.yaml): Cilium CNI configuration.
-- [multus chart](file:///Users/justindray/src/home-cluster/kubernetes/charts/core-services/multus/): Multus CNI daemonset and CRDs.
-- [global-values.yaml](file:///Users/justindray/src/home-cluster/kubernetes/global-values.yaml): Cluster-wide IP and domain values.
+- [CILIUM_MIGRATION.md](CILIUM_MIGRATION.md): Detailed migration tracker and checklist.
+- [talconfig.yaml](../../talos/talconfig.yaml): Talos node and cluster configuration.
+- [cilium values.yaml](../../kubernetes/charts/core-services/cilium/values.yaml): Cilium CNI configuration.
+- [multus chart](../../kubernetes/charts/core-services/multus/): Multus CNI daemonset and CRDs.
+- [global-values.yaml](../../kubernetes/global-values.yaml): Cluster-wide IP and domain values.
