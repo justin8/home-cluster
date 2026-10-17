@@ -53,4 +53,6 @@ spec:
               value: ""
             - name: FTL_CMD
               value: "no-daemon -- --interface=eth0"
+            - name: FTLCONF_webserver_domain
+              value: {{ if eq $instance "primary" }}"pihole-web.{{ $.Release.Namespace }}.svc.cluster.local"{{ else }}"pihole-secondary-web.{{ $.Release.Namespace }}.svc.cluster.local"{{ end }}
 {{- end }}
