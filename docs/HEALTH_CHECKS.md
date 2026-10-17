@@ -1,6 +1,9 @@
-# Cluster Health Check & Daily Inspection Guide
+# Cluster Health Check & Inspection Runbook
 
-This document outlines the standard operational health check procedure run automatically each morning at **2:00 AM** (`0 2 * * *`). It serves as an authoritative reference for engineers and AI agents to resume, run, or debug cluster health inspections.
+This document outlines the standard operational health check procedure used across two primary scenarios:
+
+1. **Automated Daily Health Check**: Run each morning at **2:00 AM** (`0 2 * * *`) via background scheduler.
+2. **Rolling Node Upgrades**: Run sequentially between each node upgrade during Talos OS or Kubernetes upgrades to guarantee storage resync and workload stability before upgrading subsequent nodes (see [`docs/TALOS.md`](TALOS.md)).
 
 ---
 

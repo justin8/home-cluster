@@ -207,7 +207,7 @@ Read-only commands (`kubectl get`, `kubectl describe`, `kubectl logs`, `kubectl 
 - **Dual Status Verification:** NEVER consider a Talos node upgrade complete based solely on `kubectl get nodes`. You MUST verify BOTH:
   1. **Talos Machine Status:** `rtk talosctl get machinestatus -n <node-ip>` must report `READY: true` and have no unmet conditions (or check the Talos dashboard).
   2. **Kubernetes Node Status:** `kubectl get nodes -o wide` must report `Ready` with the target OS version.
-- **Sequential Rolling Upgrades:** Always upgrade nodes one at a time. Never proceed to upgrade subsequent nodes until the previous node passes both Talos and Kubernetes health checks and Longhorn volume replication is 100% healthy.
+- **Sequential Rolling Upgrades & Inter-Node Health Check:** Always upgrade nodes one at a time. Between each node being upgraded (during Talos or Kubernetes rolling upgrades), you MUST run the full cluster health check runbook (`docs/HEALTH_CHECKS.md`) verifying nodes, non-job pod states, ArgoCD sync status, Longhorn volume robustness (100% healthy, 0 degraded replicas), and recent pod log tails for active errors. Never proceed to upgrade subsequent nodes until the previous node passes all checks, storage finishes rebuilding, and the cluster is verified fully healthy.
 
 ## CLI Tool Usage
 

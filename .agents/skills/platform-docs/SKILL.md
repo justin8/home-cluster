@@ -180,6 +180,8 @@ direnv exec . rtk talosctl reset -n <node-ip> \
    - Kubernetes: `direnv exec . rtk kubectl get node <node-name> -o wide` reports `Ready` with the new version.
 4. **Volume Resync Verification**:
    Confirm all degraded Longhorn replicas finish rebuilding before initiating the next node upgrade.
+5. **Inter-Node Cluster Health Check**:
+   Execute the full cluster health check runbook from [`docs/HEALTH_CHECKS.md`](../../../docs/HEALTH_CHECKS.md) between each node upgrade (checking pod states, ArgoCD sync/health, and log tails across namespaces). Never proceed to the next node while any workloads or volumes are degraded.
 
 ### Cluster Write Safety Policy
 

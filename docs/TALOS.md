@@ -132,6 +132,7 @@ When replacing or resetting an existing controlplane node (e.g. replacing hardwa
 2. Run `direnv reload`
 3. Apply updated config: `talhelper gencommand apply | bash`
 4. Upgrade Kubernetes: `talhelper gencommand upgrade-k8s | bash`
+5. **Run Cluster Health Check**: Between sequential node upgrades and upon completion, run the full health check workflow from [`docs/HEALTH_CHECKS.md`](HEALTH_CHECKS.md) to ensure all nodes, pods, and ArgoCD applications are healthy and synced.
 
 ### Talos Upgrades
 
@@ -143,7 +144,7 @@ When replacing or resetting an existing controlplane node (e.g. replacing hardwa
 - Any upstream changes where new defaults break clean installations or node replacements (e.g., Talos 1.14 defaulting `EPHEMERAL` `/var` to `noexec`, which breaks Longhorn v1 binary execution) **MUST** be explicitly configured in `talconfig.yaml` so that replacing, wiping, or rebuilding a node from scratch behaves identically to an upgraded node.
 - For Talos 1.14+, `talconfig.yaml` MUST include the `VolumeConfig` patch for `EPHEMERAL` with `mount.secure: false` as long as Longhorn v1 is used.
 
-**⚠️ CRITICAL: Dual Status Verification (Kubernetes AND Talos)**
+**⚠️ CRITICAL: Multi-Layer Verification & Inter-Node Health Check**
 
 Before considering any node as successfully upgraded and before moving to the next node:
 
@@ -158,7 +159,11 @@ Before considering any node as successfully upgraded and before moving to the ne
    kubectl get nodes -o wide
    ```
    Must show `STATUS: Ready` and the updated `OS-IMAGE` version (e.g. `Talos (v1.14.1)`).
-3. **Storage Health**: Verify Longhorn volumes are healthy and fully synced (`0` degraded) before proceeding to the next node.
+3. **Storage Health**: Verify Longhorn volumes are healthy and fully synced (`0` degraded) before proceeding to the next node:
+   ```bash
+   direnv exec . rtk kubectl get volumes.longhorn.io -n longhorn-system -o custom-columns=NAME:.metadata.name,ROBUSTNESS:.status.robustness,STATE:.status.state | grep -v healthy
+   ```
+4. **Cluster Health Check & Pod Log Inspection**: Run the complete cluster health check runbook from [`docs/HEALTH_CHECKS.md`](HEALTH_CHECKS.md) to inspect non-job pod statuses, ArgoCD sync states, and pod logs for active errors before initiating the next node upgrade.
 
 #### Upgrade Procedure
 
@@ -170,7 +175,7 @@ Before considering any node as successfully upgraded and before moving to the ne
    talhelper gencommand upgrade --node <node-ip> --extra-flags "--preserve --drain-timeout 30m" | bash
    ```
 
-4. Verify both Talos and Kubernetes status on the upgraded node before starting the next node.
+4. **Inter-Node Verification & Health Check**: Run the multi-layer verification checklist (Talos machine status, Kubernetes node readiness, Longhorn volume resync, and the full [`HEALTH_CHECKS.md`](HEALTH_CHECKS.md) runbook) before proceeding to the next node.
 
 **Without `--preserve` flag, all Longhorn data will be wiped during upgrades.**
 
