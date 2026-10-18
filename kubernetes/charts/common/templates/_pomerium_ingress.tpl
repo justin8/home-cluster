@@ -32,7 +32,7 @@ metadata:
     {{- if $responseHeaders }}
     ingress.pomerium.io/set_response_headers: {{ $responseHeaders | toJson | quote }}
     {{- end }}
-    ingress.pomerium.io/preserve_host_header: "true"
+    ingress.pomerium.io/preserve_host_header: {{ hasKey . "preserveHostHeader" | ternary .preserveHostHeader "true" | quote }}
     ingress.pomerium.io/pass_identity_headers: "true"
     ingress.pomerium.io/allow_websockets: "true"
     ingress.pomerium.io/timeout: "0s"

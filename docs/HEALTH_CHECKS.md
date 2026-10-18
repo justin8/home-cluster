@@ -1,6 +1,9 @@
-# Cluster Health Check & Daily Inspection Guide
+# Cluster Health Check & Inspection Runbook
 
-This document outlines the standard operational health check procedure run automatically each morning at **2:00 AM** (`0 2 * * *`). It serves as an authoritative reference for engineers and AI agents to resume, run, or debug cluster health inspections.
+This document outlines the standard operational health check procedure used across two primary scenarios:
+
+1. **Automated Daily Health Check**: Run each morning at **2:00 AM** (`0 2 * * *`) via background scheduler.
+2. **Rolling Node Upgrades**: Run sequentially between each node upgrade during Talos OS or Kubernetes upgrades to guarantee storage resync and workload stability before upgrading subsequent nodes (see [`docs/TALOS.md`](TALOS.md)).
 
 ---
 
@@ -102,11 +105,7 @@ To avoid false alarms, the health check applies specific operational domain know
 
 - **Rule:** Python WSGI/HTTP servers (such as Cheroot in SABnzbd) frequently log `Bad file descriptor` or `IOBase.__del__` exceptions when browser clients disconnect before a response finishes. These are benign and should be filtered out.
 
-### 4. LinuxServer.io UID/GID Remapping
-
-- **Rule:** LinuxServer container images require write access to `/etc/passwd` to apply `PUID` and `PGID`. If `securityContext.readOnlyRootFilesystem: true` is set, user modification fails silently and the container runs as default UID `911`. Ensure apps needing NFS write permissions run with appropriate permissions or writable `/etc`.
-
-### 5. CNPG S3/B2 WAL Archiving
+### 4. CNPG S3/B2 WAL Archiving
 
 - **Rule:** When initializing a fresh CNPG cluster (`initdb` on timeline 1), Barman requires an **empty target archive** (`Expected empty archive`). If the server name collides with a previous cluster prefix that contains old WALs, archiving will fail, causing WALs to accumulate until the disk fills up and CNPG stops PostgreSQL to prevent corruption.
 

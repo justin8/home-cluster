@@ -19,3 +19,12 @@ images:
     repository: ghcr.io/tensorchord/cloudnative-vectorchord
     tag: 17-0.4.3
     pullPolicy: IfNotPresent
+  backgroundsSync:
+    repository: python
+    tag: 3.15-alpine
+    pullPolicy: IfNotPresent
+
+backgroundsSync:
+  enabled: true
+  schedule: "*/5 * * * *"
+  albumName: "Backgrounds"

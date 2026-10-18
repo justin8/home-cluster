@@ -1,0 +1,154 @@
+{{- if .Values.backgroundsSync.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: immich-backgrounds-sync-script
+  namespace: {{ .Release.Namespace }}
+data:
+  sync.py: |
+    #!/usr/bin/env python3
+    import json
+    import os
+    import sys
+    import urllib.error
+    import urllib.request
+    from concurrent.futures import ThreadPoolExecutor
+    from pathlib import Path
+
+    IMMICH_URL = os.environ.get("IMMICH_URL", "http://immich:2283/api").rstrip("/")
+    API_KEY = os.environ.get("IMMICH_API_KEY", "")
+    ALBUM_NAME = os.environ.get("ALBUM_NAME", "Backgrounds")
+    SYNC_DIR = Path(os.environ.get("SYNC_DIR", "/data/Backgrounds"))
+    STATE_FILE = Path(os.environ.get("STATE_FILE", "/data/.immich-backgrounds-sync-state.json"))
+
+    if not API_KEY:
+        print("Error: IMMICH_API_KEY environment variable is required.", file=sys.stderr)
+        sys.exit(1)
+
+    def api_get(endpoint, params=None):
+        url = f"{IMMICH_URL}{endpoint}"
+        if params:
+            query = "&".join(f"{k}={v}" for k, v in params.items())
+            url = f"{url}?{query}"
+        req = urllib.request.Request(
+            url,
+            headers={"x-api-key": API_KEY, "Accept": "application/json"}
+        )
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            return json.loads(resp.read().decode())
+
+    def download_file(asset_id, dest_path):
+        url = f"{IMMICH_URL}/assets/{asset_id}/original"
+        req = urllib.request.Request(url, headers={"x-api-key": API_KEY})
+        with urllib.request.urlopen(req, timeout=60) as resp, open(dest_path, "wb") as f_out:
+            while chunk := resp.read(1024 * 1024):
+                f_out.write(chunk)
+
+    def main():
+        SYNC_DIR.mkdir(parents=True, exist_ok=True)
+
+        # 1. Look up album
+        try:
+            albums = api_get("/albums")
+        except Exception as e:
+            print(f"Failed to query Immich albums: {e}", file=sys.stderr)
+            sys.exit(1)
+
+        album = next((a for a in albums if a.get("albumName", "").strip().lower() == ALBUM_NAME.strip().lower()), None)
+        if not album:
+            print(f"Album '{ALBUM_NAME}' not found in Immich.", file=sys.stderr)
+            sys.exit(1)
+
+        album_id = album["id"]
+        updated_at = album.get("updatedAt", "")
+
+        # 2. Check state
+        last_updated_at = None
+        if STATE_FILE.exists():
+            try:
+                with open(STATE_FILE, "r") as f:
+                    state_data = json.load(f)
+                    last_updated_at = state_data.get("updatedAt")
+            except Exception:
+                pass
+
+        if last_updated_at == updated_at:
+            print(f"Album '{ALBUM_NAME}' unchanged since last sync ({updated_at}). Nothing to do.")
+            return
+
+        print(f"Album '{ALBUM_NAME}' changed ({updated_at}). Synchronizing...")
+
+        # 3. Retrieve album assets
+        buckets = api_get("/timeline/buckets", {"albumId": album_id})
+        all_asset_ids = []
+        for b in buckets:
+            tb = b.get("timeBucket")
+            res_b = api_get("/timeline/bucket", {"albumId": album_id, "timeBucket": f"{tb}T00:00:00.000Z"})
+            all_asset_ids.extend(res_b.get("id", []))
+
+        def fetch_asset(aid):
+            try:
+                return api_get(f"/assets/{aid}")
+            except Exception:
+                return None
+
+        with ThreadPoolExecutor(max_workers=10) as executor:
+            album_assets = [a for a in executor.map(fetch_asset, all_asset_ids) if a]
+
+        print(f"Found {len(album_assets)} assets in album '{ALBUM_NAME}'.")
+
+        # 4. Map album files
+        album_by_filename = {}
+        album_by_stem = {}
+        for a in album_assets:
+            fname = a.get("originalFileName", "")
+            if fname:
+                album_by_filename[fname.lower()] = a
+                album_by_stem[Path(fname).stem.lower()] = a
+
+        # 5. Map local files (ignoring hidden files / metadata)
+        local_files = [f for f in SYNC_DIR.iterdir() if f.is_file() and not f.name.startswith(".")]
+        local_filenames = {f.name.lower(): f for f in local_files}
+        local_stems = {f.stem.lower(): f for f in local_files}
+
+        # 6. Removals: local files no longer in album
+        to_delete = []
+        for f in local_files:
+            if f.name.lower() not in album_by_filename and f.stem.lower() not in album_by_stem:
+                to_delete.append(f)
+
+        # 7. Additions: album assets not present locally
+        to_download = []
+        for a in album_assets:
+            fname = a.get("originalFileName", "")
+            stem = Path(fname).stem.lower()
+            if fname.lower() not in local_filenames and stem not in local_stems:
+                to_download.append(a)
+
+        print(f"Sync plan: {len(to_download)} to download, {len(to_delete)} to remove.")
+
+        for f in to_delete:
+            print(f"Removing {f.name}")
+            f.unlink(missing_ok=True)
+
+        for a in to_download:
+            fname = a.get("originalFileName", f"{a['id']}.jpg")
+            dest = SYNC_DIR / fname
+            print(f"Downloading {fname}")
+            try:
+                download_file(a["id"], dest)
+            except Exception as e:
+                print(f"Failed to download {fname}: {e}", file=sys.stderr)
+
+        # 8. Record state
+        try:
+            with open(STATE_FILE, "w") as f:
+                json.dump({"updatedAt": updated_at, "assetCount": len(album_assets)}, f, indent=2)
+        except Exception as e:
+            print(f"Warning: could not write state file: {e}", file=sys.stderr)
+
+        print("Sync complete.")
+
+    if __name__ == "__main__":
+        main()
+{{- end }}

@@ -18,6 +18,13 @@ spec:
         - ports:
             - port: "2283"
               protocol: TCP
+    - fromEndpoints:
+        - matchLabels:
+            app: backgrounds-sync
+      toPorts:
+        - ports:
+            - port: "2283"
+              protocol: TCP
   egress:
     - toEndpoints:
         - matchLabels:
@@ -183,3 +190,23 @@ spec:
               protocol: TCP
             - port: "443"
               protocol: TCP
+{{- if .Values.backgroundsSync.enabled }}
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: backgrounds-sync
+  namespace: {{ .Release.Namespace }}
+spec:
+  endpointSelector:
+    matchLabels:
+      app: backgrounds-sync
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            app: immich
+      toPorts:
+        - ports:
+            - port: "2283"
+              protocol: TCP
+{{- end }}

@@ -168,6 +168,13 @@ egress:
             protocol: TCP
 ```
 
+## Cilium Network Policies & Baselines
+
+- **Cluster-Wide Baselines (DO NOT DUPLICATE):** Universal network policies are deployed cluster-wide in `core-services/cilium/templates/baseline-policies.yaml`:
+  1. **CoreDNS (`default-allow-coredns`):** All pods in all namespaces are globally permitted egress on port 53 (UDP/TCP) to `kube-dns` in `kube-system`. **NEVER add `kube-dns` or port 53 egress rules to application-level `CiliumNetworkPolicy` resources.**
+  2. **Host / Kubelet Probes (`default-allow-host-probes`):** All pods in all namespaces are globally permitted ingress from the `host` entity for Kubelet liveness and readiness health checks.
+- **Application Policies:** Application `CiliumNetworkPolicy` manifests should strictly declare application-specific traffic paths (e.g. database, redis, inter-service traffic, Pomerium ingress, or external APIs) without duplicating global baselines.
+
 ## Hardware Acceleration & AI/ML Workloads
 
 When adding, creating, or deploying any software or service that clearly supports hardware encoding/decoding (e.g., video transcoding, Intel QuickSync/VAAPI) or AI/ML features (e.g., facial recognition, object detection, OCR, text/image embeddings, LLMs):
@@ -207,7 +214,7 @@ Read-only commands (`kubectl get`, `kubectl describe`, `kubectl logs`, `kubectl 
 - **Dual Status Verification:** NEVER consider a Talos node upgrade complete based solely on `kubectl get nodes`. You MUST verify BOTH:
   1. **Talos Machine Status:** `rtk talosctl get machinestatus -n <node-ip>` must report `READY: true` and have no unmet conditions (or check the Talos dashboard).
   2. **Kubernetes Node Status:** `kubectl get nodes -o wide` must report `Ready` with the target OS version.
-- **Sequential Rolling Upgrades:** Always upgrade nodes one at a time. Never proceed to upgrade subsequent nodes until the previous node passes both Talos and Kubernetes health checks and Longhorn volume replication is 100% healthy.
+- **Sequential Rolling Upgrades & Inter-Node Health Check:** Always upgrade nodes one at a time. Between each node being upgraded (during Talos or Kubernetes rolling upgrades), you MUST run the full cluster health check runbook (`docs/HEALTH_CHECKS.md`) verifying nodes, non-job pod states, ArgoCD sync status, Longhorn volume robustness (100% healthy, 0 degraded replicas), and recent pod log tails for active errors. Never proceed to upgrade subsequent nodes until the previous node passes all checks, storage finishes rebuilding, and the cluster is verified fully healthy.
 
 ## CLI Tool Usage
 
