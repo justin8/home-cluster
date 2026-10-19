@@ -21,6 +21,10 @@ Pin the dependency to the latest stable version found. Never guess or use placeh
 ## Container Image Standards
 
 - **Semantic Versioning:** Always use explicit semantic version tags (e.g. `2.1.6`, `v1.4.0`) where available. Never use `latest` or unversioned tags.
+- **Avoid LinuxServer Images for Hardened/NFS Workloads:** Do NOT use LinuxServer.io (`lscr.io/linuxserver/*` or `ghcr.io/linuxserver/*`) containers for workloads that require arbitrary UIDs (specifically UID `2000` for NFS) or enforce `readOnlyRootFilesystem: true`. LinuxServer images rely on `s6-overlay` to dynamically mutate `/etc/passwd` via root-level `usermod`. Under a read-only root filesystem, this modification silently fails and the container drops privileges to hardcoded `uid=911(abc)`, causing silent write and permission failures on NFS shares.
+- **Preferred Rootless Images:**
+  - For the *arr stack, downloaders, and torrent clients (Sonarr, Radarr, SABnzbd, qBittorrent, Prowlarr), use **`ghcr.io/home-operations/*`** images. They are natively rootless, run directly under any arbitrary UID/GID without supervisor overhead, and cleanly support `readOnlyRootFilesystem: true`.
+  - For other services, always prefer official upstream container images (e.g. `jvmilazz0/kavita`, `ghcr.io/advplyr/audiobookshelf`, `jellyfin/jellyfin`, `syncthing/syncthing`) configured for non-root execution.
 
 ## ArgoCD Standards
 
@@ -90,6 +94,27 @@ volumes:
       server: { { .Values.network.storageServer } }
       path: /mnt/pool/media/books
 ```
+
+### NFS Permissions & UID 2000 Standard
+
+All workloads reading or writing to `/mnt/pool/media` MUST run natively as UID `2000` and GID `2000`:
+
+1. **Pod & Container Security Context:** Always configure:
+
+   ```yaml
+   spec:
+     securityContext:
+       runAsUser: { { .Values.userId } } # 2000
+       runAsGroup: { { .Values.groupId } } # 2000
+       fsGroup: { { .Values.groupId } } # 2000
+       fsGroupChangePolicy: OnRootMismatch
+   ```
+
+   _(Exception: For multi-container pods with a privileged sidecar like `gluetun` in qBittorrent, apply `runAsUser`/`runAsGroup` at the application container level rather than the pod level)._
+
+2. **One-Off Permission Migrations via Jobs (No Permanent InitContainers):**
+   - NEVER add permanent `initContainers` to Deployment manifests solely to `chown` or fix volume permissions.
+   - When migrating legacy volumes (e.g. files owned by UID `911` or `root`) to UID `2000`, use a temporary one-off Kubernetes `Job` or execute a single migration task. Manifests in git should remain clean and rootless.
 
 ## Ingress Pattern (Pomerium)
 
