@@ -5,11 +5,11 @@ databaseVolumeSizeGi: 20
 images:
   server:
     repository: ghcr.io/immich-app/immich-server
-    tag: v3.3.3
+    tag: v3.3.4
     pullPolicy: IfNotPresent
   machineLearning:
     repository: ghcr.io/immich-app/immich-machine-learning
-    tag: v3.3.3-openvino
+    tag: v3.3.4-openvino
     pullPolicy: IfNotPresent
   redis:
     repository: docker.io/valkey/valkey
