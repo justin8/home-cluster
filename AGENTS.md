@@ -6,6 +6,10 @@
 - **Active Knowledgebase:** Treat the root markdown files in `docs/*.md` as the authoritative, active knowledgebase. Before implementing new features or making architectural changes, research existing documentation to ensure alignment with established patterns (Talos configuration, networking, storage).
 - **Archive Directory (`docs/archive/`):** Completed migration plans, historical phase handovers, and deprecated architecture notes are preserved in `docs/archive/`. Do NOT load or read `docs/archive/` files into active context during standard operations; only consult them when the user explicitly requests historical migration context.
 
+## Git Workflow & Push Standards
+
+- **Direct Push to `main` by Default:** Do NOT create Pull Requests unless explicitly requested by the user. Commit verified changes and push directly to `main` (e.g. `git push origin HEAD:main`).
+
 ## Helm Chart Versions
 
 When adding a new Helm chart dependency to a `Chart.yaml`, always look up the current stable version before writing the file. Use:
