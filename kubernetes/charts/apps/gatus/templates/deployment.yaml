@@ -35,6 +35,11 @@ spec:
               value: /config/config.yaml
             - name: PORT
               value: "8080"
+            - name: ALERT_WEBHOOK_URL
+              valueFrom:
+                secretKeyRef:
+                  name: gatus-secrets
+                  key: ALERT_WEBHOOK_URL
           securityContext:
             capabilities:
               add:

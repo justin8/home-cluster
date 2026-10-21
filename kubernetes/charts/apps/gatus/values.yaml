@@ -22,7 +22,7 @@ config:
     path: /data/data.db
   alerting:
     custom:
-      url: "https://relay.t3.codes/v1/hooks/2a976da61c1f8c04/scheduled-task%3A2c0d9ceb-754e-458e-9527-bf6cd0053bd9/HFkMBMwl8JIknukSvvS94jZfaStUUCuRPJ5vnIJWn-I"
+      url: "${ALERT_WEBHOOK_URL}"
       method: "POST"
       headers:
         Content-Type: "application/json"
