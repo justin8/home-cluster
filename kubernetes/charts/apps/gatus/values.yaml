@@ -38,7 +38,7 @@ config:
         - "[CERTIFICATE_EXPIRATION] > 48h"
     - name: Pomerium Proxy
       group: Core Services
-      url: https://authenticate.dray.id.au/.pomerium/healthz
+      url: https://authenticate.dray.id.au/ping
       interval: 1m
       conditions:
         - "[STATUS] == 200"
@@ -87,7 +87,7 @@ config:
         - "[CERTIFICATE_EXPIRATION] > 48h"
     - name: Home Assistant
       group: Services
-      url: https://homeassistant.dray.id.au
+      url: https://home-assistant.dray.id.au
       interval: 1m
       conditions:
         - "[STATUS] == 200"
@@ -101,11 +101,10 @@ config:
         - "[CERTIFICATE_EXPIRATION] > 48h"
     - name: UHF Server
       group: Services
-      url: https://uhf.dray.id.au
+      url: http://uhf.uhf.svc.cluster.local:8000
       interval: 1m
       conditions:
         - "[STATUS] == 200"
-        - "[CERTIFICATE_EXPIRATION] > 48h"
     - name: Storage Server (NFS)
       group: Infrastructure
       url: icmp://100.92.202.28
