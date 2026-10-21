@@ -85,7 +85,7 @@ Use the `description`, `service`, and `group` from the alert payload to target t
      ```bash
      kubectl --kubeconfig=/home/justin/src/home-cluster/talos/clusterconfig/kubeconfig get nodes -o wide
      ```
-  2. Check Talos node health if nodes are `NotReady`:
+  2. Check Talos node health if nodes are `NotReady`:\
      ```bash
      talosctl --talosconfig=/home/justin/src/home-cluster/talos/clusterconfig/talosconfig -n <node-ip> health
      ```
@@ -107,7 +107,7 @@ Use the `description`, `service`, and `group` from the alert payload to target t
 Do not conclude the investigation until the failing check is verified resolved:
 
 1. **Poll the Target Service**:
-   - Query the failing endpoint or check directly every 10–15 seconds until it returns the expected healthy status (e.g. `HTTP 200`, `Healthy`, or ICMP ping success).
+   - Query the failing endpoint or check directly every 30 seconds until it returns the expected healthy status (e.g. `HTTP 200`, `Healthy`, or ICMP ping success).
    - Alternatively, check the Gatus endpoint status API:
      ```bash
      curl -s http://192.168.5.178:8080/api/v1/endpoints/<group>_<service>/statuses | jq '.[-1]'
