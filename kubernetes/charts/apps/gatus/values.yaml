@@ -24,6 +24,7 @@ config:
     title: "Cluster Status"
     header: "Home Cluster Status"
     description: "Automated service health and uptime"
+    default-sort-by: group
   connectivity:
     checker:
       target: "1.1.1.1:53"
