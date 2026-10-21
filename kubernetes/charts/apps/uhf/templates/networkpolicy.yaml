@@ -10,6 +10,7 @@ spec:
   ingress:
     - fromEntities:
         - host
+        - cluster
     - fromCIDRSet:
         - cidr: {{ .Values.network.lanIpRange }}
         - cidr: {{ .Values.network.tailscaleIpRange }}

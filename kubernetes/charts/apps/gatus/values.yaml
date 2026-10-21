@@ -117,21 +117,33 @@ config:
       interval: 30s
       conditions:
         - "[CONNECTED] == true"
-    - name: Control Plane 1
+    - name: Kubernetes Node 1
       group: Infrastructure
       url: icmp://192.168.5.11
       interval: 30s
       conditions:
         - "[CONNECTED] == true"
-    - name: Control Plane 2
+    - name: Kubernetes Node 2
       group: Infrastructure
       url: icmp://192.168.5.12
       interval: 30s
       conditions:
         - "[CONNECTED] == true"
-    - name: Control Plane 3
+    - name: Kubernetes Node 3
       group: Infrastructure
       url: icmp://192.168.5.13
+      interval: 30s
+      conditions:
+        - "[CONNECTED] == true"
+    - name: Internet Access (Cloudflare DNS)
+      group: Network & Internet
+      url: icmp://1.1.1.1
+      interval: 30s
+      conditions:
+        - "[CONNECTED] == true"
+    - name: Internet Access (Google DNS)
+      group: Network & Internet
+      url: icmp://8.8.8.8
       interval: 30s
       conditions:
         - "[CONNECTED] == true"
