@@ -20,6 +20,28 @@ config:
   storage:
     type: sqlite
     path: /data/data.db
+  alerting:
+    custom:
+      url: "https://relay.t3.codes/v1/hooks/2a976da61c1f8c04/scheduled-task%3A2c0d9ceb-754e-458e-9527-bf6cd0053bd9/HFkMBMwl8JIknukSvvS94jZfaStUUCuRPJ5vnIJWn-I"
+      method: "POST"
+      headers:
+        Content-Type: "application/json"
+      body: |
+        {
+          "status": "[ALERT_TRIGGERED_OR_RESOLVED]",
+          "service": "[ENDPOINT_NAME]",
+          "group": "[ENDPOINT_GROUP]",
+          "url": "[ENDPOINT_URL]",
+          "description": "[ALERT_DESCRIPTION]",
+          "errors": "[RESULT_ERRORS]",
+          "conditions": "[RESULT_CONDITIONS]"
+        }
+      default-alert:
+        enabled: true
+        failure-threshold: 3
+        success-threshold: 2
+        send-on-resolved: false
+        description: "Health check failed"
   ui:
     title: "Cluster Status"
     header: "Home Cluster Status"
@@ -40,6 +62,9 @@ config:
       conditions:
         - "[STATUS] == 200"
         - "[CERTIFICATE_EXPIRATION] > 48h"
+      alerts:
+        - type: custom
+          description: "Argo CD public web UI and TLS certificate validity"
     - name: Pomerium Proxy
       group: Core Services
       url: https://authenticate.dray.id.au/ping
@@ -47,6 +72,9 @@ config:
       conditions:
         - "[STATUS] == 200"
         - "[CERTIFICATE_EXPIRATION] > 48h"
+      alerts:
+        - type: custom
+          description: "Pomerium identity-aware proxy authentication endpoint and TLS certificate validity"
     - name: PocketID
       group: Core Services
       url: https://pocketid.dray.id.au/health
@@ -54,6 +82,9 @@ config:
       conditions:
         - "[STATUS] == 200"
         - "[CERTIFICATE_EXPIRATION] > 48h"
+      alerts:
+        - type: custom
+          description: "PocketID authentication service healthcheck and TLS certificate validity"
 
     # ---------------------------------------------------------
     # Media Apps (Public Ingress & Web UI)
@@ -65,6 +96,9 @@ config:
       conditions:
         - "[STATUS] == 200"
         - "[CERTIFICATE_EXPIRATION] > 48h"
+      alerts:
+        - type: custom
+          description: "Immich photo management server ping endpoint and TLS certificate validity"
     - name: Audiobookshelf
       group: Media Apps
       url: https://audiobookshelf.dray.id.au/healthcheck
@@ -72,6 +106,9 @@ config:
       conditions:
         - "[STATUS] == 200"
         - "[CERTIFICATE_EXPIRATION] > 48h"
+      alerts:
+        - type: custom
+          description: "Audiobookshelf audiobook server healthcheck and TLS certificate validity"
     - name: Jellyfin
       group: Media Apps
       url: https://jellyfin.dray.id.au/health
@@ -79,6 +116,9 @@ config:
       conditions:
         - "[STATUS] == 200"
         - "[CERTIFICATE_EXPIRATION] > 48h"
+      alerts:
+        - type: custom
+          description: "Jellyfin media streaming server healthcheck and TLS certificate validity"
     - name: Kavita
       group: Media Apps
       url: https://kavita.dray.id.au/api/health
@@ -86,6 +126,9 @@ config:
       conditions:
         - "[STATUS] == 200"
         - "[CERTIFICATE_EXPIRATION] > 48h"
+      alerts:
+        - type: custom
+          description: "Kavita digital reader server healthcheck and TLS certificate validity"
     - name: Plex
       group: Media Apps
       url: https://plex.dray.id.au/identity
@@ -93,6 +136,9 @@ config:
       conditions:
         - "[STATUS] == 200"
         - "[CERTIFICATE_EXPIRATION] > 48h"
+      alerts:
+        - type: custom
+          description: "Plex media server identity endpoint and TLS certificate validity"
 
     # ---------------------------------------------------------
     # Services & Automation (Public Ingress & Web UI)
@@ -104,6 +150,9 @@ config:
       conditions:
         - "[STATUS] == 200"
         - "[CERTIFICATE_EXPIRATION] > 48h"
+      alerts:
+        - type: custom
+          description: "Home Assistant smart home web UI and TLS certificate validity"
     - name: Syncthing
       group: Services
       url: https://syncthing.dray.id.au
@@ -111,12 +160,18 @@ config:
       conditions:
         - "[STATUS] == 200"
         - "[CERTIFICATE_EXPIRATION] > 48h"
+      alerts:
+        - type: custom
+          description: "Syncthing file synchronization web UI and TLS certificate validity"
     - name: UHF Server
       group: Services
       url: http://uhf.uhf.svc.cluster.local:8000
       interval: 1m
       conditions:
         - "[STATUS] == 200"
+      alerts:
+        - type: custom
+          description: "UHF server internal cluster HTTP service availability"
 
     # ---------------------------------------------------------
     # Argo CD Managed Workloads: Core Infrastructure
@@ -129,6 +184,9 @@ config:
         - "[STATUS] == 200"
         - "[BODY].status.health.status == Healthy"
         - "[BODY].status.sync.status == Synced"
+      alerts:
+        - type: custom
+          description: "Argo CD engine application sync and health status in cluster"
     - name: Root Application
       group: Core Infrastructure Workloads
       url: http://argo-cd-argocd-server.argocd.svc.cluster.local/api/v1/applications/root-app
@@ -137,6 +195,9 @@ config:
         - "[STATUS] == 200"
         - "[BODY].status.health.status == Healthy"
         - "[BODY].status.sync.status == Synced"
+      alerts:
+        - type: custom
+          description: "Root GitOps app-of-apps application sync and health status in cluster"
     - name: Cilium CNI
       group: Core Infrastructure Workloads
       url: http://argo-cd-argocd-server.argocd.svc.cluster.local/api/v1/applications/cilium
@@ -145,6 +206,9 @@ config:
         - "[STATUS] == 200"
         - "[BODY].status.health.status == Healthy"
         - "[BODY].status.sync.status == Synced"
+      alerts:
+        - type: custom
+          description: "Cilium CNI networking application sync and health status in cluster"
     - name: Multus CNI
       group: Core Infrastructure Workloads
       url: http://argo-cd-argocd-server.argocd.svc.cluster.local/api/v1/applications/multus
@@ -153,6 +217,9 @@ config:
         - "[STATUS] == 200"
         - "[BODY].status.health.status == Healthy"
         - "[BODY].status.sync.status == Synced"
+      alerts:
+        - type: custom
+          description: "Multus CNI secondary network application sync and health status in cluster"
     - name: Cert Manager
       group: Core Infrastructure Workloads
       url: http://argo-cd-argocd-server.argocd.svc.cluster.local/api/v1/applications/cert-manager
@@ -161,6 +228,9 @@ config:
         - "[STATUS] == 200"
         - "[BODY].status.health.status == Healthy"
         - "[BODY].status.sync.status == Synced"
+      alerts:
+        - type: custom
+          description: "cert-manager TLS certificate controller application sync and health status in cluster"
     - name: CoreDNS & ExternalDNS
       group: Core Infrastructure Workloads
       url: http://argo-cd-argocd-server.argocd.svc.cluster.local/api/v1/applications/dns
@@ -169,6 +239,9 @@ config:
         - "[STATUS] == 200"
         - "[BODY].status.health.status == Healthy"
         - "[BODY].status.sync.status == Synced"
+      alerts:
+        - type: custom
+          description: "CoreDNS & ExternalDNS application sync and health status in cluster"
     - name: Pomerium Ingress
       group: Core Infrastructure Workloads
       url: http://argo-cd-argocd-server.argocd.svc.cluster.local/api/v1/applications/pomerium
@@ -177,6 +250,9 @@ config:
         - "[STATUS] == 200"
         - "[BODY].status.health.status == Healthy"
         - "[BODY].status.sync.status == Synced"
+      alerts:
+        - type: custom
+          description: "Pomerium ingress controller application sync and health status in cluster"
     - name: PocketID Auth
       group: Core Infrastructure Workloads
       url: http://argo-cd-argocd-server.argocd.svc.cluster.local/api/v1/applications/auth
@@ -185,6 +261,9 @@ config:
         - "[STATUS] == 200"
         - "[BODY].status.health.status == Healthy"
         - "[BODY].status.sync.status == Synced"
+      alerts:
+        - type: custom
+          description: "PocketID authentication application sync and health status in cluster"
     - name: Tailscale Operator
       group: Core Infrastructure Workloads
       url: http://argo-cd-argocd-server.argocd.svc.cluster.local/api/v1/applications/tailscale-operator
@@ -193,6 +272,9 @@ config:
         - "[STATUS] == 200"
         - "[BODY].status.health.status == Healthy"
         - "[BODY].status.sync.status == Synced"
+      alerts:
+        - type: custom
+          description: "Tailscale operator application sync and health status in cluster"
 
     # ---------------------------------------------------------
     # Argo CD Managed Workloads: Cluster Operations
@@ -205,6 +287,9 @@ config:
         - "[STATUS] == 200"
         - "[BODY].status.health.status == Healthy"
         - "[BODY].status.sync.status == Synced"
+      alerts:
+        - type: custom
+          description: "Longhorn distributed storage application sync and health status in cluster"
     - name: NFS CSI Driver
       group: Cluster Operations Workloads
       url: http://argo-cd-argocd-server.argocd.svc.cluster.local/api/v1/applications/nfs-csi
@@ -213,6 +298,9 @@ config:
         - "[STATUS] == 200"
         - "[BODY].status.health.status == Healthy"
         - "[BODY].status.sync.status == Synced"
+      alerts:
+        - type: custom
+          description: "NFS CSI driver application sync and health status in cluster"
     - name: CloudNativePG Operator
       group: Cluster Operations Workloads
       url: http://argo-cd-argocd-server.argocd.svc.cluster.local/api/v1/applications/cnpg-operator
@@ -221,6 +309,9 @@ config:
         - "[STATUS] == 200"
         - "[BODY].status.health.status == Healthy"
         - "[BODY].status.sync.status == Synced"
+      alerts:
+        - type: custom
+          description: "CloudNativePG PostgreSQL operator application sync and health status in cluster"
     - name: Intel GPU Plugin
       group: Cluster Operations Workloads
       url: http://argo-cd-argocd-server.argocd.svc.cluster.local/api/v1/applications/intel-gpu
@@ -229,6 +320,9 @@ config:
         - "[STATUS] == 200"
         - "[BODY].status.health.status == Healthy"
         - "[BODY].status.sync.status == Synced"
+      alerts:
+        - type: custom
+          description: "Intel GPU device plugin application sync and health status in cluster"
     - name: Node Feature Discovery
       group: Cluster Operations Workloads
       url: http://argo-cd-argocd-server.argocd.svc.cluster.local/api/v1/applications/nfd
@@ -237,6 +331,9 @@ config:
         - "[STATUS] == 200"
         - "[BODY].status.health.status == Healthy"
         - "[BODY].status.sync.status == Synced"
+      alerts:
+        - type: custom
+          description: "Node Feature Discovery application sync and health status in cluster"
     - name: Shared Secrets
       group: Cluster Operations Workloads
       url: http://argo-cd-argocd-server.argocd.svc.cluster.local/api/v1/applications/shared-secrets
@@ -245,6 +342,9 @@ config:
         - "[STATUS] == 200"
         - "[BODY].status.health.status == Healthy"
         - "[BODY].status.sync.status == Synced"
+      alerts:
+        - type: custom
+          description: "Shared sealed secrets application sync and health status in cluster"
     - name: Mail Proxy
       group: Cluster Operations Workloads
       url: http://argo-cd-argocd-server.argocd.svc.cluster.local/api/v1/applications/mail-proxy
@@ -253,6 +353,9 @@ config:
         - "[STATUS] == 200"
         - "[BODY].status.health.status == Healthy"
         - "[BODY].status.sync.status == Synced"
+      alerts:
+        - type: custom
+          description: "Mail proxy application sync and health status in cluster"
     - name: Cordon Sync Controller
       group: Cluster Operations Workloads
       url: http://argo-cd-argocd-server.argocd.svc.cluster.local/api/v1/applications/cordon-sync
@@ -261,6 +364,9 @@ config:
         - "[STATUS] == 200"
         - "[BODY].status.health.status == Healthy"
         - "[BODY].status.sync.status == Synced"
+      alerts:
+        - type: custom
+          description: "Cordon sync controller application sync and health status in cluster"
     - name: Renovate Bot
       group: Cluster Operations Workloads
       url: http://argo-cd-argocd-server.argocd.svc.cluster.local/api/v1/applications/renovate
@@ -269,6 +375,9 @@ config:
         - "[STATUS] == 200"
         - "[BODY].status.health.status == Healthy"
         - "[BODY].status.sync.status == Synced"
+      alerts:
+        - type: custom
+          description: "Renovate bot dependency updater application sync and health status in cluster"
 
     # ---------------------------------------------------------
     # Argo CD Managed Workloads: Applications
@@ -281,6 +390,9 @@ config:
         - "[STATUS] == 200"
         - "[BODY].status.health.status == Healthy"
         - "[BODY].status.sync.status == Synced"
+      alerts:
+        - type: custom
+          description: "Download stack (qBittorrent, *arr apps) application sync and health status in cluster"
     - name: Blackhole
       group: Application Workloads
       url: http://argo-cd-argocd-server.argocd.svc.cluster.local/api/v1/applications/blackhole
@@ -289,6 +401,9 @@ config:
         - "[STATUS] == 200"
         - "[BODY].status.health.status == Healthy"
         - "[BODY].status.sync.status == Synced"
+      alerts:
+        - type: custom
+          description: "Blackhole torrent router application sync and health status in cluster"
     - name: Hello World
       group: Application Workloads
       url: http://argo-cd-argocd-server.argocd.svc.cluster.local/api/v1/applications/hello-world
@@ -297,6 +412,9 @@ config:
         - "[STATUS] == 200"
         - "[BODY].status.health.status == Healthy"
         - "[BODY].status.sync.status == Synced"
+      alerts:
+        - type: custom
+          description: "Hello World test application sync and health status in cluster"
     - name: Home Automation
       group: Application Workloads
       url: http://argo-cd-argocd-server.argocd.svc.cluster.local/api/v1/applications/home-automation
@@ -305,6 +423,9 @@ config:
         - "[STATUS] == 200"
         - "[BODY].status.health.status == Healthy"
         - "[BODY].status.sync.status == Synced"
+      alerts:
+        - type: custom
+          description: "Home Automation (Home Assistant, Zigbee/Z-Wave) application sync and health status in cluster"
 
     # ---------------------------------------------------------
     # Physical Infrastructure & Networking
@@ -315,30 +436,45 @@ config:
       interval: 30s
       conditions:
         - "[CONNECTED] == true"
+      alerts:
+        - type: custom
+          description: "TrueNAS NFS storage server network reachability via ICMP ping"
     - name: Local Gateway
       group: Infrastructure
       url: icmp://192.168.5.1
       interval: 30s
       conditions:
         - "[CONNECTED] == true"
+      alerts:
+        - type: custom
+          description: "Local LAN default gateway (192.168.5.1) network reachability via ICMP ping"
     - name: Kubernetes Node 1
       group: Infrastructure
       url: icmp://192.168.5.11
       interval: 30s
       conditions:
         - "[CONNECTED] == true"
+      alerts:
+        - type: custom
+          description: "Talos Kubernetes Node 1 (192.168.5.11) network reachability via ICMP ping"
     - name: Kubernetes Node 2
       group: Infrastructure
       url: icmp://192.168.5.12
       interval: 30s
       conditions:
         - "[CONNECTED] == true"
+      alerts:
+        - type: custom
+          description: "Talos Kubernetes Node 2 (192.168.5.12) network reachability via ICMP ping"
     - name: Kubernetes Node 3
       group: Infrastructure
       url: icmp://192.168.5.13
       interval: 30s
       conditions:
         - "[CONNECTED] == true"
+      alerts:
+        - type: custom
+          description: "Talos Kubernetes Node 3 (192.168.5.13) network reachability via ICMP ping"
 
     # ---------------------------------------------------------
     # Network & Internet
@@ -349,9 +485,15 @@ config:
       interval: 30s
       conditions:
         - "[CONNECTED] == true"
+      alerts:
+        - type: custom
+          description: "External internet connectivity via Cloudflare DNS (1.1.1.1) ICMP ping"
     - name: Internet Access (Google DNS)
       group: Network & Internet
       url: icmp://8.8.8.8
       interval: 30s
       conditions:
         - "[CONNECTED] == true"
+      alerts:
+        - type: custom
+          description: "External internet connectivity via Google DNS (8.8.8.8) ICMP ping"
