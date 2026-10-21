@@ -1,0 +1,30 @@
+{{ include "common.pomeriumIngress" (dict
+  "ctx" .
+  "name" "uptime-kuma"
+  "subdomain" "status"
+  "port" 3001
+  "type" "public"
+  "allowedUsers" "authed"
+) }}
+---
+{{ include "common.pomeriumIngress" (dict
+  "ctx" .
+  "name" "uptime-kuma-push"
+  "subdomain" "status"
+  "port" 3001
+  "path" "/api/push"
+  "type" "public"
+  "allowedUsers" "all"
+  "internalDns" false
+) }}
+---
+{{ include "common.pomeriumIngress" (dict
+  "ctx" .
+  "name" "uptime-kuma-badge"
+  "subdomain" "status"
+  "port" 3001
+  "path" "/api/badge"
+  "type" "public"
+  "allowedUsers" "all"
+  "internalDns" false
+) }}

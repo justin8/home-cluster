@@ -1,0 +1,1 @@
+{{- include "common.longhornVolume" (dict "ctx" . "name" "uptime-kuma-data" "sizeGi" .Values.volumeSizeGi) -}}
