@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: uptime-kuma
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: uptime-kuma
+  template:
+    metadata:
+      labels:
+        app: uptime-kuma
+    spec:
+      securityContext:
+        fsGroup: {{ .Values.groupId }}
+        fsGroupChangePolicy: OnRootMismatch
+      containers:
+        - name: uptime-kuma
+          image: "{{ .Values.images.app.repository }}:{{ .Values.images.app.tag }}"
+          imagePullPolicy: {{ .Values.images.app.pullPolicy }}
+          ports:
+            - containerPort: 3001
+              name: http
+          env:
+            - name: TZ
+              value: {{ .Values.TZ }}
+            - name: UPTIME_KUMA_PORT
+              value: "3001"
+          securityContext:
+            capabilities:
+              add:
+                - NET_RAW
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          livenessProbe:
+            httpGet:
+              port: 3001
+              path: /
+            initialDelaySeconds: 30
+            timeoutSeconds: 3
+          readinessProbe:
+            httpGet:
+              port: 3001
+              path: /
+            initialDelaySeconds: 15
+            timeoutSeconds: 3
+          volumeMounts:
+            - name: data
+              mountPath: /app/data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: uptime-kuma-data
