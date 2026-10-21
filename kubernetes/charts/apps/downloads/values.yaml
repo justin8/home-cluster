@@ -18,7 +18,7 @@ images:
     pullPolicy: IfNotPresent
   seerr:
     repository: ghcr.io/seerr-team/seerr
-    tag: v3.5.0
+    tag: v3.5.1
     pullPolicy: IfNotPresent
   sonarr:
     repository: ghcr.io/home-operations/sonarr
