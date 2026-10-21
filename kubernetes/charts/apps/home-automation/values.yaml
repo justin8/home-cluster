@@ -20,5 +20,5 @@ images:
     pullPolicy: IfNotPresent
   esphome:
     repository: esphome/esphome
-    tag: "2026.9"
+    tag: "2026.10"
     pullPolicy: IfNotPresent
