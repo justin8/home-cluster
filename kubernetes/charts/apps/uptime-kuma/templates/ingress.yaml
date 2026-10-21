@@ -10,6 +10,7 @@
 {{ include "common.pomeriumIngress" (dict
   "ctx" .
   "name" "uptime-kuma-push"
+  "serviceName" "uptime-kuma"
   "subdomain" "status"
   "port" 3001
   "path" "/api/push"
@@ -21,6 +22,7 @@
 {{ include "common.pomeriumIngress" (dict
   "ctx" .
   "name" "uptime-kuma-badge"
+  "serviceName" "uptime-kuma"
   "subdomain" "status"
   "port" 3001
   "path" "/api/badge"

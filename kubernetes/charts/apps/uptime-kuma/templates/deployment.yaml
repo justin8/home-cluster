@@ -17,6 +17,8 @@ spec:
     metadata:
       labels:
         app: uptime-kuma
+      annotations:
+        deployment.kubernetes.io/revision: "2"
     spec:
       securityContext:
         fsGroup: {{ .Values.groupId }}
