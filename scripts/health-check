@@ -1,0 +1,172 @@
+#!/usr/bin/env bash
+#
+# scripts/health-check
+# Automated cluster health check runbook per docs/HEALTH_CHECKS.md.
+
+set -euo pipefail
+
+TOTAL_FAILURES=0
+
+# -----------------------------------------------------------------------------
+# 1. Cluster Node Health
+# -----------------------------------------------------------------------------
+nodes_json=$(kubectl get nodes -o json)
+total_nodes=$(jq '.items | length' <<< "$nodes_json")
+ready_nodes=$(jq '[.items[] | select([.status.conditions[]? | select(.type=="Ready" and .status=="True")] | any)] | length' <<< "$nodes_json")
+k8s_version=$(jq -r '.items[0].status.nodeInfo.kubeletVersion // "unknown"' <<< "$nodes_json")
+os_image=$(jq -r '.items[0].status.nodeInfo.osImage // "unknown"' <<< "$nodes_json")
+unhealthy_nodes=$(jq -r '[.items[] | select([.status.conditions[]? | select(.type=="Ready" and .status=="True")] | any | not) | .metadata.name] | .[]' <<< "$nodes_json")
+
+if [[ "$ready_nodes" -eq "$total_nodes" && "$total_nodes" -gt 0 ]]; then
+  echo "[OK] Nodes: $ready_nodes/$total_nodes Ready ($os_image, k8s $k8s_version)"
+else
+  echo "[FAIL] Nodes: $ready_nodes/$total_nodes Ready ($os_image, k8s $k8s_version)"
+  while IFS= read -r node; do
+    [[ -n "$node" ]] && echo "  - $node: NotReady"
+  done <<< "$unhealthy_nodes"
+  TOTAL_FAILURES=$((TOTAL_FAILURES + 1))
+fi
+
+# -----------------------------------------------------------------------------
+# 2. Workload & Pod Health (with CronJob noise filtering)
+# -----------------------------------------------------------------------------
+pods_json=$(kubectl get pods -A -o json)
+jobs_json=$(kubectl get jobs -A -o json)
+total_pods=$(jq '.items | length' <<< "$pods_json")
+
+unhealthy_pods_json=$(jq --argjson jobs "$jobs_json" '
+  ([$jobs.items[] | select((.status.succeeded // 0) > 0) | (.metadata.ownerReferences[]? | select(.kind=="CronJob") | .name)] | unique) as $good_crons |
+  [.items[] | {
+    namespace: .metadata.namespace,
+    name: .metadata.name,
+    phase: .status.phase,
+    restarts: ([.status.containerStatuses[]?.restartCount // 0] | add // 0),
+    waitingReasons: ([.status.containerStatuses[]?.state.waiting.reason // empty]),
+    jobOwner: (.metadata.ownerReferences[]? | select(.kind=="Job") | .name)
+  }] | map(select(
+    if .phase == "Running" then
+      ([.waitingReasons[] | tostring | test("CrashLoopBackOff|Error")] | any)
+    else
+      if .phase == "Succeeded" then
+        false
+      else
+        if .phase == "Failed" then
+          if .jobOwner != null then
+            ([$good_crons[] | select(. != null and (. as $c | .jobOwner | startswith($c)))] | length == 0)
+          else
+            true
+          end
+        else
+          true
+        end
+      end
+    end
+  ))
+' <<< "$pods_json")
+
+unhealthy_pod_count=$(jq 'length' <<< "$unhealthy_pods_json")
+if [[ "$unhealthy_pod_count" -eq 0 ]]; then
+  echo "[OK] Workloads: $total_pods pods healthy (0 crashing / 0 pending)"
+else
+  echo "[FAIL] Workloads: $unhealthy_pod_count unhealthy pods detected (out of $total_pods total)"
+  jq -r '.[] | "  - \(.namespace)/\(.name): phase=\(.phase) restarts=\(.restarts) waiting=\(.waitingReasons | join(","))"' <<< "$unhealthy_pods_json"
+  TOTAL_FAILURES=$((TOTAL_FAILURES + 1))
+fi
+
+# -----------------------------------------------------------------------------
+# 3. GitOps & ArgoCD Application Sync
+# -----------------------------------------------------------------------------
+apps_json=$(kubectl get applications -n argocd -o json)
+total_apps=$(jq '.items | length' <<< "$apps_json")
+unhealthy_apps_json=$(jq '[.items[] | select(.status.health.status != "Healthy" or .status.sync.status != "Synced") | {name: .metadata.name, health: .status.health.status, sync: .status.sync.status}]' <<< "$apps_json")
+unhealthy_app_count=$(jq 'length' <<< "$unhealthy_apps_json")
+
+if [[ "$unhealthy_app_count" -eq 0 && "$total_apps" -gt 0 ]]; then
+  echo "[OK] GitOps: $total_apps/$total_apps ArgoCD applications Healthy & Synced"
+else
+  echo "[FAIL] GitOps: $unhealthy_app_count/$total_apps ArgoCD applications unhealthy or out of sync"
+  jq -r '.[] | "  - \(.name): health=\(.health) sync=\(.sync)"' <<< "$unhealthy_apps_json"
+  TOTAL_FAILURES=$((TOTAL_FAILURES + 1))
+fi
+
+# -----------------------------------------------------------------------------
+# 4. Distributed Storage & Database Clusters
+# -----------------------------------------------------------------------------
+lh_json=$(kubectl get volumes.longhorn.io -n longhorn-system -o json)
+total_lh=$(jq '.items | length' <<< "$lh_json")
+unhealthy_lh_json=$(jq '[.items[] | select(.status.robustness != "healthy") | {name: .metadata.name, robustness: .status.robustness, state: .status.state}]' <<< "$lh_json")
+unhealthy_lh_count=$(jq 'length' <<< "$unhealthy_lh_json")
+
+if [[ "$unhealthy_lh_count" -eq 0 && "$total_lh" -gt 0 ]]; then
+  echo "[OK] Storage: $total_lh/$total_lh Longhorn volumes healthy"
+else
+  echo "[FAIL] Storage: $unhealthy_lh_count/$total_lh Longhorn volumes unhealthy"
+  jq -r '.[] | "  - \(.name): robustness=\(.robustness) state=\(.state)"' <<< "$unhealthy_lh_json"
+  TOTAL_FAILURES=$((TOTAL_FAILURES + 1))
+fi
+
+cnpg_json=$(kubectl get cluster -A -o json)
+total_cnpg=$(jq '.items | length' <<< "$cnpg_json")
+unhealthy_cnpg_json=$(jq '[.items[] | select(
+  ([.status.conditions[]? | select(.type=="Ready" and .status=="True")] | length == 0) or
+  ([.status.conditions[]? | select(.type=="ContinuousArchiving" and .status=="False")] | length > 0)
+) | {namespace: .metadata.namespace, name: .metadata.name, conditions: [.status.conditions[]? | "\(.type)=\(.status)"]}]' <<< "$cnpg_json")
+unhealthy_cnpg_count=$(jq 'length' <<< "$unhealthy_cnpg_json")
+
+if [[ "$unhealthy_cnpg_count" -eq 0 && "$total_cnpg" -gt 0 ]]; then
+  echo "[OK] Databases: $total_cnpg/$total_cnpg CNPG clusters Ready & Archiving"
+else
+  echo "[FAIL] Databases: $unhealthy_cnpg_count/$total_cnpg CNPG clusters unhealthy"
+  jq -r '.[] | "  - \(.namespace)/\(.name): \(.conditions | join(", "))"' <<< "$unhealthy_cnpg_json"
+  TOTAL_FAILURES=$((TOTAL_FAILURES + 1))
+fi
+
+# -----------------------------------------------------------------------------
+# 5. Live Container Log Scanning (Parallelized with noise filtering)
+# -----------------------------------------------------------------------------
+scan_container_logs() {
+  local ns="$1"
+  local pod="$2"
+  local raw_logs
+  raw_logs=$(kubectl logs -n "$ns" "$pod" --tail=30 --all-containers 2>&1 || true)
+
+  # Noise filtering:
+  # 1. Pi-hole periodic git check noise
+  raw_logs=$(echo "$raw_logs" | grep -v -E "error reading .*/\.git" || true)
+  # 2. SABnzbd / Cheroot client disconnect socket deallocator noise
+  if echo "$raw_logs" | grep -q -E "cheroot|IOBase\.__del__|Bad file descriptor"; then
+    raw_logs=$(echo "$raw_logs" | grep -v -E "Traceback|File |self\.|return |OSError: \[Errno 9\]|Exception ignored while calling deallocator" || true)
+  fi
+  # 3. Media indexer rate limits (HTTP 429) & Golang runtime settings
+  raw_logs=$(echo "$raw_logs" | grep -v -E "TooManyRequests|429|Golang settings" || true)
+
+  local matches
+  matches=$(echo "$raw_logs" | grep -i -E "fatal|panic|exception|traceback" | head -n 5 || true)
+  if [[ -n "$matches" ]]; then
+    echo "=== [$ns/$pod] ==="
+    echo "$matches"
+  fi
+}
+export -f scan_container_logs
+
+log_issues=$(
+  jq -r '.items[] | select(.status.phase=="Running") | "\(.metadata.namespace) \(.metadata.name)"' <<< "$pods_json" | \
+    xargs -P 10 -n 2 bash -c 'scan_container_logs "$1" "$2"' _ 2>/dev/null || true
+)
+
+if [[ -z "$log_issues" ]]; then
+  echo "[OK] Container Logs: Clean (0 fatal/panic/traceback errors across running pods)"
+else
+  echo "[WARN] Container Logs: Potential issues detected in container logs:"
+  echo "$log_issues" | sed 's/^/  /'
+  TOTAL_FAILURES=$((TOTAL_FAILURES + 1))
+fi
+
+echo ""
+if [[ "$TOTAL_FAILURES" -eq 0 ]]; then
+  echo "Status: ALL HEALTHY"
+  exit 0
+else
+  echo "Status: ISSUES DETECTED ($TOTAL_FAILURES failure(s))"
+  exit 1
+fi
