@@ -1,0 +1,20 @@
+{{ include "common.pomeriumIngress" (dict
+  "ctx" .
+  "name" "gatus"
+  "subdomain" "status"
+  "port" 8080
+  "type" "public"
+  "allowedUsers" "authed"
+) }}
+---
+{{ include "common.pomeriumIngress" (dict
+  "ctx" .
+  "name" "gatus-badges"
+  "serviceName" "gatus"
+  "subdomain" "status"
+  "port" 8080
+  "path" "/api/v1/endpoints/"
+  "type" "public"
+  "allowedUsers" "all"
+  "internalDns" false
+) }}

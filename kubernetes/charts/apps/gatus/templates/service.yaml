@@ -1,14 +1,14 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: uptime-kuma
+  name: gatus
   namespace: {{ .Release.Namespace }}
   labels:
-    app: uptime-kuma
+    app: gatus
 spec:
   selector:
-    app: uptime-kuma
+    app: gatus
   ports:
-    - port: 3001
-      targetPort: 3001
+    - port: 8080
+      targetPort: 8080
       name: http

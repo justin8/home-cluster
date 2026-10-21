@@ -1,0 +1,7 @@
+{{- if .Values.persistence.enabled }}
+{{ include "common.longhornVolume" (dict
+  "ctx" .
+  "name" "gatus-data"
+  "size" .Values.persistence.size
+) }}
+{{- end }}

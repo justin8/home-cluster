@@ -1,12 +1,12 @@
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
-  name: uptime-kuma
+  name: gatus
   namespace: {{ .Release.Namespace }}
 spec:
   endpointSelector:
     matchLabels:
-      app: uptime-kuma
+      app: gatus
   ingress:
     - fromEntities:
         - host
@@ -16,19 +16,19 @@ spec:
             app.kubernetes.io/name: pomerium
       toPorts:
         - ports:
-            - port: "3001"
+            - port: "8080"
               protocol: TCP
     - fromEntities:
         - cluster
       toPorts:
         - ports:
-            - port: "3001"
+            - port: "8080"
               protocol: TCP
   egress:
-    # Allow probes to all in-cluster services and pods
+    # Probes to all in-cluster services and pods
     - toEntities:
         - cluster
-    # Allow checking through Pomerium ingress VIPs
+    # Probes through Pomerium ingress VIPs
     - toEndpoints:
         - matchLabels:
             k8s:io.kubernetes.pod.namespace: pomerium
@@ -40,18 +40,18 @@ spec:
             - port: "8443"
               protocol: TCP
     - toCIDRSet:
-        - cidr: {{ .Values.network.pomeriumIngress }}/32
-        - cidr: {{ .Values.network.privateIngress }}/32
+        - cidr: 192.168.5.4/32
+        - cidr: 100.99.223.17/32
       toPorts:
         - ports:
             - port: "443"
               protocol: TCP
             - port: "8443"
               protocol: TCP
-    # Allow probes to local LAN and Tailscale devices (e.g. NAS, Talos nodes, router)
+    # Probes to local LAN and Tailscale devices (e.g. NAS, Talos nodes, router)
     - toCIDRSet:
-        - cidr: {{ .Values.network.lanIpRange }}
-        - cidr: {{ .Values.network.tailscaleIpRange }}
-    # Allow probes to external world (WAN, public DNS, notification webhooks)
+        - cidr: 192.168.5.0/24
+        - cidr: 100.64.0.0/10
+    # Probes to external world (WAN, public DNS, public URLs)
     - toEntities:
         - world

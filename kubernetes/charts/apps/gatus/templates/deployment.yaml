@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: uptime-kuma
+  name: gatus
   namespace: {{ .Release.Namespace }}
 spec:
   replicas: 1
@@ -12,29 +12,29 @@ spec:
       maxUnavailable: 1
   selector:
     matchLabels:
-      app: uptime-kuma
+      app: gatus
   template:
     metadata:
       labels:
-        app: uptime-kuma
+        app: gatus
       annotations:
-        deployment.kubernetes.io/revision: "2"
+        checksum/config: {{ .Values.config | toYaml | sha256sum }}
     spec:
       securityContext:
         fsGroup: {{ .Values.groupId }}
         fsGroupChangePolicy: OnRootMismatch
       containers:
-        - name: uptime-kuma
+        - name: gatus
           image: "{{ .Values.images.app.repository }}:{{ .Values.images.app.tag }}"
           imagePullPolicy: {{ .Values.images.app.pullPolicy }}
           ports:
-            - containerPort: 3001
+            - containerPort: 8080
               name: http
           env:
-            - name: TZ
-              value: {{ .Values.TZ }}
-            - name: UPTIME_KUMA_PORT
-              value: "3001"
+            - name: GATUS_CONFIG_PATH
+              value: /config/config.yaml
+            - name: PORT
+              value: "8080"
           securityContext:
             capabilities:
               add:
@@ -43,20 +43,29 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
           livenessProbe:
             httpGet:
-              port: 3001
-              path: /
-            initialDelaySeconds: 30
+              port: 8080
+              path: /health
+            initialDelaySeconds: 10
             timeoutSeconds: 3
           readinessProbe:
             httpGet:
-              port: 3001
-              path: /
-            initialDelaySeconds: 15
+              port: 8080
+              path: /health
+            initialDelaySeconds: 5
             timeoutSeconds: 3
           volumeMounts:
+            - name: config
+              mountPath: /config
+            {{- if .Values.persistence.enabled }}
             - name: data
-              mountPath: /app/data
+              mountPath: /data
+            {{- end }}
       volumes:
+        - name: config
+          configMap:
+            name: gatus-config
+        {{- if .Values.persistence.enabled }}
         - name: data
           persistentVolumeClaim:
-            claimName: uptime-kuma-data
+            claimName: gatus-data
+        {{- end }}
