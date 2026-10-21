@@ -3,5 +3,5 @@ volumeSizeGi: 1
 images:
   app:
     repository: syncthing/syncthing
-    tag: 2.1.6
+    tag: 2.1.7
     pullPolicy: IfNotPresent
