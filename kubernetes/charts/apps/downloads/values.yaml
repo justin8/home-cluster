@@ -38,7 +38,7 @@ images:
     pullPolicy: IfNotPresent
   qbittorrent:
     repository: ghcr.io/home-operations/qbittorrent
-    tag: 5.2.4
+    tag: 5.3.0
     pullPolicy: IfNotPresent
   busybox:
     repository: busybox
