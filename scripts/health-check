@@ -137,8 +137,8 @@ scan_container_logs() {
   if echo "$raw_logs" | grep -q -E "cheroot|IOBase\.__del__|Bad file descriptor"; then
     raw_logs=$(echo "$raw_logs" | grep -v -E "Traceback|File |self\.|return |OSError: \[Errno 9\]|Exception ignored while calling deallocator" || true)
   fi
-  # 3. Media indexer rate limits (HTTP 429) & Golang runtime settings
-  raw_logs=$(echo "$raw_logs" | grep -v -E "TooManyRequests|429|Golang settings" || true)
+  # 3. Media indexer rate limits (HTTP 429), Golang runtime settings, & k8s apiserver "panicked: false"
+  raw_logs=$(echo "$raw_logs" | grep -v -E "TooManyRequests|429|Golang settings|panicked: false" || true)
 
   local matches
   matches=$(echo "$raw_logs" | grep -i -E "fatal|panic|exception|traceback" | head -n 5 || true)
