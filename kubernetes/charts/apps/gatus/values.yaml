@@ -29,6 +29,9 @@ config:
       target: "1.1.1.1:53"
       interval: 30s
   endpoints:
+    # ---------------------------------------------------------
+    # Core Services (Public Ingress & Web UI)
+    # ---------------------------------------------------------
     - name: Argo CD
       group: Core Services
       url: https://argocd.dray.id.au
@@ -50,6 +53,10 @@ config:
       conditions:
         - "[STATUS] == 200"
         - "[CERTIFICATE_EXPIRATION] > 48h"
+
+    # ---------------------------------------------------------
+    # Media Apps (Public Ingress & Web UI)
+    # ---------------------------------------------------------
     - name: Immich
       group: Media Apps
       url: https://immich.dray.id.au/api/server/ping
@@ -85,6 +92,10 @@ config:
       conditions:
         - "[STATUS] == 200"
         - "[CERTIFICATE_EXPIRATION] > 48h"
+
+    # ---------------------------------------------------------
+    # Services & Automation (Public Ingress & Web UI)
+    # ---------------------------------------------------------
     - name: Home Assistant
       group: Services
       url: https://home-assistant.dray.id.au
@@ -105,6 +116,198 @@ config:
       interval: 1m
       conditions:
         - "[STATUS] == 200"
+
+    # ---------------------------------------------------------
+    # Argo CD Managed Workloads: Core Infrastructure
+    # ---------------------------------------------------------
+    - name: Argo CD Engine
+      group: Core Infrastructure Workloads
+      url: http://argo-cd-argocd-server.argocd.svc.cluster.local/api/v1/applications/argo-cd
+      interval: 1m
+      conditions:
+        - "[STATUS] == 200"
+        - "[BODY].status.health.status == Healthy"
+        - "[BODY].status.sync.status == Synced"
+    - name: Root Application
+      group: Core Infrastructure Workloads
+      url: http://argo-cd-argocd-server.argocd.svc.cluster.local/api/v1/applications/root-app
+      interval: 1m
+      conditions:
+        - "[STATUS] == 200"
+        - "[BODY].status.health.status == Healthy"
+        - "[BODY].status.sync.status == Synced"
+    - name: Cilium CNI
+      group: Core Infrastructure Workloads
+      url: http://argo-cd-argocd-server.argocd.svc.cluster.local/api/v1/applications/cilium
+      interval: 1m
+      conditions:
+        - "[STATUS] == 200"
+        - "[BODY].status.health.status == Healthy"
+        - "[BODY].status.sync.status == Synced"
+    - name: Multus CNI
+      group: Core Infrastructure Workloads
+      url: http://argo-cd-argocd-server.argocd.svc.cluster.local/api/v1/applications/multus
+      interval: 1m
+      conditions:
+        - "[STATUS] == 200"
+        - "[BODY].status.health.status == Healthy"
+        - "[BODY].status.sync.status == Synced"
+    - name: Cert Manager
+      group: Core Infrastructure Workloads
+      url: http://argo-cd-argocd-server.argocd.svc.cluster.local/api/v1/applications/cert-manager
+      interval: 1m
+      conditions:
+        - "[STATUS] == 200"
+        - "[BODY].status.health.status == Healthy"
+        - "[BODY].status.sync.status == Synced"
+    - name: CoreDNS & ExternalDNS
+      group: Core Infrastructure Workloads
+      url: http://argo-cd-argocd-server.argocd.svc.cluster.local/api/v1/applications/dns
+      interval: 1m
+      conditions:
+        - "[STATUS] == 200"
+        - "[BODY].status.health.status == Healthy"
+        - "[BODY].status.sync.status == Synced"
+    - name: Pomerium Ingress
+      group: Core Infrastructure Workloads
+      url: http://argo-cd-argocd-server.argocd.svc.cluster.local/api/v1/applications/pomerium
+      interval: 1m
+      conditions:
+        - "[STATUS] == 200"
+        - "[BODY].status.health.status == Healthy"
+        - "[BODY].status.sync.status == Synced"
+    - name: PocketID Auth
+      group: Core Infrastructure Workloads
+      url: http://argo-cd-argocd-server.argocd.svc.cluster.local/api/v1/applications/auth
+      interval: 1m
+      conditions:
+        - "[STATUS] == 200"
+        - "[BODY].status.health.status == Healthy"
+        - "[BODY].status.sync.status == Synced"
+    - name: Tailscale Operator
+      group: Core Infrastructure Workloads
+      url: http://argo-cd-argocd-server.argocd.svc.cluster.local/api/v1/applications/tailscale-operator
+      interval: 1m
+      conditions:
+        - "[STATUS] == 200"
+        - "[BODY].status.health.status == Healthy"
+        - "[BODY].status.sync.status == Synced"
+
+    # ---------------------------------------------------------
+    # Argo CD Managed Workloads: Cluster Operations
+    # ---------------------------------------------------------
+    - name: Longhorn Storage
+      group: Cluster Operations Workloads
+      url: http://argo-cd-argocd-server.argocd.svc.cluster.local/api/v1/applications/longhorn
+      interval: 1m
+      conditions:
+        - "[STATUS] == 200"
+        - "[BODY].status.health.status == Healthy"
+        - "[BODY].status.sync.status == Synced"
+    - name: NFS CSI Driver
+      group: Cluster Operations Workloads
+      url: http://argo-cd-argocd-server.argocd.svc.cluster.local/api/v1/applications/nfs-csi
+      interval: 1m
+      conditions:
+        - "[STATUS] == 200"
+        - "[BODY].status.health.status == Healthy"
+        - "[BODY].status.sync.status == Synced"
+    - name: CloudNativePG Operator
+      group: Cluster Operations Workloads
+      url: http://argo-cd-argocd-server.argocd.svc.cluster.local/api/v1/applications/cnpg-operator
+      interval: 1m
+      conditions:
+        - "[STATUS] == 200"
+        - "[BODY].status.health.status == Healthy"
+        - "[BODY].status.sync.status == Synced"
+    - name: Intel GPU Plugin
+      group: Cluster Operations Workloads
+      url: http://argo-cd-argocd-server.argocd.svc.cluster.local/api/v1/applications/intel-gpu
+      interval: 1m
+      conditions:
+        - "[STATUS] == 200"
+        - "[BODY].status.health.status == Healthy"
+        - "[BODY].status.sync.status == Synced"
+    - name: Node Feature Discovery
+      group: Cluster Operations Workloads
+      url: http://argo-cd-argocd-server.argocd.svc.cluster.local/api/v1/applications/nfd
+      interval: 1m
+      conditions:
+        - "[STATUS] == 200"
+        - "[BODY].status.health.status == Healthy"
+        - "[BODY].status.sync.status == Synced"
+    - name: Shared Secrets
+      group: Cluster Operations Workloads
+      url: http://argo-cd-argocd-server.argocd.svc.cluster.local/api/v1/applications/shared-secrets
+      interval: 1m
+      conditions:
+        - "[STATUS] == 200"
+        - "[BODY].status.health.status == Healthy"
+        - "[BODY].status.sync.status == Synced"
+    - name: Mail Proxy
+      group: Cluster Operations Workloads
+      url: http://argo-cd-argocd-server.argocd.svc.cluster.local/api/v1/applications/mail-proxy
+      interval: 1m
+      conditions:
+        - "[STATUS] == 200"
+        - "[BODY].status.health.status == Healthy"
+        - "[BODY].status.sync.status == Synced"
+    - name: Cordon Sync Controller
+      group: Cluster Operations Workloads
+      url: http://argo-cd-argocd-server.argocd.svc.cluster.local/api/v1/applications/cordon-sync
+      interval: 1m
+      conditions:
+        - "[STATUS] == 200"
+        - "[BODY].status.health.status == Healthy"
+        - "[BODY].status.sync.status == Synced"
+    - name: Renovate Bot
+      group: Cluster Operations Workloads
+      url: http://argo-cd-argocd-server.argocd.svc.cluster.local/api/v1/applications/renovate
+      interval: 1m
+      conditions:
+        - "[STATUS] == 200"
+        - "[BODY].status.health.status == Healthy"
+        - "[BODY].status.sync.status == Synced"
+
+    # ---------------------------------------------------------
+    # Argo CD Managed Workloads: Applications
+    # ---------------------------------------------------------
+    - name: Download Stack
+      group: Application Workloads
+      url: http://argo-cd-argocd-server.argocd.svc.cluster.local/api/v1/applications/downloads
+      interval: 1m
+      conditions:
+        - "[STATUS] == 200"
+        - "[BODY].status.health.status == Healthy"
+        - "[BODY].status.sync.status == Synced"
+    - name: Blackhole
+      group: Application Workloads
+      url: http://argo-cd-argocd-server.argocd.svc.cluster.local/api/v1/applications/blackhole
+      interval: 1m
+      conditions:
+        - "[STATUS] == 200"
+        - "[BODY].status.health.status == Healthy"
+        - "[BODY].status.sync.status == Synced"
+    - name: Hello World
+      group: Application Workloads
+      url: http://argo-cd-argocd-server.argocd.svc.cluster.local/api/v1/applications/hello-world
+      interval: 1m
+      conditions:
+        - "[STATUS] == 200"
+        - "[BODY].status.health.status == Healthy"
+        - "[BODY].status.sync.status == Synced"
+    - name: Home Automation
+      group: Application Workloads
+      url: http://argo-cd-argocd-server.argocd.svc.cluster.local/api/v1/applications/home-automation
+      interval: 1m
+      conditions:
+        - "[STATUS] == 200"
+        - "[BODY].status.health.status == Healthy"
+        - "[BODY].status.sync.status == Synced"
+
+    # ---------------------------------------------------------
+    # Physical Infrastructure & Networking
+    # ---------------------------------------------------------
     - name: Storage Server (NFS)
       group: Infrastructure
       url: icmp://100.92.202.28
@@ -135,6 +338,10 @@ config:
       interval: 30s
       conditions:
         - "[CONNECTED] == true"
+
+    # ---------------------------------------------------------
+    # Network & Internet
+    # ---------------------------------------------------------
     - name: Internet Access (Cloudflare DNS)
       group: Network & Internet
       url: icmp://1.1.1.1
