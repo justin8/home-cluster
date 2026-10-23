@@ -208,6 +208,7 @@ config:
         - "[BODY].status.sync.status == Synced"
       alerts:
         - type: custom
+          failure-threshold: 5
           description: "Cilium CNI networking application sync and health status in cluster"
     - name: Multus CNI
       group: Core Infrastructure Workloads
