@@ -20,14 +20,33 @@ Alerts are only sent when an issue is **triggered** (not on resolution). The inv
 
 ## 2. Investigation Sequence
 
-### Phase 1: Check In-Flight Activity
+### Phase 1: Check In-Flight Activity & Maintenance
 
 Before modifying any configuration or restarting resources:
 
-1. **Check Active Agent Threads**:
+1. **Check for Active Maintenance, OS Upgrades, or Node Reboots**:
+   - Check if an upgrade script or maintenance process is running locally:
+     ```bash
+     pgrep -f "upgrade-talos" || true
+     ```
+   - Check if any cluster node is currently cordoned (`SchedulingDisabled`) or in a reboot sequence:
+     ```bash
+     direnv exec . kubectl get nodes
+     ```
+   - Check if Longhorn storage is actively rebuilding volume replicas due to a node reboot:
+     ```bash
+     direnv exec . kubectl get volume.longhorn.io -n longhorn-system -o jsonpath='{range .items[*]}{.status.robustness}{"\n"}{end}' 2>/dev/null | grep -c "degraded" || true
+     ```
+   - **Maintenance Guard Action**:
+     - If `upgrade-talos` is running, any node is cordoned/NotReady, or storage is rebuilding after a node reboot, **DO NOT attempt remediation**.
+     - This alert is expected transient churn caused by planned node draining, rebooting, or volume reattachment.
+     - **Response**: State clearly that an active cluster upgrade or node maintenance is underway, suppress remediation, and exit immediately without modifying workloads or restarting pods.
+
+2. **Check Active Agent Threads**:
    - Verify whether other agent instances are currently running or making changes in this repository.
    - Run `git status` and check active worktrees (`git worktree list`).
-2. **Pull and Inspect Git History**:
+
+3. **Pull and Inspect Git History**:
    - Run `git pull origin main` to ensure your working tree is synchronized with remote `main`.
    - Run `git log -n 5` to inspect recent commits.
    - Check if a commit deployed within the last 15–30 minutes touched the failing component, Helm values, or cluster secrets. If so, inspect `git show <commit>` for potential regressions.
@@ -42,20 +61,20 @@ Use the `description`, `service`, and `group` from the alert payload to target t
 - **Diagnostic Steps**:
   1. Inspect the application state:
      ```bash
-     kubectl --kubeconfig=/home/justin/src/home-cluster/talos/clusterconfig/kubeconfig get application -n argocd <app-name> -o yaml
+     direnv exec . kubectl get application -n argocd <app-name> -o yaml
      ```
   2. Check the namespace where the app deploys:
      ```bash
-     kubectl --kubeconfig=/home/justin/src/home-cluster/talos/clusterconfig/kubeconfig get pods -n <target-namespace>
+     direnv exec . kubectl get pods -n <target-namespace>
      ```
   3. If pods are in `CrashLoopBackOff`, `ImagePullBackOff`, or `Pending`, inspect logs and events:
      ```bash
-     kubectl --kubeconfig=/home/justin/src/home-cluster/talos/clusterconfig/kubeconfig logs -n <target-namespace> deployment/<app-name> --tail=50
-     kubectl --kubeconfig=/home/justin/src/home-cluster/talos/clusterconfig/kubeconfig describe pod -n <target-namespace> <pod-name>
+     direnv exec . kubectl logs -n <target-namespace> deployment/<app-name> --tail=50
+     direnv exec . kubectl describe pod -n <target-namespace> <pod-name>
      ```
   4. Check if Longhorn volumes, PVCs, or Secrets are missing or unattached:
      ```bash
-     kubectl --kubeconfig=/home/justin/src/home-cluster/talos/clusterconfig/kubeconfig get pvc -n <target-namespace>
+     direnv exec . kubectl get pvc -n <target-namespace>
      ```
 
 #### B. Public Ingress / Web UI Checks
@@ -68,12 +87,12 @@ Use the `description`, `service`, and `group` from the alert payload to target t
      ```
   2. Check Pomerium proxy ingress and routes:
      ```bash
-     kubectl --kubeconfig=/home/justin/src/home-cluster/talos/clusterconfig/kubeconfig get pods -n pomerium
-     kubectl --kubeconfig=/home/justin/src/home-cluster/talos/clusterconfig/kubeconfig get ingress -A
+     direnv exec . kubectl get pods -n pomerium
+     direnv exec . kubectl get ingress -A
      ```
   3. Check TLS certificate validity:
      ```bash
-     kubectl --kubeconfig=/home/justin/src/home-cluster/talos/clusterconfig/kubeconfig get certificate -A
+     direnv exec . kubectl get certificate -A
      ```
   4. Verify Cilium network policies allow ingress from Pomerium to the target pod (`CiliumNetworkPolicy`).
 
@@ -83,11 +102,11 @@ Use the `description`, `service`, and `group` from the alert payload to target t
 - **Diagnostic Steps**:
   1. Check Kubernetes node status:
      ```bash
-     kubectl --kubeconfig=/home/justin/src/home-cluster/talos/clusterconfig/kubeconfig get nodes -o wide
+     direnv exec . kubectl get nodes -o wide
      ```
-  2. Check Talos node health if nodes are `NotReady`:\
+  2. Check Talos node health if nodes are `NotReady`:
      ```bash
-     talosctl --talosconfig=/home/justin/src/home-cluster/talos/clusterconfig/talosconfig -n <node-ip> health
+     direnv exec . talosctl -n <node-ip> health
      ```
 
 ---
