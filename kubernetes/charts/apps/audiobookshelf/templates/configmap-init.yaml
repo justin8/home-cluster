@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: audiobookshelf-init-script
+  namespace: {{ .Release.Namespace }}
+data:
+  init.js: |-
+{{ .Files.Get "files/init.js" | indent 4 }}

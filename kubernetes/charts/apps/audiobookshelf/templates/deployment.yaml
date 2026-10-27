@@ -3,6 +3,8 @@ kind: Deployment
 metadata:
   name: audiobookshelf
   namespace: {{ .Release.Namespace }}
+  annotations:
+    secret.reloader.stakater.com/reload: audiobookshelf-oidc-credentials
 spec:
   replicas: 1
   strategy:
@@ -14,10 +16,51 @@ spec:
     metadata:
       labels:
         app: audiobookshelf
+      annotations:
+        secret.reloader.stakater.com/reload: audiobookshelf-oidc-credentials
+        checksum/config: {{ include (print $.Template.BasePath "/configmap-init.yaml") . | sha256sum }}
     spec:
       securityContext:
         fsGroup: {{ .Values.groupId }}
         fsGroupChangePolicy: OnRootMismatch
+      initContainers:
+        - name: init-oidc
+          image: "{{ .Values.images.app.repository }}:{{ .Values.images.app.tag }}"
+          imagePullPolicy: {{ .Values.images.app.pullPolicy }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: {{ .Values.userId }}
+            runAsGroup: {{ .Values.groupId }}
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          env:
+            - name: OIDC_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: audiobookshelf-oidc-credentials
+                  key: client_id
+            - name: OIDC_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: audiobookshelf-oidc-credentials
+                  key: client_secret
+            - name: OIDC_ISSUER_URL
+              valueFrom:
+                secretKeyRef:
+                  name: audiobookshelf-oidc-credentials
+                  key: issuer_url
+          command:
+            - node
+            - /scripts/init.js
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: init-script
+              mountPath: /scripts
+            - name: tmp
+              mountPath: /tmp
       containers:
         - name: audiobookshelf
           image: "{{ .Values.images.app.repository }}:{{ .Values.images.app.tag }}"
@@ -55,6 +98,8 @@ spec:
           nfs:
             server: {{ .Values.network.storageServer }}
             path: /mnt/pool/media/books
+        - name: init-script
+          configMap:
+            name: audiobookshelf-init-script
         - name: tmp
           emptyDir: {}
-
