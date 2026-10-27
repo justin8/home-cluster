@@ -50,6 +50,11 @@ for IP in $NODE_IPS; do
   CURRENT_VERSION=$(talosctl -n "$IP" version --short 2>/dev/null | grep "Tag:" | awk '{print $2}' || echo "unknown")
   echo "Current version on $NODE_NAME ($IP): $CURRENT_VERSION"
 
+  if [ "$CURRENT_VERSION" = "unknown" ]; then
+    echo "Node $NODE_NAME ($IP) is not reachable or not an active cluster member, skipping."
+    continue
+  fi
+
   if [ "$FORCE" = true ] || [ "$CURRENT_VERSION" != "$TARGET_VERSION" ]; then
     echo "Node $NODE_NAME ($IP) needs upgrade (Current: $CURRENT_VERSION, Target: $TARGET_VERSION)."
 
@@ -72,6 +77,9 @@ for IP in $NODE_IPS; do
     # Ensure Longhorn volumes settle before proceeding to the next node
     wait_for_longhorn_health
 
+    echo "Running inter-node cluster health check..."
+    "$(git rev-parse --show-toplevel)/scripts/health-check"
+
     UPGRADED_ANY=true
   else
     echo "Node $NODE_NAME ($IP) is already running $TARGET_VERSION, skipping."
@@ -81,6 +89,8 @@ done
 if [ "$UPGRADED_ANY" = true ]; then
   # Wait for Longhorn volumes to settle after the final upgrade
   wait_for_longhorn_health
+  echo "Running final cluster health check..."
+  "$(git rev-parse --show-toplevel)/scripts/health-check"
   echo "All node upgrades completed successfully."
 else
   echo "All nodes are already running $TARGET_VERSION, no upgrade needed."
