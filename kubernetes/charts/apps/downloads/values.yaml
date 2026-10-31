@@ -14,7 +14,7 @@ images:
     pullPolicy: IfNotPresent
   shelfmark:
     repository: ghcr.io/calibrain/shelfmark
-    tag: v1.5.1
+    tag: v1.6.0
     pullPolicy: IfNotPresent
   seerr:
     repository: ghcr.io/seerr-team/seerr
